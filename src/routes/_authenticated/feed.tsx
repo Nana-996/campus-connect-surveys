@@ -34,6 +34,9 @@ function Feed() {
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [answered, setAnswered] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+  const [deptFilter, setDeptFilter] = useState<string>("all");
+  const [yearFilter, setYearFilter] = useState<string>("all");
+  const [scope, setScope] = useState<"all" | "mine">("all");
 
   useEffect(() => {
     (async () => {
@@ -53,9 +56,16 @@ function Feed() {
     })();
   }, [user]);
 
+  const departments = Array.from(new Set(surveys.map((s) => s.target_department).filter(Boolean))) as string[];
+  const years = Array.from(new Set(surveys.map((s) => s.target_year).filter(Boolean))) as string[];
+
   const visible = surveys.filter((s) => {
-    if (s.target_department && profile?.department && s.target_department.toLowerCase() !== profile.department.toLowerCase()) return false;
-    if (s.target_year && profile?.year && s.target_year.toLowerCase() !== profile.year.toLowerCase()) return false;
+    if (scope === "mine") {
+      if (s.target_department && profile?.department && s.target_department.toLowerCase() !== profile.department.toLowerCase()) return false;
+      if (s.target_year && profile?.year && s.target_year.toLowerCase() !== profile.year.toLowerCase()) return false;
+    }
+    if (deptFilter !== "all" && s.target_department !== deptFilter) return false;
+    if (yearFilter !== "all" && s.target_year !== yearFilter) return false;
     return true;
   });
 
