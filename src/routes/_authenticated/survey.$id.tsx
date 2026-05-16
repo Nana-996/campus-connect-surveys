@@ -393,27 +393,6 @@ function SurveyPage() {
           ) : (
             <p className="mt-3 text-sm text-muted-foreground">No responses yet.</p>
           )}
-
-              <h3 className="mt-8 font-serif text-2xl">Individual responses</h3>
-              <div className="mt-3 space-y-3">
-                {responses.map((r, i) => (
-                  <div key={r.id} className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
-                    <p className="text-xs text-muted-foreground">Response #{i + 1} · {new Date(r.created_at).toLocaleString()}</p>
-                    <div className="mt-2 space-y-2">
-                      {survey.questions.map((q) => (
-                        <div key={q.id}>
-                          <p className="text-xs font-semibold text-muted-foreground">{q.text}</p>
-                          <p className="text-sm">{String(r.answers?.[q.id] ?? "—")}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <p className="mt-3 text-sm text-muted-foreground">No responses yet.</p>
-          )}
         </div>
       ) : alreadyAnswered ? (
         <div className="mt-6 rounded-3xl border border-dashed border-foreground/30 bg-card p-8 text-center shadow-paper">
