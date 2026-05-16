@@ -78,6 +78,45 @@ function Admin() {
           ))}
         </ul>
       )}
+
+      <h2 className="mt-12 font-serif text-3xl">Transactions</h2>
+      <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Latest 50 Paystack payments</p>
+      {txs.length === 0 ? (
+        <div className="mt-4 rounded-2xl border border-dashed border-foreground/30 bg-card p-6 text-center text-sm text-muted-foreground">
+          No transactions yet.
+        </div>
+      ) : (
+        <div className="mt-4 overflow-x-auto rounded-2xl border border-foreground/15 bg-card">
+          <table className="w-full text-xs">
+            <thead className="bg-secondary text-left uppercase tracking-wider">
+              <tr>
+                <th className="px-3 py-2">When</th>
+                <th className="px-3 py-2">Reference</th>
+                <th className="px-3 py-2">User</th>
+                <th className="px-3 py-2">Amount</th>
+                <th className="px-3 py-2">Credits</th>
+                <th className="px-3 py-2">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {txs.map((t) => (
+                <tr key={t.id} className="border-t border-foreground/10">
+                  <td className="px-3 py-2 whitespace-nowrap">{new Date(t.created_at).toLocaleString()}</td>
+                  <td className="px-3 py-2 font-mono">{t.reference}</td>
+                  <td className="px-3 py-2 font-mono">{t.user_id.slice(0, 8)}…</td>
+                  <td className="px-3 py-2">{t.currency} {(t.amount_minor / 100).toFixed(2)}</td>
+                  <td className="px-3 py-2">{t.credits}</td>
+                  <td className={`px-3 py-2 font-semibold uppercase ${
+                    t.status === "success" ? "text-primary" :
+                    t.status === "failed" || t.status === "abandoned" ? "text-destructive" :
+                    "text-muted-foreground"
+                  }`}>{t.status}{t.failure_reason ? ` · ${t.failure_reason}` : ""}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
