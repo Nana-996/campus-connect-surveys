@@ -306,32 +306,93 @@ function SurveyPage() {
           </div>
           {responses && responses.length > 0 ? (
             <>
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
+                  <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground"><Hash className="h-3 w-3" /> Total</div>
+                  <p className="mt-1 font-serif text-4xl">{responses.length}</p>
+                  <p className="text-xs text-muted-foreground">responses collected</p>
+                </div>
+                <div className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
+                  <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground"><Activity className="h-3 w-3" /> Completion</div>
+                  <p className="mt-1 font-serif text-4xl">{completionRate()}%</p>
+                  <p className="text-xs text-muted-foreground">questions answered</p>
+                </div>
+                <div className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
+                  <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground"><TrendingUp className="h-3 w-3" /> Latest</div>
+                  <p className="mt-1 font-serif text-lg leading-tight">{new Date(responses[0].created_at).toLocaleDateString()}</p>
+                  <p className="text-xs text-muted-foreground">{new Date(responses[0].created_at).toLocaleTimeString()}</p>
+                </div>
+              </div>
+
+              <div className="mt-4 rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
+                <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground"><TrendingUp className="h-3 w-3" /> Responses over time</div>
+                <div className="mt-3 h-44">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={timelineData()} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                      <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                      <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                      <Tooltip />
+                      <Area type="monotone" dataKey="count" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.25} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
                 {survey.questions.map((q, qi) => {
                   const isChartable = q.type === "choice" || q.type === "rating";
                   if (!isChartable) return null;
-                  const data = chartData(q);
+                  const type = chartTypes[q.id] ?? "bar";
+                  const avg = avgRating(q);
                   return (
                     <div key={q.id} className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
-                      <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-                        <BarChart3 className="h-3 w-3" /> Q{qi + 1}
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                            <BarChart3 className="h-3 w-3" /> Q{qi + 1}
+                          </div>
+                          <p className="mt-1 font-serif text-xl leading-tight">{q.text}</p>
+                          {avg && <p className="mt-1 text-xs text-muted-foreground">Average rating: <span className="font-semibold text-foreground">{avg}</span> / 5</p>}
+                        </div>
+                        <select
+                          value={type}
+                          onChange={(e) => setChartType(q.id, e.target.value as ChartType)}
+                          className="rounded-full border border-foreground/20 bg-background px-2 py-1 text-[11px] font-semibold uppercase tracking-wider"
+                        >
+                          {CHART_TYPES.map((c) => (<option key={c.value} value={c.value}>{c.label}</option>))}
+                        </select>
                       </div>
-                      <p className="mt-1 font-serif text-xl leading-tight">{q.text}</p>
-                      <div className="mt-3 h-48">
+                      <div className="mt-3 h-56">
                         <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={data} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                            <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-                            <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-                            <Tooltip cursor={{ fill: "var(--accent)", opacity: 0.3 }} />
-                            <Bar dataKey="count" fill="var(--primary)" radius={[6, 6, 0, 0]} />
-                          </BarChart>
+                          {renderChart(q, type)}
                         </ResponsiveContainer>
                       </div>
                     </div>
                   );
                 })}
               </div>
+
+              <h3 className="mt-8 font-serif text-2xl">Individual responses</h3>
+              <div className="mt-3 space-y-3">
+                {responses.map((r, i) => (
+                  <div key={r.id} className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
+                    <p className="text-xs text-muted-foreground">Response #{i + 1} · {new Date(r.created_at).toLocaleString()}</p>
+                    <div className="mt-2 space-y-2">
+                      {survey.questions.map((q) => (
+                        <div key={q.id}>
+                          <p className="text-xs font-semibold text-muted-foreground">{q.text}</p>
+                          <p className="text-sm">{String(r.answers?.[q.id] ?? "—")}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <p className="mt-3 text-sm text-muted-foreground">No responses yet.</p>
+          )}
 
               <h3 className="mt-8 font-serif text-2xl">Individual responses</h3>
               <div className="mt-3 space-y-3">
