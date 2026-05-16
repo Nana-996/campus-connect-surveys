@@ -28,23 +28,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const loadProfile = async (uid: string) => {
-    const { data } = await supabase.from("profiles").select("*").eq("id", uid).maybeSingle();
-    setProfile((data as Profile | null) ?? null);
+  const loadProfile = async (authUser: User) => {
+    const { data } = await supabase.from("profiles").select("*").eq("id", authUser.id).maybeSingle();
+    if (data) {
+      setProfile(data as Profile);
+      return;
+    }
+
+    const emailDomain = authUser.email?.split("@")[1]?.toLowerCase() ?? "";
+    const metadata = authUser.user_metadata ?? {};
+    const universityName =
+      metadata.university_name ??
+      (emailDomain ? `${emailDomain.split(".")[0].replace(/^./, (c) => c.toUpperCase())} University` : "University");
+
+    const { data: created } = await supabase
+      .from("profiles")
+      .insert({
+        id: authUser.id,
+        full_name: metadata.full_name ?? "",
+        university_name: universityName,
+        university_domain: emailDomain,
+        department: metadata.department ?? "",
+        year: metadata.year ?? "",
+        credits: 5,
+      })
+      .select("*")
+      .single();
+    setProfile((created as Profile | null) ?? null);
   };
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
       setSession(s);
       if (s?.user) {
-        setTimeout(() => loadProfile(s.user.id), 0);
+        setTimeout(() => loadProfile(s.user), 0);
       } else {
         setProfile(null);
       }
     });
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
-      if (data.session?.user) loadProfile(data.session.user.id).finally(() => setLoading(false));
+      if (data.session?.user) loadProfile(data.session.user).finally(() => setLoading(false));
       else setLoading(false);
     });
     return () => sub.subscription.unsubscribe();
@@ -56,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     profile,
     loading,
     refreshProfile: async () => {
-      if (session?.user) await loadProfile(session.user.id);
+      if (session?.user) await loadProfile(session.user);
     },
     signOut: async () => {
       await supabase.auth.signOut();
