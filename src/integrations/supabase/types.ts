@@ -127,16 +127,6 @@ export type Database = {
     }
     Functions: {
       current_university_domain: { Args: never; Returns: string }
-      publish_survey: {
-        Args: {
-          _description: string
-          _questions: Json
-          _target_department?: string
-          _target_year?: string
-          _title: string
-        }
-        Returns: string
-      }
     }
     Enums: {
       [_ in never]: never
