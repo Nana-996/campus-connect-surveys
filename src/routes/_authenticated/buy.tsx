@@ -8,6 +8,7 @@ import { PACKS } from "@/lib/credits";
 import { initializePaystackPayment, verifyPaystackPayment } from "@/lib/payments.functions";
 import { toast } from "sonner";
 import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
 
 const searchSchema = z.object({
   reference: z.string().optional(),
@@ -20,13 +21,21 @@ export const Route = createFileRoute("/_authenticated/buy")({
 });
 
 function BuyPage() {
-  const { profile, refreshProfile } = useAuth();
+  const { profile, refreshProfile, session, isPreviewMode } = useAuth();
   const navigate = useNavigate();
   const search = useSearch({ from: "/_authenticated/buy" });
   const initFn = useServerFn(initializePaystackPayment);
   const verifyFn = useServerFn(verifyPaystackPayment);
   const [busy, setBusy] = useState<string | null>(null);
   const [verifying, setVerifying] = useState(false);
+
+  const getAuthHeaders = async () => {
+    const token = session?.access_token ?? (await supabase.auth.getSession()).data.session?.access_token;
+    if (!token || isPreviewMode) {
+      throw new Error("Please sign in with a real account before starting checkout.");
+    }
+    return { Authorization: `Bearer ${token}` };
+  };
 
   // After callback from Paystack, verify the transaction
   useEffect(() => {
@@ -35,7 +44,7 @@ function BuyPage() {
     setVerifying(true);
     (async () => {
       try {
-        const result = await verifyFn({ data: { reference: ref } });
+        const result = await verifyFn({ data: { reference: ref }, headers: await getAuthHeaders() });
         if (result.status === "success") {
           toast.success(`Payment confirmed — +${result.credits} paid credits`);
           await refreshProfile();
@@ -58,7 +67,7 @@ function BuyPage() {
     setBusy(packId);
     try {
       const callback_url = `${window.location.origin}/buy`;
-      const { authorization_url } = await initFn({ data: { pack: packId, callback_url } });
+      const { authorization_url } = await initFn({ data: { pack: packId, callback_url }, headers: await getAuthHeaders() });
       window.location.href = authorization_url;
     } catch (err: any) {
       toast.error(err.message ?? "Could not start checkout");
