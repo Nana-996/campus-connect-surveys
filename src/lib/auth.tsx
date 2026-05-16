@@ -9,7 +9,9 @@ export type Profile = {
   university_domain: string;
   department: string;
   year: string;
-  credits: number;
+  earned_credits: number;
+  paid_credits: number;
+  is_flagged?: boolean;
 };
 
 type AuthCtx = {
@@ -33,7 +35,8 @@ const previewProfile: Profile = {
   university_domain: "campus.edu",
   department: "Research Methods",
   year: "Year 3",
-  credits: 5,
+  earned_credits: 4,
+  paid_credits: 12,
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -70,11 +73,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         university_domain: emailDomain,
         department: metadata.department ?? "",
         year: metadata.year ?? "",
-        credits: 5,
+        earned_credits: 3,
+        paid_credits: 0,
       })
       .select("*")
       .single();
-    setProfile((created as Profile | null) ?? null);
+    setProfile((created as unknown as Profile | null) ?? null);
   };
 
   useEffect(() => {
