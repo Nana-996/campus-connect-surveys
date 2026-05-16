@@ -14,6 +14,8 @@ type Survey = {
   response_count: number;
   questions: any[];
   created_at: string;
+  tier?: string | null;
+  boosted_until?: string | null;
 };
 
 export const Route = createFileRoute("/_authenticated/feed")({
@@ -48,7 +50,14 @@ function Feed() {
         .eq("is_active", true)
         .neq("creator_id", user!.id)
         .order("created_at", { ascending: false });
-      setSurveys((data as unknown as Survey[]) ?? []);
+      const rows = (data as unknown as Survey[]) ?? [];
+      // Boosted (still active) first, then newest
+      rows.sort((a, b) => {
+        const aB = a.boosted_until && new Date(a.boosted_until) > new Date() ? 1 : 0;
+        const bB = b.boosted_until && new Date(b.boosted_until) > new Date() ? 1 : 0;
+        return bB - aB;
+      });
+      setSurveys(rows);
       const { data: resps } = await supabase
         .from("survey_responses")
         .select("survey_id")
@@ -165,18 +174,27 @@ function Feed() {
               : "col-span-2 sm:col-span-2";
             const isLarge = i % 7 === 0;
             const isDone = answered.has(s.id);
+            const isBoosted = s.boosted_until && new Date(s.boosted_until) > new Date();
+            const isPro = s.tier === "pro";
             return (
               <Link
                 key={s.id}
                 to="/survey/$id"
                 params={{ id: s.id }}
-                className={`group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-foreground/15 p-5 shadow-paper transition hover:-translate-y-0.5 hover:shadow-lg ${tone} ${span}`}
+                className={`group relative flex flex-col justify-between overflow-hidden rounded-3xl border p-5 shadow-paper transition hover:-translate-y-0.5 hover:shadow-lg ${tone} ${span} ${isBoosted ? "border-highlight ring-2 ring-highlight/40" : "border-foreground/15"}`}
               >
                 <div>
                   <div className="flex items-start justify-between gap-2">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-70">
-                      №{String(i + 1).padStart(2, "0")}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-70">
+                        №{String(i + 1).padStart(2, "0")}
+                      </span>
+                      {isBoosted && (
+                        <span className="rounded-full bg-highlight px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-highlight-foreground">
+                          {isPro ? "★ Pro" : "↑ Boosted"}
+                        </span>
+                      )}
+                    </div>
                     {isDone && (
                       <span className="rounded-full bg-background/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
                         ✓ Done

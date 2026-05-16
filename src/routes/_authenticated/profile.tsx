@@ -1,76 +1,144 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { Coins, ShieldCheck } from "lucide-react";
+import { ShieldCheck, Sparkles, Coins, Clock, AlertTriangle } from "lucide-react";
+import { DAILY_EARN_CAP, WEEKLY_EARN_CAP, EARNED_EXPIRY_DAYS } from "@/lib/credits";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   component: Profile,
 });
 
 function Profile() {
-  const { profile, user, refreshProfile } = useAuth();
+  const { profile, user } = useAuth();
   const [responses, setResponses] = useState<any[]>([]);
+  const [ledger, setLedger] = useState<any[]>([]);
+  const [caps, setCaps] = useState<{ day_count: number; week_count: number } | null>(null);
+  const [nextExpiry, setNextExpiry] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!user) return;
     (async () => {
-      const { data } = await supabase
-        .from("survey_responses")
-        .select("id, created_at, survey:surveys(title)")
-        .eq("respondent_id", user!.id)
-        .order("created_at", { ascending: false });
-      setResponses(data ?? []);
+      const [resps, led, c] = await Promise.all([
+        supabase.from("survey_responses").select("id, created_at, survey:surveys(title)")
+          .eq("respondent_id", user.id).order("created_at", { ascending: false }).limit(20),
+        supabase.from("credit_ledger").select("*").eq("user_id", user.id)
+          .order("created_at", { ascending: false }).limit(15),
+        supabase.from("earning_caps").select("day_count, week_count").eq("user_id", user.id).maybeSingle(),
+      ]);
+      setResponses(resps.data ?? []);
+      setLedger(led.data ?? []);
+      setCaps(c.data ?? { day_count: 0, week_count: 0 });
+      const earliest = (led.data ?? [])
+        .filter((r: any) => r.wallet === "earned" && r.delta > 0 && r.expires_at)
+        .sort((a: any, b: any) => +new Date(a.expires_at) - +new Date(b.expires_at))[0];
+      setNextExpiry(earliest?.expires_at ?? null);
     })();
   }, [user]);
 
-  const buyCredits = async () => {
-    if (!profile) return;
-    await supabase.from("profiles").update({ credits: profile.credits + 10 }).eq("id", user!.id);
-    await refreshProfile();
-    toast.success("Added 10 credits (placeholder — payments coming soon)");
-  };
-
   if (!profile) return null;
+  const total = profile.earned_credits + profile.paid_credits;
 
   return (
     <div>
       <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Your card</p>
-      <h1 className="mt-1 font-serif text-5xl leading-[0.95]">Hello, <em className="text-primary">{profile.full_name?.split(" ")[0] || "student"}.</em></h1>
+      <h1 className="mt-1 font-serif text-5xl leading-[0.95]">
+        Hello, <em className="text-primary">{profile.full_name?.split(" ")[0] || "student"}.</em>
+      </h1>
 
+      {profile.is_flagged && (
+        <div className="mt-4 flex items-start gap-2 rounded-2xl border border-destructive/40 bg-destructive/10 p-4 text-sm">
+          <AlertTriangle className="h-4 w-4 mt-0.5 text-destructive" />
+          <div>
+            <p className="font-semibold">Your account is under review.</p>
+            <p className="text-muted-foreground">{profile.flag_reason ?? "Unusual activity detected."}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Wallet bento */}
       <div className="mt-8 grid gap-4 sm:grid-cols-6">
-        {/* Credits hero */}
-        <div className="sm:col-span-3 rounded-3xl bg-primary p-7 text-primary-foreground shadow-paper">
-          <p className="text-[11px] uppercase tracking-[0.25em] opacity-70">Credit balance</p>
-          <p className="mt-2 font-serif text-7xl leading-none">{profile.credits}</p>
-          <p className="mt-2 text-xs opacity-80">Earn 1 by answering · spend 2 to publish</p>
-          <Button onClick={buyCredits} className="mt-6 rounded-full bg-highlight text-highlight-foreground hover:bg-highlight/90">
-            <Coins className="mr-1 h-4 w-4" /> Buy more credits
-          </Button>
+        {/* Paid wallet - hero */}
+        <div className="sm:col-span-4 rounded-3xl bg-primary p-7 text-primary-foreground shadow-paper">
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] uppercase tracking-[0.25em] opacity-70">Paid credits · never expire</p>
+            <Sparkles className="h-4 w-4 opacity-80" />
+          </div>
+          <p className="mt-2 font-serif text-7xl leading-none">{profile.paid_credits}</p>
+          <p className="mt-2 text-xs opacity-80">Unlock targeting, boosting, premium placement, and high response goals.</p>
+          <Link to="/buy">
+            <Button className="mt-6 rounded-full bg-highlight text-highlight-foreground hover:bg-highlight/90">
+              <Sparkles className="mr-1 h-4 w-4" /> Buy credits
+            </Button>
+          </Link>
         </div>
 
-        {/* Verified card */}
-        <div className="sm:col-span-3 rounded-3xl border border-foreground/15 bg-card p-7 shadow-paper">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-accent px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-accent-foreground">
-            <ShieldCheck className="h-3 w-3" /> Verified
+        {/* Earned wallet */}
+        <div className="sm:col-span-2 rounded-3xl border border-foreground/15 bg-accent p-6 text-accent-foreground shadow-paper">
+          <p className="text-[11px] uppercase tracking-[0.25em] opacity-70">Earned · basic only</p>
+          <p className="mt-2 font-serif text-6xl leading-none">{profile.earned_credits}</p>
+          <p className="mt-2 text-[11px] opacity-80">{total} total · earn 1 per quality response</p>
+          {nextExpiry && (
+            <p className="mt-3 inline-flex items-center gap-1 rounded-full bg-background/40 px-2 py-0.5 text-[10px] font-bold uppercase">
+              <Clock className="h-3 w-3" /> expires {new Date(nextExpiry).toLocaleDateString()}
+            </p>
+          )}
+        </div>
+
+        {/* Caps */}
+        <div className="sm:col-span-3 rounded-3xl border border-foreground/15 bg-card p-6 shadow-paper">
+          <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Earning caps</p>
+          <div className="mt-3 space-y-3">
+            <CapBar label="Today" value={caps?.day_count ?? 0} max={DAILY_EARN_CAP} />
+            <CapBar label="This week" value={caps?.week_count ?? 0} max={WEEKLY_EARN_CAP} />
+          </div>
+          <p className="mt-3 text-[11px] text-muted-foreground">
+            Earned credits expire in {EARNED_EXPIRY_DAYS} days. Pro publishing requires paid credits.
+          </p>
+        </div>
+
+        {/* Verified */}
+        <div className="sm:col-span-3 rounded-3xl border border-foreground/15 bg-card p-6 shadow-paper">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-[11px] font-bold uppercase tracking-wider">
+            <ShieldCheck className="h-3 w-3" /> Verified · {profile.university_domain}
           </span>
-          <h2 className="mt-3 font-serif text-3xl leading-tight">{profile.university_name}</h2>
-          <dl className="mt-5 grid grid-cols-2 gap-4 text-sm">
-            <Field label="Email domain" value={profile.university_domain} />
+          <h2 className="mt-3 font-serif text-2xl leading-tight">{profile.university_name}</h2>
+          <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
             <Field label="Department" value={profile.department || "—"} />
             <Field label="Year" value={profile.year || "—"} />
-            <Field label="Name" value={profile.full_name || "—"} />
           </dl>
         </div>
       </div>
 
-      <h2 className="mt-10 font-serif text-3xl">Response history</h2>
+      {/* Ledger */}
+      <h2 className="mt-10 font-serif text-3xl">Credit history</h2>
+      {ledger.length === 0 ? (
+        <p className="mt-2 text-sm text-muted-foreground">No activity yet.</p>
+      ) : (
+        <ul className="mt-4 space-y-1.5">
+          {ledger.map((row) => (
+            <li key={row.id} className="flex items-center justify-between rounded-xl border border-foreground/10 bg-card px-4 py-2 text-sm">
+              <div className="flex items-center gap-2">
+                <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${row.wallet === "paid" ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"}`}>
+                  {row.wallet}
+                </span>
+                <span className="text-muted-foreground">{row.reason.replace(/_/g, " ")}</span>
+              </div>
+              <span className={`font-mono font-bold ${row.delta > 0 ? "text-primary" : row.delta < 0 ? "text-destructive" : "text-muted-foreground"}`}>
+                {row.delta > 0 ? "+" : ""}{row.delta}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <h2 className="mt-10 font-serif text-3xl">Recent responses</h2>
       {responses.length === 0 ? (
         <p className="mt-2 text-sm text-muted-foreground">You haven't answered any surveys yet.</p>
       ) : (
         <ul className="mt-4 space-y-2">
-          {responses.map((r, i) => (
+          {responses.map((r) => (
             <li key={r.id} className="flex items-center justify-between rounded-2xl border border-foreground/15 bg-card p-4">
               <div>
                 <p className="font-serif text-xl leading-tight">{r.survey?.title ?? "Survey"}</p>
@@ -78,13 +146,25 @@ function Profile() {
                   {new Date(r.created_at).toLocaleString()}
                 </p>
               </div>
-              <span className="rounded-full bg-highlight px-3 py-1 text-[11px] font-bold uppercase text-highlight-foreground">
-                +1 · №{String(i + 1).padStart(2, "0")}
-              </span>
             </li>
           ))}
         </ul>
       )}
+    </div>
+  );
+}
+
+function CapBar({ label, value, max }: { label: string; value: number; max: number }) {
+  const pct = Math.min(100, (value / max) * 100);
+  return (
+    <div>
+      <div className="flex items-center justify-between text-xs">
+        <span className="font-semibold uppercase tracking-wider">{label}</span>
+        <span className="text-muted-foreground">{value} / {max}</span>
+      </div>
+      <div className="mt-1 h-2 rounded-full bg-secondary overflow-hidden">
+        <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+      </div>
     </div>
   );
 }
