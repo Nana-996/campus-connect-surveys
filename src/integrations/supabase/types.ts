@@ -89,6 +89,57 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_transactions: {
+        Row: {
+          amount_minor: number
+          created_at: string
+          credited_at: string | null
+          credits: number
+          currency: string
+          failure_reason: string | null
+          id: string
+          pack_label: string | null
+          provider: string
+          provider_payload: Json
+          reference: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_minor: number
+          created_at?: string
+          credited_at?: string | null
+          credits: number
+          currency?: string
+          failure_reason?: string | null
+          id?: string
+          pack_label?: string | null
+          provider?: string
+          provider_payload?: Json
+          reference: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_minor?: number
+          created_at?: string
+          credited_at?: string | null
+          credits?: number
+          currency?: string
+          failure_reason?: string | null
+          id?: string
+          pack_label?: string | null
+          provider?: string
+          provider_payload?: Json
+          reference?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
