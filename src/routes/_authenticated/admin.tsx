@@ -14,6 +14,7 @@ function Admin() {
   const { user } = useAuth();
   const [allowed, setAllowed] = useState<boolean | null>(null);
   const [flags, setFlags] = useState<any[]>([]);
+  const [txs, setTxs] = useState<any[]>([]);
 
   useEffect(() => {
     if (!user) return;
@@ -22,9 +23,12 @@ function Admin() {
       const ok = !!data;
       setAllowed(ok);
       if (ok) {
-        const { data: f } = await supabase.from("review_flags")
-          .select("*").eq("resolved", false).order("created_at", { ascending: false });
+        const [{ data: f }, { data: t }] = await Promise.all([
+          supabase.from("review_flags").select("*").eq("resolved", false).order("created_at", { ascending: false }),
+          supabase.from("payment_transactions").select("*").order("created_at", { ascending: false }).limit(50),
+        ]);
         setFlags(f ?? []);
+        setTxs(t ?? []);
       }
     })();
   }, [user]);
