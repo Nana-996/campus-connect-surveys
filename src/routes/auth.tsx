@@ -28,8 +28,8 @@ function isUniversityEmail(email: string) {
 function AuthPage() {
   const { mode = "login" } = Route.useSearch();
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
-  const isSignup = mode === "signup";
+  const { user, loading, enterPreviewMode } = useAuth();
+  const isSignup = false;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -41,6 +41,10 @@ function AuthPage() {
   useEffect(() => {
     if (!loading && user) navigate({ to: "/feed" });
   }, [user, loading, navigate]);
+
+  useEffect(() => {
+    if (mode === "signup") navigate({ to: "/auth", search: { mode: "login" } });
+  }, [mode, navigate]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -154,18 +158,22 @@ function AuthPage() {
               </div>
             )}
             <Button type="submit" className="w-full" disabled={submitting}>
-              {submitting ? "Please wait..." : isSignup ? "Sign up" : "Log in"}
+              {submitting ? "Please wait..." : "Log in"}
+            </Button>
+            <Button
+              type="button"
+              className="w-full"
+              variant="outline"
+              onClick={() => {
+                enterPreviewMode();
+                navigate({ to: "/feed" });
+              }}
+            >
+              Enter preview mode
             </Button>
           </form>
           <p className="mt-4 text-center text-sm text-muted-foreground">
-            {isSignup ? "Already have an account?" : "New to CampusVerify?"}{" "}
-            <Link
-              to="/auth"
-              search={{ mode: isSignup ? "login" : "signup" }}
-              className="font-semibold text-primary hover:underline"
-            >
-              {isSignup ? "Log in" : "Sign up"}
-            </Link>
+            Signups are temporarily disabled while you review the app.
           </p>
         </div>
       </div>

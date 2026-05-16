@@ -16,16 +16,30 @@ type AuthCtx = {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
+  isPreviewMode: boolean;
   loading: boolean;
+  enterPreviewMode: () => void;
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
 };
 
 const Ctx = createContext<AuthCtx | undefined>(undefined);
+const PREVIEW_MODE_KEY = "campusverify-preview-mode";
+const previewUser = { id: "preview-student", email: "student@campus.edu" } as User;
+const previewProfile: Profile = {
+  id: "preview-student",
+  full_name: "Preview Student",
+  university_name: "Campus University",
+  university_domain: "campus.edu",
+  department: "Research Methods",
+  year: "Year 3",
+  credits: 5,
+};
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const loadProfile = async (authUser: User) => {
@@ -75,20 +89,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       if (data.session?.user) loadProfile(data.session.user).finally(() => setLoading(false));
-      else setLoading(false);
+      else {
+        const previewEnabled = localStorage.getItem(PREVIEW_MODE_KEY) === "true";
+        if (previewEnabled) {
+          setIsPreviewMode(true);
+          setProfile(previewProfile);
+        }
+        setLoading(false);
+      }
     });
     return () => sub.subscription.unsubscribe();
   }, []);
 
   const value: AuthCtx = {
-    user: session?.user ?? null,
+    user: session?.user ?? (isPreviewMode ? previewUser : null),
     session,
     profile,
+    isPreviewMode,
     loading,
+    enterPreviewMode: () => {
+      localStorage.setItem(PREVIEW_MODE_KEY, "true");
+      setIsPreviewMode(true);
+      setProfile(previewProfile);
+    },
     refreshProfile: async () => {
+      if (isPreviewMode) return;
       if (session?.user) await loadProfile(session.user);
     },
     signOut: async () => {
+      localStorage.removeItem(PREVIEW_MODE_KEY);
+      setIsPreviewMode(false);
+      setProfile(null);
       await supabase.auth.signOut();
     },
   };
