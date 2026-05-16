@@ -139,7 +139,7 @@ export async function creditUserAndMarkSuccess(
     .update({
       status: "success",
       credited_at: new Date().toISOString(),
-      provider_payload: providerPayload as object,
+      provider_payload: providerPayload as any,
     })
     .eq("id", txId)
     .eq("status", "pending")
