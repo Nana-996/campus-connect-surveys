@@ -20,7 +20,9 @@ function isUniversityEmail(email: string) {
   const domain = email.split("@")[1]?.toLowerCase() ?? "";
   if (!domain) return false;
   // accept .edu, .ac.*, .edu.*
-  return /\.edu$/.test(domain) || /\.ac\.[a-z]{2,}$/.test(domain) || /\.edu\.[a-z]{2,}$/.test(domain);
+  return (
+    /\.edu$/.test(domain) || /\.ac\.[a-z]{2,}$/.test(domain) || /\.edu\.[a-z]{2,}$/.test(domain)
+  );
 }
 
 function AuthPage() {
@@ -87,7 +89,9 @@ function AuthPage() {
           <GraduationCap className="h-5 w-5" /> CampusVerify
         </Link>
         <div className="rounded-2xl border bg-card p-6 shadow-sm">
-          <h1 className="text-2xl font-bold">{isSignup ? "Create your account" : "Welcome back"}</h1>
+          <h1 className="text-2xl font-bold">
+            {isSignup ? "Create your account" : "Welcome back"}
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {isSignup ? "Use your university email to get verified." : "Log in to your campus."}
           </p>
@@ -95,26 +99,57 @@ function AuthPage() {
             {isSignup && (
               <div>
                 <Label htmlFor="name">Full name</Label>
-                <Input id="name" required value={fullName} onChange={(e) => setFullName(e.target.value)} />
+                <Input
+                  id="name"
+                  required
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                />
               </div>
             )}
             <div>
               <Label htmlFor="email">University email</Label>
-              <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@yourschool.edu" />
+              <Input
+                id="email"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@yourschool.edu"
+              />
             </div>
             <div>
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} />
+              <Input
+                id="password"
+                type="password"
+                required
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </div>
             {isSignup && (
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label htmlFor="dept">Department</Label>
-                  <Input id="dept" required value={department} onChange={(e) => setDepartment(e.target.value)} placeholder="Psychology" />
+                  <Input
+                    id="dept"
+                    required
+                    value={department}
+                    onChange={(e) => setDepartment(e.target.value)}
+                    placeholder="Psychology"
+                  />
                 </div>
                 <div>
                   <Label htmlFor="year">Year</Label>
-                  <Input id="year" required value={year} onChange={(e) => setYear(e.target.value)} placeholder="Year 2" />
+                  <Input
+                    id="year"
+                    required
+                    value={year}
+                    onChange={(e) => setYear(e.target.value)}
+                    placeholder="Year 2"
+                  />
                 </div>
               </div>
             )}

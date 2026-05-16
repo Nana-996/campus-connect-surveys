@@ -6,11 +6,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { Trash2, Plus } from "lucide-react";
 
-type Question = { id: string; type: "text" | "choice" | "rating"; text: string; options?: string[] };
+type Question = {
+  id: string;
+  type: "text" | "choice" | "rating";
+  text: string;
+  options?: string[];
+};
 
 export const Route = createFileRoute("/_authenticated/create")({
   component: Create,
@@ -31,7 +42,15 @@ function Create() {
   const [submitting, setSubmitting] = useState(false);
 
   const addQ = (type: Question["type"]) =>
-    setQuestions((q) => [...q, { id: crypto.randomUUID(), type, text: "", options: type === "choice" ? ["", ""] : undefined }]);
+    setQuestions((q) => [
+      ...q,
+      {
+        id: crypto.randomUUID(),
+        type,
+        text: "",
+        options: type === "choice" ? ["", ""] : undefined,
+      },
+    ]);
   const removeQ = (id: string) => setQuestions((q) => q.filter((x) => x.id !== id));
   const updateQ = (id: string, patch: Partial<Question>) =>
     setQuestions((q) => q.map((x) => (x.id === id ? { ...x, ...patch } : x)));
@@ -76,26 +95,49 @@ function Create() {
   return (
     <div>
       <h1 className="text-2xl font-bold">Create a survey</h1>
-      <p className="text-sm text-muted-foreground">Publishing costs {PUBLISH_COST} credits. You have {profile?.credits ?? 0}.</p>
+      <p className="text-sm text-muted-foreground">
+        Publishing costs {PUBLISH_COST} credits. You have {profile?.credits ?? 0}.
+      </p>
 
       <form onSubmit={submit} className="mt-6 space-y-5">
         <div className="rounded-xl border bg-card p-4 space-y-4">
           <div>
             <Label htmlFor="title">Title</Label>
-            <Input id="title" required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Sleep habits among 2nd-year students" />
+            <Input
+              id="title"
+              required
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Sleep habits among 2nd-year students"
+            />
           </div>
           <div>
             <Label htmlFor="desc">Description</Label>
-            <Textarea id="desc" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="A short context for respondents." />
+            <Textarea
+              id="desc"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="A short context for respondents."
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label htmlFor="td">Target department (optional)</Label>
-              <Input id="td" value={targetDept} onChange={(e) => setTargetDept(e.target.value)} placeholder="Psychology" />
+              <Input
+                id="td"
+                value={targetDept}
+                onChange={(e) => setTargetDept(e.target.value)}
+                placeholder="Psychology"
+              />
             </div>
             <div>
               <Label htmlFor="ty">Target year (optional)</Label>
-              <Input id="ty" value={targetYear} onChange={(e) => setTargetYear(e.target.value)} placeholder="Year 2" />
+              <Input
+                id="ty"
+                value={targetYear}
+                onChange={(e) => setTargetYear(e.target.value)}
+                placeholder="Year 2"
+              />
             </div>
           </div>
         </div>
@@ -106,9 +148,18 @@ function Create() {
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 space-y-3">
                   <div className="flex items-center gap-2">
-                    <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-semibold text-primary">Q{i + 1}</span>
-                    <Select value={q.type} onValueChange={(v: any) => updateQ(q.id, { type: v, options: v === "choice" ? ["", ""] : undefined })}>
-                      <SelectTrigger className="h-8 w-40 text-xs"><SelectValue /></SelectTrigger>
+                    <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-semibold text-primary">
+                      Q{i + 1}
+                    </span>
+                    <Select
+                      value={q.type}
+                      onValueChange={(v: any) =>
+                        updateQ(q.id, { type: v, options: v === "choice" ? ["", ""] : undefined })
+                      }
+                    >
+                      <SelectTrigger className="h-8 w-40 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="text">Short answer</SelectItem>
                         <SelectItem value="choice">Multiple choice</SelectItem>
@@ -116,7 +167,11 @@ function Create() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <Input value={q.text} onChange={(e) => updateQ(q.id, { text: e.target.value })} placeholder="Question text" />
+                  <Input
+                    value={q.text}
+                    onChange={(e) => updateQ(q.id, { text: e.target.value })}
+                    placeholder="Question text"
+                  />
                   {q.type === "choice" && (
                     <div className="space-y-2 pl-2">
                       {q.options?.map((opt, oi) => (
@@ -131,13 +186,27 @@ function Create() {
                             placeholder={`Option ${oi + 1}`}
                           />
                           {(q.options?.length ?? 0) > 2 && (
-                            <Button type="button" variant="ghost" size="icon" onClick={() => updateQ(q.id, { options: q.options?.filter((_, idx) => idx !== oi) })}>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() =>
+                                updateQ(q.id, {
+                                  options: q.options?.filter((_, idx) => idx !== oi),
+                                })
+                              }
+                            >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           )}
                         </div>
                       ))}
-                      <Button type="button" variant="outline" size="sm" onClick={() => updateQ(q.id, { options: [...(q.options ?? []), ""] })}>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => updateQ(q.id, { options: [...(q.options ?? []), ""] })}
+                      >
                         <Plus className="mr-1 h-3 w-3" /> Add option
                       </Button>
                     </div>
@@ -154,9 +223,18 @@ function Create() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <Button type="button" variant="outline" onClick={() => addQ("text")}><Plus className="mr-1 h-4 w-4" />Short answer</Button>
-          <Button type="button" variant="outline" onClick={() => addQ("choice")}><Plus className="mr-1 h-4 w-4" />Multiple choice</Button>
-          <Button type="button" variant="outline" onClick={() => addQ("rating")}><Plus className="mr-1 h-4 w-4" />Rating</Button>
+          <Button type="button" variant="outline" onClick={() => addQ("text")}>
+            <Plus className="mr-1 h-4 w-4" />
+            Short answer
+          </Button>
+          <Button type="button" variant="outline" onClick={() => addQ("choice")}>
+            <Plus className="mr-1 h-4 w-4" />
+            Multiple choice
+          </Button>
+          <Button type="button" variant="outline" onClick={() => addQ("rating")}>
+            <Plus className="mr-1 h-4 w-4" />
+            Rating
+          </Button>
         </div>
 
         <Button type="submit" size="lg" disabled={submitting} className="w-full">

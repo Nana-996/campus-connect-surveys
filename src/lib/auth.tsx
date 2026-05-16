@@ -29,7 +29,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const loadProfile = async (authUser: User) => {
-    const { data } = await supabase.from("profiles").select("*").eq("id", authUser.id).maybeSingle();
+    const { data } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", authUser.id)
+      .maybeSingle();
     if (data) {
       setProfile(data as Profile);
       return;
@@ -39,7 +43,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const metadata = authUser.user_metadata ?? {};
     const universityName =
       metadata.university_name ??
-      (emailDomain ? `${emailDomain.split(".")[0].replace(/^./, (c) => c.toUpperCase())} University` : "University");
+      (emailDomain
+        ? `${emailDomain.split(".")[0].replace(/^./, (c) => c.toUpperCase())} University`
+        : "University");
 
     const { data: created } = await supabase
       .from("profiles")
