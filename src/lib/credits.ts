@@ -43,9 +43,9 @@ export const TIERS: Record<Tier, {
 };
 
 export const PACKS = [
-  { credits: 10, price: 4.99, label: "Starter" },
-  { credits: 50, price: 19.99, label: "Researcher", badge: "Most popular" },
-  { credits: 200, price: 59.99, label: "Lab", badge: "Best value" },
+  { id: "starter" as const, credits: 10, price: 20, currency: "GHS", label: "Starter" },
+  { id: "researcher" as const, credits: 50, price: 90, currency: "GHS", label: "Researcher", badge: "Most popular" },
+  { id: "lab" as const, credits: 200, price: 320, currency: "GHS", label: "Lab", badge: "Best value" },
 ];
 
 export const DAILY_EARN_CAP = 3;
