@@ -163,28 +163,63 @@ function SurveyPage() {
 
       {isOwner ? (
         <div className="mt-6">
-          <div className="flex items-center justify-between">
-            <h2 className="font-serif text-3xl">Responses</h2>
-            <Button size="sm" variant="outline" className="rounded-full border-foreground/30" onClick={exportCSV} disabled={!responses?.length}>
-              <Download className="mr-1 h-4 w-4" /> Export CSV
-            </Button>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="font-serif text-3xl">Results</h2>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" className="rounded-full border-foreground/30" onClick={exportCSV} disabled={!responses?.length}>
+                <Download className="mr-1 h-4 w-4" /> CSV
+              </Button>
+              <Button size="sm" variant="outline" className="rounded-full border-foreground/30" onClick={exportPDF} disabled={!responses?.length}>
+                <FileText className="mr-1 h-4 w-4" /> PDF
+              </Button>
+            </div>
           </div>
           {responses && responses.length > 0 ? (
-            <div className="mt-4 space-y-3">
-              {responses.map((r, i) => (
-                <div key={r.id} className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
-                  <p className="text-xs text-muted-foreground">Response #{i + 1} · {new Date(r.created_at).toLocaleString()}</p>
-                  <div className="mt-2 space-y-2">
-                    {survey.questions.map((q) => (
-                      <div key={q.id}>
-                        <p className="text-xs font-semibold text-muted-foreground">{q.text}</p>
-                        <p className="text-sm">{String(r.answers?.[q.id] ?? "—")}</p>
+            <>
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                {survey.questions.map((q, qi) => {
+                  const isChartable = q.type === "choice" || q.type === "rating";
+                  if (!isChartable) return null;
+                  const data = chartData(q);
+                  return (
+                    <div key={q.id} className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
+                      <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                        <BarChart3 className="h-3 w-3" /> Q{qi + 1}
                       </div>
-                    ))}
+                      <p className="mt-1 font-serif text-xl leading-tight">{q.text}</p>
+                      <div className="mt-3 h-48">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={data} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                            <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+                            <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                            <Tooltip cursor={{ fill: "hsl(var(--accent))", opacity: 0.3 }} />
+                            <Bar dataKey="count" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <h3 className="mt-8 font-serif text-2xl">Individual responses</h3>
+              <div className="mt-3 space-y-3">
+                {responses.map((r, i) => (
+                  <div key={r.id} className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
+                    <p className="text-xs text-muted-foreground">Response #{i + 1} · {new Date(r.created_at).toLocaleString()}</p>
+                    <div className="mt-2 space-y-2">
+                      {survey.questions.map((q) => (
+                        <div key={q.id}>
+                          <p className="text-xs font-semibold text-muted-foreground">{q.text}</p>
+                          <p className="text-sm">{String(r.answers?.[q.id] ?? "—")}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            </>
           ) : (
             <p className="mt-3 text-sm text-muted-foreground">No responses yet.</p>
           )}
