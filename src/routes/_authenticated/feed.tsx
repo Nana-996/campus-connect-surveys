@@ -37,6 +37,8 @@ function Feed() {
   const [deptFilter, setDeptFilter] = useState<string>("all");
   const [yearFilter, setYearFilter] = useState<string>("all");
   const [scope, setScope] = useState<"all" | "mine">("all");
+  const [campusDepts, setCampusDepts] = useState<string[]>([]);
+  const [campusYears, setCampusYears] = useState<string[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -52,20 +54,39 @@ function Feed() {
         .select("survey_id")
         .eq("respondent_id", user!.id);
       setAnswered(new Set((resps ?? []).map((r: any) => r.survey_id)));
+      const { data: peers } = await supabase
+        .from("profiles")
+        .select("department, year");
+      setCampusDepts(Array.from(new Set((peers ?? []).map((p: any) => p.department).filter(Boolean))) as string[]);
+      setCampusYears(Array.from(new Set((peers ?? []).map((p: any) => p.year).filter(Boolean))) as string[]);
       setLoading(false);
     })();
   }, [user]);
 
-  const departments = Array.from(new Set(surveys.map((s) => s.target_department).filter(Boolean))) as string[];
-  const years = Array.from(new Set(surveys.map((s) => s.target_year).filter(Boolean))) as string[];
+  // Merge cohort options from peers AND any targets surveys already use
+  const departments = Array.from(new Set([
+    ...campusDepts,
+    ...surveys.map((s) => s.target_department).filter(Boolean) as string[],
+  ])).sort();
+  const years = Array.from(new Set([
+    ...campusYears,
+    ...surveys.map((s) => s.target_year).filter(Boolean) as string[],
+  ])).sort();
+
+  // Inclusive filter: surveys with no target are "open to everyone" and always match.
+  // Targeted surveys match only when the filter equals their target.
+  const matchesDept = (s: Survey, dept: string) =>
+    dept === "all" || !s.target_department || s.target_department === dept;
+  const matchesYear = (s: Survey, year: string) =>
+    year === "all" || !s.target_year || s.target_year === year;
 
   const visible = surveys.filter((s) => {
     if (scope === "mine") {
-      if (s.target_department && profile?.department && s.target_department.toLowerCase() !== profile.department.toLowerCase()) return false;
-      if (s.target_year && profile?.year && s.target_year.toLowerCase() !== profile.year.toLowerCase()) return false;
+      if (!matchesDept(s, profile?.department ?? "all")) return false;
+      if (!matchesYear(s, profile?.year ?? "all")) return false;
     }
-    if (deptFilter !== "all" && s.target_department !== deptFilter) return false;
-    if (yearFilter !== "all" && s.target_year !== yearFilter) return false;
+    if (!matchesDept(s, deptFilter)) return false;
+    if (!matchesYear(s, yearFilter)) return false;
     return true;
   });
 
