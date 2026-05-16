@@ -79,6 +79,41 @@ export type Database = {
           },
         ]
       }
+      survey_visualizations: {
+        Row: {
+          chart_type: string
+          created_at: string
+          id: string
+          question_id: string
+          survey_id: string
+          updated_at: string
+        }
+        Insert: {
+          chart_type?: string
+          created_at?: string
+          id?: string
+          question_id: string
+          survey_id: string
+          updated_at?: string
+        }
+        Update: {
+          chart_type?: string
+          created_at?: string
+          id?: string
+          question_id?: string
+          survey_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_visualizations_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       surveys: {
         Row: {
           created_at: string
