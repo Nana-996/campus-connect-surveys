@@ -34,6 +34,9 @@ function Feed() {
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [answered, setAnswered] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+  const [deptFilter, setDeptFilter] = useState<string>("all");
+  const [yearFilter, setYearFilter] = useState<string>("all");
+  const [scope, setScope] = useState<"all" | "mine">("all");
 
   useEffect(() => {
     (async () => {
@@ -53,9 +56,16 @@ function Feed() {
     })();
   }, [user]);
 
+  const departments = Array.from(new Set(surveys.map((s) => s.target_department).filter(Boolean))) as string[];
+  const years = Array.from(new Set(surveys.map((s) => s.target_year).filter(Boolean))) as string[];
+
   const visible = surveys.filter((s) => {
-    if (s.target_department && profile?.department && s.target_department.toLowerCase() !== profile.department.toLowerCase()) return false;
-    if (s.target_year && profile?.year && s.target_year.toLowerCase() !== profile.year.toLowerCase()) return false;
+    if (scope === "mine") {
+      if (s.target_department && profile?.department && s.target_department.toLowerCase() !== profile.department.toLowerCase()) return false;
+      if (s.target_year && profile?.year && s.target_year.toLowerCase() !== profile.year.toLowerCase()) return false;
+    }
+    if (deptFilter !== "all" && s.target_department !== deptFilter) return false;
+    if (yearFilter !== "all" && s.target_year !== yearFilter) return false;
     return true;
   });
 
@@ -74,6 +84,41 @@ function Feed() {
         <Link to="/create" className="hidden sm:inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-wider text-primary-foreground shadow-paper hover:opacity-90">
           New survey <ArrowUpRight className="h-3.5 w-3.5" />
         </Link>
+      </div>
+
+      <div className="mb-6 flex flex-wrap items-center gap-2 text-xs">
+        <Filter className="h-3.5 w-3.5 text-muted-foreground" />
+        <button
+          onClick={() => setScope(scope === "mine" ? "all" : "mine")}
+          className={`rounded-full border px-3 py-1 font-semibold uppercase tracking-wider transition ${scope === "mine" ? "border-primary bg-primary text-primary-foreground" : "border-foreground/20 bg-card hover:bg-accent"}`}
+        >
+          My cohort{profile?.department || profile?.year ? ` · ${[profile?.department, profile?.year].filter(Boolean).join(" / ")}` : ""}
+        </button>
+        <select
+          value={deptFilter}
+          onChange={(e) => setDeptFilter(e.target.value)}
+          className="rounded-full border border-foreground/20 bg-card px-3 py-1 font-semibold uppercase tracking-wider"
+        >
+          <option value="all">All departments</option>
+          {departments.map((d) => <option key={d} value={d}>{d}</option>)}
+        </select>
+        <select
+          value={yearFilter}
+          onChange={(e) => setYearFilter(e.target.value)}
+          className="rounded-full border border-foreground/20 bg-card px-3 py-1 font-semibold uppercase tracking-wider"
+        >
+          <option value="all">All years</option>
+          {years.map((y) => <option key={y} value={y}>{y}</option>)}
+        </select>
+        {(deptFilter !== "all" || yearFilter !== "all" || scope === "mine") && (
+          <button
+            onClick={() => { setDeptFilter("all"); setYearFilter("all"); setScope("all"); }}
+            className="text-muted-foreground underline hover:text-foreground"
+          >
+            Clear
+          </button>
+        )}
+        <span className="ml-auto text-muted-foreground">{visible.length} showing</span>
       </div>
 
       {loading ? (
