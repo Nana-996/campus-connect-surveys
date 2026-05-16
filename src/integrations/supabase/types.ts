@@ -14,36 +14,150 @@ export type Database = {
   }
   public: {
     Tables: {
+      credit_ledger: {
+        Row: {
+          created_at: string
+          delta: number
+          expires_at: string | null
+          id: string
+          reason: string
+          survey_id: string | null
+          user_id: string
+          wallet: string
+        }
+        Insert: {
+          created_at?: string
+          delta: number
+          expires_at?: string | null
+          id?: string
+          reason: string
+          survey_id?: string | null
+          user_id: string
+          wallet: string
+        }
+        Update: {
+          created_at?: string
+          delta?: number
+          expires_at?: string | null
+          id?: string
+          reason?: string
+          survey_id?: string | null
+          user_id?: string
+          wallet?: string
+        }
+        Relationships: []
+      }
+      disposable_domains: {
+        Row: {
+          created_at: string
+          domain: string
+        }
+        Insert: {
+          created_at?: string
+          domain: string
+        }
+        Update: {
+          created_at?: string
+          domain?: string
+        }
+        Relationships: []
+      }
+      earning_caps: {
+        Row: {
+          day_bucket: string
+          day_count: number
+          updated_at: string
+          user_id: string
+          week_bucket: string
+          week_count: number
+        }
+        Insert: {
+          day_bucket?: string
+          day_count?: number
+          updated_at?: string
+          user_id: string
+          week_bucket?: string
+          week_count?: number
+        }
+        Update: {
+          day_bucket?: string
+          day_count?: number
+          updated_at?: string
+          user_id?: string
+          week_bucket?: string
+          week_count?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
-          credits: number
           department: string
+          earned_credits: number
+          email_hash: string | null
+          flag_reason: string | null
           full_name: string
           id: string
+          is_flagged: boolean
+          paid_credits: number
           university_domain: string
           university_name: string
           year: string
         }
         Insert: {
           created_at?: string
-          credits?: number
           department?: string
+          earned_credits?: number
+          email_hash?: string | null
+          flag_reason?: string | null
           full_name?: string
           id: string
+          is_flagged?: boolean
+          paid_credits?: number
           university_domain?: string
           university_name?: string
           year?: string
         }
         Update: {
           created_at?: string
-          credits?: number
           department?: string
+          earned_credits?: number
+          email_hash?: string | null
+          flag_reason?: string | null
           full_name?: string
           id?: string
+          is_flagged?: boolean
+          paid_credits?: number
           university_domain?: string
           university_name?: string
           year?: string
+        }
+        Relationships: []
+      }
+      review_flags: {
+        Row: {
+          created_at: string
+          details: Json
+          id: string
+          resolved: boolean
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json
+          id?: string
+          resolved?: boolean
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json
+          id?: string
+          resolved?: boolean
+          type?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -51,21 +165,27 @@ export type Database = {
         Row: {
           answers: Json
           created_at: string
+          duration_ms: number
           id: string
+          quality_score: number
           respondent_id: string
           survey_id: string
         }
         Insert: {
           answers?: Json
           created_at?: string
+          duration_ms?: number
           id?: string
+          quality_score?: number
           respondent_id: string
           survey_id: string
         }
         Update: {
           answers?: Json
           created_at?: string
+          duration_ms?: number
           id?: string
+          quality_score?: number
           respondent_id?: string
           survey_id?: string
         }
@@ -116,43 +236,76 @@ export type Database = {
       }
       surveys: {
         Row: {
+          boosted_until: string | null
           created_at: string
           creator_id: string
           description: string
           id: string
           is_active: boolean
+          paid_cost: number
           questions: Json
           response_count: number
+          response_goal: number
           target_department: string | null
           target_year: string | null
+          tier: string
           title: string
           university_domain: string
         }
         Insert: {
+          boosted_until?: string | null
           created_at?: string
           creator_id: string
           description?: string
           id?: string
           is_active?: boolean
+          paid_cost?: number
           questions?: Json
           response_count?: number
+          response_goal?: number
           target_department?: string | null
           target_year?: string | null
+          tier?: string
           title: string
           university_domain: string
         }
         Update: {
+          boosted_until?: string | null
           created_at?: string
           creator_id?: string
           description?: string
           id?: string
           is_active?: boolean
+          paid_cost?: number
           questions?: Json
           response_count?: number
+          response_goal?: number
           target_department?: string | null
           target_year?: string | null
+          tier?: string
           title?: string
           university_domain?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
         }
         Relationships: []
       }
@@ -162,9 +315,17 @@ export type Database = {
     }
     Functions: {
       current_university_domain: { Args: never; Returns: string }
+      expire_earned_credits: { Args: never; Returns: undefined }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -291,6 +452,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
