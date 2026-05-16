@@ -1,7 +1,8 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Coins, Home, PlusCircle, FolderOpen, User, LogOut } from "lucide-react";
+import { Coins, Sparkles, Home, PlusCircle, FolderOpen, User, LogOut } from "lucide-react";
+import { Link as TLink } from "@tanstack/react-router";
 
 export function AppHeader() {
   const { profile, signOut } = useAuth();
@@ -17,9 +18,13 @@ export function AppHeader() {
           </span>
         </Link>
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 rounded-full bg-highlight px-3 py-1.5 text-xs font-bold text-highlight-foreground shadow-paper">
+          <TLink to="/buy" className="flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground shadow-paper hover:opacity-90">
+            <Sparkles className="h-3.5 w-3.5" />
+            {profile?.paid_credits ?? 0} paid
+          </TLink>
+          <div className="hidden sm:flex items-center gap-1 rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground">
             <Coins className="h-3.5 w-3.5" />
-            {profile?.credits ?? 0} credits
+            {profile?.earned_credits ?? 0} earned
           </div>
           <Button
             variant="ghost"
