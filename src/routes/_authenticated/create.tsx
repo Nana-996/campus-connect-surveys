@@ -92,15 +92,17 @@ function Create() {
     }
   };
 
+  const lowCredits = (profile?.credits ?? 0) < PUBLISH_COST;
   return (
     <div>
-      <h1 className="text-2xl font-bold">Create a survey</h1>
-      <p className="text-sm text-muted-foreground">
-        Publishing costs {PUBLISH_COST} credits. You have {profile?.credits ?? 0}.
+      <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Studio</p>
+      <h1 className="mt-1 font-serif text-5xl leading-[0.95]">Ask <em className="text-primary">campus.</em></h1>
+      <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-highlight px-3 py-1 text-xs font-bold uppercase tracking-wider text-highlight-foreground">
+        {PUBLISH_COST} credits to publish · you have {profile?.credits ?? 0}
       </p>
 
-      <form onSubmit={submit} className="mt-6 space-y-5">
-        <div className="rounded-xl border bg-card p-4 space-y-4">
+      <form onSubmit={submit} className="mt-8 space-y-5">
+        <div className="rounded-3xl border border-foreground/15 bg-card p-6 space-y-4 shadow-paper">
           <div>
             <Label htmlFor="title">Title</Label>
             <Input
@@ -144,7 +146,7 @@ function Create() {
 
         <div className="space-y-3">
           {questions.map((q, i) => (
-            <div key={q.id} className="rounded-xl border bg-card p-4">
+            <div key={q.id} className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 space-y-3">
                   <div className="flex items-center gap-2">
@@ -223,22 +225,19 @@ function Create() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <Button type="button" variant="outline" onClick={() => addQ("text")}>
-            <Plus className="mr-1 h-4 w-4" />
-            Short answer
+          <Button type="button" variant="outline" className="rounded-full border-foreground/30" onClick={() => addQ("text")}>
+            <Plus className="mr-1 h-4 w-4" /> Short answer
           </Button>
-          <Button type="button" variant="outline" onClick={() => addQ("choice")}>
-            <Plus className="mr-1 h-4 w-4" />
-            Multiple choice
+          <Button type="button" variant="outline" className="rounded-full border-foreground/30" onClick={() => addQ("choice")}>
+            <Plus className="mr-1 h-4 w-4" /> Multiple choice
           </Button>
-          <Button type="button" variant="outline" onClick={() => addQ("rating")}>
-            <Plus className="mr-1 h-4 w-4" />
-            Rating
+          <Button type="button" variant="outline" className="rounded-full border-foreground/30" onClick={() => addQ("rating")}>
+            <Plus className="mr-1 h-4 w-4" /> Rating
           </Button>
         </div>
 
-        <Button type="submit" size="lg" disabled={submitting} className="w-full">
-          {submitting ? "Publishing..." : `Publish (${PUBLISH_COST} credits)`}
+        <Button type="submit" size="lg" disabled={submitting || lowCredits} className="h-14 w-full rounded-full bg-primary text-base">
+          {submitting ? "Publishing…" : lowCredits ? "Not enough credits — answer surveys to earn more" : `Publish for ${PUBLISH_COST} credits →`}
         </Button>
       </form>
     </div>

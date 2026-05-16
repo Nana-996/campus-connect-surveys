@@ -103,31 +103,32 @@ function SurveyPage() {
 
   return (
     <div>
-      <Link to="/feed" className="mb-3 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-3 w-3" /> Back
+      <Link to="/feed" className="mb-4 inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground">
+        <ArrowLeft className="h-3 w-3" /> Back to feed
       </Link>
-      <div className="rounded-2xl border bg-card p-5">
-        <h1 className="text-2xl font-bold">{survey.title}</h1>
-        {survey.description && <p className="mt-1 text-sm text-muted-foreground">{survey.description}</p>}
-        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-          <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{survey.response_count} responses</span>
-          {survey.target_department && <span>· {survey.target_department}</span>}
-          {survey.target_year && <span>· {survey.target_year}</span>}
+      <div className="rounded-3xl border border-foreground/15 bg-card p-7 shadow-paper">
+        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-muted-foreground">Survey</p>
+        <h1 className="mt-2 font-serif text-4xl leading-[0.95] sm:text-5xl">{survey.title}</h1>
+        {survey.description && <p className="mt-3 max-w-2xl text-base text-muted-foreground">{survey.description}</p>}
+        <div className="mt-5 flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-wider">
+          <span className="inline-flex items-center gap-1 rounded-full bg-highlight px-3 py-1 text-highlight-foreground"><Users className="h-3 w-3" />{survey.response_count} responses</span>
+          {survey.target_department && <span className="rounded-full bg-accent px-3 py-1 text-accent-foreground">{survey.target_department}</span>}
+          {survey.target_year && <span className="rounded-full bg-accent px-3 py-1 text-accent-foreground">{survey.target_year}</span>}
         </div>
       </div>
 
       {isOwner ? (
-        <div className="mt-5">
+        <div className="mt-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Responses</h2>
-            <Button size="sm" variant="outline" onClick={exportCSV} disabled={!responses?.length}>
+            <h2 className="font-serif text-3xl">Responses</h2>
+            <Button size="sm" variant="outline" className="rounded-full border-foreground/30" onClick={exportCSV} disabled={!responses?.length}>
               <Download className="mr-1 h-4 w-4" /> Export CSV
             </Button>
           </div>
           {responses && responses.length > 0 ? (
-            <div className="mt-3 space-y-3">
+            <div className="mt-4 space-y-3">
               {responses.map((r, i) => (
-                <div key={r.id} className="rounded-xl border bg-card p-4">
+                <div key={r.id} className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
                   <p className="text-xs text-muted-foreground">Response #{i + 1} · {new Date(r.created_at).toLocaleString()}</p>
                   <div className="mt-2 space-y-2">
                     {survey.questions.map((q) => (
@@ -145,14 +146,15 @@ function SurveyPage() {
           )}
         </div>
       ) : alreadyAnswered ? (
-        <div className="mt-5 rounded-xl border bg-card p-5 text-center text-sm text-muted-foreground">
-          You've already responded to this survey. Thanks!
+        <div className="mt-6 rounded-3xl border border-dashed border-foreground/30 bg-card p-8 text-center shadow-paper">
+          <p className="font-serif text-3xl text-primary">Already answered.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Thanks for adding your voice — head back to the feed for more.</p>
         </div>
       ) : (
-        <form onSubmit={submit} className="mt-5 space-y-3">
+        <form onSubmit={submit} className="mt-6 space-y-3">
           {survey.questions.map((q, i) => (
-            <div key={q.id} className="rounded-xl border bg-card p-4">
-              <Label className="text-sm font-semibold">{i + 1}. {q.text}</Label>
+            <div key={q.id} className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
+              <Label className="font-serif text-2xl leading-tight">{i + 1}. {q.text}</Label>
               <div className="mt-2">
                 {q.type === "text" && (
                   <Textarea value={answers[q.id] ?? ""} onChange={(e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value }))} />
@@ -193,8 +195,8 @@ function SurveyPage() {
               </div>
             </div>
           ))}
-          <Button type="submit" size="lg" className="w-full" disabled={submitting}>
-            {submitting ? "Submitting..." : "Submit response (+1 credit)"}
+          <Button type="submit" size="lg" className="h-14 w-full rounded-full bg-primary text-base" disabled={submitting}>
+            {submitting ? "Submitting…" : "Submit & earn 1 credit →"}
           </Button>
         </form>
       )}
