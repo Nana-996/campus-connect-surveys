@@ -100,6 +100,48 @@ function SurveyPage() {
     URL.revokeObjectURL(url);
   };
 
+  const exportPDF = () => {
+    if (!survey || !responses) return;
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const margin = 40;
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    let y = margin;
+    const line = (txt: string, size = 11, bold = false) => {
+      doc.setFont("helvetica", bold ? "bold" : "normal");
+      doc.setFontSize(size);
+      const wrapped = doc.splitTextToSize(txt, pageW - margin * 2);
+      for (const ln of wrapped) {
+        if (y > pageH - margin) { doc.addPage(); y = margin; }
+        doc.text(ln, margin, y);
+        y += size + 4;
+      }
+    };
+    line(survey.title, 18, true);
+    line(`${responses.length} responses · exported ${new Date().toLocaleString()}`, 9);
+    y += 8;
+    survey.questions.forEach((q, qi) => {
+      y += 6;
+      line(`Q${qi + 1}. ${q.text}`, 12, true);
+      if (q.type === "choice" || q.type === "rating") {
+        const counts = chartData(q);
+        counts.forEach((c) => line(`  • ${c.label}: ${c.count}`, 10));
+      } else {
+        responses.forEach((r, ri) => line(`  ${ri + 1}. ${String(r.answers?.[q.id] ?? "—")}`, 10));
+      }
+    });
+    doc.save(`${survey.title.replace(/\s+/g, "_")}.pdf`);
+  };
+
+  const chartData = (q: Question) => {
+    if (!responses) return [];
+    const labels = q.type === "rating" ? ["1", "2", "3", "4", "5"] : (q.options ?? []);
+    return labels.map((label) => ({
+      label,
+      count: responses.filter((r) => String(r.answers?.[q.id] ?? "") === label).length,
+    }));
+  };
+
   if (loading) return <p className="text-sm text-muted-foreground">Loading...</p>;
   if (!survey) return <p className="text-sm text-muted-foreground">Survey not found.</p>;
 
