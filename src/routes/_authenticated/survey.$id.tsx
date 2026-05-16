@@ -52,6 +52,7 @@ function SurveyPage() {
   const [alreadyAnswered, setAlreadyAnswered] = useState(false);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [startedAt] = useState<number>(() => Date.now());
   const [responses, setResponses] = useState<any[] | null>(null);
   const [chartTypes, setChartTypes] = useState<Record<string, ChartType>>({});
 
@@ -96,15 +97,21 @@ function SurveyPage() {
         return;
       }
     }
+    const duration = Date.now() - startedAt;
+    if (duration < 15000) {
+      toast.error(`Take your time — at least 15 seconds for quality credit (${Math.floor(duration/1000)}s so far).`);
+      return;
+    }
     setSubmitting(true);
     try {
       const { error } = await supabase.from("survey_responses").insert({
         survey_id: survey.id,
         respondent_id: user!.id,
         answers: answers as any,
+        duration_ms: duration,
       });
       if (error) throw error;
-      toast.success("Response submitted! +1 credit earned.");
+      toast.success("Response submitted! +1 earned credit (subject to caps).");
       navigate({ to: "/feed" });
     } catch (err: any) {
       toast.error(err.message ?? "Failed to submit");
