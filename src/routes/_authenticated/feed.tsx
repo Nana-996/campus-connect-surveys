@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { Users, Filter } from "lucide-react";
+import { Users, Filter, ArrowUpRight, Sparkles } from "lucide-react";
 
 type Survey = {
   id: string;
@@ -19,6 +19,15 @@ type Survey = {
 export const Route = createFileRoute("/_authenticated/feed")({
   component: Feed,
 });
+
+// Rotating bento tones for variety
+const TONES = [
+  "bg-card text-foreground",
+  "bg-accent text-accent-foreground",
+  "bg-highlight text-highlight-foreground",
+  "bg-primary text-primary-foreground",
+  "bg-secondary text-secondary-foreground",
+];
 
 function Feed() {
   const { user, profile } = useAuth();
@@ -52,51 +61,84 @@ function Feed() {
 
   return (
     <div>
-      <div className="mb-5">
-        <h1 className="text-2xl font-bold">Campus feed</h1>
-        <p className="text-sm text-muted-foreground">
-          Surveys from students at <span className="font-semibold text-foreground">{profile?.university_name}</span>
-        </p>
+      <div className="mb-8 flex items-end justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Today on campus</p>
+          <h1 className="mt-1 font-serif text-5xl leading-[0.95] sm:text-6xl">
+            The <em className="text-primary">feed.</em>
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Verified students at <span className="font-semibold text-foreground">{profile?.university_name ?? "your campus"}</span>
+          </p>
+        </div>
+        <Link to="/create" className="hidden sm:inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-wider text-primary-foreground shadow-paper hover:opacity-90">
+          New survey <ArrowUpRight className="h-3.5 w-3.5" />
+        </Link>
       </div>
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Loading surveys...</p>
+        <p className="text-sm text-muted-foreground">Loading surveys…</p>
       ) : visible.length === 0 ? (
-        <div className="rounded-xl border bg-card p-8 text-center">
-          <p className="text-sm text-muted-foreground">No surveys for you right now.</p>
-          <Link to="/create" className="mt-3 inline-block text-sm font-semibold text-primary hover:underline">
-            Be the first to publish one →
+        <div className="rounded-3xl border border-dashed border-foreground/30 bg-card p-10 text-center shadow-paper">
+          <Sparkles className="mx-auto h-8 w-8 text-primary" />
+          <p className="mt-3 font-serif text-3xl">A quiet day on campus.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Be the spark — publish the first survey.</p>
+          <Link to="/create" className="mt-5 inline-flex items-center gap-1 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground">
+            Start one <ArrowUpRight className="h-4 w-4" />
           </Link>
         </div>
       ) : (
-        <div className="space-y-3">
-          {visible.map((s) => (
-            <Link
-              key={s.id}
-              to="/survey/$id"
-              params={{ id: s.id }}
-              className="block rounded-xl border bg-card p-4 transition hover:border-primary/40 hover:shadow-sm"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <h3 className="font-semibold text-foreground">{s.title}</h3>
-                {answered.has(s.id) && (
-                  <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold text-accent-foreground">Done</span>
-                )}
-              </div>
-              {s.description && <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{s.description}</p>}
-              <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{s.response_count} responses</span>
-                <span>•</span>
-                <span>{s.questions?.length ?? 0} questions</span>
-                {(s.target_department || s.target_year) && (
-                  <span className="inline-flex items-center gap-1 text-primary">
-                    <Filter className="h-3 w-3" />
-                    {[s.target_department, s.target_year].filter(Boolean).join(" · ")}
-                  </span>
-                )}
-              </div>
-            </Link>
-          ))}
+        <div className="grid auto-rows-[minmax(180px,auto)] grid-cols-2 gap-3 sm:grid-cols-6 sm:gap-4">
+          {visible.map((s, i) => {
+            const tone = TONES[i % TONES.length];
+            // Bento sizing pattern
+            const span =
+              i % 7 === 0 ? "col-span-2 sm:col-span-4 sm:row-span-2"
+              : i % 5 === 0 ? "col-span-2 sm:col-span-3"
+              : i % 3 === 0 ? "col-span-2 sm:col-span-3"
+              : "col-span-2 sm:col-span-2";
+            const isLarge = i % 7 === 0;
+            const isDone = answered.has(s.id);
+            return (
+              <Link
+                key={s.id}
+                to="/survey/$id"
+                params={{ id: s.id }}
+                className={`group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-foreground/15 p-5 shadow-paper transition hover:-translate-y-0.5 hover:shadow-lg ${tone} ${span}`}
+              >
+                <div>
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-70">
+                      №{String(i + 1).padStart(2, "0")}
+                    </span>
+                    {isDone && (
+                      <span className="rounded-full bg-background/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+                        ✓ Done
+                      </span>
+                    )}
+                  </div>
+                  <h3 className={`mt-3 font-serif leading-[1] ${isLarge ? "text-4xl sm:text-6xl" : "text-2xl sm:text-3xl"}`}>
+                    {s.title}
+                  </h3>
+                  {s.description && isLarge && (
+                    <p className="mt-3 line-clamp-3 max-w-md text-sm opacity-80">{s.description}</p>
+                  )}
+                </div>
+                <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-medium uppercase tracking-wider opacity-80">
+                  <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{s.response_count}</span>
+                  <span>·</span>
+                  <span>{s.questions?.length ?? 0} Qs</span>
+                  {(s.target_department || s.target_year) && (
+                    <span className="inline-flex items-center gap-1">
+                      <Filter className="h-3 w-3" />
+                      {[s.target_department, s.target_year].filter(Boolean).join(" · ")}
+                    </span>
+                  )}
+                </div>
+                <ArrowUpRight className="absolute right-4 top-4 h-4 w-4 opacity-0 transition group-hover:opacity-70" />
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>
