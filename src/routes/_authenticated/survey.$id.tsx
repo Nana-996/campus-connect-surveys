@@ -7,9 +7,25 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Download, ArrowLeft, Users, FileText, BarChart3 } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { Download, ArrowLeft, Users, FileText, BarChart3, TrendingUp, Activity, Hash } from "lucide-react";
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
+  PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, RadarChart, Radar,
+  PolarGrid, PolarAngleAxis, PolarRadiusAxis, Legend,
+} from "recharts";
 import jsPDF from "jspdf";
+
+type ChartType = "bar" | "pie" | "donut" | "line" | "area" | "radar" | "horizontal";
+const CHART_TYPES: { value: ChartType; label: string }[] = [
+  { value: "bar", label: "Bar" },
+  { value: "horizontal", label: "Horizontal bar" },
+  { value: "pie", label: "Pie" },
+  { value: "donut", label: "Donut" },
+  { value: "line", label: "Line" },
+  { value: "area", label: "Area" },
+  { value: "radar", label: "Radar" },
+];
+const PALETTE = ["var(--primary)", "var(--highlight)", "var(--accent)", "#7c9a6b", "#c98a4b", "#4a6b52", "#b8c47a"];
 
 type Question = { id: string; type: "text" | "choice" | "rating"; text: string; options?: string[] };
 type Survey = {
@@ -37,6 +53,7 @@ function SurveyPage() {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [responses, setResponses] = useState<any[] | null>(null);
+  const [chartTypes, setChartTypes] = useState<Record<string, ChartType>>({});
 
   const isOwner = survey && user && survey.creator_id === user.id;
 
@@ -46,8 +63,14 @@ function SurveyPage() {
       if (!s) { setLoading(false); return; }
       setSurvey(s as unknown as Survey);
       if (s.creator_id === user!.id) {
-        const { data: r } = await supabase.from("survey_responses").select("*").eq("survey_id", id).order("created_at", { ascending: false });
+        const [{ data: r }, { data: viz }] = await Promise.all([
+          supabase.from("survey_responses").select("*").eq("survey_id", id).order("created_at", { ascending: false }),
+          supabase.from("survey_visualizations").select("question_id, chart_type").eq("survey_id", id),
+        ]);
         setResponses(r ?? []);
+        const map: Record<string, ChartType> = {};
+        (viz ?? []).forEach((v: any) => { map[v.question_id] = v.chart_type as ChartType; });
+        setChartTypes(map);
       } else {
         const { data: own } = await supabase.from("survey_responses").select("id").eq("survey_id", id).eq("respondent_id", user!.id).maybeSingle();
         setAlreadyAnswered(!!own);
@@ -55,6 +78,14 @@ function SurveyPage() {
       setLoading(false);
     })();
   }, [id, user]);
+
+  const setChartType = async (questionId: string, type: ChartType) => {
+    setChartTypes((m) => ({ ...m, [questionId]: type }));
+    await supabase.from("survey_visualizations").upsert(
+      { survey_id: id, question_id: questionId, chart_type: type },
+      { onConflict: "survey_id,question_id" },
+    );
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,6 +173,105 @@ function SurveyPage() {
     }));
   };
 
+  const timelineData = () => {
+    if (!responses) return [];
+    const buckets: Record<string, number> = {};
+    responses.forEach((r) => {
+      const d = new Date(r.created_at).toISOString().slice(0, 10);
+      buckets[d] = (buckets[d] ?? 0) + 1;
+    });
+    return Object.entries(buckets)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, count]) => ({ date: date.slice(5), count }));
+  };
+
+  const completionRate = () => {
+    if (!responses || !survey || responses.length === 0) return 0;
+    let answered = 0, total = 0;
+    responses.forEach((r) => {
+      survey.questions.forEach((q) => {
+        total += 1;
+        if (r.answers?.[q.id] != null && String(r.answers[q.id]).trim() !== "") answered += 1;
+      });
+    });
+    return total ? Math.round((answered / total) * 100) : 0;
+  };
+
+  const avgRating = (q: Question) => {
+    if (!responses || q.type !== "rating") return null;
+    const nums = responses.map((r) => Number(r.answers?.[q.id])).filter((n) => !isNaN(n) && n > 0);
+    if (!nums.length) return null;
+    return (nums.reduce((a, b) => a + b, 0) / nums.length).toFixed(2);
+  };
+
+  const renderChart = (q: Question, type: ChartType) => {
+    const data = chartData(q);
+    const common = { data, margin: { top: 8, right: 8, left: -16, bottom: 0 } };
+    switch (type) {
+      case "horizontal":
+        return (
+          <BarChart {...common} layout="vertical">
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+            <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
+            <YAxis type="category" dataKey="label" tick={{ fontSize: 11 }} width={80} />
+            <Tooltip cursor={{ fill: "var(--accent)", opacity: 0.3 }} />
+            <Bar dataKey="count" fill="var(--primary)" radius={[0, 6, 6, 0]} />
+          </BarChart>
+        );
+      case "pie":
+      case "donut":
+        return (
+          <PieChart>
+            <Tooltip />
+            <Legend wrapperStyle={{ fontSize: 11 }} />
+            <Pie data={data} dataKey="count" nameKey="label" outerRadius={70} innerRadius={type === "donut" ? 40 : 0} label={{ fontSize: 10 }}>
+              {data.map((_, i) => (<Cell key={i} fill={PALETTE[i % PALETTE.length]} />))}
+            </Pie>
+          </PieChart>
+        );
+      case "line":
+        return (
+          <LineChart {...common}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+            <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+            <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+            <Tooltip />
+            <Line type="monotone" dataKey="count" stroke="var(--primary)" strokeWidth={2} dot={{ r: 4 }} />
+          </LineChart>
+        );
+      case "area":
+        return (
+          <AreaChart {...common}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+            <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+            <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+            <Tooltip />
+            <Area type="monotone" dataKey="count" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.3} />
+          </AreaChart>
+        );
+      case "radar":
+        return (
+          <RadarChart data={data} outerRadius={70}>
+            <PolarGrid stroke="var(--border)" />
+            <PolarAngleAxis dataKey="label" tick={{ fontSize: 11 }} />
+            <PolarRadiusAxis tick={{ fontSize: 10 }} />
+            <Radar dataKey="count" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.4} />
+            <Tooltip />
+          </RadarChart>
+        );
+      default:
+        return (
+          <BarChart {...common}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+            <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+            <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+            <Tooltip cursor={{ fill: "var(--accent)", opacity: 0.3 }} />
+            <Bar dataKey="count" fill="var(--primary)" radius={[6, 6, 0, 0]} />
+          </BarChart>
+        );
+    }
+  };
+
   if (loading) return <p className="text-sm text-muted-foreground">Loading...</p>;
   if (!survey) return <p className="text-sm text-muted-foreground">Survey not found.</p>;
 
@@ -176,26 +306,66 @@ function SurveyPage() {
           </div>
           {responses && responses.length > 0 ? (
             <>
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
+                  <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground"><Hash className="h-3 w-3" /> Total</div>
+                  <p className="mt-1 font-serif text-4xl">{responses.length}</p>
+                  <p className="text-xs text-muted-foreground">responses collected</p>
+                </div>
+                <div className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
+                  <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground"><Activity className="h-3 w-3" /> Completion</div>
+                  <p className="mt-1 font-serif text-4xl">{completionRate()}%</p>
+                  <p className="text-xs text-muted-foreground">questions answered</p>
+                </div>
+                <div className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
+                  <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground"><TrendingUp className="h-3 w-3" /> Latest</div>
+                  <p className="mt-1 font-serif text-lg leading-tight">{new Date(responses[0].created_at).toLocaleDateString()}</p>
+                  <p className="text-xs text-muted-foreground">{new Date(responses[0].created_at).toLocaleTimeString()}</p>
+                </div>
+              </div>
+
+              <div className="mt-4 rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
+                <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground"><TrendingUp className="h-3 w-3" /> Responses over time</div>
+                <div className="mt-3 h-44">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={timelineData()} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                      <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                      <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                      <Tooltip />
+                      <Area type="monotone" dataKey="count" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.25} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
                 {survey.questions.map((q, qi) => {
                   const isChartable = q.type === "choice" || q.type === "rating";
                   if (!isChartable) return null;
-                  const data = chartData(q);
+                  const type = chartTypes[q.id] ?? "bar";
+                  const avg = avgRating(q);
                   return (
                     <div key={q.id} className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
-                      <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-                        <BarChart3 className="h-3 w-3" /> Q{qi + 1}
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                            <BarChart3 className="h-3 w-3" /> Q{qi + 1}
+                          </div>
+                          <p className="mt-1 font-serif text-xl leading-tight">{q.text}</p>
+                          {avg && <p className="mt-1 text-xs text-muted-foreground">Average rating: <span className="font-semibold text-foreground">{avg}</span> / 5</p>}
+                        </div>
+                        <select
+                          value={type}
+                          onChange={(e) => setChartType(q.id, e.target.value as ChartType)}
+                          className="rounded-full border border-foreground/20 bg-background px-2 py-1 text-[11px] font-semibold uppercase tracking-wider"
+                        >
+                          {CHART_TYPES.map((c) => (<option key={c.value} value={c.value}>{c.label}</option>))}
+                        </select>
                       </div>
-                      <p className="mt-1 font-serif text-xl leading-tight">{q.text}</p>
-                      <div className="mt-3 h-48">
+                      <div className="mt-3 h-56">
                         <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={data} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                            <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-                            <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-                            <Tooltip cursor={{ fill: "var(--accent)", opacity: 0.3 }} />
-                            <Bar dataKey="count" fill="var(--primary)" radius={[6, 6, 0, 0]} />
-                          </BarChart>
+                          {renderChart(q, type)}
                         </ResponsiveContainer>
                       </div>
                     </div>
