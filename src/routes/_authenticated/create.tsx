@@ -63,12 +63,6 @@ function Create() {
         .select("id")
         .single();
       if (error) throw error;
-      // Deduct credits
-      const { error: cErr } = await supabase
-        .from("profiles")
-        .update({ credits: profile.credits - PUBLISH_COST })
-        .eq("id", user!.id);
-      if (cErr) throw cErr;
       await refreshProfile();
       toast.success("Survey published!");
       navigate({ to: "/survey/$id", params: { id: data.id } });

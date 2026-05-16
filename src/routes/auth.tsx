@@ -60,7 +60,13 @@ function AuthPage() {
           },
         });
         if (error) throw error;
-        toast.success("Check your email to verify your account, then log in.");
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (sessionData.session) {
+          toast.success("Account created. Welcome to CampusVerify!");
+          navigate({ to: "/feed" });
+          return;
+        }
+        toast.success("Account created. Check your email to verify it, then log in.");
         navigate({ to: "/auth", search: { mode: "login" } });
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
