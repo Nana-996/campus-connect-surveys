@@ -7,9 +7,25 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Download, ArrowLeft, Users, FileText, BarChart3 } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { Download, ArrowLeft, Users, FileText, BarChart3, TrendingUp, Activity, Hash } from "lucide-react";
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
+  PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, RadarChart, Radar,
+  PolarGrid, PolarAngleAxis, PolarRadiusAxis, Legend,
+} from "recharts";
 import jsPDF from "jspdf";
+
+type ChartType = "bar" | "pie" | "donut" | "line" | "area" | "radar" | "horizontal";
+const CHART_TYPES: { value: ChartType; label: string }[] = [
+  { value: "bar", label: "Bar" },
+  { value: "horizontal", label: "Horizontal bar" },
+  { value: "pie", label: "Pie" },
+  { value: "donut", label: "Donut" },
+  { value: "line", label: "Line" },
+  { value: "area", label: "Area" },
+  { value: "radar", label: "Radar" },
+];
+const PALETTE = ["var(--primary)", "var(--highlight)", "var(--accent)", "#7c9a6b", "#c98a4b", "#4a6b52", "#b8c47a"];
 
 type Question = { id: string; type: "text" | "choice" | "rating"; text: string; options?: string[] };
 type Survey = {
