@@ -173,6 +173,105 @@ function SurveyPage() {
     }));
   };
 
+  const timelineData = () => {
+    if (!responses) return [];
+    const buckets: Record<string, number> = {};
+    responses.forEach((r) => {
+      const d = new Date(r.created_at).toISOString().slice(0, 10);
+      buckets[d] = (buckets[d] ?? 0) + 1;
+    });
+    return Object.entries(buckets)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, count]) => ({ date: date.slice(5), count }));
+  };
+
+  const completionRate = () => {
+    if (!responses || !survey || responses.length === 0) return 0;
+    let answered = 0, total = 0;
+    responses.forEach((r) => {
+      survey.questions.forEach((q) => {
+        total += 1;
+        if (r.answers?.[q.id] != null && String(r.answers[q.id]).trim() !== "") answered += 1;
+      });
+    });
+    return total ? Math.round((answered / total) * 100) : 0;
+  };
+
+  const avgRating = (q: Question) => {
+    if (!responses || q.type !== "rating") return null;
+    const nums = responses.map((r) => Number(r.answers?.[q.id])).filter((n) => !isNaN(n) && n > 0);
+    if (!nums.length) return null;
+    return (nums.reduce((a, b) => a + b, 0) / nums.length).toFixed(2);
+  };
+
+  const renderChart = (q: Question, type: ChartType) => {
+    const data = chartData(q);
+    const common = { data, margin: { top: 8, right: 8, left: -16, bottom: 0 } };
+    switch (type) {
+      case "horizontal":
+        return (
+          <BarChart {...common} layout="vertical">
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+            <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
+            <YAxis type="category" dataKey="label" tick={{ fontSize: 11 }} width={80} />
+            <Tooltip cursor={{ fill: "var(--accent)", opacity: 0.3 }} />
+            <Bar dataKey="count" fill="var(--primary)" radius={[0, 6, 6, 0]} />
+          </BarChart>
+        );
+      case "pie":
+      case "donut":
+        return (
+          <PieChart>
+            <Tooltip />
+            <Legend wrapperStyle={{ fontSize: 11 }} />
+            <Pie data={data} dataKey="count" nameKey="label" outerRadius={70} innerRadius={type === "donut" ? 40 : 0} label={{ fontSize: 10 }}>
+              {data.map((_, i) => (<Cell key={i} fill={PALETTE[i % PALETTE.length]} />))}
+            </Pie>
+          </PieChart>
+        );
+      case "line":
+        return (
+          <LineChart {...common}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+            <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+            <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+            <Tooltip />
+            <Line type="monotone" dataKey="count" stroke="var(--primary)" strokeWidth={2} dot={{ r: 4 }} />
+          </LineChart>
+        );
+      case "area":
+        return (
+          <AreaChart {...common}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+            <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+            <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+            <Tooltip />
+            <Area type="monotone" dataKey="count" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.3} />
+          </AreaChart>
+        );
+      case "radar":
+        return (
+          <RadarChart data={data} outerRadius={70}>
+            <PolarGrid stroke="var(--border)" />
+            <PolarAngleAxis dataKey="label" tick={{ fontSize: 11 }} />
+            <PolarRadiusAxis tick={{ fontSize: 10 }} />
+            <Radar dataKey="count" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.4} />
+            <Tooltip />
+          </RadarChart>
+        );
+      default:
+        return (
+          <BarChart {...common}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+            <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+            <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+            <Tooltip cursor={{ fill: "var(--accent)", opacity: 0.3 }} />
+            <Bar dataKey="count" fill="var(--primary)" radius={[6, 6, 0, 0]} />
+          </BarChart>
+        );
+    }
+  };
+
   if (loading) return <p className="text-sm text-muted-foreground">Loading...</p>;
   if (!survey) return <p className="text-sm text-muted-foreground">Survey not found.</p>;
 
