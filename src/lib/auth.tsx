@@ -12,6 +12,7 @@ export type Profile = {
   earned_credits: number;
   paid_credits: number;
   is_flagged?: boolean;
+  flag_reason?: string | null;
 };
 
 type AuthCtx = {
