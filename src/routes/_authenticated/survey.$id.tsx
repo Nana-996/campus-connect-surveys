@@ -53,6 +53,7 @@ function SurveyPage() {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [responses, setResponses] = useState<any[] | null>(null);
+  const [chartTypes, setChartTypes] = useState<Record<string, ChartType>>({});
 
   const isOwner = survey && user && survey.creator_id === user.id;
 
@@ -62,8 +63,14 @@ function SurveyPage() {
       if (!s) { setLoading(false); return; }
       setSurvey(s as unknown as Survey);
       if (s.creator_id === user!.id) {
-        const { data: r } = await supabase.from("survey_responses").select("*").eq("survey_id", id).order("created_at", { ascending: false });
+        const [{ data: r }, { data: viz }] = await Promise.all([
+          supabase.from("survey_responses").select("*").eq("survey_id", id).order("created_at", { ascending: false }),
+          supabase.from("survey_visualizations").select("question_id, chart_type").eq("survey_id", id),
+        ]);
         setResponses(r ?? []);
+        const map: Record<string, ChartType> = {};
+        (viz ?? []).forEach((v: any) => { map[v.question_id] = v.chart_type as ChartType; });
+        setChartTypes(map);
       } else {
         const { data: own } = await supabase.from("survey_responses").select("id").eq("survey_id", id).eq("respondent_id", user!.id).maybeSingle();
         setAlreadyAnswered(!!own);
@@ -71,6 +78,14 @@ function SurveyPage() {
       setLoading(false);
     })();
   }, [id, user]);
+
+  const setChartType = async (questionId: string, type: ChartType) => {
+    setChartTypes((m) => ({ ...m, [questionId]: type }));
+    await supabase.from("survey_visualizations").upsert(
+      { survey_id: id, question_id: questionId, chart_type: type },
+      { onConflict: "survey_id,question_id" },
+    );
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
