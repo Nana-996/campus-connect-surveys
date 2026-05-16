@@ -31,7 +31,7 @@ function MySurveys() {
         .select("*")
         .eq("creator_id", user!.id)
         .order("created_at", { ascending: false });
-      setSurveys((data as Survey[]) ?? []);
+      setSurveys((data as unknown as Survey[]) ?? []);
       setLoading(false);
     })();
   }, [user]);

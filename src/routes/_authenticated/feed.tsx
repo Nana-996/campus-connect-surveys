@@ -34,7 +34,7 @@ function Feed() {
         .eq("is_active", true)
         .neq("creator_id", user!.id)
         .order("created_at", { ascending: false });
-      setSurveys((data as Survey[]) ?? []);
+      setSurveys((data as unknown as Survey[]) ?? []);
       const { data: resps } = await supabase
         .from("survey_responses")
         .select("survey_id")
