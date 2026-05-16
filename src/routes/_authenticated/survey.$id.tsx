@@ -190,11 +190,11 @@ function SurveyPage() {
                       <div className="mt-3 h-48">
                         <ResponsiveContainer width="100%" height="100%">
                           <BarChart data={data} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                             <XAxis dataKey="label" tick={{ fontSize: 11 }} />
                             <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-                            <Tooltip cursor={{ fill: "hsl(var(--accent))", opacity: 0.3 }} />
-                            <Bar dataKey="count" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+                            <Tooltip cursor={{ fill: "var(--accent)", opacity: 0.3 }} />
+                            <Bar dataKey="count" fill="var(--primary)" radius={[6, 6, 0, 0]} />
                           </BarChart>
                         </ResponsiveContainer>
                       </div>
