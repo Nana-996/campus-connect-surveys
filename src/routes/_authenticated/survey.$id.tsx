@@ -42,7 +42,7 @@ function SurveyPage() {
     (async () => {
       const { data: s } = await supabase.from("surveys").select("*").eq("id", id).maybeSingle();
       if (!s) { setLoading(false); return; }
-      setSurvey(s as Survey);
+      setSurvey(s as unknown as Survey);
       if (s.creator_id === user!.id) {
         const { data: r } = await supabase.from("survey_responses").select("*").eq("survey_id", id).order("created_at", { ascending: false });
         setResponses(r ?? []);
