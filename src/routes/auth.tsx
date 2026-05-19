@@ -116,9 +116,11 @@ function AuthPage() {
               Enter preview mode
             </Button>
           </form>
-          <p className="mt-6 text-center text-xs uppercase tracking-wider text-muted-foreground">
-            Signups paused while you review the app
+          <p className="mt-6 text-center text-xs text-muted-foreground">
+            New here?{" "}
+            <Link to="/signup" className="font-semibold text-foreground underline">Create an account</Link>
           </p>
+
         </div>
       </div>
     </div>
