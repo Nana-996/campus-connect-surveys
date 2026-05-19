@@ -302,7 +302,10 @@ function SurveyPage() {
         <h1 className="mt-2 font-serif text-4xl leading-[0.95] sm:text-5xl">{survey.title}</h1>
         {survey.description && <p className="mt-3 max-w-2xl text-base text-muted-foreground">{survey.description}</p>}
         <div className="mt-5 flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-wider">
-          <span className="inline-flex items-center gap-1 rounded-full bg-highlight px-3 py-1 text-highlight-foreground"><Users className="h-3 w-3" />{survey.response_count} responses</span>
+          <span className="inline-flex items-center gap-1 rounded-full bg-highlight px-3 py-1 text-highlight-foreground"><Users className="h-3 w-3" />{survey.response_count} / {survey.response_goal} responses</span>
+          <span className="rounded-full bg-card border border-foreground/15 px-3 py-1 text-muted-foreground">
+            {new Date(survey.expires_at) <= new Date() ? "Closed" : `Closes ${new Date(survey.expires_at).toLocaleDateString()}`}
+          </span>
           {survey.target_department && <span className="rounded-full bg-accent px-3 py-1 text-accent-foreground">{survey.target_department}</span>}
           {survey.target_year && <span className="rounded-full bg-accent px-3 py-1 text-accent-foreground">{survey.target_year}</span>}
         </div>
