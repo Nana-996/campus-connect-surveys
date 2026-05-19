@@ -96,7 +96,7 @@ function BuyPage() {
       )}
 
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
-        {PACKS.map((p) => {
+        {packsFor(profile?.user_type).map((p) => {
           const per = (p.price / p.credits).toFixed(2);
           const isFeatured = p.badge === "Most popular";
           return (
