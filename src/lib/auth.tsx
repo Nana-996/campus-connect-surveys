@@ -13,6 +13,7 @@ export type Profile = {
   paid_credits: number;
   is_flagged?: boolean;
   flag_reason?: string | null;
+  user_type?: "student" | "general";
 };
 
 type AuthCtx = {
