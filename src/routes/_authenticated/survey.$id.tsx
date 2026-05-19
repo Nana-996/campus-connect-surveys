@@ -47,7 +47,7 @@ export const Route = createFileRoute("/_authenticated/survey/$id")({
 
 function SurveyPage() {
   const { id } = Route.useParams();
-  const { user } = useAuth();
+  const { user, isPreviewMode } = useAuth();
   const navigate = useNavigate();
   const [survey, setSurvey] = useState<Survey | null>(null);
   const [loading, setLoading] = useState(true);
@@ -61,26 +61,44 @@ function SurveyPage() {
   const isOwner = survey && user && survey.creator_id === user.id;
 
   useEffect(() => {
+    if (!user) return;
+    if (isPreviewMode) {
+      setLoading(false);
+      return;
+    }
+    let active = true;
     (async () => {
-      const { data: s } = await supabase.from("surveys").select("*").eq("id", id).maybeSingle();
+      const { data: s, error: surveyError } = await supabase.from("surveys").select("*").eq("id", id).maybeSingle();
+      if (!active) return;
+      if (surveyError) {
+        console.warn("Survey details request failed.", surveyError);
+        setLoading(false);
+        return;
+      }
       if (!s) { setLoading(false); return; }
       setSurvey(s as unknown as Survey);
-      if (s.creator_id === user!.id) {
-        const [{ data: r }, { data: viz }] = await Promise.all([
+      if (s.creator_id === user.id) {
+        const [{ data: r, error: responsesError }, { data: viz, error: vizError }] = await Promise.all([
           supabase.from("survey_responses").select("*").eq("survey_id", id).order("created_at", { ascending: false }),
           supabase.from("survey_visualizations").select("question_id, chart_type").eq("survey_id", id),
         ]);
+        if (!active) return;
+        if (responsesError) console.warn("Survey responses request failed.", responsesError);
+        if (vizError) console.warn("Survey visualizations request failed.", vizError);
         setResponses(r ?? []);
         const map: Record<string, ChartType> = {};
         (viz ?? []).forEach((v: any) => { map[v.question_id] = v.chart_type as ChartType; });
         setChartTypes(map);
       } else {
-        const { data: own } = await supabase.from("survey_responses").select("id").eq("survey_id", id).eq("respondent_id", user!.id).maybeSingle();
+        const { data: own, error: ownError } = await supabase.from("survey_responses").select("id").eq("survey_id", id).eq("respondent_id", user.id).maybeSingle();
+        if (!active) return;
+        if (ownError) console.warn("Survey answered-state request failed.", ownError);
         setAlreadyAnswered(!!own);
       }
       setLoading(false);
     })();
-  }, [id, user]);
+    return () => { active = false; };
+  }, [id, user, isPreviewMode]);
 
   const setChartType = async (questionId: string, type: ChartType) => {
     setChartTypes((m) => ({ ...m, [questionId]: type }));
