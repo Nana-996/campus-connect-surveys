@@ -106,14 +106,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
       setSession(s);
       if (s?.user) {
-        setTimeout(() => loadProfile(s.user), 0);
+        setTimeout(() => {
+          loadProfile(s.user).catch((err) => {
+            setProfile(null);
+            setProfileError(err.message ?? "Could not load your profile.");
+          });
+        }, 0);
       } else {
         setProfile(null);
+        setProfileError(null);
       }
     });
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
-      if (data.session?.user) loadProfile(data.session.user).finally(() => setLoading(false));
+      if (data.session?.user) {
+        loadProfile(data.session.user)
+          .catch((err) => {
+            setProfile(null);
+            setProfileError(err.message ?? "Could not load your profile.");
+          })
+          .finally(() => setLoading(false));
+      }
       else {
         const previewEnabled = localStorage.getItem(PREVIEW_MODE_KEY) === "true";
         if (previewEnabled) {
@@ -130,10 +143,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user: session?.user ?? (isPreviewMode ? previewUser : null),
     session,
     profile,
+    profileError,
     isPreviewMode,
     loading,
+    signIn: async (email, password) => {
+      localStorage.removeItem(PREVIEW_MODE_KEY);
+      setIsPreviewMode(false);
+      setProfile(null);
+      setProfileError(null);
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      setSession(data.session);
+      if (data.user) await loadProfile(data.user);
+    },
     enterPreviewMode: () => {
       localStorage.setItem(PREVIEW_MODE_KEY, "true");
+      setSession(null);
+      setProfileError(null);
       setIsPreviewMode(true);
       setProfile(previewProfile);
     },
