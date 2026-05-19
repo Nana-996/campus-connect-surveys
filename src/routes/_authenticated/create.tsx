@@ -191,7 +191,40 @@ function Create() {
               </div>
             </div>
           )}
+
+          <div className="border-t border-foreground/10 pt-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Limits (optional)</p>
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              Auto-closes when either limit is reached. Ultimate cap: 6 months from publish.
+            </p>
+            <div className="mt-3 grid grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="goal" className="text-xs">Response goal</Label>
+                <Input
+                  id="goal"
+                  type="number"
+                  min={1}
+                  max={TIERS[tier].responseGoal}
+                  value={responseGoal}
+                  onChange={(e) => setResponseGoal(e.target.value)}
+                  placeholder={`Default ${TIERS[tier].responseGoal}`}
+                />
+              </div>
+              <div>
+                <Label htmlFor="exp" className="text-xs">Closes on</Label>
+                <Input
+                  id="exp"
+                  type="date"
+                  min={new Date(Date.now() + 86400000).toISOString().slice(0, 10)}
+                  max={new Date(Date.now() + 1000 * 60 * 60 * 24 * 30 * 6).toISOString().slice(0, 10)}
+                  value={expiresAt}
+                  onChange={(e) => setExpiresAt(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
         </div>
+
 
         {/* Questions */}
         <div className="space-y-3">
