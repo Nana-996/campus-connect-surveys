@@ -27,7 +27,7 @@ export const TIERS: Record<Tier, {
   boosted: {
     label: "Boosted",
     tagline: "Pinned on the feed",
-    cost: 10,
+    cost: 20,
     paidRequired: true,
     responseGoal: 250,
     features: ["Pinned 48h", "Cohort highlight", "Up to 250 responses"],
@@ -35,7 +35,7 @@ export const TIERS: Record<Tier, {
   pro: {
     label: "Pro",
     tagline: "Serious research mode",
-    cost: 20,
+    cost: 50,
     paidRequired: true,
     responseGoal: 1000,
     features: ["Top placement 7 days", "Up to 1,000 responses", "Instant publish", "Analytics export"],
@@ -43,13 +43,13 @@ export const TIERS: Record<Tier, {
 };
 
 export const PACKS = [
-  { id: "starter" as const, credits: 10, price: 20, currency: "GHS", label: "Starter" },
-  { id: "researcher" as const, credits: 50, price: 90, currency: "GHS", label: "Researcher", badge: "Most popular" },
-  { id: "lab" as const, credits: 200, price: 320, currency: "GHS", label: "Lab", badge: "Best value" },
+  { id: "starter" as const, credits: 20, price: 20, currency: "GHS", label: "Starter" },
+  { id: "researcher" as const, credits: 100, price: 90, currency: "GHS", label: "Researcher", badge: "Most popular" },
+  { id: "lab" as const, credits: 400, price: 320, currency: "GHS", label: "Lab", badge: "Best value" },
 ];
 
-export const DAILY_EARN_CAP = 3;
-export const WEEKLY_EARN_CAP = 10;
+export const DAILY_EARN_CAP = 5;
+export const WEEKLY_EARN_CAP = 20;
 export const EARNED_EXPIRY_DAYS = 30;
 
 export function canAfford(
