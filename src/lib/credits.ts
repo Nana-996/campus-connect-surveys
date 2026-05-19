@@ -35,7 +35,7 @@ export const TIERS: Record<Tier, {
   pro: {
     label: "Pro",
     tagline: "Serious research mode",
-    cost: 50,
+    cost: 40,
     paidRequired: true,
     responseGoal: 1000,
     features: ["Top placement 7 days", "Up to 1,000 responses", "Instant publish", "Analytics export"],
