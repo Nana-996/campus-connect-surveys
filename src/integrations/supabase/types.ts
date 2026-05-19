@@ -153,6 +153,7 @@ export type Database = {
           paid_credits: number
           university_domain: string
           university_name: string
+          user_type: string
           year: string
         }
         Insert: {
@@ -167,6 +168,7 @@ export type Database = {
           paid_credits?: number
           university_domain?: string
           university_name?: string
+          user_type?: string
           year?: string
         }
         Update: {
@@ -181,6 +183,7 @@ export type Database = {
           paid_credits?: number
           university_domain?: string
           university_name?: string
+          user_type?: string
           year?: string
         }
         Relationships: []
@@ -287,6 +290,7 @@ export type Database = {
       }
       surveys: {
         Row: {
+          allow_general_respondents: boolean
           boosted_until: string | null
           created_at: string
           creator_id: string
@@ -305,6 +309,7 @@ export type Database = {
           university_domain: string
         }
         Insert: {
+          allow_general_respondents?: boolean
           boosted_until?: string | null
           created_at?: string
           creator_id: string
@@ -323,6 +328,7 @@ export type Database = {
           university_domain: string
         }
         Update: {
+          allow_general_respondents?: boolean
           boosted_until?: string | null
           created_at?: string
           creator_id?: string
@@ -377,6 +383,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_academic_domain: { Args: { _domain: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "user"
