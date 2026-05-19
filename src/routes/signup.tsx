@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { ArrowUpRight, GraduationCap, Globe2 } from "lucide-react";
+import { ResendVerification } from "@/components/ResendVerification";
 
 export const Route = createFileRoute("/signup")({
   component: SignupPage,
@@ -176,6 +177,10 @@ function SignupPage() {
             Already have an account?{" "}
             <Link to="/auth" className="font-semibold text-foreground underline">Log in</Link>
           </p>
+          <div className="mt-3 text-center text-xs text-muted-foreground">
+            Didn't get the verification email?{" "}
+            <ResendVerification defaultEmail={email} />
+          </div>
         </div>
       </div>
     </div>

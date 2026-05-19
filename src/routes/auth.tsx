@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ArrowUpRight, Sparkles } from "lucide-react";
+import { ResendVerification } from "@/components/ResendVerification";
 
 const searchSchema = z.object({ mode: z.enum(["login", "signup"]).optional() });
 
@@ -120,6 +121,10 @@ function AuthPage() {
             New here?{" "}
             <Link to="/signup" className="font-semibold text-foreground underline">Create an account</Link>
           </p>
+          <div className="mt-4 text-center text-xs text-muted-foreground">
+            Didn't get the verification email?{" "}
+            <ResendVerification defaultEmail={email} />
+          </div>
 
         </div>
       </div>
