@@ -93,6 +93,14 @@ function SurveyPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!survey) return;
+    if (new Date(survey.expires_at) <= new Date()) {
+      toast.error("This survey has closed.");
+      return;
+    }
+    if (survey.response_count >= survey.response_goal) {
+      toast.error("This survey has reached its response goal.");
+      return;
+    }
     for (const q of survey.questions) {
       if (!answers[q.id] || answers[q.id].toString().trim() === "") {
         toast.error("Please answer all questions.");
