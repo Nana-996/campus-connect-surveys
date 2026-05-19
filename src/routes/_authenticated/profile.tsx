@@ -11,7 +11,7 @@ export const Route = createFileRoute("/_authenticated/profile")({
 });
 
 function Profile() {
-  const { profile, user } = useAuth();
+  const { profile, user, isPreviewMode } = useAuth();
   const [responses, setResponses] = useState<any[]>([]);
   const [ledger, setLedger] = useState<any[]>([]);
   const [caps, setCaps] = useState<{ day_count: number; week_count: number } | null>(null);
@@ -19,6 +19,8 @@ function Profile() {
 
   useEffect(() => {
     if (!user) return;
+    if (isPreviewMode) return;
+    let active = true;
     (async () => {
       const [resps, led, c] = await Promise.all([
         supabase.from("survey_responses").select("id, created_at, survey:surveys(title)")
@@ -27,6 +29,10 @@ function Profile() {
           .order("created_at", { ascending: false }).limit(15),
         supabase.from("earning_caps").select("day_count, week_count").eq("user_id", user.id).maybeSingle(),
       ]);
+      if (!active) return;
+      if (resps.error) console.warn("Profile responses request failed.", resps.error);
+      if (led.error) console.warn("Credit ledger request failed.", led.error);
+      if (c.error) console.warn("Earning caps request failed.", c.error);
       setResponses(resps.data ?? []);
       setLedger(led.data ?? []);
       setCaps(c.data ?? { day_count: 0, week_count: 0 });
@@ -35,7 +41,8 @@ function Profile() {
         .sort((a: any, b: any) => +new Date(a.expires_at) - +new Date(b.expires_at))[0];
       setNextExpiry(earliest?.expires_at ?? null);
     })();
-  }, [user]);
+    return () => { active = false; };
+  }, [user, isPreviewMode]);
 
   if (!profile) return null;
   const total = profile.earned_credits + profile.paid_credits;
