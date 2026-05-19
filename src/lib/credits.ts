@@ -42,11 +42,24 @@ export const TIERS: Record<Tier, {
   },
 };
 
-export const PACKS = [
+export type UserType = "student" | "general";
+
+// General users pay 1.5× student price (rounded to nearest GHS).
+export const GENERAL_PRICE_MULTIPLIER = 1.5;
+
+const STUDENT_PACKS = [
   { id: "starter" as const, credits: 20, price: 20, currency: "GHS", label: "Starter" },
   { id: "researcher" as const, credits: 50, price: 35, currency: "GHS", label: "Researcher", badge: "Most popular" },
   { id: "lab" as const, credits: 200, price: 100, currency: "GHS", label: "Lab", badge: "Best value" },
 ];
+
+export function packsFor(userType: UserType | undefined) {
+  const mult = userType === "general" ? GENERAL_PRICE_MULTIPLIER : 1;
+  return STUDENT_PACKS.map((p) => ({ ...p, price: Math.round(p.price * mult) }));
+}
+
+export const PACKS = STUDENT_PACKS;
+
 
 export const DAILY_EARN_CAP = 3;
 export const WEEKLY_EARN_CAP = 20;

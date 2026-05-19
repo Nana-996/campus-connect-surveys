@@ -36,6 +36,7 @@ function Create() {
   const [targetYear, setTargetYear] = useState("");
   const [responseGoal, setResponseGoal] = useState<string>("");
   const [expiresAt, setExpiresAt] = useState<string>("");
+  const [allowGeneral, setAllowGeneral] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([
     { id: crypto.randomUUID(), type: "text", text: "" },
   ]);
@@ -75,6 +76,7 @@ function Create() {
           target_department: tier === "basic" ? null : (targetDept || null),
           target_year: tier === "basic" ? null : (targetYear || null),
           response_goal: goalNum,
+          allow_general_respondents: allowGeneral,
           ...(expiresIso ? { expires_at: expiresIso } : {}),
         })
         .select("id")
@@ -220,9 +222,25 @@ function Create() {
                   value={expiresAt}
                   onChange={(e) => setExpiresAt(e.target.value)}
                 />
-              </div>
             </div>
           </div>
+
+          <label className="flex items-start gap-3 rounded-xl border border-foreground/15 bg-background/40 p-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={allowGeneral}
+              onChange={(e) => setAllowGeneral(e.target.checked)}
+              className="mt-0.5 h-4 w-4 accent-primary"
+            />
+            <div>
+              <p className="text-xs font-semibold">Open to anyone (beyond my campus)</p>
+              <p className="text-[11px] text-muted-foreground">
+                General (non-student) users will be able to find and answer this survey.
+              </p>
+            </div>
+          </label>
+        </div>
+
         </div>
 
 

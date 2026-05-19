@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Zap, Check, ArrowLeft, ShieldCheck } from "lucide-react";
-import { PACKS } from "@/lib/credits";
+import { packsFor } from "@/lib/credits";
 import { initializePaystackPayment, verifyPaystackPayment } from "@/lib/payments.functions";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -96,7 +96,7 @@ function BuyPage() {
       )}
 
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
-        {PACKS.map((p) => {
+        {packsFor(profile?.user_type).map((p) => {
           const per = (p.price / p.credits).toFixed(2);
           const isFeatured = p.badge === "Most popular";
           return (
