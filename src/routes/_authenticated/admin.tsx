@@ -1,46 +1,45 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/lib/auth";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { ShieldAlert, Check } from "lucide-react";
+import { ShieldAlert, Check, Trash2, Power, UserPlus, UserMinus, Flag, FlagOff, Plus, Download } from "lucide-react";
+import {
+  getAdminMetrics,
+  listAdminUsers,
+  grantCreditsToUser,
+  setUserFlag,
+  setUserAdminRole,
+  listAdminSurveys,
+  setSurveyActive,
+  deleteSurvey,
+  listDisposableDomains,
+  addDisposableDomain,
+  removeDisposableDomain,
+  listOpenFlags,
+  resolveFlag,
+  listPayments,
+} from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: Admin,
 });
 
 function Admin() {
-  const { user } = useAuth();
-  const [allowed, setAllowed] = useState<boolean | null>(null);
-  const [flags, setFlags] = useState<any[]>([]);
-  const [txs, setTxs] = useState<any[]>([]);
+  const fetchMetrics = useServerFn(getAdminMetrics);
+  const { data: metrics, isLoading, error } = useQuery({
+    queryKey: ["admin", "metrics"],
+    queryFn: () => fetchMetrics(),
+    retry: false,
+  });
 
-  useEffect(() => {
-    if (!user) return;
-    (async () => {
-      const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").maybeSingle();
-      const ok = !!data;
-      setAllowed(ok);
-      if (ok) {
-        const [{ data: f }, { data: t }] = await Promise.all([
-          supabase.from("review_flags").select("*").eq("resolved", false).order("created_at", { ascending: false }),
-          supabase.from("payment_transactions").select("*").order("created_at", { ascending: false }).limit(50),
-        ]);
-        setFlags(f ?? []);
-        setTxs(t ?? []);
-      }
-    })();
-  }, [user]);
-
-  const resolve = async (id: string) => {
-    await supabase.from("review_flags").update({ resolved: true }).eq("id", id);
-    setFlags((f) => f.filter((x) => x.id !== id));
-    toast.success("Flag cleared");
-  };
-
-  if (allowed === null) return <p className="text-sm text-muted-foreground">Loading…</p>;
-  if (!allowed) {
+  if (isLoading) return <p className="text-sm text-muted-foreground">Loading…</p>;
+  if (error) {
     return (
       <div className="rounded-3xl border border-foreground/15 bg-card p-8 text-center">
         <ShieldAlert className="mx-auto h-8 w-8 text-destructive" />
@@ -51,72 +50,328 @@ function Admin() {
   }
 
   return (
+    <div className="space-y-8">
+      <div>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Admin</p>
+        <h1 className="mt-1 font-serif text-5xl leading-[0.95]">Control <em className="text-primary">center.</em></h1>
+      </div>
+
+      {metrics && (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <Kpi label="Users" value={metrics.users} />
+          <Kpi label="Active surveys" value={`${metrics.activeSurveys}/${metrics.surveys}`} />
+          <Kpi label="Responses (24h)" value={`${metrics.responses24h} / ${metrics.responses}`} />
+          <Kpi label="Open flags" value={metrics.openFlags} accent={metrics.openFlags > 0} />
+          <Kpi label="Revenue" value={`${metrics.currency} ${(metrics.revenueMinor / 100).toFixed(2)}`} />
+          <Kpi label="Credits sold" value={metrics.creditsSold} />
+        </div>
+      )}
+
+      <Tabs defaultValue="users">
+        <TabsList className="flex flex-wrap">
+          <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsTrigger value="surveys">Surveys</TabsTrigger>
+          <TabsTrigger value="flags">Flags</TabsTrigger>
+          <TabsTrigger value="payments">Payments</TabsTrigger>
+          <TabsTrigger value="domains">Blocked domains</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="users" className="mt-4"><UsersPanel /></TabsContent>
+        <TabsContent value="surveys" className="mt-4"><SurveysPanel /></TabsContent>
+        <TabsContent value="flags" className="mt-4"><FlagsPanel /></TabsContent>
+        <TabsContent value="payments" className="mt-4"><PaymentsPanel /></TabsContent>
+        <TabsContent value="domains" className="mt-4"><DomainsPanel /></TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
+function Kpi({ label, value, accent }: { label: string; value: string | number; accent?: boolean }) {
+  return (
+    <div className={`rounded-2xl border p-4 ${accent ? "border-destructive/40 bg-destructive/5" : "border-foreground/15 bg-card"}`}>
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
+      <p className="mt-1 font-serif text-2xl">{value}</p>
+    </div>
+  );
+}
+
+// ---------------- Users ----------------
+function UsersPanel() {
+  const qc = useQueryClient();
+  const fetchUsers = useServerFn(listAdminUsers);
+  const grant = useServerFn(grantCreditsToUser);
+  const flag = useServerFn(setUserFlag);
+  const setRole = useServerFn(setUserAdminRole);
+  const [search, setSearch] = useState("");
+  const { data: users = [] } = useQuery({
+    queryKey: ["admin", "users", search],
+    queryFn: () => fetchUsers({ data: { search: search || undefined } }),
+  });
+
+  const refresh = () => qc.invalidateQueries({ queryKey: ["admin"] });
+
+  return (
     <div>
-      <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Admin</p>
-      <h1 className="mt-1 font-serif text-5xl leading-[0.95]">Review <em className="text-primary">queue.</em></h1>
-
-      {flags.length === 0 ? (
-        <div className="mt-8 rounded-3xl border border-dashed border-foreground/30 bg-card p-10 text-center">
-          <p className="font-serif text-2xl">No open flags.</p>
-        </div>
-      ) : (
-        <ul className="mt-8 space-y-3">
-          {flags.map((f) => (
-            <li key={f.id} className="rounded-2xl border border-foreground/15 bg-card p-5">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-destructive">{f.type}</p>
-                  <p className="mt-1 font-mono text-xs">user: {f.user_id}</p>
-                  <pre className="mt-2 overflow-x-auto rounded bg-secondary p-2 text-[11px]">{JSON.stringify(f.details, null, 2)}</pre>
-                  <p className="mt-1 text-[11px] text-muted-foreground">{new Date(f.created_at).toLocaleString()}</p>
-                </div>
-                <Button size="sm" variant="outline" onClick={() => resolve(f.id)}>
-                  <Check className="mr-1 h-3.5 w-3.5" /> Clear
-                </Button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <h2 className="mt-12 font-serif text-3xl">Transactions</h2>
-      <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Latest 50 Paystack payments</p>
-      {txs.length === 0 ? (
-        <div className="mt-4 rounded-2xl border border-dashed border-foreground/30 bg-card p-6 text-center text-sm text-muted-foreground">
-          No transactions yet.
-        </div>
-      ) : (
-        <div className="mt-4 overflow-x-auto rounded-2xl border border-foreground/15 bg-card">
-          <table className="w-full text-xs">
-            <thead className="bg-secondary text-left uppercase tracking-wider">
-              <tr>
-                <th className="px-3 py-2">When</th>
-                <th className="px-3 py-2">Reference</th>
-                <th className="px-3 py-2">User</th>
-                <th className="px-3 py-2">Amount</th>
-                <th className="px-3 py-2">Credits</th>
-                <th className="px-3 py-2">Status</th>
+      <div className="mb-3 flex gap-2">
+        <Input placeholder="Search name, university, domain…" value={search} onChange={(e) => setSearch(e.target.value)} className="h-10 rounded-xl" />
+      </div>
+      <div className="overflow-x-auto rounded-2xl border border-foreground/15 bg-card">
+        <table className="w-full text-xs">
+          <thead className="bg-secondary text-left uppercase tracking-wider">
+            <tr>
+              <th className="px-3 py-2">Name</th>
+              <th className="px-3 py-2">Type</th>
+              <th className="px-3 py-2">University</th>
+              <th className="px-3 py-2">Credits (E/P)</th>
+              <th className="px-3 py-2">Status</th>
+              <th className="px-3 py-2 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((u: any) => (
+              <tr key={u.id} className="border-t border-foreground/10">
+                <td className="px-3 py-2">
+                  <div className="font-medium">{u.full_name || "—"}</div>
+                  <div className="font-mono text-[10px] text-muted-foreground">{u.id.slice(0, 8)}…</div>
+                </td>
+                <td className="px-3 py-2 capitalize">{u.user_type}</td>
+                <td className="px-3 py-2">
+                  <div>{u.university_name}</div>
+                  <div className="text-[10px] text-muted-foreground">{u.university_domain}</div>
+                </td>
+                <td className="px-3 py-2">{u.earned_credits} / {u.paid_credits}</td>
+                <td className="px-3 py-2">
+                  {u.is_flagged && <Badge variant="destructive" className="mr-1">Flagged</Badge>}
+                  {u.roles?.includes("admin") && <Badge>Admin</Badge>}
+                </td>
+                <td className="px-3 py-2">
+                  <div className="flex flex-wrap justify-end gap-1">
+                    <Button size="sm" variant="outline" onClick={async () => {
+                      const v = prompt("Grant earned credits (negative to deduct):", "5");
+                      if (!v) return;
+                      const n = parseInt(v, 10);
+                      if (!Number.isFinite(n)) return;
+                      await grant({ data: { userId: u.id, wallet: "earned", amount: n, reason: "manual" } });
+                      toast.success("Credits updated"); refresh();
+                    }}>+E</Button>
+                    <Button size="sm" variant="outline" onClick={async () => {
+                      const v = prompt("Grant paid credits (negative to deduct):", "10");
+                      if (!v) return;
+                      const n = parseInt(v, 10);
+                      if (!Number.isFinite(n)) return;
+                      await grant({ data: { userId: u.id, wallet: "paid", amount: n, reason: "manual" } });
+                      toast.success("Credits updated"); refresh();
+                    }}>+P</Button>
+                    <Button size="sm" variant="outline" onClick={async () => {
+                      const reason = u.is_flagged ? undefined : prompt("Flag reason:", "abuse") ?? "abuse";
+                      await flag({ data: { userId: u.id, flagged: !u.is_flagged, reason } });
+                      toast.success(u.is_flagged ? "Unflagged" : "Flagged"); refresh();
+                    }}>
+                      {u.is_flagged ? <FlagOff className="h-3 w-3" /> : <Flag className="h-3 w-3" />}
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={async () => {
+                      const isAdmin = u.roles?.includes("admin");
+                      if (!confirm(isAdmin ? "Revoke admin role?" : "Grant admin role?")) return;
+                      await setRole({ data: { userId: u.id, grant: !isAdmin } });
+                      toast.success("Role updated"); refresh();
+                    }}>
+                      {u.roles?.includes("admin") ? <UserMinus className="h-3 w-3" /> : <UserPlus className="h-3 w-3" />}
+                    </Button>
+                  </div>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {txs.map((t) => (
-                <tr key={t.id} className="border-t border-foreground/10">
-                  <td className="px-3 py-2 whitespace-nowrap">{new Date(t.created_at).toLocaleString()}</td>
-                  <td className="px-3 py-2 font-mono">{t.reference}</td>
-                  <td className="px-3 py-2 font-mono">{t.user_id.slice(0, 8)}…</td>
-                  <td className="px-3 py-2">{t.currency} {(t.amount_minor / 100).toFixed(2)}</td>
-                  <td className="px-3 py-2">{t.credits}</td>
-                  <td className={`px-3 py-2 font-semibold uppercase ${
-                    t.status === "success" ? "text-primary" :
-                    t.status === "failed" || t.status === "abandoned" ? "text-destructive" :
-                    "text-muted-foreground"
-                  }`}>{t.status}{t.failure_reason ? ` · ${t.failure_reason}` : ""}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+            ))}
+            {users.length === 0 && (
+              <tr><td colSpan={6} className="px-3 py-6 text-center text-muted-foreground">No users.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// ---------------- Surveys ----------------
+function SurveysPanel() {
+  const qc = useQueryClient();
+  const fetchSurveys = useServerFn(listAdminSurveys);
+  const setActive = useServerFn(setSurveyActive);
+  const remove = useServerFn(deleteSurvey);
+  const { data: surveys = [] } = useQuery({ queryKey: ["admin", "surveys"], queryFn: () => fetchSurveys() });
+  const refresh = () => qc.invalidateQueries({ queryKey: ["admin", "surveys"] });
+
+  return (
+    <div className="overflow-x-auto rounded-2xl border border-foreground/15 bg-card">
+      <table className="w-full text-xs">
+        <thead className="bg-secondary text-left uppercase tracking-wider">
+          <tr>
+            <th className="px-3 py-2">Title</th>
+            <th className="px-3 py-2">Tier</th>
+            <th className="px-3 py-2">University</th>
+            <th className="px-3 py-2">Responses</th>
+            <th className="px-3 py-2">Status</th>
+            <th className="px-3 py-2 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {surveys.map((s: any) => (
+            <tr key={s.id} className="border-t border-foreground/10">
+              <td className="px-3 py-2">{s.title}</td>
+              <td className="px-3 py-2 capitalize">{s.tier}</td>
+              <td className="px-3 py-2">{s.allow_general_respondents ? "Open" : s.university_domain}</td>
+              <td className="px-3 py-2">{s.response_count}/{s.response_goal}</td>
+              <td className="px-3 py-2">{s.is_active ? <Badge>Active</Badge> : <Badge variant="secondary">Inactive</Badge>}</td>
+              <td className="px-3 py-2">
+                <div className="flex justify-end gap-1">
+                  <Button size="sm" variant="outline" onClick={async () => {
+                    await setActive({ data: { surveyId: s.id, active: !s.is_active } });
+                    toast.success(s.is_active ? "Deactivated" : "Activated"); refresh();
+                  }}><Power className="h-3 w-3" /></Button>
+                  <Button size="sm" variant="outline" onClick={async () => {
+                    if (!confirm("Delete this survey and all its responses?")) return;
+                    await remove({ data: { surveyId: s.id } });
+                    toast.success("Deleted"); refresh();
+                  }}><Trash2 className="h-3 w-3" /></Button>
+                </div>
+              </td>
+            </tr>
+          ))}
+          {surveys.length === 0 && <tr><td colSpan={6} className="px-3 py-6 text-center text-muted-foreground">No surveys.</td></tr>}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// ---------------- Flags ----------------
+function FlagsPanel() {
+  const qc = useQueryClient();
+  const fetchFlags = useServerFn(listOpenFlags);
+  const resolve = useServerFn(resolveFlag);
+  const { data: flags = [] } = useQuery({ queryKey: ["admin", "flags"], queryFn: () => fetchFlags() });
+  if (flags.length === 0)
+    return <div className="rounded-2xl border border-dashed border-foreground/30 bg-card p-8 text-center text-sm text-muted-foreground">No open flags.</div>;
+  return (
+    <ul className="space-y-3">
+      {flags.map((f: any) => (
+        <li key={f.id} className="rounded-2xl border border-foreground/15 bg-card p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-destructive">{f.type}</p>
+              <p className="mt-1 font-mono text-xs">user: {f.user_id}</p>
+              <pre className="mt-1 overflow-x-auto rounded bg-secondary p-2 text-[11px]">{JSON.stringify(f.details, null, 2)}</pre>
+              <p className="mt-1 text-[11px] text-muted-foreground">{new Date(f.created_at).toLocaleString()}</p>
+            </div>
+            <Button size="sm" variant="outline" onClick={async () => {
+              await resolve({ data: { id: f.id } });
+              toast.success("Cleared");
+              qc.invalidateQueries({ queryKey: ["admin", "flags"] });
+            }}><Check className="mr-1 h-3 w-3" /> Clear</Button>
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+// ---------------- Payments ----------------
+function PaymentsPanel() {
+  const fetchPayments = useServerFn(listPayments);
+  const { data: txs = [] } = useQuery({ queryKey: ["admin", "payments"], queryFn: () => fetchPayments() });
+
+  const exportCsv = () => {
+    const headers = ["created_at", "reference", "user_id", "amount_minor", "currency", "credits", "status", "failure_reason"];
+    const lines = [headers.join(",")].concat(
+      txs.map((t: any) => headers.map((h) => JSON.stringify(t[h] ?? "")).join(",")),
+    );
+    const blob = new Blob([lines.join("\n")], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `payments-${new Date().toISOString().slice(0,10)}.csv`; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div>
+      <div className="mb-3 flex justify-end">
+        <Button size="sm" variant="outline" onClick={exportCsv} disabled={txs.length === 0}>
+          <Download className="mr-1 h-3 w-3" /> Export CSV
+        </Button>
+      </div>
+      <div className="overflow-x-auto rounded-2xl border border-foreground/15 bg-card">
+        <table className="w-full text-xs">
+          <thead className="bg-secondary text-left uppercase tracking-wider">
+            <tr>
+              <th className="px-3 py-2">When</th>
+              <th className="px-3 py-2">Reference</th>
+              <th className="px-3 py-2">User</th>
+              <th className="px-3 py-2">Amount</th>
+              <th className="px-3 py-2">Credits</th>
+              <th className="px-3 py-2">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {txs.map((t: any) => (
+              <tr key={t.id} className="border-t border-foreground/10">
+                <td className="px-3 py-2 whitespace-nowrap">{new Date(t.created_at).toLocaleString()}</td>
+                <td className="px-3 py-2 font-mono">{t.reference}</td>
+                <td className="px-3 py-2 font-mono">{t.user_id.slice(0, 8)}…</td>
+                <td className="px-3 py-2">{t.currency} {(t.amount_minor / 100).toFixed(2)}</td>
+                <td className="px-3 py-2">{t.credits}</td>
+                <td className={`px-3 py-2 font-semibold uppercase ${
+                  t.status === "success" ? "text-primary" :
+                  t.status === "failed" || t.status === "abandoned" ? "text-destructive" :
+                  "text-muted-foreground"
+                }`}>{t.status}{t.failure_reason ? ` · ${t.failure_reason}` : ""}</td>
+              </tr>
+            ))}
+            {txs.length === 0 && <tr><td colSpan={6} className="px-3 py-6 text-center text-muted-foreground">No transactions.</td></tr>}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// ---------------- Domains ----------------
+function DomainsPanel() {
+  const qc = useQueryClient();
+  const fetchDomains = useServerFn(listDisposableDomains);
+  const add = useServerFn(addDisposableDomain);
+  const remove = useServerFn(removeDisposableDomain);
+  const [domain, setDomain] = useState("");
+  const { data: domains = [] } = useQuery({ queryKey: ["admin", "domains"], queryFn: () => fetchDomains() });
+  const refresh = () => qc.invalidateQueries({ queryKey: ["admin", "domains"] });
+
+  return (
+    <div>
+      <form
+        className="mb-3 flex gap-2"
+        onSubmit={async (e) => {
+          e.preventDefault();
+          if (!domain) return;
+          try {
+            await add({ data: { domain } });
+            toast.success("Domain blocked");
+            setDomain(""); refresh();
+          } catch (err: any) { toast.error(err.message); }
+        }}
+      >
+        <Input placeholder="e.g. mailinator.com" value={domain} onChange={(e) => setDomain(e.target.value)} className="h-10 rounded-xl" />
+        <Button type="submit"><Plus className="mr-1 h-3 w-3" /> Block</Button>
+      </form>
+      <ul className="divide-y divide-foreground/10 rounded-2xl border border-foreground/15 bg-card">
+        {domains.map((d: any) => (
+          <li key={d.domain} className="flex items-center justify-between px-4 py-2 text-sm">
+            <span className="font-mono">{d.domain}</span>
+            <Button size="sm" variant="outline" onClick={async () => {
+              await remove({ data: { domain: d.domain } });
+              toast.success("Removed"); refresh();
+            }}><Trash2 className="h-3 w-3" /></Button>
+          </li>
+        ))}
+        {domains.length === 0 && <li className="px-4 py-6 text-center text-sm text-muted-foreground">No blocked domains.</li>}
+      </ul>
     </div>
   );
 }
