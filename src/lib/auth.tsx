@@ -31,9 +31,9 @@ type AuthCtx = {
 
 const Ctx = createContext<AuthCtx | undefined>(undefined);
 const PREVIEW_MODE_KEY = "campusverify-preview-mode";
-const previewUser = { id: "preview-student", email: "student@campus.edu" } as User;
+const previewUser = { id: "00000000-0000-4000-8000-000000000001", email: "student@campus.edu" } as User;
 const previewProfile: Profile = {
-  id: "preview-student",
+  id: "00000000-0000-4000-8000-000000000001",
   full_name: "Preview Student",
   university_name: "Campus University",
   university_domain: "campus.edu",
@@ -41,6 +41,23 @@ const previewProfile: Profile = {
   year: "Year 3",
   earned_credits: 4,
   paid_credits: 12,
+};
+
+const fallbackProfileFor = (authUser: User): Profile => {
+  const emailDomain = authUser.email?.split("@")[1]?.toLowerCase() ?? "";
+  const metadata = authUser.user_metadata ?? {};
+  const userType = metadata.user_type === "general" ? "general" : "student";
+  return {
+    id: authUser.id,
+    full_name: metadata.full_name ?? authUser.email?.split("@")[0] ?? "",
+    university_name: metadata.university_name ?? (userType === "general" ? "General" : `${emailDomain.split(".")[0] || "Campus"} University`),
+    university_domain: emailDomain,
+    department: userType === "student" ? metadata.department ?? "" : "",
+    year: userType === "student" ? metadata.year ?? "" : "",
+    earned_credits: 0,
+    paid_credits: 0,
+    user_type: userType,
+  };
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -57,7 +74,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .select("*")
       .eq("id", authUser.id)
       .maybeSingle();
-    if (error) throw error;
+    if (error) {
+      console.warn("Profile lookup failed; continuing with a temporary profile.", error);
+      setProfile(fallbackProfileFor(authUser));
+      return;
+    }
     if (data) {
       setProfile(data as Profile);
       return;
@@ -97,7 +118,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setProfile(retry as Profile);
         return;
       }
-      throw retryError ?? createError;
+      console.warn("Profile creation failed; continuing with a temporary profile.", retryError ?? createError);
+      setProfile(fallbackProfileFor(authUser));
+      return;
     }
     setProfile((created as unknown as Profile | null) ?? null);
   };
@@ -147,12 +170,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isPreviewMode,
     loading,
     signIn: async (email, password) => {
-      localStorage.removeItem(PREVIEW_MODE_KEY);
-      setIsPreviewMode(false);
-      setProfile(null);
       setProfileError(null);
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
+      localStorage.removeItem(PREVIEW_MODE_KEY);
+      setIsPreviewMode(false);
       setSession(data.session);
       if (data.user) await loadProfile(data.user);
     },
