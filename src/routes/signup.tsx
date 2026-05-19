@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { ArrowUpRight, GraduationCap, Globe2 } from "lucide-react";
+import { ResendVerification } from "@/components/ResendVerification";
 
 export const Route = createFileRoute("/signup")({
   component: SignupPage,
