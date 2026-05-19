@@ -76,6 +76,7 @@ function Create() {
           target_department: tier === "basic" ? null : (targetDept || null),
           target_year: tier === "basic" ? null : (targetYear || null),
           response_goal: goalNum,
+          allow_general_respondents: allowGeneral,
           ...(expiresIso ? { expires_at: expiresIso } : {}),
         })
         .select("id")
