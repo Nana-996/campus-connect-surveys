@@ -51,7 +51,8 @@ function Feed() {
         .gt("expires_at", new Date().toISOString())
         .neq("creator_id", user!.id)
         .order("created_at", { ascending: false });
-      const rows = (data as unknown as Survey[]) ?? [];
+      const rows = ((data as unknown as (Survey & { response_goal: number })[]) ?? [])
+        .filter((s) => s.response_count < (s.response_goal ?? Infinity));
       // Boosted (still active) first, then newest
       rows.sort((a, b) => {
         const aB = a.boosted_until && new Date(a.boosted_until) > new Date() ? 1 : 0;
