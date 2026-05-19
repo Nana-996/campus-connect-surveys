@@ -20,21 +20,31 @@ export const Route = createFileRoute("/_authenticated/my-surveys")({
 });
 
 function MySurveys() {
-  const { user } = useAuth();
+  const { user, isPreviewMode } = useAuth();
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!user) return;
+    if (isPreviewMode) {
+      setSurveys([]);
+      setLoading(false);
+      return;
+    }
+    let active = true;
     (async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("surveys")
         .select("*")
-        .eq("creator_id", user!.id)
+        .eq("creator_id", user.id)
         .order("created_at", { ascending: false });
+      if (!active) return;
+      if (error) console.warn("My surveys request failed.", error);
       setSurveys((data as unknown as Survey[]) ?? []);
       setLoading(false);
     })();
-  }, [user]);
+    return () => { active = false; };
+  }, [user, isPreviewMode]);
 
   return (
     <div>
