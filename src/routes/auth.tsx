@@ -18,6 +18,7 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
+  const search = Route.useSearch();
   const { user, loading, signIn, enterPreviewMode } = useAuth();
 
   const [email, setEmail] = useState("");
@@ -26,7 +27,8 @@ function AuthPage() {
 
   useEffect(() => {
     if (!loading && user) navigate({ to: "/feed" });
-  }, [user, loading, navigate]);
+    else if (!loading && search.mode === "signup") navigate({ to: "/signup", replace: true });
+  }, [user, loading, search.mode, navigate]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
