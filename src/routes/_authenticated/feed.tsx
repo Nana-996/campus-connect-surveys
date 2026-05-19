@@ -32,7 +32,7 @@ const TONES = [
 ];
 
 function Feed() {
-  const { user, profile } = useAuth();
+  const { user, profile, isPreviewMode } = useAuth();
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [answered, setAnswered] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
@@ -43,36 +43,43 @@ function Feed() {
   const [campusYears, setCampusYears] = useState<string[]>([]);
 
   useEffect(() => {
-    (async () => {
-      const { data } = await supabase
-        .from("surveys")
-        .select("*")
-        .eq("is_active", true)
-        .gt("expires_at", new Date().toISOString())
-        .neq("creator_id", user!.id)
-        .order("created_at", { ascending: false });
-      const rows = ((data as unknown as (Survey & { response_goal: number })[]) ?? [])
-        .filter((s) => s.response_count < (s.response_goal ?? Infinity));
-      // Boosted (still active) first, then newest
-      rows.sort((a, b) => {
-        const aB = a.boosted_until && new Date(a.boosted_until) > new Date() ? 1 : 0;
-        const bB = b.boosted_until && new Date(b.boosted_until) > new Date() ? 1 : 0;
-        return bB - aB;
-      });
-      setSurveys(rows);
-      const { data: resps } = await supabase
-        .from("survey_responses")
-        .select("survey_id")
-        .eq("respondent_id", user!.id);
-      setAnswered(new Set((resps ?? []).map((r: any) => r.survey_id)));
-      const { data: peers } = await supabase
-        .from("profiles")
-        .select("department, year");
-      setCampusDepts(Array.from(new Set((peers ?? []).map((p: any) => p.department).filter(Boolean))) as string[]);
-      setCampusYears(Array.from(new Set((peers ?? []).map((p: any) => p.year).filter(Boolean))) as string[]);
+    if (!user) return;
+    if (isPreviewMode) {
+      setSurveys([]);
+      setAnswered(new Set());
+      setCampusDepts([profile?.department].filter(Boolean) as string[]);
+      setCampusYears([profile?.year].filter(Boolean) as string[]);
       setLoading(false);
+      return;
+    }
+    let active = true;
+    (async () => {
+      try {
+        const [{ data, error }, { data: resps, error: respsError }, { data: peers, error: peersError }] = await Promise.all([
+          supabase.from("surveys").select("*").eq("is_active", true).gt("expires_at", new Date().toISOString()).neq("creator_id", user.id).order("created_at", { ascending: false }),
+          supabase.from("survey_responses").select("survey_id").eq("respondent_id", user.id),
+          supabase.from("profiles").select("department, year"),
+        ]);
+        if (!active) return;
+        if (error) console.warn("Survey feed request failed.", error);
+        if (respsError) console.warn("Answered-surveys request failed.", respsError);
+        if (peersError) console.warn("Campus filters request failed.", peersError);
+        const rows = ((data as unknown as (Survey & { response_goal: number })[]) ?? []).filter((s) => s.response_count < (s.response_goal ?? Infinity));
+        rows.sort((a, b) => {
+          const aB = a.boosted_until && new Date(a.boosted_until) > new Date() ? 1 : 0;
+          const bB = b.boosted_until && new Date(b.boosted_until) > new Date() ? 1 : 0;
+          return bB - aB;
+        });
+        setSurveys(rows);
+        setAnswered(new Set((resps ?? []).map((r: any) => r.survey_id)));
+        setCampusDepts(Array.from(new Set((peers ?? []).map((p: any) => p.department).filter(Boolean))) as string[]);
+        setCampusYears(Array.from(new Set((peers ?? []).map((p: any) => p.year).filter(Boolean))) as string[]);
+      } finally {
+        if (active) setLoading(false);
+      }
     })();
-  }, [user]);
+    return () => { active = false; };
+  }, [user, isPreviewMode, profile?.department, profile?.year]);
 
   // Merge cohort options from peers AND any targets surveys already use
   const departments = Array.from(new Set([
