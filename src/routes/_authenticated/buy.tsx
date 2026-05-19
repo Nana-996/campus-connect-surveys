@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Zap, Check, ArrowLeft, ShieldCheck } from "lucide-react";
-import { PACKS } from "@/lib/credits";
+import { packsFor } from "@/lib/credits";
 import { initializePaystackPayment, verifyPaystackPayment } from "@/lib/payments.functions";
 import { toast } from "sonner";
 import { z } from "zod";
