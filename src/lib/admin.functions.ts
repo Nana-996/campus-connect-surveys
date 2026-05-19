@@ -93,7 +93,8 @@ export const grantCreditsToUser = createServerFn({ method: "POST" })
     if (e1 || !profile) throw new Error("User not found");
     const col = data.wallet === "paid" ? "paid_credits" : "earned_credits";
     const next = Math.max(0, (profile as any)[col] + data.amount);
-    const { error: e2 } = await supabaseAdmin.from("profiles").update({ [col]: next }).eq("id", data.userId);
+    const patch: Record<string, number> = { [col]: next };
+    const { error: e2 } = await supabaseAdmin.from("profiles").update(patch as any).eq("id", data.userId);
     if (e2) throw new Error(e2.message);
     await supabaseAdmin.from("credit_ledger").insert({
       user_id: data.userId,
