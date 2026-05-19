@@ -34,6 +34,8 @@ function Create() {
   const [description, setDescription] = useState("");
   const [targetDept, setTargetDept] = useState("");
   const [targetYear, setTargetYear] = useState("");
+  const [responseGoal, setResponseGoal] = useState<string>("");
+  const [expiresAt, setExpiresAt] = useState<string>("");
   const [questions, setQuestions] = useState<Question[]>([
     { id: crypto.randomUUID(), type: "text", text: "" },
   ]);
