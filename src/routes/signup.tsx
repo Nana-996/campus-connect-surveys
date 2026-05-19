@@ -29,6 +29,8 @@ function SignupPage() {
   const [department, setDepartment] = useState("");
   const [year, setYear] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [signupNotice, setSignupNotice] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && user) navigate({ to: "/feed" });
@@ -36,9 +38,13 @@ function SignupPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
+    setSignupNotice(null);
     const domain = email.split("@")[1]?.toLowerCase() ?? "";
     if (userType === "student" && !ACADEMIC_RE.test(domain)) {
-      toast.error("Student accounts require a university email (.edu, .edu.xx or .ac.xx).");
+      const message = "Student accounts require a university email (.edu, .edu.xx or .ac.xx).";
+      setFormError(message);
+      toast.error(message);
       return;
     }
     setSubmitting(true);
@@ -57,10 +63,13 @@ function SignupPage() {
         },
       });
       if (error) throw error;
-      toast.success("Check your email to verify your account.");
-      navigate({ to: "/auth" });
+      setPassword("");
+      setSignupNotice(`We created the account for ${email}. Check your inbox and spam folder for the verification email, or use the resend button below.`);
+      toast.success("Account created. Check your email to verify your account.");
     } catch (err: any) {
-      toast.error(err.message ?? "Could not create account");
+      const message = err.message ?? "Could not create account";
+      setFormError(message);
+      toast.error(message);
     } finally {
       setSubmitting(false);
     }
@@ -166,6 +175,16 @@ function SignupPage() {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+            )}
+            {formError && (
+              <div className="rounded-2xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                {formError}
+              </div>
+            )}
+            {signupNotice && (
+              <div className="rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-foreground">
+                {signupNotice}
               </div>
             )}
             <Button type="submit" className="h-12 w-full rounded-full bg-primary text-base" disabled={submitting}>
