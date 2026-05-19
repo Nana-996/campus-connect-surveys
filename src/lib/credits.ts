@@ -44,11 +44,11 @@ export const TIERS: Record<Tier, {
 
 export const PACKS = [
   { id: "starter" as const, credits: 20, price: 20, currency: "GHS", label: "Starter" },
-  { id: "researcher" as const, credits: 100, price: 90, currency: "GHS", label: "Researcher", badge: "Most popular" },
-  { id: "lab" as const, credits: 400, price: 320, currency: "GHS", label: "Lab", badge: "Best value" },
+  { id: "researcher" as const, credits: 50, price: 90, currency: "GHS", label: "Researcher", badge: "Most popular" },
+  { id: "lab" as const, credits: 200, price: 320, currency: "GHS", label: "Lab", badge: "Best value" },
 ];
 
-export const DAILY_EARN_CAP = 5;
+export const DAILY_EARN_CAP = 3;
 export const WEEKLY_EARN_CAP = 20;
 export const EARNED_EXPIRY_DAYS = 30;
 
