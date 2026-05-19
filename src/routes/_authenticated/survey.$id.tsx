@@ -35,6 +35,8 @@ type Survey = {
   description: string;
   questions: Question[];
   response_count: number;
+  response_goal: number;
+  expires_at: string;
   target_department: string | null;
   target_year: string | null;
 };
