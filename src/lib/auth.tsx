@@ -20,8 +20,10 @@ type AuthCtx = {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
+  profileError: string | null;
   isPreviewMode: boolean;
   loading: boolean;
+  signIn: (email: string, password: string) => Promise<void>;
   enterPreviewMode: () => void;
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
@@ -44,15 +46,18 @@ const previewProfile: Profile = {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [profileError, setProfileError] = useState<string | null>(null);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const loadProfile = async (authUser: User) => {
-    const { data } = await supabase
+    setProfileError(null);
+    const { data, error } = await supabase
       .from("profiles")
       .select("*")
       .eq("id", authUser.id)
       .maybeSingle();
+    if (error) throw error;
     if (data) {
       setProfile(data as Profile);
       return;
@@ -66,7 +71,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         ? `${emailDomain.split(".")[0].replace(/^./, (c) => c.toUpperCase())} University`
         : "University");
 
-    const { data: created } = await supabase
+    const userType = metadata.user_type === "general" ? "general" : "student";
+    const { data: created, error: createError } = await supabase
       .from("profiles")
       .insert({
         id: authUser.id,
@@ -77,9 +83,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         year: metadata.year ?? "",
         earned_credits: 3,
         paid_credits: 0,
+        user_type: userType,
       })
       .select("*")
       .single();
+    if (createError) {
+      const { data: retry, error: retryError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", authUser.id)
+        .maybeSingle();
+      if (retry) {
+        setProfile(retry as Profile);
+        return;
+      }
+      throw retryError ?? createError;
+    }
     setProfile((created as unknown as Profile | null) ?? null);
   };
 
@@ -87,14 +106,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
       setSession(s);
       if (s?.user) {
-        setTimeout(() => loadProfile(s.user), 0);
+        setTimeout(() => {
+          loadProfile(s.user).catch((err) => {
+            setProfile(null);
+            setProfileError(err.message ?? "Could not load your profile.");
+          });
+        }, 0);
       } else {
         setProfile(null);
+        setProfileError(null);
       }
     });
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
-      if (data.session?.user) loadProfile(data.session.user).finally(() => setLoading(false));
+      if (data.session?.user) {
+        loadProfile(data.session.user)
+          .catch((err) => {
+            setProfile(null);
+            setProfileError(err.message ?? "Could not load your profile.");
+          })
+          .finally(() => setLoading(false));
+      }
       else {
         const previewEnabled = localStorage.getItem(PREVIEW_MODE_KEY) === "true";
         if (previewEnabled) {
@@ -111,10 +143,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user: session?.user ?? (isPreviewMode ? previewUser : null),
     session,
     profile,
+    profileError,
     isPreviewMode,
     loading,
+    signIn: async (email, password) => {
+      localStorage.removeItem(PREVIEW_MODE_KEY);
+      setIsPreviewMode(false);
+      setProfile(null);
+      setProfileError(null);
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      setSession(data.session);
+      if (data.user) await loadProfile(data.user);
+    },
     enterPreviewMode: () => {
       localStorage.setItem(PREVIEW_MODE_KEY, "true");
+      setSession(null);
+      setProfileError(null);
       setIsPreviewMode(true);
       setProfile(previewProfile);
     },
