@@ -48,6 +48,7 @@ function Feed() {
         .from("surveys")
         .select("*")
         .eq("is_active", true)
+        .gt("expires_at", new Date().toISOString())
         .neq("creator_id", user!.id)
         .order("created_at", { ascending: false });
       const rows = (data as unknown as Survey[]) ?? [];
