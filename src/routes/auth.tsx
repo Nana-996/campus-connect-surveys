@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ArrowUpRight, Sparkles } from "lucide-react";
+import { ResendVerification } from "@/components/ResendVerification";
 
 const searchSchema = z.object({ mode: z.enum(["login", "signup"]).optional() });
 
