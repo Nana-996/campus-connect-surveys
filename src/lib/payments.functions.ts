@@ -35,13 +35,16 @@ export const initializePaystackPayment = createServerFn({ method: "POST" })
     if (!secret) throw new Error("Payments not configured — missing PAYSTACK_SECRET_KEY");
 
     const { userId } = context;
-    const pack = PACKS[data.pack];
 
-    // Fetch user email for Paystack (required field)
+    // Fetch user email + user_type to apply the right pricing
     const { data: userRow, error: uErr } = await supabaseAdmin.auth.admin.getUserById(userId);
     if (uErr || !userRow?.user?.email) throw new Error("Could not read user email");
+    const { data: profileRow } = await supabaseAdmin
+      .from("profiles").select("user_type").eq("id", userId).maybeSingle();
+    const pack = priceFor(PACKS[data.pack], profileRow?.user_type ?? "student");
 
     const reference = `cv_${userId.slice(0, 8)}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
 
     // Pre-create the transaction row as pending
     const { error: insErr } = await supabaseAdmin.from("payment_transactions").insert({
