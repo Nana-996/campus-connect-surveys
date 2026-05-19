@@ -291,6 +291,7 @@ export type Database = {
           created_at: string
           creator_id: string
           description: string
+          expires_at: string
           id: string
           is_active: boolean
           paid_cost: number
@@ -308,6 +309,7 @@ export type Database = {
           created_at?: string
           creator_id: string
           description?: string
+          expires_at?: string
           id?: string
           is_active?: boolean
           paid_cost?: number
@@ -325,6 +327,7 @@ export type Database = {
           created_at?: string
           creator_id?: string
           description?: string
+          expires_at?: string
           id?: string
           is_active?: boolean
           paid_cost?: number
