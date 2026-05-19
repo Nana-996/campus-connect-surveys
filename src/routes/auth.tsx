@@ -121,6 +121,16 @@ function AuthPage() {
             New here?{" "}
             <Link to="/signup" className="font-semibold text-foreground underline">Create an account</Link>
           </p>
+          <div className="mt-4 text-center text-xs text-muted-foreground">
+            Didn't get the verification email?{" "}
+            <ResendVerification defaultEmail={email} />
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}
 
         </div>
       </div>
