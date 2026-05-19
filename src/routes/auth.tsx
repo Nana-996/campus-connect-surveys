@@ -24,6 +24,7 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && user) navigate({ to: "/feed" });
@@ -32,12 +33,17 @@ function AuthPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
     setSubmitting(true);
     try {
       await signIn(email, password);
       navigate({ to: "/feed" });
     } catch (err: any) {
-      toast.error(err.message ?? "Something went wrong");
+      const message = err.message === "Invalid login credentials"
+        ? "Those credentials did not match a verified account. If you just signed up, verify your email first or resend the verification email below."
+        : err.message ?? "Something went wrong";
+      setFormError(message);
+      toast.error(message);
     } finally {
       setSubmitting(false);
     }
@@ -101,6 +107,11 @@ function AuthPage() {
                 className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"
               />
             </div>
+            {formError && (
+              <div className="rounded-2xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                {formError}
+              </div>
+            )}
             <Button type="submit" className="h-12 w-full rounded-full bg-primary text-base" disabled={submitting}>
               {submitting ? "Please wait…" : "Log in"}
               <ArrowUpRight className="ml-1 h-4 w-4" />
