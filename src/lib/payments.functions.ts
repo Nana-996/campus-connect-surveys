@@ -6,11 +6,21 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 const PAYSTACK_BASE = "https://api.paystack.co";
 
 // Server-side source of truth for pack pricing (GHS, in pesewas = amount * 100).
+// Student prices; general users pay 1.5× (rounded to nearest cedi).
 const PACKS: Record<string, { credits: number; amount_minor: number; label: string }> = {
   starter: { credits: 20, amount_minor: 2000, label: "Starter" },       // GHS 20.00
   researcher: { credits: 50, amount_minor: 3500, label: "Researcher" }, // GHS 35.00
   lab: { credits: 200, amount_minor: 10000, label: "Lab" },             // GHS 100.00
 };
+
+const GENERAL_MULT = 1.5;
+function priceFor(pack: { credits: number; amount_minor: number; label: string }, userType: string) {
+  if (userType !== "general") return pack;
+  // Round to nearest 100 pesewas (1 GHS) to keep clean prices.
+  const scaled = Math.round((pack.amount_minor * GENERAL_MULT) / 100) * 100;
+  return { ...pack, amount_minor: scaled };
+}
+
 
 export const initializePaystackPayment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
