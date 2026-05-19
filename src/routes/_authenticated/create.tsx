@@ -60,6 +60,9 @@ function Create() {
     }
     setSubmitting(true);
     try {
+      const tierMax = TIERS[tier].responseGoal;
+      const goalNum = responseGoal ? Math.max(1, Math.min(tierMax, parseInt(responseGoal, 10))) : tierMax;
+      const expiresIso = expiresAt ? new Date(expiresAt).toISOString() : null;
       const { data, error } = await supabase
         .from("surveys")
         .insert({
@@ -71,7 +74,8 @@ function Create() {
           tier,
           target_department: tier === "basic" ? null : (targetDept || null),
           target_year: tier === "basic" ? null : (targetYear || null),
-          response_goal: TIERS[tier].responseGoal,
+          response_goal: goalNum,
+          ...(expiresIso ? { expires_at: expiresIso } : {}),
         })
         .select("id")
         .single();
