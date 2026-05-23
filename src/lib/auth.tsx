@@ -58,7 +58,7 @@ const fallbackProfileFor = (authUser: User): Profile => {
     university_domain: emailDomain,
     department: userType === "student" ? metadata.department ?? "" : "",
     year: userType === "student" ? metadata.year ?? "" : "",
-    earned_credits: 0,
+    earned_credits: userType === "student" ? 10 : 5,
     paid_credits: 0,
     user_type: userType,
   };
