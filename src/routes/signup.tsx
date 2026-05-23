@@ -45,9 +45,9 @@ function SignupPage() {
     e.preventDefault();
     setFormError(null);
     setSignupNotice(null);
-    const domain = email.split("@")[1]?.toLowerCase() ?? "";
+    const domain = email.trim().split("@")[1]?.toLowerCase().trim() ?? "";
     if (userType === "student" && !ACADEMIC_RE.test(domain)) {
-      const message = "Student accounts require a university email (.edu, .edu.xx or .ac.xx).";
+      const message = `"${domain}" isn't recognized as a university domain. Use an academic email ending in .edu, .edu.xx (e.g. .edu.gh, .edu.ng), or .ac.xx (e.g. .ac.uk).`;
       setFormError(message);
       toast.error(message);
       return;
