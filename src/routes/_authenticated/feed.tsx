@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Users, Filter, ArrowUpRight, Sparkles } from "lucide-react";
 
-import { tagLabel, ageLabel } from "@/lib/interests";
+import { tagLabel, ageLabel, AGE_RANGES, COUNTRIES, INTEREST_TAGS } from "@/lib/interests";
 
 type Survey = {
   id: string;
@@ -38,11 +38,17 @@ const TONES = [
 
 function Feed() {
   const { user, profile, isPreviewMode } = useAuth();
+  const isGeneral = profile?.user_type === "general";
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [answered, setAnswered] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+  // Student filters
   const [deptFilter, setDeptFilter] = useState<string>("all");
   const [yearFilter, setYearFilter] = useState<string>("all");
+  // General filters
+  const [countryFilter, setCountryFilter] = useState<string>("all");
+  const [ageFilter, setAgeFilter] = useState<string>("all");
+  const [interestFilter, setInterestFilter] = useState<string>("all");
   const [scope, setScope] = useState<"all" | "mine">("all");
   const [campusDepts, setCampusDepts] = useState<string[]>([]);
   const [campusYears, setCampusYears] = useState<string[]>([]);
@@ -60,10 +66,13 @@ function Feed() {
     let active = true;
     (async () => {
       try {
+        const peersPromise = isGeneral
+          ? Promise.resolve({ data: [], error: null } as any)
+          : supabase.from("profiles").select("department, year");
         const [{ data, error }, { data: resps, error: respsError }, { data: peers, error: peersError }] = await Promise.all([
           supabase.from("surveys").select("*").eq("is_active", true).gt("expires_at", new Date().toISOString()).neq("creator_id", user.id).order("created_at", { ascending: false }),
           supabase.from("survey_responses").select("survey_id").eq("respondent_id", user.id),
-          supabase.from("profiles").select("department, year"),
+          peersPromise,
         ]);
         if (!active) return;
         if (error) console.warn("Survey feed request failed.", error);
@@ -84,9 +93,9 @@ function Feed() {
       }
     })();
     return () => { active = false; };
-  }, [user, isPreviewMode, profile?.department, profile?.year]);
+  }, [user, isPreviewMode, profile?.department, profile?.year, isGeneral]);
 
-  // Merge cohort options from peers AND any targets surveys already use
+  // Student cohort options
   const departments = Array.from(new Set([
     ...campusDepts,
     ...surveys.map((s) => s.target_department).filter(Boolean) as string[],
@@ -96,14 +105,34 @@ function Feed() {
     ...surveys.map((s) => s.target_year).filter(Boolean) as string[],
   ])).sort();
 
-  // Inclusive filter: surveys with no target are "open to everyone" and always match.
-  // Targeted surveys match only when the filter equals their target.
+  // General audience options
+  const countries = Array.from(new Set([
+    ...COUNTRIES,
+    ...surveys.map((s) => s.target_country).filter(Boolean) as string[],
+  ]));
+
   const matchesDept = (s: Survey, dept: string) =>
     dept === "all" || !s.target_department || s.target_department === dept;
   const matchesYear = (s: Survey, year: string) =>
     year === "all" || !s.target_year || s.target_year === year;
+  const matchesCountry = (s: Survey, c: string) =>
+    c === "all" || !s.target_country || s.target_country === c;
+  const matchesAge = (s: Survey, a: string) =>
+    a === "all" || !s.target_age_range || s.target_age_range === a;
+  const matchesInterest = (s: Survey, i: string) =>
+    i === "all" || !s.target_interests || s.target_interests.length === 0 || s.target_interests.includes(i);
 
   const visible = surveys.filter((s) => {
+    if (isGeneral) {
+      if (scope === "mine") {
+        if (!matchesCountry(s, profile?.country ?? "all")) return false;
+        if (!matchesAge(s, profile?.age_range ?? "all")) return false;
+      }
+      if (!matchesCountry(s, countryFilter)) return false;
+      if (!matchesAge(s, ageFilter)) return false;
+      if (!matchesInterest(s, interestFilter)) return false;
+      return true;
+    }
     if (scope === "mine") {
       if (!matchesDept(s, profile?.department ?? "all")) return false;
       if (!matchesYear(s, profile?.year ?? "all")) return false;
@@ -113,16 +142,25 @@ function Feed() {
     return true;
   });
 
+  const generalCohortLabel = [profile?.country, profile?.age_range ? ageLabel(profile.age_range) : null].filter(Boolean).join(" / ");
+  const studentCohortLabel = [profile?.department, profile?.year].filter(Boolean).join(" / ");
+  const cohortLabel = isGeneral ? generalCohortLabel : studentCohortLabel;
+  const anyFilterActive = isGeneral
+    ? (countryFilter !== "all" || ageFilter !== "all" || interestFilter !== "all" || scope === "mine")
+    : (deptFilter !== "all" || yearFilter !== "all" || scope === "mine");
+
   return (
     <div>
       <div className="mb-8 flex items-end justify-between gap-4">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Today on campus</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">{isGeneral ? "Today's surveys" : "Today on campus"}</p>
           <h1 className="mt-1 font-serif text-5xl leading-[0.95] sm:text-6xl">
             The <em className="text-primary">feed.</em>
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Verified students at <span className="font-semibold text-foreground">{profile?.university_name ?? "your campus"}</span>
+            {isGeneral
+              ? <>Open to <span className="font-semibold text-foreground">everyone</span>{profile?.country ? <> · {profile.country}</> : null}</>
+              : <>Verified students at <span className="font-semibold text-foreground">{profile?.university_name ?? "your campus"}</span></>}
           </p>
         </div>
         <Link to="/create" className="hidden sm:inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-wider text-primary-foreground shadow-paper hover:opacity-90">
@@ -136,27 +174,64 @@ function Feed() {
           onClick={() => setScope(scope === "mine" ? "all" : "mine")}
           className={`rounded-full border px-3 py-1 font-semibold uppercase tracking-wider transition ${scope === "mine" ? "border-primary bg-primary text-primary-foreground" : "border-foreground/20 bg-card hover:bg-accent"}`}
         >
-          My cohort{profile?.department || profile?.year ? ` · ${[profile?.department, profile?.year].filter(Boolean).join(" / ")}` : ""}
+          {isGeneral ? "For me" : "My cohort"}{cohortLabel ? ` · ${cohortLabel}` : ""}
         </button>
-        <select
-          value={deptFilter}
-          onChange={(e) => setDeptFilter(e.target.value)}
-          className="rounded-full border border-foreground/20 bg-card px-3 py-1 font-semibold uppercase tracking-wider"
-        >
-          <option value="all">All departments</option>
-          {departments.map((d) => <option key={d} value={d}>{d}</option>)}
-        </select>
-        <select
-          value={yearFilter}
-          onChange={(e) => setYearFilter(e.target.value)}
-          className="rounded-full border border-foreground/20 bg-card px-3 py-1 font-semibold uppercase tracking-wider"
-        >
-          <option value="all">All years</option>
-          {years.map((y) => <option key={y} value={y}>{y}</option>)}
-        </select>
-        {(deptFilter !== "all" || yearFilter !== "all" || scope === "mine") && (
+
+        {isGeneral ? (
+          <>
+            <select
+              value={countryFilter}
+              onChange={(e) => setCountryFilter(e.target.value)}
+              className="rounded-full border border-foreground/20 bg-card px-3 py-1 font-semibold uppercase tracking-wider"
+            >
+              <option value="all">All countries</option>
+              {countries.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+            <select
+              value={ageFilter}
+              onChange={(e) => setAgeFilter(e.target.value)}
+              className="rounded-full border border-foreground/20 bg-card px-3 py-1 font-semibold uppercase tracking-wider"
+            >
+              <option value="all">All ages</option>
+              {AGE_RANGES.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}
+            </select>
+            <select
+              value={interestFilter}
+              onChange={(e) => setInterestFilter(e.target.value)}
+              className="rounded-full border border-foreground/20 bg-card px-3 py-1 font-semibold uppercase tracking-wider"
+            >
+              <option value="all">All interests</option>
+              {INTEREST_TAGS.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
+            </select>
+          </>
+        ) : (
+          <>
+            <select
+              value={deptFilter}
+              onChange={(e) => setDeptFilter(e.target.value)}
+              className="rounded-full border border-foreground/20 bg-card px-3 py-1 font-semibold uppercase tracking-wider"
+            >
+              <option value="all">All departments</option>
+              {departments.map((d) => <option key={d} value={d}>{d}</option>)}
+            </select>
+            <select
+              value={yearFilter}
+              onChange={(e) => setYearFilter(e.target.value)}
+              className="rounded-full border border-foreground/20 bg-card px-3 py-1 font-semibold uppercase tracking-wider"
+            >
+              <option value="all">All years</option>
+              {years.map((y) => <option key={y} value={y}>{y}</option>)}
+            </select>
+          </>
+        )}
+
+        {anyFilterActive && (
           <button
-            onClick={() => { setDeptFilter("all"); setYearFilter("all"); setScope("all"); }}
+            onClick={() => {
+              setDeptFilter("all"); setYearFilter("all");
+              setCountryFilter("all"); setAgeFilter("all"); setInterestFilter("all");
+              setScope("all");
+            }}
             className="text-muted-foreground underline hover:text-foreground"
           >
             Clear
