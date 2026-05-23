@@ -80,16 +80,13 @@ function Create() {
           description: description.trim(),
           questions: questions as any,
           tier,
-          target_department: tier === "basic"
-            ? null
-            : isGeneral
-              ? (audience || null)
-              : (targetDept || null),
-          target_year: tier === "basic"
-            ? null
-            : isGeneral
-              ? ([region, ageRange].filter(Boolean).join(" · ") || null)
-              : (targetYear || null),
+          // Student-only structured targeting
+          target_department: tier === "basic" || isGeneral ? null : (targetDept || null),
+          target_year: tier === "basic" || isGeneral ? null : (targetYear || null),
+          // Shared structured targeting
+          target_country: tier === "basic" ? null : (targetCountry || null),
+          target_age_range: tier === "basic" ? null : (targetAge || null),
+          target_interests: tier === "basic" ? [] : targetInterests.map((t) => t.tag),
           response_goal: goalNum,
           // General users have no campus, so their surveys are always public.
           allow_general_respondents: isGeneral ? true : allowGeneral,
