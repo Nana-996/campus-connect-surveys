@@ -184,7 +184,7 @@ function Create() {
           <div>
             <Label htmlFor="title">Title</Label>
             <Input id="title" required value={title} onChange={(e) => setTitle(e.target.value)}
-              placeholder="Sleep habits among 2nd-year students" />
+              placeholder={isGeneral ? "What people think about remote work" : "Sleep habits among 2nd-year students"} />
           </div>
           <div>
             <Label htmlFor="desc">Description</Label>
@@ -193,8 +193,25 @@ function Create() {
           </div>
           {tier === "basic" ? (
             <p className="text-xs text-muted-foreground italic">
-              Basic surveys go out to your whole campus — upgrade to <button type="button" onClick={() => setTier("targeted")} className="font-bold underline text-foreground">Targeted</button> to pick department & year.
+              {isGeneral
+                ? <>Basic surveys are open to the entire public — upgrade to <button type="button" onClick={() => setTier("targeted")} className="font-bold underline text-foreground">Targeted</button> to filter by audience, region & age.</>
+                : <>Basic surveys go out to your whole campus — upgrade to <button type="button" onClick={() => setTier("targeted")} className="font-bold underline text-foreground">Targeted</button> to pick department & year.</>}
             </p>
+          ) : isGeneral ? (
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div>
+                <Label htmlFor="aud">Target audience</Label>
+                <Input id="aud" value={audience} onChange={(e) => setAudience(e.target.value)} placeholder="Remote workers" />
+              </div>
+              <div>
+                <Label htmlFor="reg">Region / country</Label>
+                <Input id="reg" value={region} onChange={(e) => setRegion(e.target.value)} placeholder="Ghana" />
+              </div>
+              <div>
+                <Label htmlFor="age">Age range</Label>
+                <Input id="age" value={ageRange} onChange={(e) => setAgeRange(e.target.value)} placeholder="25–34" />
+              </div>
+            </div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
               <div>
