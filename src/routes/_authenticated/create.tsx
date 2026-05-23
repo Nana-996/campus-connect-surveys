@@ -78,10 +78,19 @@ function Create() {
           description: description.trim(),
           questions: questions as any,
           tier,
-          target_department: tier === "basic" ? null : (targetDept || null),
-          target_year: tier === "basic" ? null : (targetYear || null),
+          target_department: tier === "basic"
+            ? null
+            : isGeneral
+              ? (audience || null)
+              : (targetDept || null),
+          target_year: tier === "basic"
+            ? null
+            : isGeneral
+              ? ([region, ageRange].filter(Boolean).join(" · ") || null)
+              : (targetYear || null),
           response_goal: goalNum,
-          allow_general_respondents: allowGeneral,
+          // General users have no campus, so their surveys are always public.
+          allow_general_respondents: isGeneral ? true : allowGeneral,
           ...(expiresIso ? { expires_at: expiresIso } : {}),
         })
         .select("id")
