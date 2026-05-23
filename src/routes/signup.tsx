@@ -18,7 +18,7 @@ export const Route = createFileRoute("/signup")({
   component: SignupPage,
 });
 
-const ACADEMIC_RE = /(^|\.)edu$|\.edu\.[a-z]{2,3}$|\.ac\.[a-z]{2,3}$/i;
+const ACADEMIC_RE = /(^|\.)edu$|\.edu\.[a-z]{2,6}$|\.ac\.[a-z]{2,6}$|\.uni\.[a-z]{2,6}$/i;
 
 function SignupPage() {
   const navigate = useNavigate();
