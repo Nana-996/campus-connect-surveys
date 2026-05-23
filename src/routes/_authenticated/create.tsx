@@ -29,11 +29,16 @@ const TIER_ORDER: Tier[] = ["pro", "boosted", "targeted", "basic"];
 function Create() {
   const { user, profile, refreshProfile } = useAuth();
   const navigate = useNavigate();
+  const isGeneral = profile?.user_type === "general";
   const [tier, setTier] = useState<Tier>("pro");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  // For students: department/year. For general: audience descriptor + region.
   const [targetDept, setTargetDept] = useState("");
   const [targetYear, setTargetYear] = useState("");
+  const [audience, setAudience] = useState("");
+  const [region, setRegion] = useState("");
+  const [ageRange, setAgeRange] = useState("");
   const [responseGoal, setResponseGoal] = useState<string>("");
   const [expiresAt, setExpiresAt] = useState<string>("");
   const [allowGeneral, setAllowGeneral] = useState(false);
