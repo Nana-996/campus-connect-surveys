@@ -37,9 +37,10 @@ function SignupPage() {
   const [signupNotice, setSignupNotice] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!loading && user) navigate({ to: "/feed" });
-  }, [user, loading, navigate]);
+  // Don't auto-redirect signed-in users away from /signup — that creates a
+  // race where clicks on the freshly-mounted form look like they caused a
+  // mysterious bounce to /feed. Instead, show an explicit notice below.
+
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
