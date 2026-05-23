@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Users, Filter, ArrowUpRight, Sparkles } from "lucide-react";
 
+import { tagLabel, ageLabel } from "@/lib/interests";
+
 type Survey = {
   id: string;
   title: string;
@@ -11,6 +13,9 @@ type Survey = {
   creator_id: string;
   target_department: string | null;
   target_year: string | null;
+  target_country?: string | null;
+  target_age_range?: string | null;
+  target_interests?: string[] | null;
   response_count: number;
   questions: any[];
   created_at: string;
@@ -221,12 +226,21 @@ function Feed() {
                   <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{s.response_count}</span>
                   <span>·</span>
                   <span>{s.questions?.length ?? 0} Qs</span>
-                  {(s.target_department || s.target_year) && (
-                    <span className="inline-flex items-center gap-1">
-                      <Filter className="h-3 w-3" />
-                      {[s.target_department, s.target_year].filter(Boolean).join(" · ")}
-                    </span>
-                  )}
+                  {(() => {
+                    const bits = [
+                      s.target_department,
+                      s.target_year,
+                      s.target_country,
+                      s.target_age_range ? ageLabel(s.target_age_range) : null,
+                      ...(s.target_interests ?? []).map((id) => tagLabel(id)),
+                    ].filter(Boolean) as string[];
+                    return bits.length > 0 ? (
+                      <span className="inline-flex items-center gap-1">
+                        <Filter className="h-3 w-3" />
+                        {bits.slice(0, 3).join(" · ")}{bits.length > 3 ? ` +${bits.length - 3}` : ""}
+                      </span>
+                    ) : null;
+                  })()}
                 </div>
                 <ArrowUpRight className="absolute right-4 top-4 h-4 w-4 opacity-0 transition group-hover:opacity-70" />
               </Link>

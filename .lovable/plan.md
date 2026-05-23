@@ -1,85 +1,112 @@
-# Dual-Wallet Credit Economy
 
-Redesign CampusVerify's credits into two distinct wallets so paid credits feel essential for serious work, while earned credits keep casual engagement alive.
+# Real audience targeting end-to-end
 
-## Wallet model
+Right now creators can type "Target audience / Region / Age" but nothing on respondent profiles matches it. This wires the loop closed.
 
-Two balances per user:
+## 1. Profile attributes (both user types)
 
-- **Earned credits** — from completing surveys. Daily cap, weekly cap, 30-day expiry. Spendable only on Basic publishing.
-- **Paid credits** — from purchase. Never expire. Required for Pro features.
+Add to `profiles`:
+
+- `country text` — general users (and optional for students)
+- `age_range text` — one of: `under_18`, `18_24`, `25_34`, `35_44`, `45_54`, `55_plus`
+- `interests text[]` — normalized canonical tags
+- `interests_raw text[]` — what the user actually typed (so we never lose nuance)
+
+Students keep `department` + `year`. General users get `country` + `age_range`. Both get `interests`.
+
+## 2. Canonical interest tag list
+
+Fixed vocabulary of ~22 tags used for matching:
 
 ```text
-                  EARNED                PAID
-  Source          answering surveys     purchase
-  Cap             3/day, 10/week        none
-  Expiry          30 days               never
-  Basic publish   yes (2 credits)       yes (2 credits)
-  Pro features    no                    yes
+tech, ai, gaming, science, health, fitness, mental_health, food, travel,
+fashion, beauty, music, film, books, sports, finance, business, politics,
+education, environment, parenting, relationships, art, other
 ```
 
-## Publishing tiers
+## 3. AI-normalized tag input (flexible + accurate)
 
-| Tier | Cost | Paid required | Features |
-|---|---|---|---|
-| Basic | 2 | no | Open to whole university, capped at 25 responses, standard queue |
-| Targeted | 5 paid | yes | Department + year targeting, 100 response cap |
-| Boosted | 10 paid | yes | Pinned in feed for 48h, push to cohort, 250 response cap |
-| Pro | 20 paid | yes | All targeting, top placement, 1000 response cap, instant publish, analytics export |
+When a user types a tag (e.g. "crypto", "weight lifting", "k-pop"):
 
-Earned credits cover Basic only. Attempting Targeted+ with only earned credits prompts upgrade.
+- Client calls a `createServerFn` `normalizeInterestTag({ raw })` that uses Lovable AI Gateway (`google/gemini-2.5-flash-lite`) with a strict JSON-schema response: `{ tag: <one of canonical>, confidence: 0..1 }`.
+- Server stores `interests_raw[]` = user text, `interests[]` = canonical tag.
+- UI shows the chip with both: `crypto → finance`. User can override the mapping by tapping the chip and picking a different canonical tag from a dropdown — so AI is the default, not the jail.
+- Same flow runs on the Create form's "target interests" input, so creators and respondents share the canonical vocabulary.
 
-## Fraud prevention
+This is the "very flexible yet highly accurate" piece — free typing on the surface, normalized vocabulary in the database, manual override always available.
 
-- **Verified school email**: reject signup unless domain matches an allowlist of `.edu` / known university TLDs (`.ac.uk`, `.edu.au`, etc.). Block disposable domains via maintained list (mailinator, tempmail, etc.).
-- **Anti-duplicate account**: hash `lower(trim(email))` and store; also store normalized full name + university; flag soft-duplicates for admin review. Hard block on existing email hash.
-- **Earning caps**: server-side trigger refuses to grant earned credit when daily/weekly cap reached or when respondent has already answered that survey.
-- **Quality threshold**: response must have non-empty answers for ≥80% of questions and take ≥15 seconds total (client timestamp on entry, server validates on submit). Failing responses recorded but grant 0 credits.
-- **Suspicious behavior detection**: tracks rapid-fire submissions (>5 in 10 min), copy-paste identical answers across surveys, and answering own university surveys created by same IP/device. Flags raise a `review_flags` row.
-- **Admin review queue**: flagged users can't earn or spend until cleared. Simple admin role + page.
+## 4. Signup form changes
 
-## Credit UX
+`src/routes/signup.tsx`:
 
-- Profile shows two distinct cards: paid (gold/primary, prominent) and earned (sage, secondary), with progress to next cap reset and expiry countdown.
-- Publish flow defaults to Pro tier with a clear "fastest, no friction" badge. Basic is a small text link underneath ("Publish basic with earned credits →").
-- Insufficient paid credits triggers an inline buy sheet with three packs (10 / 50 / 200) and per-credit price reduction at higher tiers.
-- Feed shows a "Boosted" ribbon on premium surveys so creators see the visible value of paying.
+- Replace the user-type switch's left/right pane content so each type collects what's actually relevant:
+  - **Student**: full name, university (auto-derived from email domain), department, year, interests.
+  - **General**: full name, country (dropdown of ~50 countries, "Other" lets type), age range (dropdown), interests.
+- Tag input is a chip field: type → enter normalizes → chip shows raw + canonical → click to edit or remove.
+
+## 5. Create form changes (students AND general)
+
+Replace the three free-text targeting inputs with structured controls when tier is not Basic:
+
+- **Students**: department (text), year (select), interests (tag chips), optional country.
+- **General**: country (select), age range (select), interests (tag chips).
+
+All write to new survey columns: `target_country`, `target_age_range`, `target_interests text[]`. We drop the misuse of `target_year` for "Region · Age".
+
+## 6. Feed matching
+
+`surveys` table gains `target_country`, `target_age_range`, `target_interests text[]`.
+
+The feed query (and the RLS read policy) only shows a survey to a respondent when **every targeting field that is set on the survey matches the respondent's profile**:
+
+- `target_department` set → must equal respondent's department
+- `target_year` set → must equal respondent's year
+- `target_country` set → must equal respondent's country
+- `target_age_range` set → must equal respondent's age_range
+- `target_interests` non-empty → respondent's `interests` must overlap (`&&` operator)
+
+Empty targeting fields are wildcards. Creators always see their own surveys regardless.
+
+## 7. Backfill + safety
+
+- New columns are nullable; existing surveys and profiles keep working (no targeting = visible to everyone in their audience pool).
+- A small banner on profile prompts existing users without `interests`/`age_range`/`country` to fill them in so they show up in more targeted surveys.
 
 ## Technical details
 
-### Schema (migration)
+### Schema migration
 
-- `profiles`: add `earned_credits int default 0`, `paid_credits int default 0`, `is_flagged bool default false`, `flag_reason text`, `email_hash text unique`. Migrate existing `credits` → `earned_credits` then drop.
-- New table `credit_ledger` (audit): `id, user_id, wallet ('earned'|'paid'), delta, reason, survey_id?, expires_at?, created_at`.
-- New table `earning_caps` (per-user rolling counters): `user_id, day_bucket, week_bucket, day_count, week_count`.
-- New table `review_flags`: `id, user_id, type, details jsonb, resolved bool, created_at`.
-- New table `user_roles` + `app_role` enum (`admin`, `user`) + `has_role()` security-definer function (per template rules — never store role on profiles).
-- New table `disposable_domains` seeded with common providers.
-- `surveys`: add `tier text default 'basic'`, `paid_cost int default 0`, `boosted_until timestamptz`, `response_goal int`.
-- `survey_responses`: add `duration_ms int`, `quality_score numeric`.
+```text
+profiles:
+  + country text
+  + age_range text
+  + interests text[] default '{}'
+  + interests_raw text[] default '{}'
 
-### Triggers / functions
+surveys:
+  + target_country text
+  + target_age_range text
+  + target_interests text[] default '{}'
 
-- `charge_survey_publish_credit` rewritten: deduct from paid wallet for Targeted/Boosted/Pro, allow earned for Basic only, enforce tier rules.
-- `handle_new_response` rewritten: validate quality + caps, expire-stamp new earned credit (`now() + interval '30 days'`), insert ledger row, increment counters.
-- Nightly `pg_cron` job to expire stale earned credits and reset weekly bucket.
-- `signup` trigger validates email domain against allowlist + disposable list, sets `email_hash`.
+new table: interest_tags (id text primary key, label text) seeded with the 22 canonical tags
+```
 
-### Frontend
+### Files touched
 
-- `src/lib/credits.ts` helper: tier definitions, formatting, "can afford" check.
-- `src/routes/_authenticated/profile.tsx`: dual wallet cards + expiry meter + ledger history.
-- `src/routes/_authenticated/create.tsx`: tier selector with Pro pre-selected, upgrade nudges.
-- `src/routes/_authenticated/feed.tsx`: boosted ribbon, sort boosted first.
-- `src/routes/_authenticated/survey.$id.tsx`: track entry timestamp, send `duration_ms` on submit.
-- New `src/routes/_authenticated/buy.tsx`: credit packs, currently placeholder (Stripe wiring deferred unless requested).
-- New `src/routes/_authenticated/admin.tsx`: gated by `has_role('admin')`, lists flagged users + review actions.
+```text
+supabase migration (new)            schema + RLS update for surveys SELECT
+src/lib/interests.ts                canonical tag list + helpers
+src/lib/interests.functions.ts      normalizeInterestTag serverFn (Lovable AI)
+src/components/InterestTagInput.tsx chip input with AI normalization + override
+src/routes/signup.tsx               new structured fields per user type
+src/routes/_authenticated/create.tsx replace free-text targeting with selects + chips
+src/routes/_authenticated/feed.tsx  apply respondent-profile filter
+src/lib/auth.tsx                    extend Profile type with country/age_range/interests
+src/integrations/supabase/types.ts  auto-regenerated by migration
+```
 
-### Not included (call out)
+### Out of scope (call out)
 
-- Real payment processing — packs add to `paid_credits` directly with a "Demo purchase" note. Wire Stripe in a follow-up.
-- IP/device fingerprinting beyond Supabase auth — deeper anti-fraud (e.g. fingerprintjs) is a follow-up.
-
-## Open question
-
-Pricing of packs (10 / 50 / 200) — pick now or leave as placeholders? I'll use placeholders unless you give numbers.
+- Geo-detection — no IP lookup; country is user-declared.
+- Multi-country surveys — `target_country` is a single value for v1 (can become `text[]` later if you want).
+- Migrating old surveys' free-text "audience" strings into the new structured fields — they stay as legacy `target_department` text.

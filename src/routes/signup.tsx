@@ -11,6 +11,8 @@ import {
 import { toast } from "sonner";
 import { ArrowUpRight, GraduationCap, Globe2 } from "lucide-react";
 import { ResendVerification } from "@/components/ResendVerification";
+import { InterestTagInput, type InterestEntry } from "@/components/InterestTagInput";
+import { AGE_RANGES, COUNTRIES } from "@/lib/interests";
 
 export const Route = createFileRoute("/signup")({
   component: SignupPage,
@@ -28,6 +30,9 @@ function SignupPage() {
   const [password, setPassword] = useState("");
   const [department, setDepartment] = useState("");
   const [year, setYear] = useState("");
+  const [country, setCountry] = useState("");
+  const [ageRange, setAgeRange] = useState("");
+  const [interests, setInterests] = useState<InterestEntry[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [signupNotice, setSignupNotice] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
@@ -59,6 +64,10 @@ function SignupPage() {
             user_type: userType,
             department: userType === "student" ? department : "",
             year: userType === "student" ? year : "",
+            country: userType === "general" ? country : "",
+            age_range: userType === "general" ? ageRange : "",
+            interests: interests.map((i) => i.tag),
+            interests_raw: interests.map((i) => i.raw),
           },
         },
       });
@@ -184,6 +193,45 @@ function SignupPage() {
                 </div>
               </div>
             )}
+            {userType === "general" && (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="country" className="text-xs font-semibold uppercase tracking-wider">Country</Label>
+                  <Select value={country} onValueChange={setCountry}>
+                    <SelectTrigger className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"><SelectValue placeholder="Choose…" /></SelectTrigger>
+                    <SelectContent className="max-h-60">
+                      {COUNTRIES.map((c) => (
+                        <SelectItem key={c} value={c}>{c}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="age" className="text-xs font-semibold uppercase tracking-wider">Age range</Label>
+                  <Select value={ageRange} onValueChange={setAgeRange}>
+                    <SelectTrigger className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"><SelectValue placeholder="Choose…" /></SelectTrigger>
+                    <SelectContent>
+                      {AGE_RANGES.map((r) => (
+                        <SelectItem key={r.id} value={r.id}>{r.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+            <div>
+              <Label className="text-xs font-semibold uppercase tracking-wider">Interests</Label>
+              <div className="mt-1.5">
+                <InterestTagInput
+                  value={interests}
+                  onChange={setInterests}
+                  placeholder="e.g. crypto, k-pop, hiking…"
+                />
+              </div>
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                These help us show you surveys that actually match what you care about.
+              </p>
+            </div>
             {formError && (
               <div className="rounded-2xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                 {formError}
