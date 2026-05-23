@@ -1,29 +1,46 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, BarChart3, Coins, Sparkles, ArrowUpRight } from "lucide-react";
+import { ShieldCheck, BarChart3, Coins, Sparkles, ArrowUpRight, GraduationCap, Globe2, Send, Inbox, Trophy } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   component: Landing,
+  head: () => ({
+    meta: [
+      { title: "CampusVerify — Real research, real classmates, real fast" },
+      { name: "description", content: "Run surveys with verified students from your campus or the wider public. Earn credits by answering, spend credits to publish. No bots, no randoms." },
+      { property: "og:title", content: "CampusVerify — Surveys for verified students" },
+      { property: "og:description", content: "A credit-powered survey feed for verified university students. Publish in seconds, get real answers from your campus." },
+    ],
+  }),
 });
 
 function Landing() {
   const { user, loading } = useAuth();
-  const navigate = useNavigate();
-  useEffect(() => {
-    if (!loading && user) navigate({ to: "/feed" });
-  }, [user, loading, navigate]);
+  const isSignedIn = !loading && !!user;
 
   return (
     <div className="min-h-screen">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
         <Link to="/" className="font-serif text-3xl text-primary">CampusVerify</Link>
+        <nav className="hidden items-center gap-6 text-xs font-semibold uppercase tracking-wider text-muted-foreground sm:flex">
+          <a href="#how-it-works" className="hover:text-foreground">How it works</a>
+          <a href="#about" className="hover:text-foreground">About</a>
+          <a href="#faq" className="hover:text-foreground">FAQ</a>
+        </nav>
         <div className="flex items-center gap-2">
-          <Link to="/auth"><Button variant="ghost" className="rounded-full">Log in</Button></Link>
-          <Link to="/auth" search={{ mode: "signup" }}>
-            <Button className="rounded-full bg-primary px-5">Get started</Button>
-          </Link>
+          {isSignedIn ? (
+            <Link to="/feed">
+              <Button className="rounded-full bg-primary px-5">Go to feed <ArrowUpRight className="ml-1 h-4 w-4" /></Button>
+            </Link>
+          ) : (
+            <>
+              <Link to="/auth"><Button variant="ghost" className="rounded-full">Log in</Button></Link>
+              <Link to="/signup">
+                <Button className="rounded-full bg-primary px-5">Get started</Button>
+              </Link>
+            </>
+          )}
         </div>
       </header>
 
@@ -44,22 +61,32 @@ function Landing() {
               No bots. No randoms. Just your people answering your questions.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link to="/auth" search={{ mode: "signup" }}>
-                <Button size="lg" className="h-12 rounded-full bg-primary px-7 text-base">
-                  Claim 5 free credits <ArrowUpRight className="ml-1 h-4 w-4" />
-                </Button>
-              </Link>
-              <Link to="/auth">
-                <Button size="lg" variant="outline" className="h-12 rounded-full border-foreground/30 px-7 text-base">
-                  I already belong here
-                </Button>
-              </Link>
+              {isSignedIn ? (
+                <Link to="/feed">
+                  <Button size="lg" className="h-12 rounded-full bg-primary px-7 text-base">
+                    Open your feed <ArrowUpRight className="ml-1 h-4 w-4" />
+                  </Button>
+                </Link>
+              ) : (
+                <>
+                  <Link to="/signup">
+                    <Button size="lg" className="h-12 rounded-full bg-primary px-7 text-base">
+                      Claim free credits <ArrowUpRight className="ml-1 h-4 w-4" />
+                    </Button>
+                  </Link>
+                  <Link to="/auth">
+                    <Button size="lg" variant="outline" className="h-12 rounded-full border-foreground/30 px-7 text-base">
+                      I already belong here
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
 
           <div className="sm:col-span-2 rounded-3xl bg-primary p-6 text-primary-foreground shadow-paper">
-            <p className="font-serif text-6xl leading-none">5</p>
-            <p className="mt-2 text-xs uppercase tracking-[0.2em] opacity-80">free credits on join</p>
+            <p className="font-serif text-6xl leading-none">10</p>
+            <p className="mt-2 text-xs uppercase tracking-[0.2em] opacity-80">free credits for students on join</p>
             <div className="mt-6 h-px bg-primary-foreground/20" />
             <p className="mt-4 font-serif text-2xl italic leading-tight">
               "Got 80 responses in two days."
@@ -75,24 +102,141 @@ function Landing() {
         </section>
 
         {/* feature row */}
-        <section className="mt-4 grid gap-4 pb-16 sm:grid-cols-3">
+        <section className="mt-4 grid gap-4 sm:grid-cols-3">
           <Tile icon={<ShieldCheck />} title="Verified-only" tone="card">
-            Sign in with your university email. Surveys never leave campus.
+            Sign in with your university email. Surveys never leave campus unless you say so.
           </Tile>
           <Tile icon={<Coins />} title="Fair credit economy" tone="accent">
-            Earn 1 by answering. Spend 2 to publish. Everyone gives, everyone gets.
+            Earn 1 by answering. Spend to publish. Everyone gives, everyone gets.
           </Tile>
           <Tile icon={<Sparkles />} title="Built for thesis season" tone="card">
             Clean export, no setup. Hit publish, watch responses land.
           </Tile>
         </section>
+
+        {/* How it works */}
+        <section id="how-it-works" className="mt-20 scroll-mt-20">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">How it works</p>
+          <h2 className="mt-2 font-serif text-4xl sm:text-5xl leading-[0.95]">Four steps. <em className="text-primary">No friction.</em></h2>
+          <div className="mt-8 grid gap-4 sm:grid-cols-4">
+            <Step n="01" icon={<GraduationCap />} title="Verify">Sign up with your university email. Students get 10 free credits; general accounts get 5.</Step>
+            <Step n="02" icon={<Send />} title="Publish">Pick a tier (Basic, Targeted, Boosted, Pro), write questions, hit publish.</Step>
+            <Step n="03" icon={<Inbox />} title="Earn">Answer surveys in your feed to earn credits — fund your own research without spending a cedi.</Step>
+            <Step n="04" icon={<Trophy />} title="Export">Watch responses land in real time. Export clean data when you're ready.</Step>
+          </div>
+        </section>
+
+        {/* About */}
+        <section id="about" className="mt-20 scroll-mt-20 rounded-3xl border border-foreground/15 bg-card p-8 sm:p-12 shadow-paper">
+          <div className="grid gap-8 sm:grid-cols-2">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">About</p>
+              <h2 className="mt-2 font-serif text-4xl sm:text-5xl leading-[0.95]">Built on campus, <em className="text-primary">for campus.</em></h2>
+              <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
+                CampusVerify started because thesis season shouldn't mean DMing strangers on WhatsApp. We give university researchers a clean,
+                fair way to reach verified peers — and reward respondents for showing up with real answers.
+              </p>
+              <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+                Every account is tied to a verified email. Every credit moves through a transparent ledger. No bots, no troll farms,
+                no third-party advertisers staring over your shoulder.
+              </p>
+            </div>
+            <div className="grid gap-3">
+              <Stat n="100%" label="Verified accounts" />
+              <Stat n="0" label="Third-party ad trackers" />
+              <Stat n="30 days" label="Credit-earn freshness window" />
+              <Stat n="GHS" label="Native pricing, mobile-money ready" />
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section id="faq" className="mt-20 scroll-mt-20">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">FAQ</p>
+          <h2 className="mt-2 font-serif text-4xl sm:text-5xl leading-[0.95]">Quick <em className="text-primary">answers.</em></h2>
+          <div className="mt-8 grid gap-3 sm:grid-cols-2">
+            <Faq q="Who can sign up?">
+              Anyone with a valid academic email (.edu, .edu.xx, .ac.xx, .uni.xx) can create a student account. Non-students can sign up as
+              general accounts and reach the wider public audience.
+            </Faq>
+            <Faq q="How do credits work?">
+              You spend credits to publish a survey and earn 1 credit for each quality response you submit. Earned credits expire after
+              30 days; paid credits never expire.
+            </Faq>
+            <Faq q="Can I target specific departments?">
+              Yes — upgrade to the Targeted tier or higher to filter by department, year, country, age range, and interests.
+            </Faq>
+            <Faq q="How are payments handled?">
+              Paid credits are processed by Paystack — card, mobile money, bank transfer, or USSD. We never see your card details.
+            </Faq>
+            <Faq q="Is my data private?">
+              Survey creators see responses, not respondent identities beyond what your questions ask. See the{" "}
+              <Link to="/privacy" className="font-semibold underline">Privacy Policy</Link> for the full picture.
+            </Faq>
+            <Faq q="What if I forgot my password?">
+              Use the <Link to="/forgot-password" className="font-semibold underline">Forgot password</Link> link on the login screen.
+              We'll email a secure reset link.
+            </Faq>
+          </div>
+        </section>
+
+        {/* Final CTA */}
+        <section className="mt-20 rounded-3xl bg-primary p-10 text-center text-primary-foreground shadow-paper">
+          <Globe2 className="mx-auto h-8 w-8" />
+          <h2 className="mt-3 font-serif text-4xl sm:text-5xl leading-[0.95]">Ready to ask <em>better questions?</em></h2>
+          <p className="mx-auto mt-3 max-w-md text-sm opacity-80">
+            Sign up in under a minute. Start with free credits. Publish your first survey today.
+          </p>
+          <div className="mt-6 flex justify-center">
+            {isSignedIn ? (
+              <Link to="/feed">
+                <Button size="lg" className="h-12 rounded-full bg-highlight px-7 text-base text-highlight-foreground hover:bg-highlight/90">
+                  Open your feed <ArrowUpRight className="ml-1 h-4 w-4" />
+                </Button>
+              </Link>
+            ) : (
+              <Link to="/signup">
+                <Button size="lg" className="h-12 rounded-full bg-highlight px-7 text-base text-highlight-foreground hover:bg-highlight/90">
+                  Create your account <ArrowUpRight className="ml-1 h-4 w-4" />
+                </Button>
+              </Link>
+            )}
+          </div>
+        </section>
       </main>
 
-      <footer className="border-t border-foreground/15 py-8 text-center">
-        <p className="font-serif text-2xl text-primary">CampusVerify</p>
-        <p className="mt-1 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
-          © {new Date().getFullYear()} — made on campus
-        </p>
+      <footer className="mt-20 border-t border-foreground/15">
+        <div className="mx-auto grid max-w-6xl gap-8 px-6 py-12 sm:grid-cols-4">
+          <div className="sm:col-span-2">
+            <p className="font-serif text-3xl text-primary">CampusVerify</p>
+            <p className="mt-2 max-w-xs text-xs text-muted-foreground">
+              A credit-powered survey feed for verified university students and the curious general public.
+            </p>
+          </div>
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Product</p>
+            <ul className="mt-3 space-y-2 text-sm">
+              <li><a href="#how-it-works" className="hover:text-primary">How it works</a></li>
+              <li><a href="#about" className="hover:text-primary">About</a></li>
+              <li><a href="#faq" className="hover:text-primary">FAQ</a></li>
+              <li><Link to="/signup" className="hover:text-primary">Sign up</Link></li>
+              <li><Link to="/auth" className="hover:text-primary">Log in</Link></li>
+            </ul>
+          </div>
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Legal</p>
+            <ul className="mt-3 space-y-2 text-sm">
+              <li><Link to="/terms" className="hover:text-primary">Terms of Service</Link></li>
+              <li><Link to="/privacy" className="hover:text-primary">Privacy Policy</Link></li>
+              <li><Link to="/forgot-password" className="hover:text-primary">Forgot password</Link></li>
+            </ul>
+          </div>
+        </div>
+        <div className="border-t border-foreground/10 py-6 text-center">
+          <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
+            © {new Date().getFullYear()} CampusVerify — made on campus
+          </p>
+        </div>
       </footer>
     </div>
   );
@@ -110,5 +254,39 @@ function Tile({ icon, title, children, tone }: { icon: React.ReactNode; title: s
       <h3 className="mt-4 font-serif text-2xl leading-tight">{title}</h3>
       <p className="mt-1 text-sm opacity-80">{children}</p>
     </div>
+  );
+}
+
+function Step({ n, icon, title, children }: { n: string; icon: React.ReactNode; title: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
+      <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-muted-foreground">{n}</p>
+      <div className="mt-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary [&>svg]:h-5 [&>svg]:w-5">
+        {icon}
+      </div>
+      <h3 className="mt-3 font-serif text-2xl leading-tight">{title}</h3>
+      <p className="mt-1 text-sm text-muted-foreground">{children}</p>
+    </div>
+  );
+}
+
+function Stat({ n, label }: { n: string; label: string }) {
+  return (
+    <div className="flex items-baseline justify-between border-b border-foreground/10 pb-3 last:border-0">
+      <span className="font-serif text-3xl text-primary">{n}</span>
+      <span className="text-xs uppercase tracking-wider text-muted-foreground">{label}</span>
+    </div>
+  );
+}
+
+function Faq({ q, children }: { q: string; children: React.ReactNode }) {
+  return (
+    <details className="group rounded-2xl border border-foreground/15 bg-card p-5 shadow-paper">
+      <summary className="cursor-pointer list-none font-serif text-lg flex items-center justify-between">
+        {q}
+        <span className="ml-2 text-xs text-muted-foreground transition group-open:rotate-45">＋</span>
+      </summary>
+      <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{children}</p>
+    </details>
   );
 }
