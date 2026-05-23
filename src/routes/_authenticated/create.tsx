@@ -29,11 +29,16 @@ const TIER_ORDER: Tier[] = ["pro", "boosted", "targeted", "basic"];
 function Create() {
   const { user, profile, refreshProfile } = useAuth();
   const navigate = useNavigate();
+  const isGeneral = profile?.user_type === "general";
   const [tier, setTier] = useState<Tier>("pro");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  // For students: department/year. For general: audience descriptor + region.
   const [targetDept, setTargetDept] = useState("");
   const [targetYear, setTargetYear] = useState("");
+  const [audience, setAudience] = useState("");
+  const [region, setRegion] = useState("");
+  const [ageRange, setAgeRange] = useState("");
   const [responseGoal, setResponseGoal] = useState<string>("");
   const [expiresAt, setExpiresAt] = useState<string>("");
   const [allowGeneral, setAllowGeneral] = useState(false);
@@ -73,10 +78,19 @@ function Create() {
           description: description.trim(),
           questions: questions as any,
           tier,
-          target_department: tier === "basic" ? null : (targetDept || null),
-          target_year: tier === "basic" ? null : (targetYear || null),
+          target_department: tier === "basic"
+            ? null
+            : isGeneral
+              ? (audience || null)
+              : (targetDept || null),
+          target_year: tier === "basic"
+            ? null
+            : isGeneral
+              ? ([region, ageRange].filter(Boolean).join(" · ") || null)
+              : (targetYear || null),
           response_goal: goalNum,
-          allow_general_respondents: allowGeneral,
+          // General users have no campus, so their surveys are always public.
+          allow_general_respondents: isGeneral ? true : allowGeneral,
           ...(expiresIso ? { expires_at: expiresIso } : {}),
         })
         .select("id")
@@ -99,7 +113,7 @@ function Create() {
     <div>
       <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Studio</p>
       <h1 className="mt-1 font-serif text-5xl leading-[0.95]">
-        Ask <em className="text-primary">campus.</em>
+        Ask <em className="text-primary">{isGeneral ? "the public." : "campus."}</em>
       </h1>
       <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-card px-3 py-1 text-xs font-semibold">
         <span className="font-bold text-primary">{profile?.paid_credits ?? 0} paid</span>
@@ -170,7 +184,7 @@ function Create() {
           <div>
             <Label htmlFor="title">Title</Label>
             <Input id="title" required value={title} onChange={(e) => setTitle(e.target.value)}
-              placeholder="Sleep habits among 2nd-year students" />
+              placeholder={isGeneral ? "What people think about remote work" : "Sleep habits among 2nd-year students"} />
           </div>
           <div>
             <Label htmlFor="desc">Description</Label>
@@ -179,8 +193,25 @@ function Create() {
           </div>
           {tier === "basic" ? (
             <p className="text-xs text-muted-foreground italic">
-              Basic surveys go out to your whole campus — upgrade to <button type="button" onClick={() => setTier("targeted")} className="font-bold underline text-foreground">Targeted</button> to pick department & year.
+              {isGeneral
+                ? <>Basic surveys are open to the entire public — upgrade to <button type="button" onClick={() => setTier("targeted")} className="font-bold underline text-foreground">Targeted</button> to filter by audience, region & age.</>
+                : <>Basic surveys go out to your whole campus — upgrade to <button type="button" onClick={() => setTier("targeted")} className="font-bold underline text-foreground">Targeted</button> to pick department & year.</>}
             </p>
+          ) : isGeneral ? (
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div>
+                <Label htmlFor="aud">Target audience</Label>
+                <Input id="aud" value={audience} onChange={(e) => setAudience(e.target.value)} placeholder="Remote workers" />
+              </div>
+              <div>
+                <Label htmlFor="reg">Region / country</Label>
+                <Input id="reg" value={region} onChange={(e) => setRegion(e.target.value)} placeholder="Ghana" />
+              </div>
+              <div>
+                <Label htmlFor="age">Age range</Label>
+                <Input id="age" value={ageRange} onChange={(e) => setAgeRange(e.target.value)} placeholder="25–34" />
+              </div>
+            </div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -225,20 +256,26 @@ function Create() {
             </div>
           </div>
 
-          <label className="flex items-start gap-3 rounded-xl border border-foreground/15 bg-background/40 p-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={allowGeneral}
-              onChange={(e) => setAllowGeneral(e.target.checked)}
-              className="mt-0.5 h-4 w-4 accent-primary"
-            />
-            <div>
-              <p className="text-xs font-semibold">Open to anyone (beyond my campus)</p>
-              <p className="text-[11px] text-muted-foreground">
-                General (non-student) users will be able to find and answer this survey.
-              </p>
-            </div>
-          </label>
+          {isGeneral ? (
+            <p className="rounded-xl border border-foreground/15 bg-background/40 p-3 text-[11px] text-muted-foreground">
+              Your surveys are open to the public — anyone on CampusVerify can find and answer them.
+            </p>
+          ) : (
+            <label className="flex items-start gap-3 rounded-xl border border-foreground/15 bg-background/40 p-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={allowGeneral}
+                onChange={(e) => setAllowGeneral(e.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-primary"
+              />
+              <div>
+                <p className="text-xs font-semibold">Open to anyone (beyond my campus)</p>
+                <p className="text-[11px] text-muted-foreground">
+                  General (non-student) users will be able to find and answer this survey.
+                </p>
+              </div>
+            </label>
+          )}
         </div>
 
         </div>
