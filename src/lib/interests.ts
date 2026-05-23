@@ -57,3 +57,30 @@ export const COUNTRIES = [
   "Australia", "New Zealand",
   "Other",
 ] as const;
+
+// Year options — covers standard undergrad through long professional programs
+// (e.g. Doctor of Pharmacy = 6 years, Medicine = up to 10 years).
+export const YEAR_OPTIONS = [
+  "Year 1", "Year 2", "Year 3", "Year 4", "Year 5",
+  "Year 6", "Year 7", "Year 8", "Year 9", "Year 10",
+  "Postgrad",
+] as const;
+
+// Common departments — used as autocomplete suggestions on signup. The field
+// stays free-text so unusual programs still work, but typing maps to a
+// canonical label when there's a match.
+export const DEPARTMENT_SUGGESTIONS = [
+  "Accounting", "Actuarial Science", "Agriculture", "Anatomy", "Anthropology",
+  "Architecture", "Art & Design", "Biochemistry", "Biology", "Biomedical Engineering",
+  "Biomedical Science", "Business Administration", "Chemical Engineering", "Chemistry",
+  "Civil Engineering", "Communication Studies", "Computer Engineering", "Computer Science",
+  "Dentistry", "Economics", "Education", "Electrical Engineering", "English",
+  "Environmental Science", "Finance", "Geography", "Geology", "History",
+  "Hospitality & Tourism", "Human Resource Management", "Information Systems",
+  "International Relations", "Journalism", "Law", "Linguistics", "Management",
+  "Marketing", "Mathematics", "Mechanical Engineering", "Medicine", "Music",
+  "Nursing", "Nutrition & Dietetics", "Pharmacy", "Philosophy", "Physics",
+  "Physiotherapy", "Political Science", "Psychology", "Public Health",
+  "Religious Studies", "Sociology", "Software Engineering", "Statistics",
+  "Theatre Arts", "Veterinary Medicine",
+] as const;
