@@ -96,7 +96,12 @@ function AuthPage() {
               />
             </div>
             <div>
-              <Label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider">Password</Label>
+              <div className="flex items-baseline justify-between">
+                <Label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider">Password</Label>
+                <Link to="/forgot-password" className="text-[11px] font-semibold uppercase tracking-wider text-primary hover:underline">
+                  Forgot?
+                </Link>
+              </div>
               <Input
                 id="password"
                 type="password"
