@@ -14,6 +14,10 @@ export type Profile = {
   is_flagged?: boolean;
   flag_reason?: string | null;
   user_type?: "student" | "general";
+  country?: string | null;
+  age_range?: string | null;
+  interests?: string[];
+  interests_raw?: string[];
 };
 
 type AuthCtx = {
