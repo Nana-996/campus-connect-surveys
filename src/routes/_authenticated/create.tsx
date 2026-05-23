@@ -113,7 +113,7 @@ function Create() {
     <div>
       <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Studio</p>
       <h1 className="mt-1 font-serif text-5xl leading-[0.95]">
-        Ask <em className="text-primary">campus.</em>
+        Ask <em className="text-primary">{isGeneral ? "the public." : "campus."}</em>
       </h1>
       <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-card px-3 py-1 text-xs font-semibold">
         <span className="font-bold text-primary">{profile?.paid_credits ?? 0} paid</span>
