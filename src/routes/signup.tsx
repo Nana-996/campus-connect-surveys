@@ -64,6 +64,10 @@ function SignupPage() {
             user_type: userType,
             department: userType === "student" ? department : "",
             year: userType === "student" ? year : "",
+            country: userType === "general" ? country : "",
+            age_range: userType === "general" ? ageRange : "",
+            interests: interests.map((i) => i.tag),
+            interests_raw: interests.map((i) => i.raw),
           },
         },
       });
