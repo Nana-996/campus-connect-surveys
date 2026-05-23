@@ -324,6 +324,21 @@ function Create() {
                     </Select>
                   </div>
                   <Input value={q.text} onChange={(e) => updateQ(q.id, { text: e.target.value })} placeholder="Question text" />
+                  {q.type === "text" && (
+                    <div className="rounded-xl border border-dashed border-foreground/20 bg-background/40 px-3 py-2 text-xs text-muted-foreground">
+                      Preview: respondents will type a short answer.
+                    </div>
+                  )}
+                  {q.type === "rating" && (
+                    <div className="flex items-center gap-2 rounded-xl border border-dashed border-foreground/20 bg-background/40 px-3 py-2">
+                      <span className="text-xs text-muted-foreground">Preview:</span>
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <span key={n} className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-foreground/20 text-xs font-semibold">
+                          {n}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   {q.type === "choice" && (
                     <div className="space-y-2 pl-2">
                       {q.options?.map((opt, oi) => (
@@ -347,11 +362,16 @@ function Create() {
                     </div>
                   )}
                 </div>
-                {questions.length > 1 && (
-                  <Button type="button" variant="ghost" size="icon" onClick={() => removeQ(q.id)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                )}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => removeQ(q.id)}
+                  aria-label="Delete question"
+                  title="Delete question"
+                >
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
               </div>
             </div>
           ))}
