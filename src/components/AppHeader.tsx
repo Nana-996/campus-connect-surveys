@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Coins, Sparkles, Home, PlusCircle, FolderOpen, User, LogOut } from "lucide-react";
+import { Coins, Sparkles, Home, PlusCircle, FolderOpen, User, LogOut, Zap } from "lucide-react";
 import { Link as TLink } from "@tanstack/react-router";
 
 export function AppHeader() {
@@ -38,12 +38,14 @@ export function AppHeader() {
       </div>
       <nav className="mx-auto flex max-w-5xl items-center justify-around border-t border-foreground/10 bg-card px-2 py-1.5 sm:hidden">
         <NavItem to="/feed" icon={<Home className="h-5 w-5" />} label="Feed" />
+        <NavItem to="/swipe" icon={<Zap className="h-5 w-5" />} label="Swipe" />
         <NavItem to="/create" icon={<PlusCircle className="h-5 w-5" />} label="Create" />
         <NavItem to="/my-surveys" icon={<FolderOpen className="h-5 w-5" />} label="Mine" />
         <NavItem to="/profile" icon={<User className="h-5 w-5" />} label="Profile" />
       </nav>
       <nav className="mx-auto hidden max-w-5xl items-center gap-1 border-t border-foreground/10 px-5 py-2 sm:flex">
         <DesktopLink to="/feed">Feed</DesktopLink>
+        <DesktopLink to="/swipe">Swipe</DesktopLink>
         <DesktopLink to="/create">Create survey</DesktopLink>
         <DesktopLink to="/my-surveys">My surveys</DesktopLink>
         <DesktopLink to="/profile">Profile</DesktopLink>

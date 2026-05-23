@@ -13,6 +13,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedSwipeRouteImport } from './routes/_authenticated/swipe'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedMySurveysRouteImport } from './routes/_authenticated/my-surveys'
 import { Route as AuthenticatedFeedRouteImport } from './routes/_authenticated/feed'
@@ -40,6 +41,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedSwipeRoute = AuthenticatedSwipeRouteImport.update({
+  id: '/swipe',
+  path: '/swipe',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/feed': typeof AuthenticatedFeedRoute
   '/my-surveys': typeof AuthenticatedMySurveysRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/swipe': typeof AuthenticatedSwipeRoute
   '/survey/$id': typeof AuthenticatedSurveyIdRoute
   '/api/public/paystack-webhook': typeof ApiPublicPaystackWebhookRoute
 }
@@ -106,6 +113,7 @@ export interface FileRoutesByTo {
   '/feed': typeof AuthenticatedFeedRoute
   '/my-surveys': typeof AuthenticatedMySurveysRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/swipe': typeof AuthenticatedSwipeRoute
   '/survey/$id': typeof AuthenticatedSurveyIdRoute
   '/api/public/paystack-webhook': typeof ApiPublicPaystackWebhookRoute
 }
@@ -121,6 +129,7 @@ export interface FileRoutesById {
   '/_authenticated/feed': typeof AuthenticatedFeedRoute
   '/_authenticated/my-surveys': typeof AuthenticatedMySurveysRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/swipe': typeof AuthenticatedSwipeRoute
   '/_authenticated/survey/$id': typeof AuthenticatedSurveyIdRoute
   '/api/public/paystack-webhook': typeof ApiPublicPaystackWebhookRoute
 }
@@ -136,6 +145,7 @@ export interface FileRouteTypes {
     | '/feed'
     | '/my-surveys'
     | '/profile'
+    | '/swipe'
     | '/survey/$id'
     | '/api/public/paystack-webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -149,6 +159,7 @@ export interface FileRouteTypes {
     | '/feed'
     | '/my-surveys'
     | '/profile'
+    | '/swipe'
     | '/survey/$id'
     | '/api/public/paystack-webhook'
   id:
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
     | '/_authenticated/feed'
     | '/_authenticated/my-surveys'
     | '/_authenticated/profile'
+    | '/_authenticated/swipe'
     | '/_authenticated/survey/$id'
     | '/api/public/paystack-webhook'
   fileRoutesById: FileRoutesById
@@ -204,6 +216,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/swipe': {
+      id: '/_authenticated/swipe'
+      path: '/swipe'
+      fullPath: '/swipe'
+      preLoaderRoute: typeof AuthenticatedSwipeRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/profile': {
       id: '/_authenticated/profile'
@@ -271,6 +290,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedFeedRoute: typeof AuthenticatedFeedRoute
   AuthenticatedMySurveysRoute: typeof AuthenticatedMySurveysRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedSwipeRoute: typeof AuthenticatedSwipeRoute
   AuthenticatedSurveyIdRoute: typeof AuthenticatedSurveyIdRoute
 }
 
@@ -281,6 +301,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedFeedRoute: AuthenticatedFeedRoute,
   AuthenticatedMySurveysRoute: AuthenticatedMySurveysRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedSwipeRoute: AuthenticatedSwipeRoute,
   AuthenticatedSurveyIdRoute: AuthenticatedSurveyIdRoute,
 }
 
