@@ -106,7 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         university_domain: emailDomain,
         department: metadata.department ?? "",
         year: metadata.year ?? "",
-        earned_credits: 3,
+        earned_credits: userType === "student" ? 10 : 5,
         paid_credits: 0,
         user_type: userType,
       })
