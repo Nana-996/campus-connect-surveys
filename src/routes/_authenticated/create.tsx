@@ -12,6 +12,8 @@ import {
 import { toast } from "sonner";
 import { Trash2, Plus, Sparkles, Lock, Zap } from "lucide-react";
 import { TIERS, type Tier, canAfford } from "@/lib/credits";
+import { InterestTagInput, type InterestEntry } from "@/components/InterestTagInput";
+import { AGE_RANGES, COUNTRIES } from "@/lib/interests";
 
 type Question = {
   id: string;
