@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { ArrowUpRight, GraduationCap, Globe2 } from "lucide-react";
 import { ResendVerification } from "@/components/ResendVerification";
 import { InterestTagInput, type InterestEntry } from "@/components/InterestTagInput";
-import { AGE_RANGES, COUNTRIES } from "@/lib/interests";
+import { AGE_RANGES, COUNTRIES, YEAR_OPTIONS, DEPARTMENT_SUGGESTIONS } from "@/lib/interests";
 
 export const Route = createFileRoute("/signup")({
   component: SignupPage,
