@@ -120,6 +120,23 @@ function SignupPage() {
             Pick the account type that fits you.
           </p>
 
+          {!loading && user && (
+            <div className="mt-4 rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm">
+              You're already signed in as <span className="font-semibold">{user.email}</span>.{" "}
+              <Link to="/feed" className="font-semibold underline">Go to feed</Link>{" "}
+              or{" "}
+              <button
+                type="button"
+                onClick={async () => { await supabase.auth.signOut(); }}
+                className="font-semibold underline"
+              >
+                sign out
+              </button>{" "}
+              to create a different account.
+            </div>
+          )}
+
+
           <div className="mt-6 grid grid-cols-2 gap-3">
             <button
               type="button"
