@@ -37,9 +37,10 @@ function SignupPage() {
   const [signupNotice, setSignupNotice] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!loading && user) navigate({ to: "/feed" });
-  }, [user, loading, navigate]);
+  // Don't auto-redirect signed-in users away from /signup — that creates a
+  // race where clicks on the freshly-mounted form look like they caused a
+  // mysterious bounce to /feed. Instead, show an explicit notice below.
+
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,6 +119,23 @@ function SignupPage() {
           <p className="mt-2 text-sm text-muted-foreground">
             Pick the account type that fits you.
           </p>
+
+          {!loading && user && (
+            <div className="mt-4 rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm">
+              You're already signed in as <span className="font-semibold">{user.email}</span>.{" "}
+              <Link to="/feed" className="font-semibold underline">Go to feed</Link>{" "}
+              or{" "}
+              <button
+                type="button"
+                onClick={async () => { await supabase.auth.signOut(); }}
+                className="font-semibold underline"
+              >
+                sign out
+              </button>{" "}
+              to create a different account.
+            </div>
+          )}
+
 
           <div className="mt-6 grid grid-cols-2 gap-3">
             <button
