@@ -64,8 +64,15 @@ function SignupPage() {
       });
       if (error) throw error;
       setPassword("");
-      setSignupNotice(`We created the account for ${email}. Check your inbox and spam folder for the verification email, or use the resend button below.`);
-      toast.success("Account created. Check your email to verify your account.");
+      setSignupNotice(`Account created for ${email}. You can log in right away — email verification is disabled during testing.`);
+      toast.success("Account created. You can log in now.");
+      // Attempt immediate sign-in for convenience
+      try {
+        await supabase.auth.signInWithPassword({ email, password });
+        navigate({ to: "/feed" });
+      } catch {
+        navigate({ to: "/auth" });
+      }
     } catch (err: any) {
       const message = err.message ?? "Could not create account";
       setFormError(message);
