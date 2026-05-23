@@ -89,6 +89,21 @@ export type Database = {
         }
         Relationships: []
       }
+      interest_tags: {
+        Row: {
+          id: string
+          label: string
+        }
+        Insert: {
+          id: string
+          label: string
+        }
+        Update: {
+          id?: string
+          label?: string
+        }
+        Relationships: []
+      }
       payment_transactions: {
         Row: {
           amount_minor: number
@@ -142,6 +157,8 @@ export type Database = {
       }
       profiles: {
         Row: {
+          age_range: string | null
+          country: string | null
           created_at: string
           department: string
           earned_credits: number
@@ -149,6 +166,8 @@ export type Database = {
           flag_reason: string | null
           full_name: string
           id: string
+          interests: string[]
+          interests_raw: string[]
           is_flagged: boolean
           paid_credits: number
           university_domain: string
@@ -157,6 +176,8 @@ export type Database = {
           year: string
         }
         Insert: {
+          age_range?: string | null
+          country?: string | null
           created_at?: string
           department?: string
           earned_credits?: number
@@ -164,6 +185,8 @@ export type Database = {
           flag_reason?: string | null
           full_name?: string
           id: string
+          interests?: string[]
+          interests_raw?: string[]
           is_flagged?: boolean
           paid_credits?: number
           university_domain?: string
@@ -172,6 +195,8 @@ export type Database = {
           year?: string
         }
         Update: {
+          age_range?: string | null
+          country?: string | null
           created_at?: string
           department?: string
           earned_credits?: number
@@ -179,6 +204,8 @@ export type Database = {
           flag_reason?: string | null
           full_name?: string
           id?: string
+          interests?: string[]
+          interests_raw?: string[]
           is_flagged?: boolean
           paid_credits?: number
           university_domain?: string
@@ -302,7 +329,10 @@ export type Database = {
           questions: Json
           response_count: number
           response_goal: number
+          target_age_range: string | null
+          target_country: string | null
           target_department: string | null
+          target_interests: string[]
           target_year: string | null
           tier: string
           title: string
@@ -321,7 +351,10 @@ export type Database = {
           questions?: Json
           response_count?: number
           response_goal?: number
+          target_age_range?: string | null
+          target_country?: string | null
           target_department?: string | null
+          target_interests?: string[]
           target_year?: string | null
           tier?: string
           title: string
@@ -340,7 +373,10 @@ export type Database = {
           questions?: Json
           response_count?: number
           response_goal?: number
+          target_age_range?: string | null
+          target_country?: string | null
           target_department?: string | null
+          target_interests?: string[]
           target_year?: string | null
           tier?: string
           title?: string
@@ -374,7 +410,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      current_age_range: { Args: never; Returns: string }
+      current_country: { Args: never; Returns: string }
+      current_department: { Args: never; Returns: string }
+      current_interests: { Args: never; Returns: string[] }
       current_university_domain: { Args: never; Returns: string }
+      current_year: { Args: never; Returns: string }
       expire_earned_credits: { Args: never; Returns: undefined }
       has_role: {
         Args: {
