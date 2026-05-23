@@ -91,7 +91,7 @@ function SignupPage() {
             Join<br /><em>the conversation.</em>
           </p>
           <p className="mt-6 max-w-sm text-sm opacity-80">
-            Students get campus-scoped surveys at the lowest rate. General users can run public surveys too.
+            Students get verified campus-scoped surveys. General users can run public surveys too.
           </p>
         </div>
         <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.25em] opacity-70">
@@ -122,7 +122,7 @@ function SignupPage() {
             >
               <GraduationCap className="h-5 w-5" />
               <p className="mt-2 font-serif text-xl">Student</p>
-              <p className="text-[11px] opacity-80">Campus-scoped · best price</p>
+              <p className="text-[11px] opacity-80">Campus-scoped surveys</p>
             </button>
             <button
               type="button"
@@ -135,7 +135,7 @@ function SignupPage() {
             >
               <Globe2 className="h-5 w-5" />
               <p className="mt-2 font-serif text-xl">General</p>
-              <p className="text-[11px] opacity-80">Public surveys · 1.5× pricing</p>
+              <p className="text-[11px] opacity-80">Public surveys</p>
             </button>
           </div>
 
