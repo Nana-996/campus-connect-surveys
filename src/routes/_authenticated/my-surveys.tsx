@@ -63,7 +63,7 @@ function MySurveys() {
       ) : surveys.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-foreground/30 bg-card p-10 text-center shadow-paper">
           <p className="font-serif text-3xl">Nothing published yet.</p>
-          <p className="mt-1 text-sm text-muted-foreground">Your first survey is two credits away.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Your first survey is one credit away.</p>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
