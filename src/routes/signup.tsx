@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { ArrowUpRight, GraduationCap, Globe2 } from "lucide-react";
 import { ResendVerification } from "@/components/ResendVerification";
 import { InterestTagInput, type InterestEntry } from "@/components/InterestTagInput";
-import { AGE_RANGES, COUNTRIES } from "@/lib/interests";
+import { AGE_RANGES, COUNTRIES, YEAR_OPTIONS, DEPARTMENT_SUGGESTIONS } from "@/lib/interests";
 
 export const Route = createFileRoute("/signup")({
   component: SignupPage,
@@ -177,15 +177,32 @@ function SignupPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label htmlFor="dept" className="text-xs font-semibold uppercase tracking-wider">Department</Label>
-                  <Input id="dept" value={department} onChange={(e) => setDepartment(e.target.value)}
-                    placeholder="Psychology" className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card" />
+                  <Input
+                    id="dept"
+                    list="dept-suggestions"
+                    value={department}
+                    onChange={(e) => setDepartment(e.target.value)}
+                    onBlur={(e) => {
+                      const v = e.target.value.trim();
+                      if (!v) return;
+                      const match = DEPARTMENT_SUGGESTIONS.find(
+                        (d) => d.toLowerCase() === v.toLowerCase(),
+                      );
+                      if (match && match !== v) setDepartment(match);
+                    }}
+                    placeholder="Start typing… e.g. Pharmacy"
+                    className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"
+                  />
+                  <datalist id="dept-suggestions">
+                    {DEPARTMENT_SUGGESTIONS.map((d) => <option key={d} value={d} />)}
+                  </datalist>
                 </div>
                 <div>
                   <Label htmlFor="year" className="text-xs font-semibold uppercase tracking-wider">Year</Label>
                   <Select value={year} onValueChange={setYear}>
                     <SelectTrigger className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"><SelectValue placeholder="Year" /></SelectTrigger>
                     <SelectContent>
-                      {["Year 1","Year 2","Year 3","Year 4","Postgrad"].map((y) => (
+                      {YEAR_OPTIONS.map((y) => (
                         <SelectItem key={y} value={y}>{y}</SelectItem>
                       ))}
                     </SelectContent>
