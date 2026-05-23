@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
-import { Sparkles, ArrowLeft, Heart, X, Zap, Star } from "lucide-react";
+import { Sparkles, ArrowLeft, Zap, Star } from "lucide-react";
 
 type Question = { id: string; type: "text" | "choice" | "rating"; text: string; options?: string[] };
 type Survey = {
