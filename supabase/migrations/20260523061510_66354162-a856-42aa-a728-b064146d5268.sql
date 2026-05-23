@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public.current_university_domain() TO anon, authenticated;
