@@ -122,7 +122,7 @@ function SignupPage() {
             >
               <GraduationCap className="h-5 w-5" />
               <p className="mt-2 font-serif text-xl">Student</p>
-              <p className="text-[11px] opacity-80">Campus-scoped · best price</p>
+              <p className="text-[11px] opacity-80">Campus-scoped surveys</p>
             </button>
             <button
               type="button"
