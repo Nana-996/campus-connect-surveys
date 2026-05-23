@@ -57,7 +57,11 @@ function BuyPage() {
         toast.error(e.message ?? "Could not verify payment");
       } finally {
         setVerifying(false);
-        navigate({ to: "/buy", search: {} as any, replace: true });
+        // Only strip the ?reference param if the user is still on /buy.
+        // Otherwise we'd yank them back here after they navigated away.
+        if (typeof window !== "undefined" && window.location.pathname === "/buy") {
+          navigate({ to: "/buy", search: {} as any, replace: true });
+        }
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
