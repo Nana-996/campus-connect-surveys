@@ -35,12 +35,12 @@ function Create() {
   const [tier, setTier] = useState<Tier>("pro");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  // For students: department/year. For general: audience descriptor + region.
+  // Structured targeting (replaces the old free-text audience/region inputs)
   const [targetDept, setTargetDept] = useState("");
   const [targetYear, setTargetYear] = useState("");
-  const [audience, setAudience] = useState("");
-  const [region, setRegion] = useState("");
-  const [ageRange, setAgeRange] = useState("");
+  const [targetCountry, setTargetCountry] = useState<string>("");
+  const [targetAge, setTargetAge] = useState<string>("");
+  const [targetInterests, setTargetInterests] = useState<InterestEntry[]>([]);
   const [responseGoal, setResponseGoal] = useState<string>("");
   const [expiresAt, setExpiresAt] = useState<string>("");
   const [allowGeneral, setAllowGeneral] = useState(false);
