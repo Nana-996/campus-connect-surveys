@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Users, Filter, ArrowUpRight, Sparkles } from "lucide-react";
 
-import { tagLabel, ageLabel } from "@/lib/interests";
+import { tagLabel, ageLabel, AGE_RANGES, COUNTRIES, INTEREST_TAGS } from "@/lib/interests";
 
 type Survey = {
   id: string;
