@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Users, Filter, ArrowUpRight, Sparkles } from "lucide-react";
 
+import { tagLabel, ageLabel } from "@/lib/interests";
+
 type Survey = {
   id: string;
   title: string;
@@ -11,6 +13,9 @@ type Survey = {
   creator_id: string;
   target_department: string | null;
   target_year: string | null;
+  target_country?: string | null;
+  target_age_range?: string | null;
+  target_interests?: string[] | null;
   response_count: number;
   questions: any[];
   created_at: string;
