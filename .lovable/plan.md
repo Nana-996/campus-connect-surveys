@@ -1,112 +1,102 @@
+# Survey Insights & Reports
 
-# Real audience targeting end-to-end
+Add an Analyze area to each survey the creator owns, turning raw responses into research-quality outputs. Free tier covers basic analytics for every creator; premium gates advanced reporting, branded PDF exports, subgroup comparison, and shareable dashboards.
 
-Right now creators can type "Target audience / Region / Age" but nothing on respondent profiles matches it. This wires the loop closed.
+## Scope
 
-## 1. Profile attributes (both user types)
+### Route
+- New nested route: `/_authenticated/survey/$id/analyze` (creator-only). Add an "Analyze" button on `my-surveys` and on the existing `survey.$id` page when the viewer is the creator.
 
-Add to `profiles`:
+### Analyze page layout
+Sidebar (sticky) + main canvas:
 
-- `country text` — general users (and optional for students)
-- `age_range text` — one of: `under_18`, `18_24`, `25_34`, `35_44`, `45_54`, `55_plus`
-- `interests text[]` — normalized canonical tags
-- `interests_raw text[]` — what the user actually typed (so we never lose nuance)
-
-Students keep `department` + `year`. General users get `country` + `age_range`. Both get `interests`.
-
-## 2. Canonical interest tag list
-
-Fixed vocabulary of ~22 tags used for matching:
-
-```text
-tech, ai, gaming, science, health, fitness, mental_health, food, travel,
-fashion, beauty, music, film, books, sports, finance, business, politics,
-education, environment, parenting, relationships, art, other
+```
+┌──────────────┬──────────────────────────────┐
+│ Views        │ Header: title, n=, filters    │
+│ • Overview   │                               │
+│ • Questions  │ [Active filter chips]         │
+│ • Compare ★  │                               │
+│ • Cross-tab ★│ <selected view renders here>  │
+│ • Raw data   │                               │
+│ • Saved      │                               │
+│              │                               │
+│ Filters      │                               │
+│ Dept / Year  │                               │
+│ Country / Age│                               │
+│ Date range   │                               │
+└──────────────┴──────────────────────────────┘
 ```
 
-## 3. AI-normalized tag input (flexible + accurate)
+★ = premium-gated.
 
-When a user types a tag (e.g. "crypto", "weight lifting", "k-pop"):
+### Views
+1. **Overview (free)** — total responses, completion rate, avg duration, response-over-time sparkline, top 3 questions preview.
+2. **Questions (free)** — per-question chart (bar / pie / horizontal bar auto-selected by question type), counts + percentages, "show/hide" toggles per question.
+3. **Subgroup compare (premium)** — pick a question + a demographic (dept / year / country / age). Side-by-side bars per group.
+4. **Cross-tab (premium)** — pick Question A × Question B, render matrix table with row %.
+5. **Raw data (free CSV, premium XLSX + filtered exports)** — table of responses with answers; export buttons.
+6. **Saved views (premium)** — name + persist a filter+selection combo; reload later.
 
-- Client calls a `createServerFn` `normalizeInterestTag({ raw })` that uses Lovable AI Gateway (`google/gemini-2.5-flash-lite`) with a strict JSON-schema response: `{ tag: <one of canonical>, confidence: 0..1 }`.
-- Server stores `interests_raw[]` = user text, `interests[]` = canonical tag.
-- UI shows the chip with both: `crypto → finance`. User can override the mapping by tapping the chip and picking a different canonical tag from a dropdown — so AI is the default, not the jail.
-- Same flow runs on the Create form's "target interests" input, so creators and respondents share the canonical vocabulary.
+### Exports
+- CSV of raw responses (free).
+- PDF report (premium, branded with university + CampusVerify footer) — overview + selected charts rendered via `jspdf` + `html2canvas` snapshot of chart container.
+- Shareable live dashboard (premium) — public read-only token URL `/r/$token` showing overview + questions view; no raw data, no PII.
 
-This is the "very flexible yet highly accurate" piece — free typing on the surface, normalized vocabulary in the database, manual override always available.
+### Safeguards (apply to ALL views)
+- Always show `n = X` in header and per subgroup.
+- Suppress any subgroup / cross-tab cell with `count < 5` — render as "—" with tooltip "Hidden to protect privacy (n<5)".
+- Active filters shown as removable chips.
+- Never expose `respondent_id` or any join back to profiles in any view or export.
 
-## 4. Signup form changes
+### Premium gating
+Two checks:
+- Creator's most recent survey of this id has `tier in ('boosted','pro')` → full premium on that survey, OR
+- Creator has `paid_credits >= 5` (treated as premium subscription proxy for now).
 
-`src/routes/signup.tsx`:
+Locked features show a small Lock badge + "Upgrade to Boosted/Pro" CTA linking to `/buy`.
 
-- Replace the user-type switch's left/right pane content so each type collects what's actually relevant:
-  - **Student**: full name, university (auto-derived from email domain), department, year, interests.
-  - **General**: full name, country (dropdown of ~50 countries, "Other" lets type), age range (dropdown), interests.
-- Tag input is a chip field: type → enter normalizes → chip shows raw + canonical → click to edit or remove.
+## Database
 
-## 5. Create form changes (students AND general)
+New migration adds:
 
-Replace the three free-text targeting inputs with structured controls when tier is not Basic:
+- `survey_report_views` table: `id, survey_id, creator_id, name, config jsonb, created_at, updated_at`. RLS: creator only.
+- `survey_share_tokens` table: `id, survey_id, creator_id, token text unique, expires_at, created_at, revoked bool`. RLS: creator manages own; `token` lookups go through a SECURITY DEFINER RPC `public.get_shared_dashboard(token text)` that returns only safe aggregated JSON (no raw responses).
+- RPC `public.survey_aggregate(survey_id uuid, filters jsonb)` (SECURITY DEFINER) — computes per-question counts/percentages server-side honoring filters and the n<5 suppression rule. Authorizes: caller must be creator OR call must come via `get_shared_dashboard` flow (token validates internally).
 
-- **Students**: department (text), year (select), interests (tag chips), optional country.
-- **General**: country (select), age range (select), interests (tag chips).
+## Server functions (`src/lib/reports.functions.ts`)
 
-All write to new survey columns: `target_country`, `target_age_range`, `target_interests text[]`. We drop the misuse of `target_year` for "Region · Age".
+All protected with `requireSupabaseAuth`, all verify `creator_id = auth.uid()`:
+- `getSurveyAggregate({ surveyId, filters })` → counts per question, totals, demographics breakdown, with n<5 suppression.
+- `getCrossTab({ surveyId, qa, qb, filters })` — premium.
+- `getCompareBreakdown({ surveyId, questionId, dimension, filters })` — premium.
+- `exportResponsesCsv({ surveyId, filters })` → returns CSV string.
+- `saveReportView({ surveyId, name, config })` / `listReportViews` / `deleteReportView` — premium.
+- `createShareToken({ surveyId, expiresInDays })` / `revokeShareToken` / `listShareTokens` — premium.
 
-## 6. Feed matching
+Public server route `src/routes/r/$token.tsx` renders shared dashboard via `get_shared_dashboard` RPC (no auth required, read-only safe aggregates only).
 
-`surveys` table gains `target_country`, `target_age_range`, `target_interests text[]`.
+## Frontend files
 
-The feed query (and the RLS read policy) only shows a survey to a respondent when **every targeting field that is set on the survey matches the respondent's profile**:
+- `src/routes/_authenticated/survey.$id.analyze.tsx` — main page, sidebar + view switcher.
+- `src/components/analyze/OverviewView.tsx`
+- `src/components/analyze/QuestionsView.tsx`
+- `src/components/analyze/CompareView.tsx` (premium)
+- `src/components/analyze/CrossTabView.tsx` (premium)
+- `src/components/analyze/RawDataView.tsx`
+- `src/components/analyze/SavedViews.tsx` (premium)
+- `src/components/analyze/FiltersPanel.tsx`
+- `src/components/analyze/PremiumLock.tsx`
+- `src/components/analyze/ExportMenu.tsx` (CSV free, PDF + XLSX premium)
+- `src/routes/r.$token.tsx` — public dashboard
 
-- `target_department` set → must equal respondent's department
-- `target_year` set → must equal respondent's year
-- `target_country` set → must equal respondent's country
-- `target_age_range` set → must equal respondent's age_range
-- `target_interests` non-empty → respondent's `interests` must overlap (`&&` operator)
+Use existing `recharts` (already in `chart.tsx`) for charts. Add `jspdf` + `html2canvas` + `xlsx` via `bun add` for premium exports.
 
-Empty targeting fields are wildcards. Creators always see their own surveys regardless.
+## Design
 
-## 7. Backfill + safety
+Academic, presentation-ready: serif headings (Instrument Serif via existing font stack), generous spacing, neutral palette using existing tokens, muted chart colors, clear n= labels, dotted divider between sections. Print stylesheet for the dashboard so creators can also browser-print.
 
-- New columns are nullable; existing surveys and profiles keep working (no targeting = visible to everyone in their audience pool).
-- A small banner on profile prompts existing users without `interests`/`age_range`/`country` to fill them in so they show up in more targeted surveys.
-
-## Technical details
-
-### Schema migration
-
-```text
-profiles:
-  + country text
-  + age_range text
-  + interests text[] default '{}'
-  + interests_raw text[] default '{}'
-
-surveys:
-  + target_country text
-  + target_age_range text
-  + target_interests text[] default '{}'
-
-new table: interest_tags (id text primary key, label text) seeded with the 22 canonical tags
-```
-
-### Files touched
-
-```text
-supabase migration (new)            schema + RLS update for surveys SELECT
-src/lib/interests.ts                canonical tag list + helpers
-src/lib/interests.functions.ts      normalizeInterestTag serverFn (Lovable AI)
-src/components/InterestTagInput.tsx chip input with AI normalization + override
-src/routes/signup.tsx               new structured fields per user type
-src/routes/_authenticated/create.tsx replace free-text targeting with selects + chips
-src/routes/_authenticated/feed.tsx  apply respondent-profile filter
-src/lib/auth.tsx                    extend Profile type with country/age_range/interests
-src/integrations/supabase/types.ts  auto-regenerated by migration
-```
-
-### Out of scope (call out)
-
-- Geo-detection — no IP lookup; country is user-declared.
-- Multi-country surveys — `target_country` is a single value for v1 (can become `text[]` later if you want).
-- Migrating old surveys' free-text "audience" strings into the new structured fields — they stay as legacy `target_department` text.
+## Out of scope (call out, do not build)
+- AI-generated written summaries.
+- Sentiment analysis / NLP on free-text answers.
+- Email-scheduled reports.
+- Custom logo upload for branded PDFs (uses university_name text only).
