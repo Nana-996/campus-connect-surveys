@@ -17,6 +17,7 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RTokenRouteImport } from './routes/r.$token'
 import { Route as AuthenticatedSwipeRouteImport } from './routes/_authenticated/swipe'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedMySurveysRouteImport } from './routes/_authenticated/my-surveys'
@@ -65,6 +66,11 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RTokenRoute = RTokenRouteImport.update({
+  id: '/r/$token',
+  path: '/r/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedSwipeRoute = AuthenticatedSwipeRouteImport.update({
@@ -135,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/my-surveys': typeof AuthenticatedMySurveysRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/swipe': typeof AuthenticatedSwipeRoute
+  '/r/$token': typeof RTokenRoute
   '/survey/$id': typeof AuthenticatedSurveyIdRouteWithChildren
   '/api/public/paystack-webhook': typeof ApiPublicPaystackWebhookRoute
   '/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
@@ -154,6 +161,7 @@ export interface FileRoutesByTo {
   '/my-surveys': typeof AuthenticatedMySurveysRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/swipe': typeof AuthenticatedSwipeRoute
+  '/r/$token': typeof RTokenRoute
   '/survey/$id': typeof AuthenticatedSurveyIdRouteWithChildren
   '/api/public/paystack-webhook': typeof ApiPublicPaystackWebhookRoute
   '/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
@@ -175,6 +183,7 @@ export interface FileRoutesById {
   '/_authenticated/my-surveys': typeof AuthenticatedMySurveysRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/swipe': typeof AuthenticatedSwipeRoute
+  '/r/$token': typeof RTokenRoute
   '/_authenticated/survey/$id': typeof AuthenticatedSurveyIdRouteWithChildren
   '/api/public/paystack-webhook': typeof ApiPublicPaystackWebhookRoute
   '/_authenticated/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
@@ -196,6 +205,7 @@ export interface FileRouteTypes {
     | '/my-surveys'
     | '/profile'
     | '/swipe'
+    | '/r/$token'
     | '/survey/$id'
     | '/api/public/paystack-webhook'
     | '/survey/$id/analyze'
@@ -215,6 +225,7 @@ export interface FileRouteTypes {
     | '/my-surveys'
     | '/profile'
     | '/swipe'
+    | '/r/$token'
     | '/survey/$id'
     | '/api/public/paystack-webhook'
     | '/survey/$id/analyze'
@@ -235,6 +246,7 @@ export interface FileRouteTypes {
     | '/_authenticated/my-surveys'
     | '/_authenticated/profile'
     | '/_authenticated/swipe'
+    | '/r/$token'
     | '/_authenticated/survey/$id'
     | '/api/public/paystack-webhook'
     | '/_authenticated/survey/$id/analyze'
@@ -249,6 +261,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
   TermsRoute: typeof TermsRoute
+  RTokenRoute: typeof RTokenRoute
   ApiPublicPaystackWebhookRoute: typeof ApiPublicPaystackWebhookRoute
 }
 
@@ -308,6 +321,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/r/$token': {
+      id: '/r/$token'
+      path: '/r/$token'
+      fullPath: '/r/$token'
+      preLoaderRoute: typeof RTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/swipe': {
@@ -431,6 +451,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
   TermsRoute: TermsRoute,
+  RTokenRoute: RTokenRoute,
   ApiPublicPaystackWebhookRoute: ApiPublicPaystackWebhookRoute,
 }
 export const routeTree = rootRouteImport
