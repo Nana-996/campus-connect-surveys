@@ -17,6 +17,7 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RTokenRouteImport } from './routes/r.$token'
 import { Route as AuthenticatedSwipeRouteImport } from './routes/_authenticated/swipe'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedMySurveysRouteImport } from './routes/_authenticated/my-surveys'
@@ -26,6 +27,7 @@ import { Route as AuthenticatedBuyRouteImport } from './routes/_authenticated/bu
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as ApiPublicPaystackWebhookRouteImport } from './routes/api/public/paystack-webhook'
 import { Route as AuthenticatedSurveyIdRouteImport } from './routes/_authenticated/survey.$id'
+import { Route as AuthenticatedSurveyIdAnalyzeRouteImport } from './routes/_authenticated/survey.$id.analyze'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -64,6 +66,11 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RTokenRoute = RTokenRouteImport.update({
+  id: '/r/$token',
+  path: '/r/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedSwipeRoute = AuthenticatedSwipeRouteImport.update({
@@ -112,6 +119,12 @@ const AuthenticatedSurveyIdRoute = AuthenticatedSurveyIdRouteImport.update({
   path: '/survey/$id',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedSurveyIdAnalyzeRoute =
+  AuthenticatedSurveyIdAnalyzeRouteImport.update({
+    id: '/analyze',
+    path: '/analyze',
+    getParentRoute: () => AuthenticatedSurveyIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -128,8 +141,10 @@ export interface FileRoutesByFullPath {
   '/my-surveys': typeof AuthenticatedMySurveysRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/swipe': typeof AuthenticatedSwipeRoute
-  '/survey/$id': typeof AuthenticatedSurveyIdRoute
+  '/r/$token': typeof RTokenRoute
+  '/survey/$id': typeof AuthenticatedSurveyIdRouteWithChildren
   '/api/public/paystack-webhook': typeof ApiPublicPaystackWebhookRoute
+  '/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -146,8 +161,10 @@ export interface FileRoutesByTo {
   '/my-surveys': typeof AuthenticatedMySurveysRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/swipe': typeof AuthenticatedSwipeRoute
-  '/survey/$id': typeof AuthenticatedSurveyIdRoute
+  '/r/$token': typeof RTokenRoute
+  '/survey/$id': typeof AuthenticatedSurveyIdRouteWithChildren
   '/api/public/paystack-webhook': typeof ApiPublicPaystackWebhookRoute
+  '/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -166,8 +183,10 @@ export interface FileRoutesById {
   '/_authenticated/my-surveys': typeof AuthenticatedMySurveysRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/swipe': typeof AuthenticatedSwipeRoute
-  '/_authenticated/survey/$id': typeof AuthenticatedSurveyIdRoute
+  '/r/$token': typeof RTokenRoute
+  '/_authenticated/survey/$id': typeof AuthenticatedSurveyIdRouteWithChildren
   '/api/public/paystack-webhook': typeof ApiPublicPaystackWebhookRoute
+  '/_authenticated/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -186,8 +205,10 @@ export interface FileRouteTypes {
     | '/my-surveys'
     | '/profile'
     | '/swipe'
+    | '/r/$token'
     | '/survey/$id'
     | '/api/public/paystack-webhook'
+    | '/survey/$id/analyze'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -204,8 +225,10 @@ export interface FileRouteTypes {
     | '/my-surveys'
     | '/profile'
     | '/swipe'
+    | '/r/$token'
     | '/survey/$id'
     | '/api/public/paystack-webhook'
+    | '/survey/$id/analyze'
   id:
     | '__root__'
     | '/'
@@ -223,8 +246,10 @@ export interface FileRouteTypes {
     | '/_authenticated/my-surveys'
     | '/_authenticated/profile'
     | '/_authenticated/swipe'
+    | '/r/$token'
     | '/_authenticated/survey/$id'
     | '/api/public/paystack-webhook'
+    | '/_authenticated/survey/$id/analyze'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -236,6 +261,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
   TermsRoute: typeof TermsRoute
+  RTokenRoute: typeof RTokenRoute
   ApiPublicPaystackWebhookRoute: typeof ApiPublicPaystackWebhookRoute
 }
 
@@ -295,6 +321,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/r/$token': {
+      id: '/r/$token'
+      path: '/r/$token'
+      fullPath: '/r/$token'
+      preLoaderRoute: typeof RTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/swipe': {
@@ -360,8 +393,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSurveyIdRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/survey/$id/analyze': {
+      id: '/_authenticated/survey/$id/analyze'
+      path: '/analyze'
+      fullPath: '/survey/$id/analyze'
+      preLoaderRoute: typeof AuthenticatedSurveyIdAnalyzeRouteImport
+      parentRoute: typeof AuthenticatedSurveyIdRoute
+    }
   }
 }
+
+interface AuthenticatedSurveyIdRouteChildren {
+  AuthenticatedSurveyIdAnalyzeRoute: typeof AuthenticatedSurveyIdAnalyzeRoute
+}
+
+const AuthenticatedSurveyIdRouteChildren: AuthenticatedSurveyIdRouteChildren = {
+  AuthenticatedSurveyIdAnalyzeRoute: AuthenticatedSurveyIdAnalyzeRoute,
+}
+
+const AuthenticatedSurveyIdRouteWithChildren =
+  AuthenticatedSurveyIdRoute._addFileChildren(
+    AuthenticatedSurveyIdRouteChildren,
+  )
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
@@ -371,7 +424,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedMySurveysRoute: typeof AuthenticatedMySurveysRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedSwipeRoute: typeof AuthenticatedSwipeRoute
-  AuthenticatedSurveyIdRoute: typeof AuthenticatedSurveyIdRoute
+  AuthenticatedSurveyIdRoute: typeof AuthenticatedSurveyIdRouteWithChildren
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -382,7 +435,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedMySurveysRoute: AuthenticatedMySurveysRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedSwipeRoute: AuthenticatedSwipeRoute,
-  AuthenticatedSurveyIdRoute: AuthenticatedSurveyIdRoute,
+  AuthenticatedSurveyIdRoute: AuthenticatedSurveyIdRouteWithChildren,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
@@ -398,6 +451,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
   TermsRoute: TermsRoute,
+  RTokenRoute: RTokenRoute,
   ApiPublicPaystackWebhookRoute: ApiPublicPaystackWebhookRoute,
 }
 export const routeTree = rootRouteImport

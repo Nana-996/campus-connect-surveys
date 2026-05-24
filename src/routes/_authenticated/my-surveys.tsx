@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Users, Eye, ArrowUpRight } from "lucide-react";
+import { Users, Eye, ArrowUpRight, BarChart3 } from "lucide-react";
 
 type Survey = {
   id: string;
@@ -81,10 +81,15 @@ function MySurveys() {
                   <Users className="h-3 w-3" /> {s.response_count}
                 </div>
               </div>
-              <div className="mt-4">
+              <div className="mt-4 flex flex-wrap gap-2">
                 <Link to="/survey/$id" params={{ id: s.id }}>
                   <Button size="sm" variant="outline" className="rounded-full border-foreground/30 bg-background/40">
-                    <Eye className="mr-1 h-3.5 w-3.5" /> View & export
+                    <Eye className="mr-1 h-3.5 w-3.5" /> View
+                  </Button>
+                </Link>
+                <Link to="/survey/$id/analyze" params={{ id: s.id }}>
+                  <Button size="sm" className="rounded-full bg-primary">
+                    <BarChart3 className="mr-1 h-3.5 w-3.5" /> Analyze
                   </Button>
                 </Link>
               </div>
