@@ -407,7 +407,45 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      campus_directory: {
+        Row: {
+          age_range: string | null
+          country: string | null
+          created_at: string | null
+          department: string | null
+          full_name: string | null
+          id: string | null
+          university_domain: string | null
+          university_name: string | null
+          user_type: string | null
+          year: string | null
+        }
+        Insert: {
+          age_range?: string | null
+          country?: string | null
+          created_at?: string | null
+          department?: string | null
+          full_name?: string | null
+          id?: string | null
+          university_domain?: string | null
+          university_name?: string | null
+          user_type?: string | null
+          year?: string | null
+        }
+        Update: {
+          age_range?: string | null
+          country?: string | null
+          created_at?: string | null
+          department?: string | null
+          full_name?: string | null
+          id?: string | null
+          university_domain?: string | null
+          university_name?: string | null
+          user_type?: string | null
+          year?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       current_age_range: { Args: never; Returns: string }
