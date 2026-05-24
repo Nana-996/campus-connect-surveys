@@ -243,14 +243,46 @@ function Feed() {
       {loading ? (
         <p className="text-sm text-muted-foreground">Loading surveys…</p>
       ) : visible.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-foreground/30 bg-card p-10 text-center shadow-paper">
-          <Sparkles className="mx-auto h-8 w-8 text-primary" />
-          <p className="mt-3 font-serif text-3xl">A quiet day on campus.</p>
-          <p className="mt-1 text-sm text-muted-foreground">Be the spark — publish the first survey.</p>
-          <Link to="/create" className="mt-5 inline-flex items-center gap-1 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground">
-            Start one <ArrowUpRight className="h-4 w-4" />
-          </Link>
-        </div>
+        (() => {
+          const noneAtAll = surveys.length === 0;
+          const filteredOut = !noneAtAll && anyFilterActive;
+          return (
+            <div className="rounded-3xl border border-dashed border-foreground/30 bg-card p-10 text-center shadow-paper">
+              <Sparkles className="mx-auto h-8 w-8 text-primary" />
+              <p className="mt-3 font-serif text-3xl">
+                {filteredOut
+                  ? "Nothing matches those filters."
+                  : isGeneral
+                    ? "No open surveys right now."
+                    : "A quiet day on campus."}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {filteredOut
+                  ? `${surveys.length} survey${surveys.length === 1 ? "" : "s"} available — try widening or clearing your filters.`
+                  : isGeneral
+                    ? "Check back soon, or publish the first one yourself."
+                    : `No surveys on ${profile?.university_name ?? "your campus"} yet. Be the spark — publish the first one.`}
+              </p>
+              <div className="mt-5 flex items-center justify-center gap-2">
+                {filteredOut && (
+                  <button
+                    onClick={() => {
+                      setDeptFilter("all"); setYearFilter("all");
+                      setCountryFilter("all"); setAgeFilter("all"); setInterestFilter("all");
+                      setScope("all");
+                    }}
+                    className="inline-flex items-center gap-1 rounded-full border border-foreground/30 bg-background px-5 py-2 text-sm font-semibold"
+                  >
+                    Clear filters
+                  </button>
+                )}
+                <Link to="/create" className="inline-flex items-center gap-1 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground">
+                  {filteredOut ? "New survey" : "Start one"} <ArrowUpRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+          );
+        })()
       ) : (
         <div className="grid auto-rows-[minmax(180px,auto)] grid-cols-2 gap-3 sm:grid-cols-6 sm:gap-4">
           {visible.map((s, i) => {
