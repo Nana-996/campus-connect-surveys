@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Users, Eye, ArrowUpRight } from "lucide-react";
+import { Users, Eye, ArrowUpRight, BarChart3 } from "lucide-react";
 
 type Survey = {
   id: string;
