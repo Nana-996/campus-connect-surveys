@@ -37,6 +37,16 @@ function BuyPage() {
     return { Authorization: `Bearer ${token}` };
   };
 
+  // Reset any stale loading state when arriving on /buy without a payment ref
+  // (e.g. user closed the Paystack tab / hit back without completing checkout).
+  useEffect(() => {
+    const ref = search.reference || search.trxref;
+    if (!ref) {
+      setBusy(null);
+      setVerifying(false);
+    }
+  }, [search.reference, search.trxref]);
+
   // After callback from Paystack, verify the transaction
   useEffect(() => {
     const ref = search.reference || search.trxref;
@@ -57,6 +67,7 @@ function BuyPage() {
         toast.error(e.message ?? "Could not verify payment");
       } finally {
         setVerifying(false);
+        setBusy(null);
         // Only strip the ?reference param if the user is still on /buy.
         // Otherwise we'd yank them back here after they navigated away.
         if (typeof window !== "undefined" && window.location.pathname === "/buy") {
