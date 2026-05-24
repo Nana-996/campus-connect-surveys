@@ -68,7 +68,7 @@ function Feed() {
       try {
         const peersPromise = isGeneral
           ? Promise.resolve({ data: [], error: null } as any)
-          : supabase.from("profiles").select("department, year");
+          : supabase.from("campus_directory" as any).select("department, year");
         const [{ data, error }, { data: resps, error: respsError }, { data: peers, error: peersError }] = await Promise.all([
           supabase.from("surveys").select("*").eq("is_active", true).gt("expires_at", new Date().toISOString()).neq("creator_id", user.id).order("created_at", { ascending: false }),
           supabase.from("survey_responses").select("survey_id").eq("respondent_id", user.id),
