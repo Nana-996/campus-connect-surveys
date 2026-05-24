@@ -119,16 +119,6 @@ const AuthenticatedSurveyIdRoute = AuthenticatedSurveyIdRouteImport.update({
   path: '/survey/$id',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedSurveyIdAnalyzeRoute = AuthenticatedSurveyIdAnalyzeRouteImport.update({
-  id: '/survey/$id/analyze',
-  path: '/survey/$id/analyze',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const RTokenRoute = RTokenRouteImport.update({
-  id: '/r/$token',
-  path: '/r/$token',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticatedSurveyIdAnalyzeRoute =
   AuthenticatedSurveyIdAnalyzeRouteImport.update({
     id: '/analyze',
