@@ -28,8 +28,6 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as ApiPublicPaystackWebhookRouteImport } from './routes/api/public/paystack-webhook'
 import { Route as AuthenticatedSurveyIdRouteImport } from './routes/_authenticated/survey.$id'
 import { Route as AuthenticatedSurveyIdAnalyzeRouteImport } from './routes/_authenticated/survey.$id.analyze'
-import { Route as RTokenRouteImport } from './routes/r.$token'
-import { Route as AuthenticatedSurveyIdAnalyzeRouteImport } from './routes/_authenticated/survey.$id.analyze'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -120,6 +118,16 @@ const AuthenticatedSurveyIdRoute = AuthenticatedSurveyIdRouteImport.update({
   id: '/survey/$id',
   path: '/survey/$id',
   getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedSurveyIdAnalyzeRoute = AuthenticatedSurveyIdAnalyzeRouteImport.update({
+  id: '/survey/$id/analyze',
+  path: '/survey/$id/analyze',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const RTokenRoute = RTokenRouteImport.update({
+  id: '/r/$token',
+  path: '/r/$token',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedSurveyIdAnalyzeRoute =
   AuthenticatedSurveyIdAnalyzeRouteImport.update({
