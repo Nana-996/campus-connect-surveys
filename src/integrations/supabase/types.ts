@@ -242,6 +242,44 @@ export type Database = {
         }
         Relationships: []
       }
+      survey_report_views: {
+        Row: {
+          config: Json
+          created_at: string
+          creator_id: string
+          id: string
+          name: string
+          survey_id: string
+          updated_at: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          creator_id: string
+          id?: string
+          name: string
+          survey_id: string
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          creator_id?: string
+          id?: string
+          name?: string
+          survey_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_report_views_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       survey_responses: {
         Row: {
           answers: Json
@@ -273,6 +311,44 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "survey_responses_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      survey_share_tokens: {
+        Row: {
+          created_at: string
+          creator_id: string
+          expires_at: string | null
+          id: string
+          revoked: boolean
+          survey_id: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          creator_id: string
+          expires_at?: string | null
+          id?: string
+          revoked?: boolean
+          survey_id: string
+          token: string
+        }
+        Update: {
+          created_at?: string
+          creator_id?: string
+          expires_at?: string | null
+          id?: string
+          revoked?: boolean
+          survey_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_share_tokens_survey_id_fkey"
             columns: ["survey_id"]
             isOneToOne: false
             referencedRelation: "surveys"
@@ -455,6 +531,7 @@ export type Database = {
       current_university_domain: { Args: never; Returns: string }
       current_year: { Args: never; Returns: string }
       expire_earned_credits: { Args: never; Returns: undefined }
+      get_shared_dashboard: { Args: { _token: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
