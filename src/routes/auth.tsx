@@ -102,9 +102,8 @@ function AuthPage() {
                   Forgot?
                 </Link>
               </div>
-              <Input
+              <PasswordInput
                 id="password"
-                type="password"
                 required
                 minLength={6}
                 value={password}
