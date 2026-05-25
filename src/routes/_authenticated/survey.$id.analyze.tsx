@@ -58,6 +58,7 @@ function AnalyzePage() {
   const [hiddenQs, setHiddenQs] = useState<Set<string>>(new Set());
   const [savedViews, setSavedViews] = useState<any[]>([]);
   const [shareTokens, setShareTokens] = useState<any[]>([]);
+  const [newToken, setNewToken] = useState<string | null>(null);
   const [upgradePrompt, setUpgradePrompt] = useState<{ open: boolean; feature: string; description?: string }>({ open: false, feature: "" });
   const promptUpgrade = (feature: string, description?: string) => setUpgradePrompt({ open: true, feature, description });
 
