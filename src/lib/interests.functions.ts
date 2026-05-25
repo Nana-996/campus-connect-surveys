@@ -35,16 +35,37 @@ export const normalizeInterestTag = createServerFn({ method: "POST" })
     }).parse(input),
   )
   .handler(async ({ data }) => {
-    const apiKey = process.env.LOVABLE_API_KEY;
-    if (!apiKey) {
-      return { tag: "other" as const, confidence: 0, source: "fallback" as const };
-    }
-
-    // Fast cheap exact match first
+    // Fast cheap exact match first — runs for everyone, no AI cost
     const lower = data.raw.toLowerCase().replace(/\s+/g, "_");
     if ((CANONICAL_IDS as readonly string[]).includes(lower)) {
       return { tag: lower, confidence: 1, source: "exact" as const };
     }
+
+    // Gate the paid AI call behind a valid user session to prevent quota drain
+    // by unauthenticated callers. Unauthenticated callers (e.g. signup form)
+    // still get the exact-match path above and a safe "other" fallback below.
+    const apiKey = process.env.LOVABLE_API_KEY;
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_PUBLISHABLE_KEY;
+    const authHeader = getRequestHeader("authorization");
+    const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+
+    if (!apiKey || !supabaseUrl || !supabaseKey || !token) {
+      return { tag: "other" as const, confidence: 0, source: "fallback" as const };
+    }
+
+    try {
+      const supabase = createClient(supabaseUrl, supabaseKey, {
+        auth: { persistSession: false, autoRefreshToken: false, storage: undefined },
+      });
+      const { data: claims, error: claimsErr } = await supabase.auth.getClaims(token);
+      if (claimsErr || !claims?.claims?.sub) {
+        return { tag: "other" as const, confidence: 0, source: "fallback" as const };
+      }
+    } catch {
+      return { tag: "other" as const, confidence: 0, source: "fallback" as const };
+    }
+
 
     try {
       const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
