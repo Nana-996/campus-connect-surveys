@@ -215,7 +215,7 @@ function AnalyzePage() {
   };
 
   const exportPDF = () => {
-    if (!isPremium) return toast.error("Branded PDF exports are a premium feature.");
+    if (!isPremium) return promptUpgrade("Branded PDF reports", "Generate a polished, presentation-ready PDF report with your university name and CampusVerify footer — ready to email or hand in.");
     const doc = new jsPDF({ unit: "pt", format: "a4" });
     const margin = 40;
     const W = doc.internal.pageSize.getWidth();
