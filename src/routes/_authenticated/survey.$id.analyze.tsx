@@ -15,6 +15,7 @@ import {
   PieChart, Pie, Cell, Legend, AreaChart, Area,
 } from "recharts";
 import jsPDF from "jspdf";
+import { UpgradeDialog } from "@/components/UpgradeDialog";
 
 const PALETTE = ["#4a6b52", "#7c9a6b", "#c98a4b", "#b8c47a", "#8e7a5a", "#6b8e9e", "#a47b4c"];
 const SUPPRESS_THRESHOLD = 5;
@@ -57,6 +58,8 @@ function AnalyzePage() {
   const [hiddenQs, setHiddenQs] = useState<Set<string>>(new Set());
   const [savedViews, setSavedViews] = useState<any[]>([]);
   const [shareTokens, setShareTokens] = useState<any[]>([]);
+  const [upgradePrompt, setUpgradePrompt] = useState<{ open: boolean; feature: string; description?: string }>({ open: false, feature: "" });
+  const promptUpgrade = (feature: string, description?: string) => setUpgradePrompt({ open: true, feature, description });
 
   useEffect(() => {
     if (!user || isPreviewMode) { setLoading(false); return; }
@@ -146,7 +149,7 @@ function AnalyzePage() {
 
   // --- Saved views & share tokens helpers ---
   const saveCurrentView = async () => {
-    if (!isPremium) return toast.error("Saved views are a premium feature.");
+    if (!isPremium) return promptUpgrade("Saved views", "Save filter + question selections so you can revisit the exact same report cut later.");
     const name = prompt("Name this view:");
     if (!name) return;
     const { error } = await supabase.from("survey_report_views" as any).insert({
@@ -170,7 +173,7 @@ function AnalyzePage() {
   };
 
   const createShareLink = async () => {
-    if (!isPremium) return toast.error("Shareable dashboards are a premium feature.");
+    if (!isPremium) return promptUpgrade("Shareable live dashboards", "Mint a read-only public URL that always shows the latest aggregated results — perfect for sharing with stakeholders without giving them account access.");
     const token = crypto.randomUUID().replace(/-/g, "");
     const { error } = await supabase.from("survey_share_tokens" as any).insert({
       survey_id: id, creator_id: user!.id, token,
@@ -212,7 +215,7 @@ function AnalyzePage() {
   };
 
   const exportPDF = () => {
-    if (!isPremium) return toast.error("Branded PDF exports are a premium feature.");
+    if (!isPremium) return promptUpgrade("Branded PDF reports", "Generate a polished, presentation-ready PDF report with your university name and CampusVerify footer — ready to email or hand in.");
     const doc = new jsPDF({ unit: "pt", format: "a4" });
     const margin = 40;
     const W = doc.internal.pageSize.getWidth();
@@ -311,7 +314,13 @@ function AnalyzePage() {
                 return (
                   <button
                     key={v.key}
-                    onClick={() => setView(v.key)}
+                    onClick={() => {
+                      if (v.premium && !isPremium) {
+                        promptUpgrade(v.label, `${v.label} is part of the advanced reporting suite.`);
+                        return;
+                      }
+                      setView(v.key);
+                    }}
                     className={`flex items-center justify-between gap-2 rounded-full px-3 py-2 text-left text-sm transition-colors ${
                       active ? "bg-foreground text-background" : "hover:bg-accent"
                     }`}
@@ -351,15 +360,15 @@ function AnalyzePage() {
               <Button size="sm" variant="outline" onClick={exportCSV} className="rounded-full">
                 <Download className="mr-1 h-3.5 w-3.5" /> CSV (raw)
               </Button>
-              <Button size="sm" variant="outline" onClick={exportPDF} disabled={!isPremium} className="rounded-full">
+              <Button size="sm" variant="outline" onClick={exportPDF} className="rounded-full">
                 {!isPremium && <Lock className="mr-1 h-3 w-3" />}
                 <FileText className="mr-1 h-3.5 w-3.5" /> PDF report
               </Button>
-              <Button size="sm" variant="outline" onClick={saveCurrentView} disabled={!isPremium} className="rounded-full">
+              <Button size="sm" variant="outline" onClick={saveCurrentView} className="rounded-full">
                 {!isPremium && <Lock className="mr-1 h-3 w-3" />}
                 <Save className="mr-1 h-3.5 w-3.5" /> Save view
               </Button>
-              <Button size="sm" variant="outline" onClick={createShareLink} disabled={!isPremium} className="rounded-full">
+              <Button size="sm" variant="outline" onClick={createShareLink} className="rounded-full">
                 {!isPremium && <Lock className="mr-1 h-3 w-3" />}
                 <Share2 className="mr-1 h-3.5 w-3.5" /> Share dashboard
               </Button>
@@ -402,6 +411,12 @@ function AnalyzePage() {
           </p>
         </main>
       </div>
+      <UpgradeDialog
+        open={upgradePrompt.open}
+        onOpenChange={(o) => setUpgradePrompt((p) => ({ ...p, open: o }))}
+        feature={upgradePrompt.feature}
+        description={upgradePrompt.description}
+      />
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/PasswordInput";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
@@ -71,13 +71,13 @@ function ResetPasswordPage() {
         <form onSubmit={submit} className="mt-8 space-y-4">
           <div>
             <Label htmlFor="pw" className="text-xs font-semibold uppercase tracking-wider">New password</Label>
-            <Input id="pw" type="password" required minLength={6} value={password}
+            <PasswordInput id="pw" required minLength={6} value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card" />
           </div>
           <div>
             <Label htmlFor="pw2" className="text-xs font-semibold uppercase tracking-wider">Confirm password</Label>
-            <Input id="pw2" type="password" required minLength={6} value={confirm}
+            <PasswordInput id="pw2" required minLength={6} value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
               className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card" />
           </div>
