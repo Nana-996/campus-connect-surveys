@@ -314,7 +314,13 @@ function AnalyzePage() {
                 return (
                   <button
                     key={v.key}
-                    onClick={() => setView(v.key)}
+                    onClick={() => {
+                      if (v.premium && !isPremium) {
+                        promptUpgrade(v.label, `${v.label} is part of the advanced reporting suite.`);
+                        return;
+                      }
+                      setView(v.key);
+                    }}
                     className={`flex items-center justify-between gap-2 rounded-full px-3 py-2 text-left text-sm transition-colors ${
                       active ? "bg-foreground text-background" : "hover:bg-accent"
                     }`}
