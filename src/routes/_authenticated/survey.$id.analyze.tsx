@@ -381,9 +381,30 @@ function AnalyzePage() {
               </Button>
               <Button size="sm" variant="outline" onClick={createShareLink} className="rounded-full">
                 {!isPremium && <Lock className="mr-1 h-3 w-3" />}
-                <Share2 className="mr-1 h-3.5 w-3.5" /> Share dashboard
+                <Share2 className="mr-1 h-3.5 w-3.5" /> Create share link
               </Button>
             </div>
+            {newToken && (
+              <div className="mt-3 rounded-2xl border border-primary/30 bg-primary/5 p-3">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">New link created</p>
+                <div className="mt-1.5 flex items-center gap-2">
+                  <code className="flex-1 truncate rounded-md bg-background px-2 py-1 text-[11px] font-mono text-foreground">
+                    {window.location.origin}/r/{newToken}
+                  </code>
+                  <Button size="sm" variant="ghost" onClick={copyNewToken} className="h-7 rounded-full px-2">
+                    <Copy className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+                <div className="mt-2 flex gap-2">
+                  <Button size="sm" variant="outline" onClick={copyNewToken} className="h-7 flex-1 rounded-full text-xs">
+                    Copy URL
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={dismissNewToken} className="h-7 rounded-full text-xs text-muted-foreground">
+                    Dismiss
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </aside>
 
