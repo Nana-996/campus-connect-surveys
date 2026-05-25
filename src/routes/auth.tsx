@@ -4,6 +4,7 @@ import { z } from "zod";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/PasswordInput";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ArrowUpRight, Sparkles } from "lucide-react";
