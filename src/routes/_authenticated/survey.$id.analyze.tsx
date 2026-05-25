@@ -411,6 +411,12 @@ function AnalyzePage() {
           </p>
         </main>
       </div>
+      <UpgradeDialog
+        open={upgradePrompt.open}
+        onOpenChange={(o) => setUpgradePrompt((p) => ({ ...p, open: o }))}
+        feature={upgradePrompt.feature}
+        description={upgradePrompt.description}
+      />
     </div>
   );
 }
