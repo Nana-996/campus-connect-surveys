@@ -183,7 +183,17 @@ function AnalyzePage() {
     if (error) return toast.error(error.message);
     const { data } = await supabase.from("survey_share_tokens" as any).select("*").eq("survey_id", id).order("created_at", { ascending: false });
     setShareTokens((data as any) ?? []);
-    toast.success("Share link created.");
+    setNewToken(token);
+    const url = `${window.location.origin}/r/${token}`;
+    navigator.clipboard.writeText(url);
+    toast.success("Share link created and copied to clipboard.");
+  };
+  const dismissNewToken = () => setNewToken(null);
+  const copyNewToken = () => {
+    if (!newToken) return;
+    const url = `${window.location.origin}/r/${newToken}`;
+    navigator.clipboard.writeText(url);
+    toast.success("URL copied.");
   };
   const revokeShare = async (tid: string) => {
     await supabase.from("survey_share_tokens" as any).update({ revoked: true }).eq("id", tid);
