@@ -187,7 +187,7 @@ function SignupPage() {
             </div>
             <div>
               <Label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider">Password</Label>
-              <Input id="password" type="password" required minLength={6} value={password}
+              <PasswordInput id="password" required minLength={6} value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card" />
             </div>
