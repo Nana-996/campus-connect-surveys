@@ -1,5 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequestHeader } from "@tanstack/react-start/server";
+import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
+
 
 const CANONICAL_IDS = [
   "tech","ai","gaming","science","health","fitness","mental_health","food",
