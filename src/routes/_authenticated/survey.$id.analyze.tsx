@@ -149,7 +149,7 @@ function AnalyzePage() {
 
   // --- Saved views & share tokens helpers ---
   const saveCurrentView = async () => {
-    if (!isPremium) return toast.error("Saved views are a premium feature.");
+    if (!isPremium) return promptUpgrade("Saved views", "Save filter + question selections so you can revisit the exact same report cut later.");
     const name = prompt("Name this view:");
     if (!name) return;
     const { error } = await supabase.from("survey_report_views" as any).insert({
