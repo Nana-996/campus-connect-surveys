@@ -360,15 +360,15 @@ function AnalyzePage() {
               <Button size="sm" variant="outline" onClick={exportCSV} className="rounded-full">
                 <Download className="mr-1 h-3.5 w-3.5" /> CSV (raw)
               </Button>
-              <Button size="sm" variant="outline" onClick={exportPDF} disabled={!isPremium} className="rounded-full">
+              <Button size="sm" variant="outline" onClick={exportPDF} className="rounded-full">
                 {!isPremium && <Lock className="mr-1 h-3 w-3" />}
                 <FileText className="mr-1 h-3.5 w-3.5" /> PDF report
               </Button>
-              <Button size="sm" variant="outline" onClick={saveCurrentView} disabled={!isPremium} className="rounded-full">
+              <Button size="sm" variant="outline" onClick={saveCurrentView} className="rounded-full">
                 {!isPremium && <Lock className="mr-1 h-3 w-3" />}
                 <Save className="mr-1 h-3.5 w-3.5" /> Save view
               </Button>
-              <Button size="sm" variant="outline" onClick={createShareLink} disabled={!isPremium} className="rounded-full">
+              <Button size="sm" variant="outline" onClick={createShareLink} className="rounded-full">
                 {!isPremium && <Lock className="mr-1 h-3 w-3" />}
                 <Share2 className="mr-1 h-3.5 w-3.5" /> Share dashboard
               </Button>
