@@ -173,7 +173,7 @@ function AnalyzePage() {
   };
 
   const createShareLink = async () => {
-    if (!isPremium) return toast.error("Shareable dashboards are a premium feature.");
+    if (!isPremium) return promptUpgrade("Shareable live dashboards", "Mint a read-only public URL that always shows the latest aggregated results — perfect for sharing with stakeholders without giving them account access.");
     const token = crypto.randomUUID().replace(/-/g, "");
     const { error } = await supabase.from("survey_share_tokens" as any).insert({
       survey_id: id, creator_id: user!.id, token,
