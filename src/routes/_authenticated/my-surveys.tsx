@@ -110,7 +110,29 @@ function MySurveys() {
                     <BarChart3 className="mr-1 h-3.5 w-3.5" /> Analyze
                   </Button>
                 </Link>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleShare(s.id)}
+                  className="rounded-full border-foreground/30 bg-background/40"
+                >
+                  {sharedId === s.id ? <Check className="mr-1 h-3.5 w-3.5" /> : <Share2 className="mr-1 h-3.5 w-3.5" />}
+                  {sharedId === s.id ? "Copied" : "Share"}
+                </Button>
               </div>
+              {sharedId === s.id && (
+                <div className="mt-3 flex items-center gap-2 rounded-2xl border border-foreground/15 bg-background/60 px-3 py-2">
+                  <code className="flex-1 truncate text-[11px] opacity-80">{shareUrl(s.id)}</code>
+                  <button
+                    type="button"
+                    onClick={() => handleShare(s.id)}
+                    className="inline-flex shrink-0 items-center gap-1 rounded-full bg-foreground/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wider hover:bg-foreground/20"
+                    aria-label="Copy link"
+                  >
+                    <Copy className="h-3 w-3" /> Copy
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>
