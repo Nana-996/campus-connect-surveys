@@ -24,6 +24,23 @@ function MySurveys() {
   const { user, isPreviewMode } = useAuth();
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sharedId, setSharedId] = useState<string | null>(null);
+
+  const shareUrl = (id: string) =>
+    typeof window !== "undefined" ? `${window.location.origin}/survey/${id}` : `/survey/${id}`;
+
+  const handleShare = async (id: string) => {
+    const url = shareUrl(id);
+    try {
+      await navigator.clipboard.writeText(url);
+      setSharedId(id);
+      toast.success("Link copied! Share it to get responses");
+      setTimeout(() => setSharedId((curr) => (curr === id ? null : curr)), 2500);
+    } catch {
+      toast.error("Couldn't copy. Long-press the link to copy manually.");
+      setSharedId(id);
+    }
+  };
 
   useEffect(() => {
     if (!user) return;
