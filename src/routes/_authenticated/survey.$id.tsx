@@ -58,6 +58,7 @@ function SurveyPage() {
   const [startedAt] = useState<number>(() => Date.now());
   const [responses, setResponses] = useState<any[] | null>(null);
   const [chartTypes, setChartTypes] = useState<Record<string, ChartType>>({});
+  const [verifyOpen, setVerifyOpen] = useState(false);
 
   const isOwner = survey && user && survey.creator_id === user.id;
 
