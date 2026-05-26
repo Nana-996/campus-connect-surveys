@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Download, ArrowLeft, Users, FileText, BarChart3, TrendingUp, Activity, Hash } from "lucide-react";
+import { SurveyVerifyModal } from "@/components/SurveyVerifyModal";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
   PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, RadarChart, Radar,
@@ -57,6 +58,7 @@ function SurveyPage() {
   const [startedAt] = useState<number>(() => Date.now());
   const [responses, setResponses] = useState<any[] | null>(null);
   const [chartTypes, setChartTypes] = useState<Record<string, ChartType>>({});
+  const [verifyOpen, setVerifyOpen] = useState(false);
 
   const isOwner = survey && user && survey.creator_id === user.id;
 
@@ -111,6 +113,10 @@ function SurveyPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!survey) return;
+    if (!user) {
+      setVerifyOpen(true);
+      return;
+    }
     if (new Date(survey.expires_at) <= new Date()) {
       toast.error("This survey has closed.");
       return;
@@ -487,6 +493,12 @@ function SurveyPage() {
           </Button>
         </form>
       )}
+      <SurveyVerifyModal
+        open={verifyOpen}
+        onClose={() => setVerifyOpen(false)}
+        onVerified={() => setVerifyOpen(false)}
+        surveyTitle={survey?.title}
+      />
     </div>
   );
 }
