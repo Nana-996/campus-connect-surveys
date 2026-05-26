@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Download, ArrowLeft, Users, FileText, BarChart3, TrendingUp, Activity, Hash } from "lucide-react";
+import { SurveyVerifyModal } from "@/components/SurveyVerifyModal";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
   PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, RadarChart, Radar,
