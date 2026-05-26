@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Users, Eye, ArrowUpRight, BarChart3 } from "lucide-react";
+import { toast } from "sonner";
+import { Users, Eye, ArrowUpRight, BarChart3, Share2, Copy, Check } from "lucide-react";
 
 type Survey = {
   id: string;
@@ -23,6 +24,23 @@ function MySurveys() {
   const { user, isPreviewMode } = useAuth();
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sharedId, setSharedId] = useState<string | null>(null);
+
+  const shareUrl = (id: string) =>
+    typeof window !== "undefined" ? `${window.location.origin}/survey/${id}` : `/survey/${id}`;
+
+  const handleShare = async (id: string) => {
+    const url = shareUrl(id);
+    try {
+      await navigator.clipboard.writeText(url);
+      setSharedId(id);
+      toast.success("Link copied! Share it to get responses");
+      setTimeout(() => setSharedId((curr) => (curr === id ? null : curr)), 2500);
+    } catch {
+      toast.error("Couldn't copy. Long-press the link to copy manually.");
+      setSharedId(id);
+    }
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -92,7 +110,29 @@ function MySurveys() {
                     <BarChart3 className="mr-1 h-3.5 w-3.5" /> Analyze
                   </Button>
                 </Link>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleShare(s.id)}
+                  className="rounded-full border-foreground/30 bg-background/40"
+                >
+                  {sharedId === s.id ? <Check className="mr-1 h-3.5 w-3.5" /> : <Share2 className="mr-1 h-3.5 w-3.5" />}
+                  {sharedId === s.id ? "Copied" : "Share"}
+                </Button>
               </div>
+              {sharedId === s.id && (
+                <div className="mt-3 flex items-center gap-2 rounded-2xl border border-foreground/15 bg-background/60 px-3 py-2">
+                  <code className="flex-1 truncate text-[11px] opacity-80">{shareUrl(s.id)}</code>
+                  <button
+                    type="button"
+                    onClick={() => handleShare(s.id)}
+                    className="inline-flex shrink-0 items-center gap-1 rounded-full bg-foreground/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wider hover:bg-foreground/20"
+                    aria-label="Copy link"
+                  >
+                    <Copy className="h-3 w-3" /> Copy
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>
