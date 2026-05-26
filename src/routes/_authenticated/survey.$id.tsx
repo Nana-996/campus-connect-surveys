@@ -493,6 +493,12 @@ function SurveyPage() {
           </Button>
         </form>
       )}
+      <SurveyVerifyModal
+        open={verifyOpen}
+        onClose={() => setVerifyOpen(false)}
+        onVerified={() => setVerifyOpen(false)}
+        surveyTitle={survey?.title}
+      />
     </div>
   );
 }
