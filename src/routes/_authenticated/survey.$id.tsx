@@ -113,6 +113,10 @@ function SurveyPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!survey) return;
+    if (!user) {
+      setVerifyOpen(true);
+      return;
+    }
     if (new Date(survey.expires_at) <= new Date()) {
       toast.error("This survey has closed.");
       return;
