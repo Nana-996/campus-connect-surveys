@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Users, Eye, ArrowUpRight, BarChart3 } from "lucide-react";
+import { toast } from "sonner";
+import { Users, Eye, ArrowUpRight, BarChart3, Share2, Copy, Check } from "lucide-react";
 
 type Survey = {
   id: string;
