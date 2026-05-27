@@ -1,12 +1,17 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/PasswordInput";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { GraduationCap, Globe2 } from "lucide-react";
+
+const searchSchema = z.object({ as: z.enum(["student", "general"]).optional() });
 
 export const Route = createFileRoute("/reset-password")({
+  validateSearch: searchSchema,
   component: ResetPasswordPage,
   head: () => ({
     meta: [
