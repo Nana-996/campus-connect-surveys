@@ -23,6 +23,9 @@ export const Route = createFileRoute("/reset-password")({
 
 function ResetPasswordPage() {
   const navigate = useNavigate();
+  const search = Route.useSearch();
+  const tab = search.as ?? "student";
+  const isStudent = tab === "student";
   const [ready, setReady] = useState(false);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -62,6 +65,10 @@ function ResetPasswordPage() {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-12">
+      <span className="mb-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-[10px] font-bold uppercase tracking-wider">
+        {isStudent ? <GraduationCap className="h-3 w-3" /> : <Globe2 className="h-3 w-3" />}
+        {isStudent ? "Student account" : "General account"}
+      </span>
       <h1 className="font-serif text-5xl leading-[0.95]">Set a new <em className="text-primary">password.</em></h1>
       <p className="mt-3 text-sm text-muted-foreground">
         Choose something you'll remember. You'll be signed in right after.
