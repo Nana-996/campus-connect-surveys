@@ -2,26 +2,33 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { useAuth } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/PasswordInput";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ArrowUpRight, Sparkles } from "lucide-react";
+import { ArrowUpRight, Sparkles, GraduationCap, Globe2 } from "lucide-react";
 import { ResendVerification } from "@/components/ResendVerification";
 
-const searchSchema = z.object({ mode: z.enum(["login", "signup"]).optional() });
+const searchSchema = z.object({
+  mode: z.enum(["login", "signup"]).optional(),
+  as: z.enum(["student", "general"]).optional(),
+});
 
 export const Route = createFileRoute("/auth")({
   validateSearch: searchSchema,
   component: AuthPage,
 });
 
+type AccountTab = "student" | "general";
+
 function AuthPage() {
   const navigate = useNavigate();
   const search = Route.useSearch();
-  const { user, loading, signIn, enterPreviewMode } = useAuth();
+  const { user, loading, signIn, signOut, enterPreviewMode } = useAuth();
 
+  const [tab, setTab] = useState<AccountTab>(search.as ?? "student");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -38,6 +45,30 @@ function AuthPage() {
     setSubmitting(true);
     try {
       await signIn(email, password);
+
+      // Hard block: verify the account type matches the selected tab.
+      const { data: authData } = await supabase.auth.getUser();
+      const uid = authData.user?.id;
+      let accountType: AccountTab = "student";
+      if (uid) {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("user_type")
+          .eq("id", uid)
+          .maybeSingle();
+        accountType = (prof?.user_type === "general" ? "general" : "student") as AccountTab;
+      }
+
+      if (accountType !== tab) {
+        await signOut();
+        const otherLabel = accountType === "general" ? "General" : "Student";
+        const message = `This is a ${otherLabel} account. Switch to the ${otherLabel} tab to log in.`;
+        setFormError(message);
+        setTab(accountType);
+        toast.error(message);
+        return;
+      }
+
       navigate({ to: "/feed" });
     } catch (err: any) {
       const message = err.message === "Invalid login credentials"
@@ -50,26 +81,28 @@ function AuthPage() {
     }
   };
 
+  const isStudent = tab === "student";
+
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
-      {/* Left poster panel */}
       <div className="relative hidden flex-col justify-between bg-primary p-12 text-primary-foreground lg:flex">
         <Link to="/" className="font-serif text-3xl">CampusVerify</Link>
         <div>
           <p className="font-serif text-7xl leading-[0.9]">
-            Welcome<br /><em>back to campus.</em>
+            Welcome<br /><em>{isStudent ? "back to campus." : "back."}</em>
           </p>
           <p className="mt-6 max-w-sm text-sm opacity-80">
-            Pick up where you left off — your feed, your credits, your responses.
+            {isStudent
+              ? "Pick up where you left off — your campus feed, your credits, your responses."
+              : "Pick up where you left off — public surveys, your credits, your responses."}
           </p>
         </div>
         <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.25em] opacity-70">
           <span>vol. 01</span>
-          <span>verified students only</span>
+          <span>{isStudent ? "verified students only" : "general public"}</span>
         </div>
       </div>
 
-      {/* Right form panel */}
       <div className="flex items-center justify-center px-6 py-10">
         <div className="w-full max-w-md">
           <Link to="/" className="mb-8 inline-block font-serif text-3xl text-primary lg:hidden">
@@ -80,26 +113,66 @@ function AuthPage() {
           </span>
           <h1 className="mt-4 font-serif text-5xl leading-[0.95]">Hello again.</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Use your university email and password.
+            Choose your account type, then log in.
           </p>
 
-          <form onSubmit={submit} className="mt-8 space-y-4">
+          {/* Account-type tabs */}
+          <div className="mt-6 grid grid-cols-2 gap-3" role="tablist">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={isStudent}
+              onClick={() => { setTab("student"); setFormError(null); }}
+              className={`rounded-2xl border-2 p-3 text-left transition ${
+                isStudent
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-foreground/15 bg-card hover:border-foreground/40"
+              }`}
+            >
+              <GraduationCap className="h-4 w-4" />
+              <p className="mt-1 font-serif text-lg leading-none">Student</p>
+              <p className="mt-1 text-[10px] uppercase tracking-wider opacity-80">.edu / .ac.xx</p>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={!isStudent}
+              onClick={() => { setTab("general"); setFormError(null); }}
+              className={`rounded-2xl border-2 p-3 text-left transition ${
+                !isStudent
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-foreground/15 bg-card hover:border-foreground/40"
+              }`}
+            >
+              <Globe2 className="h-4 w-4" />
+              <p className="mt-1 font-serif text-lg leading-none">General</p>
+              <p className="mt-1 text-[10px] uppercase tracking-wider opacity-80">public account</p>
+            </button>
+          </div>
+
+          <form onSubmit={submit} className="mt-6 space-y-4">
             <div>
-              <Label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider">University email</Label>
+              <Label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider">
+                {isStudent ? "University email" : "Email"}
+              </Label>
               <Input
                 id="email"
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@yourschool.edu"
+                placeholder={isStudent ? "you@yourschool.edu" : "you@example.com"}
                 className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"
               />
             </div>
             <div>
               <div className="flex items-baseline justify-between">
                 <Label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider">Password</Label>
-                <Link to="/forgot-password" className="text-[11px] font-semibold uppercase tracking-wider text-primary hover:underline">
+                <Link
+                  to="/forgot-password"
+                  search={{ as: tab }}
+                  className="text-[11px] font-semibold uppercase tracking-wider text-primary hover:underline"
+                >
                   Forgot?
                 </Link>
               </div>
@@ -118,7 +191,7 @@ function AuthPage() {
               </div>
             )}
             <Button type="submit" className="h-12 w-full rounded-full bg-primary text-base" disabled={submitting}>
-              {submitting ? "Please wait…" : "Log in"}
+              {submitting ? "Please wait…" : `Log in as ${isStudent ? "Student" : "General"}`}
               <ArrowUpRight className="ml-1 h-4 w-4" />
             </Button>
             <Button
