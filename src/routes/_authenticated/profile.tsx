@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, Sparkles, Coins, Clock, AlertTriangle } from "lucide-react";
+import { ShieldCheck, Sparkles, Clock, AlertTriangle, Globe2 } from "lucide-react";
 import { DAILY_EARN_CAP, WEEKLY_EARN_CAP, EARNED_EXPIRY_DAYS } from "@/lib/credits";
+import { ageLabel } from "@/lib/interests";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   component: Profile,
@@ -46,12 +47,15 @@ function Profile() {
 
   if (!profile) return null;
   const total = profile.earned_credits + profile.paid_credits;
+  const isGeneral = profile.user_type === "general";
 
   return (
     <div>
-      <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Your card</p>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+        {isGeneral ? "Your account" : "Your card"}
+      </p>
       <h1 className="mt-1 font-serif text-5xl leading-[0.95]">
-        Hello, <em className="text-primary">{profile.full_name?.split(" ")[0] || "student"}.</em>
+        Hello, <em className="text-primary">{profile.full_name?.split(" ")[0] || (isGeneral ? "friend" : "student")}.</em>
       </h1>
 
       {profile.is_flagged && (
@@ -105,16 +109,31 @@ function Profile() {
           </p>
         </div>
 
-        {/* Verified */}
+        {/* Identity card — student vs general */}
         <div className="sm:col-span-3 rounded-3xl border border-foreground/15 bg-card p-6 shadow-paper">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-[11px] font-bold uppercase tracking-wider">
-            <ShieldCheck className="h-3 w-3" /> Verified · {profile.university_domain}
-          </span>
-          <h2 className="mt-3 font-serif text-2xl leading-tight">{profile.university_name}</h2>
-          <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
-            <Field label="Department" value={profile.department || "—"} />
-            <Field label="Year" value={profile.year || "—"} />
-          </dl>
+          {isGeneral ? (
+            <>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-[11px] font-bold uppercase tracking-wider">
+                <Globe2 className="h-3 w-3" /> General account
+              </span>
+              <h2 className="mt-3 font-serif text-2xl leading-tight">Public surveys only</h2>
+              <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
+                <Field label="Country" value={profile.country || "—"} />
+                <Field label="Age range" value={profile.age_range ? ageLabel(profile.age_range) : "—"} />
+              </dl>
+            </>
+          ) : (
+            <>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-[11px] font-bold uppercase tracking-wider">
+                <ShieldCheck className="h-3 w-3" /> Verified · {profile.university_domain}
+              </span>
+              <h2 className="mt-3 font-serif text-2xl leading-tight">{profile.university_name}</h2>
+              <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
+                <Field label="Department" value={profile.department || "—"} />
+                <Field label="Year" value={profile.year || "—"} />
+              </dl>
+            </>
+          )}
         </div>
       </div>
 
