@@ -31,12 +31,12 @@ export const Route = createFileRoute("/sitemap.xml")({
           .eq("is_active", true);
 
         if (surveys) {
-          for (const s of surveys) {
+            for (const s of surveys) {
             entries.push({
               path: `/survey/${s.id}`,
               changefreq: "weekly",
               priority: "0.7",
-              lastmod: s.updated_at ? new Date(s.updated_at).toISOString().slice(0, 10) : undefined,
+              lastmod: s.created_at ? new Date(s.created_at).toISOString().slice(0, 10) : undefined,
             });
           }
         }
