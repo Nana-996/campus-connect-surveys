@@ -27,9 +27,8 @@ export const Route = createFileRoute("/sitemap.xml")({
         // Fetch published surveys for dynamic /survey/$id entries
         const { data: surveys } = await supabaseAdmin
           .from("surveys")
-          .select("id, updated_at")
-          .eq("is_active", true)
-          .eq("status", "published");
+          .select("id, created_at")
+          .eq("is_active", true);
 
         if (surveys) {
           for (const s of surveys) {
