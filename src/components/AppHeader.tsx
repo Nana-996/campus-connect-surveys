@@ -29,6 +29,7 @@ export function AppHeader() {
           <Button
             variant="ghost"
             size="icon"
+            aria-label="Log out"
             className="rounded-full hover:bg-secondary"
             onClick={async () => { await signOut(); navigate({ to: "/" }); }}
           >
