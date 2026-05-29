@@ -229,7 +229,7 @@ function SignupPage() {
                 <div>
                   <Label htmlFor="year" className="text-xs font-semibold uppercase tracking-wider">Year</Label>
                   <Select value={year} onValueChange={setYear}>
-                    <SelectTrigger className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"><SelectValue placeholder="Year" /></SelectTrigger>
+                    <SelectTrigger id="year" className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"><SelectValue placeholder="Year" /></SelectTrigger>
                     <SelectContent>
                       {YEAR_OPTIONS.map((y) => (
                         <SelectItem key={y} value={y}>{y}</SelectItem>
@@ -244,18 +244,12 @@ function SignupPage() {
                 <div>
                   <Label htmlFor="country" className="text-xs font-semibold uppercase tracking-wider">Country</Label>
                   <Select value={country} onValueChange={setCountry}>
-                    <SelectTrigger className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"><SelectValue placeholder="Choose…" /></SelectTrigger>
-                    <SelectContent className="max-h-60">
-                      {COUNTRIES.map((c) => (
-                        <SelectItem key={c} value={c}>{c}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                    <SelectTrigger id="country" className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"><SelectValue placeholder="Choose…" /></SelectTrigger>
+...
                 <div>
                   <Label htmlFor="age" className="text-xs font-semibold uppercase tracking-wider">Age range</Label>
                   <Select value={ageRange} onValueChange={setAgeRange}>
-                    <SelectTrigger className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"><SelectValue placeholder="Choose…" /></SelectTrigger>
+                    <SelectTrigger id="age" className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"><SelectValue placeholder="Choose…" /></SelectTrigger>
                     <SelectContent>
                       {AGE_RANGES.map((r) => (
                         <SelectItem key={r.id} value={r.id}>{r.label}</SelectItem>
