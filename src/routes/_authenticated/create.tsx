@@ -181,6 +181,7 @@ function Create() {
 
         {/* Survey body */}
         <div className="rounded-3xl border border-foreground/15 bg-card p-6 space-y-4 shadow-paper">
+          <h2 className="sr-only">Survey body</h2>
           <div>
             <Label htmlFor="title">Title</Label>
             <Input id="title" required value={title} onChange={(e) => setTitle(e.target.value)}
