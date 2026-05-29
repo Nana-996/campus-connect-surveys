@@ -17,6 +17,16 @@ import { AGE_RANGES, COUNTRIES, YEAR_OPTIONS, DEPARTMENT_SUGGESTIONS } from "@/l
 
 export const Route = createFileRoute("/signup")({
   component: SignupPage,
+  head: () => ({
+    meta: [
+      { title: "Create account — CampusVerify" },
+      { name: "description", content: "Sign up for CampusVerify as a verified student or general user. Get free credits and start running or answering surveys today." },
+      { property: "og:title", content: "Create account — CampusVerify" },
+      { property: "og:description", content: "Join CampusVerify — pick a Student or General account, claim free credits, and start running real surveys." },
+      { property: "og:url", content: "https://campus-spotlight-verify.lovable.app/signup" },
+    ],
+    links: [{ rel: "canonical", href: "https://campus-spotlight-verify.lovable.app/signup" }],
+  }),
 });
 
 const ACADEMIC_RE = /(^|\.)edu$|\.edu\.[a-z]{2,6}$|\.ac\.[a-z]{2,6}$|\.uni\.[a-z]{2,6}$/i;
@@ -219,7 +229,7 @@ function SignupPage() {
                 <div>
                   <Label htmlFor="year" className="text-xs font-semibold uppercase tracking-wider">Year</Label>
                   <Select value={year} onValueChange={setYear}>
-                    <SelectTrigger className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"><SelectValue placeholder="Year" /></SelectTrigger>
+                    <SelectTrigger id="year" className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"><SelectValue placeholder="Year" /></SelectTrigger>
                     <SelectContent>
                       {YEAR_OPTIONS.map((y) => (
                         <SelectItem key={y} value={y}>{y}</SelectItem>
@@ -234,7 +244,7 @@ function SignupPage() {
                 <div>
                   <Label htmlFor="country" className="text-xs font-semibold uppercase tracking-wider">Country</Label>
                   <Select value={country} onValueChange={setCountry}>
-                    <SelectTrigger className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"><SelectValue placeholder="Choose…" /></SelectTrigger>
+                    <SelectTrigger id="country" className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"><SelectValue placeholder="Choose…" /></SelectTrigger>
                     <SelectContent className="max-h-60">
                       {COUNTRIES.map((c) => (
                         <SelectItem key={c} value={c}>{c}</SelectItem>
@@ -245,7 +255,7 @@ function SignupPage() {
                 <div>
                   <Label htmlFor="age" className="text-xs font-semibold uppercase tracking-wider">Age range</Label>
                   <Select value={ageRange} onValueChange={setAgeRange}>
-                    <SelectTrigger className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"><SelectValue placeholder="Choose…" /></SelectTrigger>
+                    <SelectTrigger id="age" className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"><SelectValue placeholder="Choose…" /></SelectTrigger>
                     <SelectContent>
                       {AGE_RANGES.map((r) => (
                         <SelectItem key={r.id} value={r.id}>{r.label}</SelectItem>

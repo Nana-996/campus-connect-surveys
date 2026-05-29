@@ -180,6 +180,7 @@ function Feed() {
         {isGeneral ? (
           <>
             <select
+              aria-label="Filter by country"
               value={countryFilter}
               onChange={(e) => setCountryFilter(e.target.value)}
               className="rounded-full border border-foreground/20 bg-card px-3 py-1 font-semibold uppercase tracking-wider"
@@ -188,6 +189,7 @@ function Feed() {
               {countries.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
             <select
+              aria-label="Filter by age"
               value={ageFilter}
               onChange={(e) => setAgeFilter(e.target.value)}
               className="rounded-full border border-foreground/20 bg-card px-3 py-1 font-semibold uppercase tracking-wider"
@@ -196,6 +198,7 @@ function Feed() {
               {AGE_RANGES.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}
             </select>
             <select
+              aria-label="Filter by interest"
               value={interestFilter}
               onChange={(e) => setInterestFilter(e.target.value)}
               className="rounded-full border border-foreground/20 bg-card px-3 py-1 font-semibold uppercase tracking-wider"
@@ -207,6 +210,7 @@ function Feed() {
         ) : (
           <>
             <select
+              aria-label="Filter by department"
               value={deptFilter}
               onChange={(e) => setDeptFilter(e.target.value)}
               className="rounded-full border border-foreground/20 bg-card px-3 py-1 font-semibold uppercase tracking-wider"
@@ -215,6 +219,7 @@ function Feed() {
               {departments.map((d) => <option key={d} value={d}>{d}</option>)}
             </select>
             <select
+              aria-label="Filter by year"
               value={yearFilter}
               onChange={(e) => setYearFilter(e.target.value)}
               className="rounded-full border border-foreground/20 bg-card px-3 py-1 font-semibold uppercase tracking-wider"
@@ -284,7 +289,9 @@ function Feed() {
           );
         })()
       ) : (
-        <div className="grid auto-rows-[minmax(180px,auto)] grid-cols-2 gap-3 sm:grid-cols-6 sm:gap-4">
+        <>
+          <h2 className="sr-only">Open surveys</h2>
+          <div className="grid auto-rows-[minmax(180px,auto)] grid-cols-2 gap-3 sm:grid-cols-6 sm:gap-4">
           {visible.map((s, i) => {
             const tone = TONES[i % TONES.length];
             // Bento sizing pattern
@@ -353,7 +360,8 @@ function Feed() {
               </Link>
             );
           })}
-        </div>
+          </div>
+        </>
       )}
     </div>
   );

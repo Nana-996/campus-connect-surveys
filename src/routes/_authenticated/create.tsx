@@ -123,6 +123,7 @@ function Create() {
       <form onSubmit={submit} className="mt-8 space-y-6">
         {/* Tier selector */}
         <div>
+          <h2 className="sr-only">Publishing tier</h2>
           <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Publishing tier</Label>
           <div className="mt-2 grid gap-3 sm:grid-cols-4">
             {TIER_ORDER.map((t) => {
@@ -180,6 +181,7 @@ function Create() {
 
         {/* Survey body */}
         <div className="rounded-3xl border border-foreground/15 bg-card p-6 space-y-4 shadow-paper">
+          <h2 className="sr-only">Survey body</h2>
           <div>
             <Label htmlFor="title">Title</Label>
             <Input id="title" required value={title} onChange={(e) => setTitle(e.target.value)}
@@ -201,9 +203,9 @@ function Create() {
               {isGeneral ? (
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label>Target country</Label>
+                    <Label htmlFor="tc">Target country</Label>
                     <Select value={targetCountry} onValueChange={(v) => setTargetCountry(v === "__any" ? "" : v)}>
-                      <SelectTrigger><SelectValue placeholder="Anywhere" /></SelectTrigger>
+                      <SelectTrigger id="tc"><SelectValue placeholder="Anywhere" /></SelectTrigger>
                       <SelectContent className="max-h-60">
                         <SelectItem value="__any">Anywhere</SelectItem>
                         {COUNTRIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
@@ -211,9 +213,9 @@ function Create() {
                     </Select>
                   </div>
                   <div>
-                    <Label>Target age range</Label>
+                    <Label htmlFor="ta">Target age range</Label>
                     <Select value={targetAge} onValueChange={(v) => setTargetAge(v === "__any" ? "" : v)}>
-                      <SelectTrigger><SelectValue placeholder="Any age" /></SelectTrigger>
+                      <SelectTrigger id="ta"><SelectValue placeholder="Any age" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="__any">Any age</SelectItem>
                         {AGE_RANGES.map((r) => <SelectItem key={r.id} value={r.id}>{r.label}</SelectItem>)}
@@ -307,6 +309,7 @@ function Create() {
 
         {/* Questions */}
         <div className="space-y-3">
+          <h2 className="sr-only">Questions</h2>
           {questions.map((q, i) => (
             <div key={q.id} className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
               <div className="flex items-start justify-between gap-3">

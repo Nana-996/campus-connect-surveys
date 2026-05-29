@@ -1,0 +1,17 @@
+# CampusVerify
+
+> A credit-powered survey platform connecting researchers with verified university students and the general public for honest, campus-scoped responses.
+
+CampusVerify helps students and general users run surveys with verified respondents. Students sign up with an academic email and get campus-scoped feeds; general users run public surveys. Credits are earned by answering and spent to publish.
+
+## Pages
+
+- [Home](/): Overview of CampusVerify, how it works, FAQ, and sign-up.
+- [Log in](/auth): Sign in to your Student or General account.
+- [Sign up](/signup): Create a Student or General account.
+- [Forgot password](/forgot-password): Request a password reset email.
+
+## Legal
+
+- [Privacy Policy](/privacy): How we handle your data.
+- [Terms of Service](/terms): Terms governing use of the platform.
