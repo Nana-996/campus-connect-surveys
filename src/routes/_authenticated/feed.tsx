@@ -289,7 +289,9 @@ function Feed() {
           );
         })()
       ) : (
-        <div className="grid auto-rows-[minmax(180px,auto)] grid-cols-2 gap-3 sm:grid-cols-6 sm:gap-4">
+        <>
+          <h2 className="sr-only">Open surveys</h2>
+          <div className="grid auto-rows-[minmax(180px,auto)] grid-cols-2 gap-3 sm:grid-cols-6 sm:gap-4">
           {visible.map((s, i) => {
             const tone = TONES[i % TONES.length];
             // Bento sizing pattern
