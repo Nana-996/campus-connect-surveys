@@ -123,6 +123,7 @@ function Create() {
       <form onSubmit={submit} className="mt-8 space-y-6">
         {/* Tier selector */}
         <div>
+          <h2 className="sr-only">Publishing tier</h2>
           <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Publishing tier</Label>
           <div className="mt-2 grid gap-3 sm:grid-cols-4">
             {TIER_ORDER.map((t) => {
