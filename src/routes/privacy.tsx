@@ -8,7 +8,9 @@ export const Route = createFileRoute("/privacy")({
       { name: "description", content: "How CampusVerify collects, uses, and protects your data." },
       { property: "og:title", content: "Privacy Policy — CampusVerify" },
       { property: "og:description", content: "How CampusVerify collects, uses, and protects your data." },
+      { property: "og:url", content: "https://campus-spotlight-verify.lovable.app/privacy" },
     ],
+    links: [{ rel: "canonical", href: "https://campus-spotlight-verify.lovable.app/privacy" }],
   }),
 });
 
