@@ -17,6 +17,16 @@ import { AGE_RANGES, COUNTRIES, YEAR_OPTIONS, DEPARTMENT_SUGGESTIONS } from "@/l
 
 export const Route = createFileRoute("/signup")({
   component: SignupPage,
+  head: () => ({
+    meta: [
+      { title: "Create account — CampusVerify" },
+      { name: "description", content: "Sign up for CampusVerify as a verified student or general user. Get free credits and start running or answering surveys today." },
+      { property: "og:title", content: "Create account — CampusVerify" },
+      { property: "og:description", content: "Join CampusVerify — pick a Student or General account, claim free credits, and start running real surveys." },
+      { property: "og:url", content: "https://campus-spotlight-verify.lovable.app/signup" },
+    ],
+    links: [{ rel: "canonical", href: "https://campus-spotlight-verify.lovable.app/signup" }],
+  }),
 });
 
 const ACADEMIC_RE = /(^|\.)edu$|\.edu\.[a-z]{2,6}$|\.ac\.[a-z]{2,6}$|\.uni\.[a-z]{2,6}$/i;
