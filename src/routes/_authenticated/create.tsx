@@ -309,6 +309,7 @@ function Create() {
 
         {/* Questions */}
         <div className="space-y-3">
+          <h2 className="sr-only">Questions</h2>
           {questions.map((q, i) => (
             <div key={q.id} className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
               <div className="flex items-start justify-between gap-3">
