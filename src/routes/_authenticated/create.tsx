@@ -203,9 +203,9 @@ function Create() {
               {isGeneral ? (
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label>Target country</Label>
+                    <Label htmlFor="tc">Target country</Label>
                     <Select value={targetCountry} onValueChange={(v) => setTargetCountry(v === "__any" ? "" : v)}>
-                      <SelectTrigger><SelectValue placeholder="Anywhere" /></SelectTrigger>
+                      <SelectTrigger id="tc"><SelectValue placeholder="Anywhere" /></SelectTrigger>
                       <SelectContent className="max-h-60">
                         <SelectItem value="__any">Anywhere</SelectItem>
                         {COUNTRIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
@@ -213,9 +213,9 @@ function Create() {
                     </Select>
                   </div>
                   <div>
-                    <Label>Target age range</Label>
+                    <Label htmlFor="ta">Target age range</Label>
                     <Select value={targetAge} onValueChange={(v) => setTargetAge(v === "__any" ? "" : v)}>
-                      <SelectTrigger><SelectValue placeholder="Any age" /></SelectTrigger>
+                      <SelectTrigger id="ta"><SelectValue placeholder="Any age" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="__any">Any age</SelectItem>
                         {AGE_RANGES.map((r) => <SelectItem key={r.id} value={r.id}>{r.label}</SelectItem>)}
