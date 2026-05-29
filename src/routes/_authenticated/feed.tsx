@@ -360,7 +360,8 @@ function Feed() {
               </Link>
             );
           })}
-        </div>
+          </div>
+        </>
       )}
     </div>
   );
