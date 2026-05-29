@@ -245,7 +245,13 @@ function SignupPage() {
                   <Label htmlFor="country" className="text-xs font-semibold uppercase tracking-wider">Country</Label>
                   <Select value={country} onValueChange={setCountry}>
                     <SelectTrigger id="country" className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"><SelectValue placeholder="Choose…" /></SelectTrigger>
-...
+                    <SelectContent className="max-h-60">
+                      {COUNTRIES.map((c) => (
+                        <SelectItem key={c} value={c}>{c}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div>
                   <Label htmlFor="age" className="text-xs font-semibold uppercase tracking-wider">Age range</Label>
                   <Select value={ageRange} onValueChange={setAgeRange}>
