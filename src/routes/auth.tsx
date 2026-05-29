@@ -19,6 +19,16 @@ const searchSchema = z.object({
 export const Route = createFileRoute("/auth")({
   validateSearch: searchSchema,
   component: AuthPage,
+  head: () => ({
+    meta: [
+      { title: "Log in — CampusVerify" },
+      { name: "description", content: "Log in to CampusVerify as a verified student or general user to access your survey feed, credits, and responses." },
+      { property: "og:title", content: "Log in — CampusVerify" },
+      { property: "og:description", content: "Sign in to CampusVerify to access your campus or public survey feed and earned credits." },
+      { property: "og:url", content: "https://campus-spotlight-verify.lovable.app/auth" },
+    ],
+    links: [{ rel: "canonical", href: "https://campus-spotlight-verify.lovable.app/auth" }],
+  }),
 });
 
 type AccountTab = "student" | "general";
