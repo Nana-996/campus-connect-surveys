@@ -46,24 +46,51 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  head: () => ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "CampusVerify — Verified student research" },
-      { name: "description", content: "CampusVerify helps students turn real voices into real research. It connects you with verified students on your campus, so you can get genuine responses and do" },
+      { name: "description", content: "CampusVerify connects researchers with verified students for honest, campus-scoped survey responses. Earn credits to answer, spend to publish." },
       { property: "og:title", content: "CampusVerify — Verified student research" },
       { name: "twitter:title", content: "CampusVerify — Verified student research" },
-      { property: "og:description", content: "CampusVerify helps students turn real voices into real research. It connects you with verified students on your campus, so you can get genuine responses and do" },
-      { name: "twitter:description", content: "CampusVerify helps students turn real voices into real research. It connects you with verified students on your campus, so you can get genuine responses and do" },
+      { property: "og:description", content: "Run surveys with verified university students. Earn credits by answering, spend to publish — no bots, no randoms." },
+      { name: "twitter:description", content: "Run surveys with verified university students. Earn credits by answering, spend to publish — no bots, no randoms." },
       { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/35cdaee2-7de6-46f3-b48e-93dac2861738" },
       { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/35cdaee2-7de6-46f3-b48e-93dac2861738" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "CampusVerify" },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "CampusVerify",
+          url: "https://campus-spotlight-verify.lovable.app",
+          logo: "https://campus-spotlight-verify.lovable.app/favicon.ico",
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "CampusVerify",
+          url: "https://campus-spotlight-verify.lovable.app",
+        }),
+      },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
+  notFoundComponent: NotFoundComponent,
+  errorComponent: ErrorComponent,
+});
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
 });
