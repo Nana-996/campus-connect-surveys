@@ -284,15 +284,9 @@ function AnalyzePage() {
         <div className="mt-4 flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-wider">
           <span className="rounded-full bg-foreground px-3 py-1 text-background">n = {n}{n !== responses.length && ` of ${responses.length}`}</span>
           <span className="rounded-full border border-foreground/20 px-3 py-1 text-muted-foreground">tier: {survey.tier}</span>
-          {isPremium ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-highlight px-3 py-1 text-highlight-foreground">
-              <Sparkles className="h-3 w-3" /> Premium analytics
-            </span>
-          ) : (
-            <Link to="/buy" className="inline-flex items-center gap-1 rounded-full border border-foreground/20 px-3 py-1 text-muted-foreground hover:bg-accent">
-              <Lock className="h-3 w-3" /> Unlock premium
-            </Link>
-          )}
+          <span className="inline-flex items-center gap-1 rounded-full bg-highlight px-3 py-1 text-highlight-foreground">
+            <Sparkles className="h-3 w-3" /> Full analytics included
+          </span>
         </div>
         {activeFilterChips.length > 0 && (
           <div className="mt-4 flex flex-wrap items-center gap-2">
