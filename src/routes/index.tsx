@@ -163,7 +163,7 @@ function Landing() {
               <Stat n="100%" label="Verified accounts" />
               <Stat n="0" label="Third-party ad trackers" />
               <Stat n="30 days" label="Credit-earn freshness window" />
-              <Stat n="GHS" label="Native pricing, mobile-money ready" />
+              <Stat n="Free" label="To join and to use" />
             </div>
           </div>
         </section>
@@ -178,14 +178,14 @@ function Landing() {
               general accounts and reach the wider public audience.
             </Faq>
             <Faq q="How do credits work?">
-              You spend credits to publish a survey and earn 1 credit for each quality response you submit. Earned credits expire after
-              30 days; paid credits never expire.
+              You spend credits to publish a survey and earn 1 credit for each quality response you submit. CampusVerify is free to use —
+              every credit you spend comes from answering other people's surveys.
             </Faq>
             <Faq q="Can I target specific departments?">
-              Yes — upgrade to the Targeted tier or higher to filter by department, year, country, age range, and interests.
+              Yes — pick the Targeted tier or higher to filter by department, year, country, age range, and interests.
             </Faq>
-            <Faq q="How are payments handled?">
-              Paid credits are processed by Paystack — card, mobile money, bank transfer, or USSD. We never see your card details.
+            <Faq q="How do I get more credits?">
+              Open your feed and answer surveys from other people. Each quality response earns you 1 credit — fuel for your own research.
             </Faq>
             <Faq q="Is my data private?">
               Survey creators see responses, not respondent identities beyond what your questions ask. See the{" "}
