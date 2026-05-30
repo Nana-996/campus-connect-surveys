@@ -15,7 +15,7 @@ import {
   PieChart, Pie, Cell, Legend, AreaChart, Area,
 } from "recharts";
 import jsPDF from "jspdf";
-import { UpgradeDialog } from "@/components/UpgradeDialog";
+
 
 const PALETTE = ["#4a6b52", "#7c9a6b", "#c98a4b", "#b8c47a", "#8e7a5a", "#6b8e9e", "#a47b4c"];
 const SUPPRESS_THRESHOLD = 5;
