@@ -104,9 +104,9 @@ function AnalyzePage() {
   }, [id, user, isPreviewMode]);
 
   const isPremium = useMemo(() => {
-    if (!survey) return false;
-    return survey.tier === "boosted" || survey.tier === "pro" || paidCredits >= 5;
-  }, [survey, paidCredits]);
+    // Premium features are free for now — all signed-in creators get full access.
+    return !!survey;
+  }, [survey]);
 
   const filtered = useMemo(() => {
     return responses.filter((r) => {
