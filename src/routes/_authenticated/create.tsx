@@ -381,18 +381,10 @@ function Create() {
           </Button>
         </div>
 
-        {!afford.ok && selected.paidRequired ? (
-          <Link to="/buy" className="block">
-            <Button type="button" size="lg" className="h-14 w-full rounded-full bg-highlight text-highlight-foreground hover:bg-highlight/90 text-base">
-              <Sparkles className="mr-1 h-4 w-4" /> Buy {selected.cost - (profile?.paid_credits ?? 0)} more paid credits to publish {selected.label}
-            </Button>
-          </Link>
-        ) : (
-          <Button type="submit" size="lg" disabled={submitting || !afford.ok}
-            className="h-14 w-full rounded-full bg-primary text-base">
-            {submitting ? "Publishing…" : !afford.ok ? afford.reason : `Publish ${selected.label} for ${selected.cost} credits →`}
-          </Button>
-        )}
+        <Button type="submit" size="lg" disabled={submitting || !afford.ok}
+          className="h-14 w-full rounded-full bg-primary text-base">
+          {submitting ? "Publishing…" : !afford.ok ? afford.reason : `Publish ${selected.label} for ${selected.cost} credits →`}
+        </Button>
       </form>
     </div>
   );
