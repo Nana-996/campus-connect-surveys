@@ -472,11 +472,10 @@ function PremiumLockCard({ label }: { label: string }) {
       <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-accent">
         <Lock className="h-6 w-6 text-accent-foreground" />
       </div>
-      <p className="mt-3 font-serif text-2xl">{label} is a premium feature</p>
+      <p className="mt-3 font-serif text-2xl">{label}</p>
       <p className="mt-1 text-sm text-muted-foreground">
-        Upgrade to a Boosted or Pro survey tier, or top up paid credits, to unlock advanced analytics.
+        Answer surveys in your feed to keep your credit balance topped up.
       </p>
-      <Link to="/buy"><Button className="mt-4 rounded-full bg-primary">Upgrade</Button></Link>
     </div>
   );
 }
