@@ -52,7 +52,7 @@ function AnalyzePage() {
   const [survey, setSurvey] = useState<Survey | null>(null);
   const [responses, setResponses] = useState<Response[]>([]);
   const [profileMap, setProfileMap] = useState<Record<string, Profile>>({});
-  const [paidCredits, setPaidCredits] = useState(0);
+  const [_paidCredits, setPaidCredits] = useState(0);
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [view, setView] = useState<"overview" | "questions" | "compare" | "crosstab" | "raw" | "saved">("overview");
   const [hiddenQs, setHiddenQs] = useState<Set<string>>(new Set());
