@@ -37,7 +37,7 @@ function PrivacyPage() {
         </section>
         <section>
           <h2 className="font-serif text-2xl">3. Sharing</h2>
-          <p>Survey creators see <em>aggregated</em> answers and respondent-level answers without identifying personal info beyond what the question asks. We use Supabase (database & auth) and Paystack (payments) as processors.</p>
+          <p>Survey creators see <em>aggregated</em> answers and respondent-level answers without identifying personal info beyond what the question asks. We use Supabase (database & auth) as our infrastructure provider.</p>
         </section>
         <section>
           <h2 className="font-serif text-2xl">4. Security</h2>
