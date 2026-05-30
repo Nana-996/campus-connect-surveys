@@ -10,7 +10,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Trash2, Plus, Sparkles, Lock, Zap } from "lucide-react";
+import { Trash2, Plus, Zap } from "lucide-react";
 import { TIERS, type Tier, canAfford } from "@/lib/credits";
 import { InterestTagInput, type InterestEntry } from "@/components/InterestTagInput";
 import { AGE_RANGES, COUNTRIES } from "@/lib/interests";
