@@ -115,9 +115,9 @@ function Create() {
         Ask <em className="text-primary">{isGeneral ? "the public." : "campus."}</em>
       </h1>
       <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-card px-3 py-1 text-xs font-semibold">
-        <span className="font-bold text-primary">{profile?.paid_credits ?? 0} paid</span>
+        <span className="font-bold text-primary">{(profile?.earned_credits ?? 0) + (profile?.paid_credits ?? 0)} credits</span>
         <span className="text-muted-foreground">·</span>
-        <span className="text-muted-foreground">{profile?.earned_credits ?? 0} earned</span>
+        <span className="text-muted-foreground">earn more by answering surveys</span>
       </p>
 
       <form onSubmit={submit} className="mt-8 space-y-6">
