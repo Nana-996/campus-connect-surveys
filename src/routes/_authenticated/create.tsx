@@ -129,7 +129,6 @@ function Create() {
             {TIER_ORDER.map((t) => {
               const T = TIERS[t];
               const active = tier === t;
-              const locked = T.paidRequired && (profile?.paid_credits ?? 0) < T.cost;
               const isPro = t === "pro";
               return (
                 <button
@@ -151,22 +150,12 @@ function Create() {
                   )}
                   <div className="flex items-baseline justify-between">
                     <span className="font-serif text-2xl">{T.label}</span>
-                    {T.paidRequired ? (
-                      <Sparkles className="h-3.5 w-3.5" />
-                    ) : null}
                   </div>
                   <p className="mt-0.5 text-[11px] opacity-80">{T.tagline}</p>
-                  <p className="mt-3 text-xs font-bold">
-                    {T.cost} {T.paidRequired ? "paid" : "credits"}
-                  </p>
+                  <p className="mt-3 text-xs font-bold">{T.cost} credits</p>
                   <ul className="mt-2 space-y-0.5 text-[11px] opacity-80">
                     {T.features.slice(0, 2).map((f) => <li key={f}>· {f}</li>)}
                   </ul>
-                  {locked && !active && (
-                    <span className="absolute bottom-2 right-3 inline-flex items-center gap-1 text-[10px] font-semibold uppercase text-muted-foreground">
-                      <Lock className="h-3 w-3" /> need paid
-                    </span>
-                  )}
                 </button>
               );
             })}
