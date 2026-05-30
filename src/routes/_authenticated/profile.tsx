@@ -70,26 +70,28 @@ function Profile() {
 
       {/* Wallet bento */}
       <div className="mt-8 grid gap-4 sm:grid-cols-6">
-        {/* Paid wallet - hero */}
+        {/* Credits - hero */}
         <div className="sm:col-span-4 rounded-3xl bg-primary p-7 text-primary-foreground shadow-paper">
           <div className="flex items-center justify-between">
-            <p className="text-[11px] uppercase tracking-[0.25em] opacity-70">Paid credits · never expire</p>
+            <p className="text-[11px] uppercase tracking-[0.25em] opacity-70">Your credits</p>
             <Sparkles className="h-4 w-4 opacity-80" />
           </div>
-          <p className="mt-2 font-serif text-7xl leading-none">{profile.paid_credits}</p>
-          <p className="mt-2 text-xs opacity-80">Unlock targeting, boosting, premium placement, and high response goals.</p>
-          <Link to="/buy">
+          <p className="mt-2 font-serif text-7xl leading-none">{total}</p>
+          <p className="mt-2 text-xs opacity-80">
+            Earn credits by answering surveys — 1 credit per quality response. Spend them to publish your own.
+          </p>
+          <Link to="/feed">
             <Button className="mt-6 rounded-full bg-highlight text-highlight-foreground hover:bg-highlight/90">
-              <Sparkles className="mr-1 h-4 w-4" /> Buy credits
+              <Sparkles className="mr-1 h-4 w-4" /> Earn credits — answer surveys
             </Button>
           </Link>
         </div>
 
         {/* Earned wallet */}
         <div className="sm:col-span-2 rounded-3xl border border-foreground/15 bg-accent p-6 text-accent-foreground shadow-paper">
-          <p className="text-[11px] uppercase tracking-[0.25em] opacity-70">Earned · basic only</p>
+          <p className="text-[11px] uppercase tracking-[0.25em] opacity-70">Earned this month</p>
           <p className="mt-2 font-serif text-6xl leading-none">{profile.earned_credits}</p>
-          <p className="mt-2 text-[11px] opacity-80">{total} total · earn 1 per quality response</p>
+          <p className="mt-2 text-[11px] opacity-80">earn 1 per quality response</p>
           {nextExpiry && (
             <p className="mt-3 inline-flex items-center gap-1 rounded-full bg-background/40 px-2 py-0.5 text-[10px] font-bold uppercase">
               <Clock className="h-3 w-3" /> expires {new Date(nextExpiry).toLocaleDateString()}
@@ -105,7 +107,7 @@ function Profile() {
             <CapBar label="This week" value={caps?.week_count ?? 0} max={WEEKLY_EARN_CAP} />
           </div>
           <p className="mt-3 text-[11px] text-muted-foreground">
-            Earned credits expire in {EARNED_EXPIRY_DAYS} days. Pro publishing requires paid credits.
+            Earned credits expire in {EARNED_EXPIRY_DAYS} days. Keep answering surveys to keep your balance healthy.
           </p>
         </div>
 

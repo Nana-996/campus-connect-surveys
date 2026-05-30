@@ -15,7 +15,7 @@ import {
   PieChart, Pie, Cell, Legend, AreaChart, Area,
 } from "recharts";
 import jsPDF from "jspdf";
-import { UpgradeDialog } from "@/components/UpgradeDialog";
+
 
 const PALETTE = ["#4a6b52", "#7c9a6b", "#c98a4b", "#b8c47a", "#8e7a5a", "#6b8e9e", "#a47b4c"];
 const SUPPRESS_THRESHOLD = 5;
@@ -52,7 +52,7 @@ function AnalyzePage() {
   const [survey, setSurvey] = useState<Survey | null>(null);
   const [responses, setResponses] = useState<Response[]>([]);
   const [profileMap, setProfileMap] = useState<Record<string, Profile>>({});
-  const [paidCredits, setPaidCredits] = useState(0);
+  const [_paidCredits, setPaidCredits] = useState(0);
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [view, setView] = useState<"overview" | "questions" | "compare" | "crosstab" | "raw" | "saved">("overview");
   const [hiddenQs, setHiddenQs] = useState<Set<string>>(new Set());
@@ -104,9 +104,9 @@ function AnalyzePage() {
   }, [id, user, isPreviewMode]);
 
   const isPremium = useMemo(() => {
-    if (!survey) return false;
-    return survey.tier === "boosted" || survey.tier === "pro" || paidCredits >= 5;
-  }, [survey, paidCredits]);
+    // Premium features are free for now — all signed-in creators get full access.
+    return !!survey;
+  }, [survey]);
 
   const filtered = useMemo(() => {
     return responses.filter((r) => {
@@ -284,15 +284,9 @@ function AnalyzePage() {
         <div className="mt-4 flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-wider">
           <span className="rounded-full bg-foreground px-3 py-1 text-background">n = {n}{n !== responses.length && ` of ${responses.length}`}</span>
           <span className="rounded-full border border-foreground/20 px-3 py-1 text-muted-foreground">tier: {survey.tier}</span>
-          {isPremium ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-highlight px-3 py-1 text-highlight-foreground">
-              <Sparkles className="h-3 w-3" /> Premium analytics
-            </span>
-          ) : (
-            <Link to="/buy" className="inline-flex items-center gap-1 rounded-full border border-foreground/20 px-3 py-1 text-muted-foreground hover:bg-accent">
-              <Lock className="h-3 w-3" /> Unlock premium
-            </Link>
-          )}
+          <span className="inline-flex items-center gap-1 rounded-full bg-highlight px-3 py-1 text-highlight-foreground">
+            <Sparkles className="h-3 w-3" /> Full analytics included
+          </span>
         </div>
         {activeFilterChips.length > 0 && (
           <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -443,12 +437,6 @@ function AnalyzePage() {
           </p>
         </main>
       </div>
-      <UpgradeDialog
-        open={upgradePrompt.open}
-        onOpenChange={(o) => setUpgradePrompt((p) => ({ ...p, open: o }))}
-        feature={upgradePrompt.feature}
-        description={upgradePrompt.description}
-      />
     </div>
   );
 }
@@ -484,11 +472,10 @@ function PremiumLockCard({ label }: { label: string }) {
       <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-accent">
         <Lock className="h-6 w-6 text-accent-foreground" />
       </div>
-      <p className="mt-3 font-serif text-2xl">{label} is a premium feature</p>
+      <p className="mt-3 font-serif text-2xl">{label}</p>
       <p className="mt-1 text-sm text-muted-foreground">
-        Upgrade to a Boosted or Pro survey tier, or top up paid credits, to unlock advanced analytics.
+        Answer surveys in your feed to keep your credit balance topped up.
       </p>
-      <Link to="/buy"><Button className="mt-4 rounded-full bg-primary">Upgrade</Button></Link>
     </div>
   );
 }

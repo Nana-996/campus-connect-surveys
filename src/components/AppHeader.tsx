@@ -1,12 +1,12 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Coins, Sparkles, Home, PlusCircle, FolderOpen, User, LogOut, Zap } from "lucide-react";
-import { Link as TLink } from "@tanstack/react-router";
+import { Coins, Home, PlusCircle, FolderOpen, User, LogOut, Zap } from "lucide-react";
 
 export function AppHeader() {
   const { profile, signOut } = useAuth();
   const navigate = useNavigate();
+  const totalCredits = (profile?.earned_credits ?? 0) + (profile?.paid_credits ?? 0);
 
   return (
     <header className="sticky top-0 z-40 border-b border-foreground/15 bg-background/85 backdrop-blur">
@@ -18,14 +18,14 @@ export function AppHeader() {
           </span>
         </Link>
         <div className="flex items-center gap-2">
-          <TLink to="/buy" className="flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground shadow-paper hover:opacity-90">
-            <Sparkles className="h-3.5 w-3.5" />
-            {profile?.paid_credits ?? 0} paid
-          </TLink>
-          <div className="hidden sm:flex items-center gap-1 rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground">
+          <Link
+            to="/feed"
+            className="flex items-center gap-1 rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:opacity-90"
+            title="Answer surveys in your feed to earn more credits"
+          >
             <Coins className="h-3.5 w-3.5" />
-            {profile?.earned_credits ?? 0} earned
-          </div>
+            {totalCredits} credits
+          </Link>
           <Button
             variant="ghost"
             size="icon"

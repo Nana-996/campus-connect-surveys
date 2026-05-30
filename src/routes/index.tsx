@@ -8,7 +8,7 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "CampusVerify — Real research, real classmates, real fast" },
-      { name: "description", content: "Run surveys with verified students from your campus or the wider public. Earn credits by answering, spend credits to publish. No bots, no randoms." },
+      { name: "description", content: "Run surveys with verified students from your campus or the wider public. Free to use — earn credits by answering surveys, spend them to publish your own." },
       { property: "og:title", content: "CampusVerify — Surveys for verified students" },
       { property: "og:description", content: "A credit-powered survey feed for verified university students. Publish in seconds, get real answers from your campus." },
       { property: "og:url", content: "https://campus-spotlight-verify.lovable.app/" },
@@ -22,9 +22,8 @@ export const Route = createFileRoute("/")({
           "@type": "FAQPage",
           mainEntity: [
             { "@type": "Question", name: "Who can sign up?", acceptedAnswer: { "@type": "Answer", text: "Anyone with a valid academic email (.edu, .edu.xx, .ac.xx, .uni.xx) can create a student account. Non-students can sign up as general accounts and reach the wider public audience." } },
-            { "@type": "Question", name: "How do credits work?", acceptedAnswer: { "@type": "Answer", text: "You spend credits to publish a survey and earn 1 credit for each quality response you submit. Earned credits expire after 30 days; paid credits never expire." } },
-            { "@type": "Question", name: "Can I target specific departments?", acceptedAnswer: { "@type": "Answer", text: "Yes — upgrade to the Targeted tier or higher to filter by department, year, country, age range, and interests." } },
-            { "@type": "Question", name: "How are payments handled?", acceptedAnswer: { "@type": "Answer", text: "Paid credits are processed by Paystack — card, mobile money, bank transfer, or USSD. We never see your card details." } },
+            { "@type": "Question", name: "How do credits work?", acceptedAnswer: { "@type": "Answer", text: "You spend credits to publish a survey and earn 1 credit for each quality response you submit. CampusVerify is free to use — every credit you spend comes from answering other people's surveys." } },
+            { "@type": "Question", name: "Can I target specific departments?", acceptedAnswer: { "@type": "Answer", text: "Yes — pick the Targeted tier or higher to filter by department, year, country, age range, and interests." } },
             { "@type": "Question", name: "Is my data private?", acceptedAnswer: { "@type": "Answer", text: "Survey creators see responses, not respondent identities beyond what your questions ask. See the Privacy Policy for the full picture." } },
             { "@type": "Question", name: "What if I forgot my password?", acceptedAnswer: { "@type": "Answer", text: "Use the Forgot password link on the login screen. We'll email a secure reset link." } },
           ],
@@ -164,7 +163,7 @@ function Landing() {
               <Stat n="100%" label="Verified accounts" />
               <Stat n="0" label="Third-party ad trackers" />
               <Stat n="30 days" label="Credit-earn freshness window" />
-              <Stat n="GHS" label="Native pricing, mobile-money ready" />
+              <Stat n="Free" label="To join and to use" />
             </div>
           </div>
         </section>
@@ -179,14 +178,14 @@ function Landing() {
               general accounts and reach the wider public audience.
             </Faq>
             <Faq q="How do credits work?">
-              You spend credits to publish a survey and earn 1 credit for each quality response you submit. Earned credits expire after
-              30 days; paid credits never expire.
+              You spend credits to publish a survey and earn 1 credit for each quality response you submit. CampusVerify is free to use —
+              every credit you spend comes from answering other people's surveys.
             </Faq>
             <Faq q="Can I target specific departments?">
-              Yes — upgrade to the Targeted tier or higher to filter by department, year, country, age range, and interests.
+              Yes — pick the Targeted tier or higher to filter by department, year, country, age range, and interests.
             </Faq>
-            <Faq q="How are payments handled?">
-              Paid credits are processed by Paystack — card, mobile money, bank transfer, or USSD. We never see your card details.
+            <Faq q="How do I get more credits?">
+              Open your feed and answer surveys from other people. Each quality response earns you 1 credit — fuel for your own research.
             </Faq>
             <Faq q="Is my data private?">
               Survey creators see responses, not respondent identities beyond what your questions ask. See the{" "}

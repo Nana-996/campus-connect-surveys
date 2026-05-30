@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -10,7 +10,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Trash2, Plus, Sparkles, Lock, Zap } from "lucide-react";
+import { Trash2, Plus, Zap } from "lucide-react";
 import { TIERS, type Tier, canAfford } from "@/lib/credits";
 import { InterestTagInput, type InterestEntry } from "@/components/InterestTagInput";
 import { AGE_RANGES, COUNTRIES } from "@/lib/interests";
@@ -115,9 +115,9 @@ function Create() {
         Ask <em className="text-primary">{isGeneral ? "the public." : "campus."}</em>
       </h1>
       <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-card px-3 py-1 text-xs font-semibold">
-        <span className="font-bold text-primary">{profile?.paid_credits ?? 0} paid</span>
+        <span className="font-bold text-primary">{(profile?.earned_credits ?? 0) + (profile?.paid_credits ?? 0)} credits</span>
         <span className="text-muted-foreground">·</span>
-        <span className="text-muted-foreground">{profile?.earned_credits ?? 0} earned</span>
+        <span className="text-muted-foreground">earn more by answering surveys</span>
       </p>
 
       <form onSubmit={submit} className="mt-8 space-y-6">
@@ -129,7 +129,6 @@ function Create() {
             {TIER_ORDER.map((t) => {
               const T = TIERS[t];
               const active = tier === t;
-              const locked = T.paidRequired && (profile?.paid_credits ?? 0) < T.cost;
               const isPro = t === "pro";
               return (
                 <button
@@ -151,22 +150,12 @@ function Create() {
                   )}
                   <div className="flex items-baseline justify-between">
                     <span className="font-serif text-2xl">{T.label}</span>
-                    {T.paidRequired ? (
-                      <Sparkles className="h-3.5 w-3.5" />
-                    ) : null}
                   </div>
                   <p className="mt-0.5 text-[11px] opacity-80">{T.tagline}</p>
-                  <p className="mt-3 text-xs font-bold">
-                    {T.cost} {T.paidRequired ? "paid" : "credits"}
-                  </p>
+                  <p className="mt-3 text-xs font-bold">{T.cost} credits</p>
                   <ul className="mt-2 space-y-0.5 text-[11px] opacity-80">
                     {T.features.slice(0, 2).map((f) => <li key={f}>· {f}</li>)}
                   </ul>
-                  {locked && !active && (
-                    <span className="absolute bottom-2 right-3 inline-flex items-center gap-1 text-[10px] font-semibold uppercase text-muted-foreground">
-                      <Lock className="h-3 w-3" /> need paid
-                    </span>
-                  )}
                 </button>
               );
             })}
@@ -392,18 +381,10 @@ function Create() {
           </Button>
         </div>
 
-        {!afford.ok && selected.paidRequired ? (
-          <Link to="/buy" className="block">
-            <Button type="button" size="lg" className="h-14 w-full rounded-full bg-highlight text-highlight-foreground hover:bg-highlight/90 text-base">
-              <Sparkles className="mr-1 h-4 w-4" /> Buy {selected.cost - (profile?.paid_credits ?? 0)} more paid credits to publish {selected.label}
-            </Button>
-          </Link>
-        ) : (
-          <Button type="submit" size="lg" disabled={submitting || !afford.ok}
-            className="h-14 w-full rounded-full bg-primary text-base">
-            {submitting ? "Publishing…" : !afford.ok ? afford.reason : `Publish ${selected.label} for ${selected.cost} credits →`}
-          </Button>
-        )}
+        <Button type="submit" size="lg" disabled={submitting || !afford.ok}
+          className="h-14 w-full rounded-full bg-primary text-base">
+          {submitting ? "Publishing…" : !afford.ok ? afford.reason : `Publish ${selected.label} for ${selected.cost} credits →`}
+        </Button>
       </form>
     </div>
   );
