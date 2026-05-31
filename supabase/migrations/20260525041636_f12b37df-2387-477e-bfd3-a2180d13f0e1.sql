@@ -1,5 +1,5 @@
 
-CREATE OR REPLACE FUNCTION public.protect_profile_sensitive_columns()
+CREATE OR REPLACE FUNCTION public.protect_survey_sensitive_columns()
 RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -14,15 +14,13 @@ BEGIN
     RETURN NEW;
   END IF;
 
-  IF NEW.is_flagged IS DISTINCT FROM OLD.is_flagged
-     OR NEW.flag_reason IS DISTINCT FROM OLD.flag_reason
-     OR NEW.email_hash IS DISTINCT FROM OLD.email_hash
-     OR NEW.user_type IS DISTINCT FROM OLD.user_type
-     OR NEW.university_domain IS DISTINCT FROM OLD.university_domain
-     OR NEW.university_name IS DISTINCT FROM OLD.university_name
-     OR NEW.id IS DISTINCT FROM OLD.id
-  THEN
-    RAISE EXCEPTION 'You cannot modify protected profile fields';
+  IF TG_OP = 'UPDATE' THEN
+    IF NEW.response_count IS DISTINCT FROM OLD.response_count
+       OR NEW.paid_cost IS DISTINCT FROM OLD.paid_cost
+       OR NEW.boosted_until IS DISTINCT FROM OLD.boosted_until
+    THEN
+      RAISE EXCEPTION 'You cannot modify protected survey fields';
+    END IF;
   END IF;
 
   RETURN NEW;
