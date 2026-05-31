@@ -188,7 +188,7 @@ export const removeDisposableDomain = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-// ---------- Flags & payments ----------
+// ---------- Flags ----------
 export const listOpenFlags = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
   .handler(async () => {
@@ -204,12 +204,4 @@ export const resolveFlag = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin.from("review_flags").update({ resolved: true }).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
-  });
-
-export const listPayments = createServerFn({ method: "GET" })
-  .middleware([requireAdmin])
-  .handler(async () => {
-    const { data, error } = await supabaseAdmin.from("payment_transactions").select("*").order("created_at", { ascending: false }).limit(200);
-    if (error) throw new Error(error.message);
-    return data ?? [];
   });
