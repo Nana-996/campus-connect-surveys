@@ -21,18 +21,14 @@ export const getAdminMetrics = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
   .handler(async () => {
     const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    const [users, surveys, activeSurveys, respTotal, resp24, txSuccess, openFlags] = await Promise.all([
+    const [users, surveys, activeSurveys, respTotal, resp24, openFlags] = await Promise.all([
       supabaseAdmin.from("profiles").select("id", { count: "exact", head: true }),
       supabaseAdmin.from("surveys").select("id", { count: "exact", head: true }),
       supabaseAdmin.from("surveys").select("id", { count: "exact", head: true }).eq("is_active", true),
       supabaseAdmin.from("survey_responses").select("id", { count: "exact", head: true }),
       supabaseAdmin.from("survey_responses").select("id", { count: "exact", head: true }).gte("created_at", since24h),
-      supabaseAdmin.from("payment_transactions").select("amount_minor,currency,credits").eq("status", "success"),
       supabaseAdmin.from("review_flags").select("id", { count: "exact", head: true }).eq("resolved", false),
     ]);
-    const revenueMinor = (txSuccess.data ?? []).reduce((s, t: any) => s + (t.amount_minor ?? 0), 0);
-    const creditsSold = (txSuccess.data ?? []).reduce((s, t: any) => s + (t.credits ?? 0), 0);
-    const currency = (txSuccess.data?.[0] as any)?.currency ?? "GHS";
     return {
       users: users.count ?? 0,
       surveys: surveys.count ?? 0,
@@ -40,9 +36,6 @@ export const getAdminMetrics = createServerFn({ method: "GET" })
       responses: respTotal.count ?? 0,
       responses24h: resp24.count ?? 0,
       openFlags: openFlags.count ?? 0,
-      revenueMinor,
-      creditsSold,
-      currency,
     };
   });
 
@@ -55,7 +48,7 @@ export const listAdminUsers = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     let q = supabaseAdmin
       .from("profiles")
-      .select("id, full_name, university_name, university_domain, user_type, earned_credits, paid_credits, is_flagged, flag_reason, created_at")
+      .select("id, full_name, university_name, university_domain, user_type, earned_credits, is_flagged, flag_reason, created_at")
       .order("created_at", { ascending: false })
       .limit(200);
     if (data.search) {
@@ -79,7 +72,7 @@ export const grantCreditsToUser = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z.object({
       userId: z.string().uuid(),
-      wallet: z.enum(["earned", "paid"]),
+      wallet: z.literal("earned"),
       amount: z.number().int().min(-1000).max(1000),
       reason: z.string().min(1).max(200).default("admin_grant"),
     }).parse(d),
@@ -87,13 +80,12 @@ export const grantCreditsToUser = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: profile, error: e1 } = await supabaseAdmin
       .from("profiles")
-      .select("earned_credits, paid_credits")
+      .select("earned_credits")
       .eq("id", data.userId)
       .single();
     if (e1 || !profile) throw new Error("User not found");
-    const col = data.wallet === "paid" ? "paid_credits" : "earned_credits";
-    const next = Math.max(0, (profile as any)[col] + data.amount);
-    const patch: Record<string, number> = { [col]: next };
+    const next = Math.max(0, (profile as any).earned_credits + data.amount);
+    const patch: Record<string, number> = { earned_credits: next };
     const { error: e2 } = await supabaseAdmin.from("profiles").update(patch as any).eq("id", data.userId);
     if (e2) throw new Error(e2.message);
     await supabaseAdmin.from("credit_ledger").insert({
@@ -101,7 +93,7 @@ export const grantCreditsToUser = createServerFn({ method: "POST" })
       wallet: data.wallet,
       delta: data.amount,
       reason: `admin:${data.reason}:by:${context.userId}`,
-      expires_at: data.wallet === "earned" && data.amount > 0 ? new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString() : null,
+      expires_at: data.amount > 0 ? new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString() : null,
     });
     return { ok: true, balance: next };
   });
