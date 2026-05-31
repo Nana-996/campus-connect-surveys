@@ -9,12 +9,12 @@ BEGIN
   IF auth.uid() IS NULL THEN
     RETURN NEW;
   END IF;
+
   IF has_role(auth.uid(), 'admin'::app_role) THEN
     RETURN NEW;
   END IF;
-  IF NEW.earned_credits IS DISTINCT FROM OLD.earned_credits
-     OR NEW.paid_credits IS DISTINCT FROM OLD.paid_credits
-     OR NEW.is_flagged IS DISTINCT FROM OLD.is_flagged
+
+  IF NEW.is_flagged IS DISTINCT FROM OLD.is_flagged
      OR NEW.flag_reason IS DISTINCT FROM OLD.flag_reason
      OR NEW.email_hash IS DISTINCT FROM OLD.email_hash
      OR NEW.user_type IS DISTINCT FROM OLD.user_type
@@ -24,6 +24,7 @@ BEGIN
   THEN
     RAISE EXCEPTION 'You cannot modify protected profile fields';
   END IF;
+
   RETURN NEW;
 END;
 $$;
