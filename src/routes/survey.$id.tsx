@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { Download, ArrowLeft, Users, FileText, BarChart3, TrendingUp, Activity, Hash, Lock, ShieldCheck } from "lucide-react";
 import { SurveyVerifyModal } from "@/components/SurveyVerifyModal";
 import { AppHeader } from "@/components/AppHeader";
-import { getSurveyPublic } from "@/lib/survey-public.functions";
+import { getSurveyPublic, getSurveyForRespondent } from "@/lib/survey-public.functions";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
   PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, RadarChart, Radar,
