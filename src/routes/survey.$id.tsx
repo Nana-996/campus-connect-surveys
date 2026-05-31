@@ -37,7 +37,7 @@ type Survey = {
   creator_id: string;
   title: string;
   description: string;
-  questions?: Question[];
+  questions: Question[];
   response_count: number;
   response_goal: number;
   expires_at: string;
