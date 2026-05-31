@@ -381,9 +381,12 @@ function Create() {
           </Button>
         </div>
 
+        {!afford.ok && (
+          <p className="text-center text-xs font-medium text-destructive">{afford.reason}</p>
+        )}
         <Button type="submit" size="lg" disabled={submitting || !afford.ok}
           className="h-14 w-full rounded-full bg-primary text-base">
-          {submitting ? "Publishing…" : !afford.ok ? afford.reason : `Publish ${selected.label} for ${selected.cost} credits →`}
+          {submitting ? "Publishing…" : `Publish ${selected.label} · ${selected.cost} credits →`}
         </Button>
       </form>
     </div>
