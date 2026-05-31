@@ -65,6 +65,7 @@ function SurveyPage() {
   const { user, isPreviewMode } = useAuth();
   const navigate = useNavigate();
   const fetchPublic = useServerFn(getSurveyPublic);
+  const fetchAuthed = useServerFn(getSurveyForRespondent);
   const [survey, setSurvey] = useState<Survey | null>(null);
   const [ownerName, setOwnerName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
