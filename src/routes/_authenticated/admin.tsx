@@ -117,7 +117,7 @@ function UsersPanel() {
               <th className="px-3 py-2">Name</th>
               <th className="px-3 py-2">Type</th>
               <th className="px-3 py-2">University</th>
-              <th className="px-3 py-2">Credits (E/P)</th>
+              <th className="px-3 py-2">Credits</th>
               <th className="px-3 py-2">Status</th>
               <th className="px-3 py-2 text-right">Actions</th>
             </tr>
@@ -134,7 +134,7 @@ function UsersPanel() {
                   <div>{u.university_name}</div>
                   <div className="text-[10px] text-muted-foreground">{u.university_domain}</div>
                 </td>
-                <td className="px-3 py-2">{u.earned_credits} / {u.paid_credits}</td>
+                <td className="px-3 py-2">{u.earned_credits}</td>
                 <td className="px-3 py-2">
                   {u.is_flagged && <Badge variant="destructive" className="mr-1">Flagged</Badge>}
                   {u.roles?.includes("admin") && <Badge>Admin</Badge>}
@@ -148,15 +148,7 @@ function UsersPanel() {
                       if (!Number.isFinite(n)) return;
                       await grant({ data: { userId: u.id, wallet: "earned", amount: n, reason: "manual" } });
                       toast.success("Credits updated"); refresh();
-                    }}>+E</Button>
-                    <Button size="sm" variant="outline" onClick={async () => {
-                      const v = prompt("Grant paid credits (negative to deduct):", "10");
-                      if (!v) return;
-                      const n = parseInt(v, 10);
-                      if (!Number.isFinite(n)) return;
-                      await grant({ data: { userId: u.id, wallet: "paid", amount: n, reason: "manual" } });
-                      toast.success("Credits updated"); refresh();
-                    }}>+P</Button>
+                    }}>Credits</Button>
                     <Button size="sm" variant="outline" onClick={async () => {
                       const reason = u.is_flagged ? undefined : prompt("Flag reason:", "abuse") ?? "abuse";
                       await flag({ data: { userId: u.id, flagged: !u.is_flagged, reason } });
