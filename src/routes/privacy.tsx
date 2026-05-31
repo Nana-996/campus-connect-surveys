@@ -27,7 +27,6 @@ function PrivacyPage() {
           <ul className="list-disc pl-5 space-y-1">
             <li><strong>Account data:</strong> email, name, university domain, department, year, interests.</li>
             <li><strong>Survey data:</strong> the surveys you create and the responses you submit.</li>
-            <li><strong>Payment data:</strong> Paystack handles card details directly; we only store transaction references and amounts.</li>
             <li><strong>Technical data:</strong> basic logs needed to operate the service.</li>
           </ul>
         </section>

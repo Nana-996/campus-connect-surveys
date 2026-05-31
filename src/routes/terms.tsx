@@ -43,8 +43,8 @@ function TermsPage() {
           <p>You retain ownership of the surveys and responses you create. You grant CampusVerify a limited license to host, display, and process that content to operate the service.</p>
         </section>
         <section>
-          <h2 className="font-serif text-2xl">6. Payments</h2>
-          <p>Paid credits are processed by Paystack. By purchasing, you agree to Paystack's terms. Refunds for failed or duplicate transactions are handled case-by-case — contact support.</p>
+          <h2 className="font-serif text-2xl">6. Credits</h2>
+          <p>CampusVerify is free to use. Credits are earned by answering surveys and are not for sale. Credits have no cash value and cannot be transferred or refunded.</p>
         </section>
         <section>
           <h2 className="font-serif text-2xl">7. Disclaimers</h2>

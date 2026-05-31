@@ -27,7 +27,7 @@ export const TIERS: Record<Tier, {
   boosted: {
     label: "Boosted",
     tagline: "Pinned on the feed",
-    cost: 10,
+    cost: 8,
     paidRequired: false,
     responseGoal: 500,
     features: ["Pinned 72h on feed", "Cohort highlight badge", "Up to 500 responses", "Priority queue"],
@@ -35,7 +35,7 @@ export const TIERS: Record<Tier, {
   pro: {
     label: "Pro",
     tagline: "Serious research mode",
-    cost: 20,
+    cost: 15,
     paidRequired: false,
     responseGoal: 2000,
     features: ["Top placement for 7 days", "Up to 2,000 responses", "Instant publish", "Analytics & CSV export"],
@@ -52,11 +52,16 @@ export function canAfford(
   tier: Tier,
   earned: number,
   paid: number,
-): { ok: boolean; reason?: string } {
+): { ok: boolean; reason?: string; shortReason?: string } {
   const t = TIERS[tier];
   const total = earned + paid;
   if (total < t.cost) {
-    return { ok: false, reason: `Needs ${t.cost} credits — you have ${total}. Answer surveys in your feed to earn more.` };
+    const need = t.cost - total;
+    return {
+      ok: false,
+      shortReason: `Need ${need} more credit${need === 1 ? "" : "s"}`,
+      reason: `Need ${need} more credit${need === 1 ? "" : "s"} — answer surveys in your feed to earn them.`,
+    };
   }
   return { ok: true };
 }
