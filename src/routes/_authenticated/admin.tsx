@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { ShieldAlert, Check, Trash2, Power, UserPlus, UserMinus, Flag, FlagOff, Plus, Download } from "lucide-react";
+import { ShieldAlert, Check, Trash2, Power, UserPlus, UserMinus, Flag, FlagOff, Plus } from "lucide-react";
 import {
   getAdminMetrics,
   listAdminUsers,
@@ -23,7 +23,6 @@ import {
   removeDisposableDomain,
   listOpenFlags,
   resolveFlag,
-  listPayments,
 } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -62,8 +61,6 @@ function Admin() {
           <Kpi label="Active surveys" value={`${metrics.activeSurveys}/${metrics.surveys}`} />
           <Kpi label="Responses (24h)" value={`${metrics.responses24h} / ${metrics.responses}`} />
           <Kpi label="Open flags" value={metrics.openFlags} accent={metrics.openFlags > 0} />
-          <Kpi label="Revenue" value={`${metrics.currency} ${(metrics.revenueMinor / 100).toFixed(2)}`} />
-          <Kpi label="Credits sold" value={metrics.creditsSold} />
         </div>
       )}
 
@@ -72,14 +69,12 @@ function Admin() {
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="surveys">Surveys</TabsTrigger>
           <TabsTrigger value="flags">Flags</TabsTrigger>
-          <TabsTrigger value="payments">Payments</TabsTrigger>
           <TabsTrigger value="domains">Blocked domains</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="mt-4"><UsersPanel /></TabsContent>
         <TabsContent value="surveys" className="mt-4"><SurveysPanel /></TabsContent>
         <TabsContent value="flags" className="mt-4"><FlagsPanel /></TabsContent>
-        <TabsContent value="payments" className="mt-4"><PaymentsPanel /></TabsContent>
         <TabsContent value="domains" className="mt-4"><DomainsPanel /></TabsContent>
       </Tabs>
     </div>
@@ -274,64 +269,6 @@ function FlagsPanel() {
   );
 }
 
-// ---------------- Payments ----------------
-function PaymentsPanel() {
-  const fetchPayments = useServerFn(listPayments);
-  const { data: txs = [] } = useQuery({ queryKey: ["admin", "payments"], queryFn: () => fetchPayments() });
-
-  const exportCsv = () => {
-    const headers = ["created_at", "reference", "user_id", "amount_minor", "currency", "credits", "status", "failure_reason"];
-    const lines = [headers.join(",")].concat(
-      txs.map((t: any) => headers.map((h) => JSON.stringify(t[h] ?? "")).join(",")),
-    );
-    const blob = new Blob([lines.join("\n")], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = `payments-${new Date().toISOString().slice(0,10)}.csv`; a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  return (
-    <div>
-      <div className="mb-3 flex justify-end">
-        <Button size="sm" variant="outline" onClick={exportCsv} disabled={txs.length === 0}>
-          <Download className="mr-1 h-3 w-3" /> Export CSV
-        </Button>
-      </div>
-      <div className="overflow-x-auto rounded-2xl border border-foreground/15 bg-card">
-        <table className="w-full text-xs">
-          <thead className="bg-secondary text-left uppercase tracking-wider">
-            <tr>
-              <th className="px-3 py-2">When</th>
-              <th className="px-3 py-2">Reference</th>
-              <th className="px-3 py-2">User</th>
-              <th className="px-3 py-2">Amount</th>
-              <th className="px-3 py-2">Credits</th>
-              <th className="px-3 py-2">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {txs.map((t: any) => (
-              <tr key={t.id} className="border-t border-foreground/10">
-                <td className="px-3 py-2 whitespace-nowrap">{new Date(t.created_at).toLocaleString()}</td>
-                <td className="px-3 py-2 font-mono">{t.reference}</td>
-                <td className="px-3 py-2 font-mono">{t.user_id.slice(0, 8)}…</td>
-                <td className="px-3 py-2">{t.currency} {(t.amount_minor / 100).toFixed(2)}</td>
-                <td className="px-3 py-2">{t.credits}</td>
-                <td className={`px-3 py-2 font-semibold uppercase ${
-                  t.status === "success" ? "text-primary" :
-                  t.status === "failed" || t.status === "abandoned" ? "text-destructive" :
-                  "text-muted-foreground"
-                }`}>{t.status}{t.failure_reason ? ` · ${t.failure_reason}` : ""}</td>
-              </tr>
-            ))}
-            {txs.length === 0 && <tr><td colSpan={6} className="px-3 py-6 text-center text-muted-foreground">No transactions.</td></tr>}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
 
 // ---------------- Domains ----------------
 function DomainsPanel() {
