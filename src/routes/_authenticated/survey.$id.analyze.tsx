@@ -52,7 +52,6 @@ function AnalyzePage() {
   const [survey, setSurvey] = useState<Survey | null>(null);
   const [responses, setResponses] = useState<Response[]>([]);
   const [profileMap, setProfileMap] = useState<Record<string, Profile>>({});
-  const [_paidCredits, setPaidCredits] = useState(0);
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [view, setView] = useState<"overview" | "questions" | "compare" | "crosstab" | "raw" | "saved">("overview");
   const [hiddenQs, setHiddenQs] = useState<Set<string>>(new Set());
@@ -66,17 +65,15 @@ function AnalyzePage() {
     if (!user || isPreviewMode) { setLoading(false); return; }
     let active = true;
     (async () => {
-      const [{ data: s }, { data: r }, { data: p }] = await Promise.all([
+      const [{ data: s }, { data: r }] = await Promise.all([
         supabase.from("surveys").select("*").eq("id", id).maybeSingle(),
         supabase.from("survey_responses").select("*").eq("survey_id", id).order("created_at", { ascending: false }),
-        supabase.from("profiles").select("paid_credits").eq("id", user.id).maybeSingle(),
       ]);
       if (!active) return;
       if (!s || s.creator_id !== user.id) { setLoading(false); return; }
       setSurvey(s as unknown as Survey);
       const resps = (r as unknown as Response[]) ?? [];
       setResponses(resps);
-      setPaidCredits((p as any)?.paid_credits ?? 0);
 
       // Pull demographic info for filters via the safe campus_directory view
       const ids = Array.from(new Set(resps.map((x) => x.respondent_id)));

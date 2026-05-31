@@ -46,7 +46,6 @@ function Profile() {
   }, [user, isPreviewMode]);
 
   if (!profile) return null;
-  const total = profile.earned_credits + profile.paid_credits;
   const isGeneral = profile.user_type === "general";
 
   return (
@@ -76,7 +75,7 @@ function Profile() {
             <p className="text-[11px] uppercase tracking-[0.25em] opacity-70">Your credits</p>
             <Sparkles className="h-4 w-4 opacity-80" />
           </div>
-          <p className="mt-2 font-serif text-7xl leading-none">{total}</p>
+          <p className="mt-2 font-serif text-7xl leading-none">{profile.earned_credits}</p>
           <p className="mt-2 text-xs opacity-80">
             Earn credits by answering surveys — 1 credit per quality response. Spend them to publish your own.
           </p>
@@ -148,8 +147,8 @@ function Profile() {
           {ledger.map((row) => (
             <li key={row.id} className="flex items-center justify-between rounded-xl border border-foreground/10 bg-card px-4 py-2 text-sm">
               <div className="flex items-center gap-2">
-                <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${row.wallet === "paid" ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"}`}>
-                  {row.wallet}
+                <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent-foreground">
+                  credits
                 </span>
                 <span className="text-muted-foreground">{row.reason.replace(/_/g, " ")}</span>
               </div>

@@ -4,7 +4,6 @@ export const TIERS: Record<Tier, {
   label: string;
   tagline: string;
   cost: number;
-  paidRequired: boolean;
   responseGoal: number;
   features: string[];
 }> = {
@@ -12,7 +11,6 @@ export const TIERS: Record<Tier, {
     label: "Basic",
     tagline: "Casual pulse check",
     cost: 1,
-    paidRequired: false,
     responseGoal: 50,
     features: ["Open to whole campus", "Up to 50 responses", "Live for 14 days"],
   },
@@ -20,7 +18,6 @@ export const TIERS: Record<Tier, {
     label: "Targeted",
     tagline: "Reach a specific cohort",
     cost: 3,
-    paidRequired: false,
     responseGoal: 200,
     features: ["Department + year + interest targeting", "Up to 200 responses", "Priority queue", "Live for 30 days"],
   },
@@ -28,7 +25,6 @@ export const TIERS: Record<Tier, {
     label: "Boosted",
     tagline: "Pinned on the feed",
     cost: 8,
-    paidRequired: false,
     responseGoal: 500,
     features: ["Pinned 72h on feed", "Cohort highlight badge", "Up to 500 responses", "Priority queue"],
   },
@@ -36,7 +32,6 @@ export const TIERS: Record<Tier, {
     label: "Pro",
     tagline: "Serious research mode",
     cost: 15,
-    paidRequired: false,
     responseGoal: 2000,
     features: ["Top placement for 7 days", "Up to 2,000 responses", "Instant publish", "Analytics & CSV export"],
   },
@@ -51,12 +46,11 @@ export const EARNED_EXPIRY_DAYS = 30;
 export function canAfford(
   tier: Tier,
   earned: number,
-  paid: number,
+  _paid = 0,
 ): { ok: boolean; reason?: string; shortReason?: string } {
   const t = TIERS[tier];
-  const total = earned + paid;
-  if (total < t.cost) {
-    const need = t.cost - total;
+  if (earned < t.cost) {
+    const need = t.cost - earned;
     return {
       ok: false,
       shortReason: `Need ${need} more credit${need === 1 ? "" : "s"}`,

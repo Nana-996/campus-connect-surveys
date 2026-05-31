@@ -6,7 +6,7 @@ import { Coins, Home, PlusCircle, FolderOpen, User, LogOut, Zap } from "lucide-r
 export function AppHeader() {
   const { profile, signOut } = useAuth();
   const navigate = useNavigate();
-  const totalCredits = (profile?.earned_credits ?? 0) + (profile?.paid_credits ?? 0);
+  const earnedCredits = profile?.earned_credits ?? 0;
 
   return (
     <header className="sticky top-0 z-40 border-b border-foreground/15 bg-background/85 backdrop-blur">
@@ -24,7 +24,7 @@ export function AppHeader() {
             title="Answer surveys in your feed to earn more credits"
           >
             <Coins className="h-3.5 w-3.5" />
-            {totalCredits} credits
+            {earnedCredits} credits
           </Link>
           <Button
             variant="ghost"

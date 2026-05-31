@@ -10,7 +10,6 @@ export type Profile = {
   department: string;
   year: string;
   earned_credits: number;
-  paid_credits: number;
   is_flagged?: boolean;
   flag_reason?: string | null;
   user_type?: "student" | "general";
@@ -44,7 +43,6 @@ const previewProfile: Profile = {
   department: "Research Methods",
   year: "Year 3",
   earned_credits: 4,
-  paid_credits: 12,
 };
 
 const fallbackProfileFor = (authUser: User): Profile => {
@@ -59,7 +57,6 @@ const fallbackProfileFor = (authUser: User): Profile => {
     department: userType === "student" ? metadata.department ?? "" : "",
     year: userType === "student" ? metadata.year ?? "" : "",
     earned_credits: userType === "student" ? 10 : 5,
-    paid_credits: 0,
     user_type: userType,
   };
 };
@@ -107,7 +104,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         department: metadata.department ?? "",
         year: metadata.year ?? "",
         earned_credits: userType === "student" ? 10 : 5,
-        paid_credits: 0,
         user_type: userType,
       })
       .select("*")

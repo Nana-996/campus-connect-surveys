@@ -61,7 +61,7 @@ function Create() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!profile) return;
-    const afford = canAfford(tier, profile.earned_credits, profile.paid_credits);
+    const afford = canAfford(tier, profile.earned_credits);
     if (!afford.ok) { toast.error(afford.reason!); return; }
     if (questions.length === 0 || questions.some((q) => !q.text.trim())) {
       toast.error("Each question needs text."); return;
@@ -106,7 +106,7 @@ function Create() {
   };
 
   const selected = TIERS[tier];
-  const afford = profile ? canAfford(tier, profile.earned_credits, profile.paid_credits) : { ok: false };
+  const afford = profile ? canAfford(tier, profile.earned_credits) : { ok: false };
 
   return (
     <div>
@@ -115,7 +115,7 @@ function Create() {
         Ask <em className="text-primary">{isGeneral ? "the public." : "campus."}</em>
       </h1>
       <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-card px-3 py-1 text-xs font-semibold">
-        <span className="font-bold text-primary">{(profile?.earned_credits ?? 0) + (profile?.paid_credits ?? 0)} credits</span>
+        <span className="font-bold text-primary">{profile?.earned_credits ?? 0} credits</span>
         <span className="text-muted-foreground">·</span>
         <span className="text-muted-foreground">earn more by answering surveys</span>
       </p>
