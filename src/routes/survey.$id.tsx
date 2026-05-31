@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { Download, ArrowLeft, Users, FileText, BarChart3, TrendingUp, Activity, Hash, Lock, ShieldCheck } from "lucide-react";
 import { SurveyVerifyModal } from "@/components/SurveyVerifyModal";
 import { AppHeader } from "@/components/AppHeader";
-import { getSurveyPublic } from "@/lib/survey-public.functions";
+import { getSurveyPublic, getSurveyForRespondent } from "@/lib/survey-public.functions";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
   PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, RadarChart, Radar,
@@ -65,6 +65,7 @@ function SurveyPage() {
   const { user, isPreviewMode } = useAuth();
   const navigate = useNavigate();
   const fetchPublic = useServerFn(getSurveyPublic);
+  const fetchAuthed = useServerFn(getSurveyForRespondent);
   const [survey, setSurvey] = useState<Survey | null>(null);
   const [ownerName, setOwnerName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -78,16 +79,20 @@ function SurveyPage() {
 
   const isOwner = !!(survey && user && survey.creator_id === user.id);
 
-  // Load survey publicly (works for signed-in or anonymous viewers).
+  // Load survey: authenticated users get full questions via RLS-scoped fetch;
+  // anonymous viewers only see metadata (no questions) for the verify card.
   useEffect(() => {
     if (isPreviewMode) { setLoading(false); return; }
     let active = true;
     (async () => {
       try {
-        const res = await fetchPublic({ data: { id } });
+        const res = user
+          ? await fetchAuthed({ data: { id } })
+          : await fetchPublic({ data: { id } });
         if (!active) return;
         if (!res.survey) { setSurvey(null); setLoading(false); return; }
-        setSurvey(res.survey as unknown as Survey);
+        const surveyData = { ...(res.survey as any), questions: (res.survey as any).questions ?? [] };
+        setSurvey(surveyData as Survey);
         setOwnerName(res.ownerName);
       } catch (e) {
         console.warn("Survey load failed", e);
@@ -96,7 +101,7 @@ function SurveyPage() {
       }
     })();
     return () => { active = false; };
-  }, [id, isPreviewMode, fetchPublic]);
+  }, [id, isPreviewMode, fetchPublic, fetchAuthed, user]);
 
   // Auto-open the verify modal for unauthenticated visitors as soon as the survey loads.
   useEffect(() => {
