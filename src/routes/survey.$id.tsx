@@ -84,6 +84,31 @@ function SurveyPage() {
   const [responses, setResponses] = useState<any[] | null>(null);
   const [chartTypes, setChartTypes] = useState<Record<string, ChartType>>({});
   const [verifyOpen, setVerifyOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/survey/${id}` : `/survey/${id}`;
+  const handleShare = async () => {
+    const shareData = {
+      title: survey?.title ? `Take this survey: ${survey.title}` : "Take this survey",
+      text: survey?.description || "Help me out by answering this quick verified survey on CampusVerify.",
+      url: shareUrl,
+    };
+    try {
+      if (typeof navigator !== "undefined" && (navigator as any).share) {
+        await (navigator as any).share(shareData);
+        return;
+      }
+    } catch { /* user cancelled — fall through to copy */ }
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      toast.success("Link copied! Share it anywhere.");
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      toast.error("Couldn't copy. Long-press the link to copy manually.");
+      setCopied(true);
+    }
+  };
 
   const isOwner = !!(survey && user && survey.creator_id === user.id);
 
