@@ -179,6 +179,15 @@ function SurveyPage() {
     } finally {
       setSubmitting(false);
     }
+      if (error) throw error;
+      try { localStorage.removeItem(draftKey); } catch {}
+      toast.success("Response submitted! +1 earned credit (subject to caps).");
+      navigate({ to: "/feed" });
+    } catch (err: any) {
+      toast.error(err.message ?? "Failed to submit");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const exportCSV = () => {
