@@ -28,26 +28,53 @@ export const Route = createFileRoute("/_authenticated/create")({
 
 const TIER_ORDER: Tier[] = ["pro", "boosted", "targeted", "basic"];
 
+const DRAFT_KEY = "cv:create-draft:v1";
+type Draft = {
+  tier: Tier; title: string; description: string;
+  targetDept: string; targetYear: string; targetCountry: string; targetAge: string;
+  targetInterests: InterestEntry[]; responseGoal: string; expiresAt: string;
+  allowGeneral: boolean; questions: Question[];
+};
+const loadDraft = (): Partial<Draft> => {
+  if (typeof window === "undefined") return {};
+  try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || "{}"); } catch { return {}; }
+};
+
 function Create() {
   const { user, profile, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const isGeneral = profile?.user_type === "general";
-  const [tier, setTier] = useState<Tier>("pro");
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  // Structured targeting (replaces the old free-text audience/region inputs)
-  const [targetDept, setTargetDept] = useState("");
-  const [targetYear, setTargetYear] = useState("");
-  const [targetCountry, setTargetCountry] = useState<string>("");
-  const [targetAge, setTargetAge] = useState<string>("");
-  const [targetInterests, setTargetInterests] = useState<InterestEntry[]>([]);
-  const [responseGoal, setResponseGoal] = useState<string>("");
-  const [expiresAt, setExpiresAt] = useState<string>("");
-  const [allowGeneral, setAllowGeneral] = useState(false);
-  const [questions, setQuestions] = useState<Question[]>([
-    { id: crypto.randomUUID(), type: "text", text: "" },
-  ]);
+  const d = loadDraft();
+  const [tier, setTier] = useState<Tier>(d.tier ?? "pro");
+  const [title, setTitle] = useState(d.title ?? "");
+  const [description, setDescription] = useState(d.description ?? "");
+  const [targetDept, setTargetDept] = useState(d.targetDept ?? "");
+  const [targetYear, setTargetYear] = useState(d.targetYear ?? "");
+  const [targetCountry, setTargetCountry] = useState<string>(d.targetCountry ?? "");
+  const [targetAge, setTargetAge] = useState<string>(d.targetAge ?? "");
+  const [targetInterests, setTargetInterests] = useState<InterestEntry[]>(d.targetInterests ?? []);
+  const [responseGoal, setResponseGoal] = useState<string>(d.responseGoal ?? "");
+  const [expiresAt, setExpiresAt] = useState<string>(d.expiresAt ?? "");
+  const [allowGeneral, setAllowGeneral] = useState(d.allowGeneral ?? false);
+  const [questions, setQuestions] = useState<Question[]>(
+    d.questions && d.questions.length > 0 ? d.questions :
+    [{ id: crypto.randomUUID(), type: "text", text: "" }]
+  );
   const [submitting, setSubmitting] = useState(false);
+
+  // Persist draft on any change
+  useState(() => {});
+  if (typeof window !== "undefined") {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    require("react").useEffect(() => {
+      try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify({
+          tier, title, description, targetDept, targetYear, targetCountry,
+          targetAge, targetInterests, responseGoal, expiresAt, allowGeneral, questions,
+        }));
+      } catch {}
+    }, [tier, title, description, targetDept, targetYear, targetCountry, targetAge, targetInterests, responseGoal, expiresAt, allowGeneral, questions]);
+  }
 
   const addQ = (type: Question["type"]) =>
     setQuestions((q) => [...q, {
