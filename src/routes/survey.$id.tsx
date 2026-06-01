@@ -405,6 +405,47 @@ function SurveyPage() {
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="font-serif text-3xl">Results</h2>
               <div className="flex gap-2">
+          <div className="mt-6 rounded-2xl border border-foreground/15 bg-background/60 p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground">Share this survey</p>
+                <p className="mt-1 text-xs text-muted-foreground">Send the link to friends, classmates or your group chat — verified responses earn you data fast.</p>
+              </div>
+              <Button onClick={handleShare} size="sm" className="rounded-full bg-primary">
+                {copied ? <Check className="mr-1 h-4 w-4" /> : <Share2 className="mr-1 h-4 w-4" />}
+                {copied ? "Copied" : "Share link"}
+              </Button>
+            </div>
+            <div className="mt-3 flex items-center gap-2 rounded-xl border border-foreground/15 bg-card px-3 py-2">
+              <code className="flex-1 truncate text-[11px] text-muted-foreground">{shareUrl}</code>
+              <button
+                type="button"
+                onClick={handleShare}
+                className="inline-flex shrink-0 items-center gap-1 rounded-full bg-foreground/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wider hover:bg-foreground/20"
+                aria-label="Copy link"
+              >
+                <Copy className="h-3 w-3" /> Copy
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {!user ? (
+          <div className="mt-6 rounded-3xl border border-dashed border-foreground/30 bg-card p-8 text-center shadow-paper">
+            <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <Lock className="h-5 w-5" />
+            </div>
+            <p className="mt-3 font-serif text-3xl">Verify to view the questions</p>
+            <p className="mt-2 text-sm text-muted-foreground">Create a quick account or log in to answer this survey and earn credits.</p>
+            <Button onClick={() => setVerifyOpen(true)} className="mt-5 h-11 rounded-full bg-primary px-6 text-sm font-semibold text-primary-foreground">
+              <ShieldCheck className="mr-2 h-4 w-4" /> Verify to continue
+            </Button>
+          </div>
+        ) : isOwner ? (
+          <div className="mt-6">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="font-serif text-3xl">Results</h2>
+              <div className="flex gap-2">
                 <Button size="sm" variant="outline" className="rounded-full border-foreground/30" onClick={exportCSV} disabled={!responses?.length}>
                   <Download className="mr-1 h-4 w-4" /> CSV
                 </Button>
