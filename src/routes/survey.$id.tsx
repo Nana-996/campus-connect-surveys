@@ -387,24 +387,6 @@ function SurveyPage() {
             {survey.target_department && <span className="rounded-full bg-accent px-3 py-1 text-accent-foreground">{survey.target_department}</span>}
             {survey.target_year && <span className="rounded-full bg-accent px-3 py-1 text-accent-foreground">{survey.target_year}</span>}
           </div>
-        </div>
-
-        {!user ? (
-          <div className="mt-6 rounded-3xl border border-dashed border-foreground/30 bg-card p-8 text-center shadow-paper">
-            <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <Lock className="h-5 w-5" />
-            </div>
-            <p className="mt-3 font-serif text-3xl">Verify to view the questions</p>
-            <p className="mt-2 text-sm text-muted-foreground">Create a quick account or log in to answer this survey and earn credits.</p>
-            <Button onClick={() => setVerifyOpen(true)} className="mt-5 h-11 rounded-full bg-primary px-6 text-sm font-semibold text-primary-foreground">
-              <ShieldCheck className="mr-2 h-4 w-4" /> Verify to continue
-            </Button>
-          </div>
-        ) : isOwner ? (
-          <div className="mt-6">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="font-serif text-3xl">Results</h2>
-              <div className="flex gap-2">
           <div className="mt-6 rounded-2xl border border-foreground/15 bg-background/60 p-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
