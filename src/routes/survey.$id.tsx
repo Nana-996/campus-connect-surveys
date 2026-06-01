@@ -70,7 +70,15 @@ function SurveyPage() {
   const [ownerName, setOwnerName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [alreadyAnswered, setAlreadyAnswered] = useState(false);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const draftKey = `cv:answers:${id}`;
+  const [answers, setAnswers] = useState<Record<string, string>>(() => {
+    if (typeof window === "undefined") return {};
+    try { return JSON.parse(localStorage.getItem(draftKey) || "{}"); } catch { return {}; }
+  });
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try { localStorage.setItem(draftKey, JSON.stringify(answers)); } catch {}
+  }, [answers, draftKey]);
   const [submitting, setSubmitting] = useState(false);
   const [startedAt] = useState<number>(() => Date.now());
   const [responses, setResponses] = useState<any[] | null>(null);
