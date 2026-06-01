@@ -119,6 +119,7 @@ function Create() {
       if (error) throw error;
       await refreshProfile();
       toast.success(`Published as ${TIERS[tier].label}!`);
+      try { localStorage.removeItem(DRAFT_KEY); } catch {}
       navigate({ to: "/survey/$id", params: { id: data.id } });
     } catch (err: any) {
       toast.error(err.message ?? "Failed to publish");
