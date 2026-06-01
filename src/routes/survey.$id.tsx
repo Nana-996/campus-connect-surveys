@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Download, ArrowLeft, Users, FileText, BarChart3, TrendingUp, Activity, Hash, Lock, ShieldCheck } from "lucide-react";
+import { Download, ArrowLeft, Users, FileText, BarChart3, TrendingUp, Activity, Hash, Lock, ShieldCheck, Share2, Copy, Check } from "lucide-react";
 import { SurveyVerifyModal } from "@/components/SurveyVerifyModal";
 import { AppHeader } from "@/components/AppHeader";
 import { getSurveyPublic, getSurveyForRespondent } from "@/lib/survey-public.functions";
@@ -84,6 +84,31 @@ function SurveyPage() {
   const [responses, setResponses] = useState<any[] | null>(null);
   const [chartTypes, setChartTypes] = useState<Record<string, ChartType>>({});
   const [verifyOpen, setVerifyOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/survey/${id}` : `/survey/${id}`;
+  const handleShare = async () => {
+    const shareData = {
+      title: survey?.title ? `Take this survey: ${survey.title}` : "Take this survey",
+      text: survey?.description || "Help me out by answering this quick verified survey on CampusVerify.",
+      url: shareUrl,
+    };
+    try {
+      if (typeof navigator !== "undefined" && (navigator as any).share) {
+        await (navigator as any).share(shareData);
+        return;
+      }
+    } catch { /* user cancelled — fall through to copy */ }
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      toast.success("Link copied! Share it anywhere.");
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      toast.error("Couldn't copy. Long-press the link to copy manually.");
+      setCopied(true);
+    }
+  };
 
   const isOwner = !!(survey && user && survey.creator_id === user.id);
 
@@ -361,6 +386,29 @@ function SurveyPage() {
             </span>
             {survey.target_department && <span className="rounded-full bg-accent px-3 py-1 text-accent-foreground">{survey.target_department}</span>}
             {survey.target_year && <span className="rounded-full bg-accent px-3 py-1 text-accent-foreground">{survey.target_year}</span>}
+          </div>
+          <div className="mt-6 rounded-2xl border border-foreground/15 bg-background/60 p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground">Share this survey</p>
+                <p className="mt-1 text-xs text-muted-foreground">Send the link to friends, classmates or your group chat — verified responses earn you data fast.</p>
+              </div>
+              <Button onClick={handleShare} size="sm" className="rounded-full bg-primary">
+                {copied ? <Check className="mr-1 h-4 w-4" /> : <Share2 className="mr-1 h-4 w-4" />}
+                {copied ? "Copied" : "Share link"}
+              </Button>
+            </div>
+            <div className="mt-3 flex items-center gap-2 rounded-xl border border-foreground/15 bg-card px-3 py-2">
+              <code className="flex-1 truncate text-[11px] text-muted-foreground">{shareUrl}</code>
+              <button
+                type="button"
+                onClick={handleShare}
+                className="inline-flex shrink-0 items-center gap-1 rounded-full bg-foreground/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wider hover:bg-foreground/20"
+                aria-label="Copy link"
+              >
+                <Copy className="h-3 w-3" /> Copy
+              </button>
+            </div>
           </div>
         </div>
 
