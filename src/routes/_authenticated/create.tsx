@@ -62,19 +62,14 @@ function Create() {
   );
   const [submitting, setSubmitting] = useState(false);
 
-  // Persist draft on any change
-  useState(() => {});
-  if (typeof window !== "undefined") {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    require("react").useEffect(() => {
-      try {
-        localStorage.setItem(DRAFT_KEY, JSON.stringify({
-          tier, title, description, targetDept, targetYear, targetCountry,
-          targetAge, targetInterests, responseGoal, expiresAt, allowGeneral, questions,
-        }));
-      } catch {}
-    }, [tier, title, description, targetDept, targetYear, targetCountry, targetAge, targetInterests, responseGoal, expiresAt, allowGeneral, questions]);
-  }
+  useEffect(() => {
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({
+        tier, title, description, targetDept, targetYear, targetCountry,
+        targetAge, targetInterests, responseGoal, expiresAt, allowGeneral, questions,
+      }));
+    } catch {}
+  }, [tier, title, description, targetDept, targetYear, targetCountry, targetAge, targetInterests, responseGoal, expiresAt, allowGeneral, questions]);
 
   const addQ = (type: Question["type"]) =>
     setQuestions((q) => [...q, {
