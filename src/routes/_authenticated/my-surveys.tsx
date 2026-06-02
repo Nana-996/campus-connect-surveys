@@ -54,6 +54,20 @@ function MySurveys() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const { error } = await supabase.from("surveys").delete().eq("id", deleteTarget.id);
+    setDeleting(false);
+    setDeleteTarget(null);
+    if (error) {
+      toast.error(error.message || "Failed to delete survey.");
+      return;
+    }
+    setSurveys((prev) => prev.filter((s) => s.id !== deleteTarget.id));
+    toast.success("Survey deleted.");
+  };
+
   useEffect(() => {
     if (!user) return;
     if (isPreviewMode) {
