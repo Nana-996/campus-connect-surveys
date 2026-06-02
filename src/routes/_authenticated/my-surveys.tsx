@@ -145,6 +145,14 @@ function MySurveys() {
                   {sharedId === s.id ? <Check className="mr-1 h-3.5 w-3.5" /> : <Share2 className="mr-1 h-3.5 w-3.5" />}
                   {sharedId === s.id ? "Copied" : "Share"}
                 </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setDeleteTarget(s)}
+                  className="rounded-full border-destructive/40 bg-background/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                >
+                  <Trash2 className="mr-1 h-3.5 w-3.5" /> Delete
+                </Button>
               </div>
               {sharedId === s.id && (
                 <div className="mt-3 flex items-center gap-2 rounded-2xl border border-foreground/15 bg-background/60 px-3 py-2">
