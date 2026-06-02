@@ -122,6 +122,20 @@ function SurveyPage() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!survey) return;
+    setDeleting(true);
+    const { error } = await supabase.from("surveys").delete().eq("id", survey.id);
+    setDeleting(false);
+    setDeleteOpen(false);
+    if (error) {
+      toast.error(error.message || "Failed to delete survey.");
+      return;
+    }
+    toast.success("Survey deleted.");
+    navigate({ to: "/my-surveys" });
+  };
+
   const isOwner = !!(survey && user && survey.creator_id === user.id);
 
   // Load survey: authenticated users get full questions via RLS-scoped fetch;
