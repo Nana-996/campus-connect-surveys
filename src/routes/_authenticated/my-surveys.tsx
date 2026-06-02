@@ -35,6 +35,8 @@ function MySurveys() {
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [loading, setLoading] = useState(true);
   const [sharedId, setSharedId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Survey | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const shareUrl = (id: string) =>
     typeof window !== "undefined" ? `${window.location.origin}/survey/${id}` : `/survey/${id}`;
