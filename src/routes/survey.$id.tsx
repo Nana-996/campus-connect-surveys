@@ -460,6 +460,9 @@ function SurveyPage() {
                 <Button size="sm" variant="outline" className="rounded-full border-foreground/30" onClick={exportPDF} disabled={!responses?.length}>
                   <FileText className="mr-1 h-4 w-4" /> PDF
                 </Button>
+                <Button size="sm" variant="outline" onClick={() => setDeleteOpen(true)} className="rounded-full border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive">
+                  <Trash2 className="mr-1 h-4 w-4" /> Delete
+                </Button>
               </div>
             </div>
             {responses && responses.length > 0 ? (
