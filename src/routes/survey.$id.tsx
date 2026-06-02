@@ -8,7 +8,17 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Download, ArrowLeft, Users, FileText, BarChart3, TrendingUp, Activity, Hash, Lock, ShieldCheck, Share2, Copy, Check } from "lucide-react";
+import { Download, ArrowLeft, Users, FileText, BarChart3, TrendingUp, Activity, Hash, Lock, ShieldCheck, Share2, Copy, Check, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { SurveyVerifyModal } from "@/components/SurveyVerifyModal";
 import { AppHeader } from "@/components/AppHeader";
 import { getSurveyPublic, getSurveyForRespondent } from "@/lib/survey-public.functions";
@@ -85,6 +95,8 @@ function SurveyPage() {
   const [chartTypes, setChartTypes] = useState<Record<string, ChartType>>({});
   const [verifyOpen, setVerifyOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/survey/${id}` : `/survey/${id}`;
   const handleShare = async () => {
@@ -108,6 +120,20 @@ function SurveyPage() {
       toast.error("Couldn't copy. Long-press the link to copy manually.");
       setCopied(true);
     }
+  };
+
+  const handleDelete = async () => {
+    if (!survey) return;
+    setDeleting(true);
+    const { error } = await supabase.from("surveys").delete().eq("id", survey.id);
+    setDeleting(false);
+    setDeleteOpen(false);
+    if (error) {
+      toast.error(error.message || "Failed to delete survey.");
+      return;
+    }
+    toast.success("Survey deleted.");
+    navigate({ to: "/my-surveys" });
   };
 
   const isOwner = !!(survey && user && survey.creator_id === user.id);
@@ -434,6 +460,9 @@ function SurveyPage() {
                 <Button size="sm" variant="outline" className="rounded-full border-foreground/30" onClick={exportPDF} disabled={!responses?.length}>
                   <FileText className="mr-1 h-4 w-4" /> PDF
                 </Button>
+                <Button size="sm" variant="outline" onClick={() => setDeleteOpen(true)} className="rounded-full border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive">
+                  <Trash2 className="mr-1 h-4 w-4" /> Delete
+                </Button>
               </div>
             </div>
             {responses && responses.length > 0 ? (
@@ -588,6 +617,23 @@ function SurveyPage() {
           onVerified={() => setVerifyOpen(false)}
           surveyTitle={survey?.title}
         />
+
+        <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete survey?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently remove <strong>{survey?.title}</strong> and all its responses. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} disabled={deleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                {deleting ? "Deleting…" : "Delete"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     );
   })();

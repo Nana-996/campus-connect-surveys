@@ -4,7 +4,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Users, Eye, ArrowUpRight, BarChart3, Share2, Copy, Check } from "lucide-react";
+import { Users, Eye, ArrowUpRight, BarChart3, Share2, Copy, Check, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type Survey = {
   id: string;
@@ -25,6 +35,8 @@ function MySurveys() {
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [loading, setLoading] = useState(true);
   const [sharedId, setSharedId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Survey | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const shareUrl = (id: string) =>
     typeof window !== "undefined" ? `${window.location.origin}/survey/${id}` : `/survey/${id}`;
@@ -40,6 +52,20 @@ function MySurveys() {
       toast.error("Couldn't copy. Long-press the link to copy manually.");
       setSharedId(id);
     }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const { error } = await supabase.from("surveys").delete().eq("id", deleteTarget.id);
+    setDeleting(false);
+    setDeleteTarget(null);
+    if (error) {
+      toast.error(error.message || "Failed to delete survey.");
+      return;
+    }
+    setSurveys((prev) => prev.filter((s) => s.id !== deleteTarget.id));
+    toast.success("Survey deleted.");
   };
 
   useEffect(() => {
@@ -119,6 +145,14 @@ function MySurveys() {
                   {sharedId === s.id ? <Check className="mr-1 h-3.5 w-3.5" /> : <Share2 className="mr-1 h-3.5 w-3.5" />}
                   {sharedId === s.id ? "Copied" : "Share"}
                 </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setDeleteTarget(s)}
+                  className="rounded-full border-destructive/40 bg-background/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                >
+                  <Trash2 className="mr-1 h-3.5 w-3.5" /> Delete
+                </Button>
               </div>
               {sharedId === s.id && (
                 <div className="mt-3 flex items-center gap-2 rounded-2xl border border-foreground/15 bg-background/60 px-3 py-2">
@@ -137,6 +171,22 @@ function MySurveys() {
           ))}
         </div>
       )}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete survey?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove <strong>{deleteTarget?.title}</strong> and all its responses. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteTarget(null)} disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={deleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {deleting ? "Deleting…" : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
