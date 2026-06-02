@@ -95,6 +95,8 @@ function SurveyPage() {
   const [chartTypes, setChartTypes] = useState<Record<string, ChartType>>({});
   const [verifyOpen, setVerifyOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/survey/${id}` : `/survey/${id}`;
   const handleShare = async () => {
