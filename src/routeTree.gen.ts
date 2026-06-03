@@ -20,6 +20,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SurveyIdRouteImport } from './routes/survey.$id'
 import { Route as RTokenRouteImport } from './routes/r.$token'
+import { Route as BlogStudentSurveyQuestionsGuideRouteImport } from './routes/blog.student-survey-questions-guide'
 import { Route as AuthenticatedSwipeRouteImport } from './routes/_authenticated/swipe'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedMySurveysRouteImport } from './routes/_authenticated/my-surveys'
@@ -82,6 +83,12 @@ const RTokenRoute = RTokenRouteImport.update({
   path: '/r/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogStudentSurveyQuestionsGuideRoute =
+  BlogStudentSurveyQuestionsGuideRouteImport.update({
+    id: '/blog/student-survey-questions-guide',
+    path: '/blog/student-survey-questions-guide',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedSwipeRoute = AuthenticatedSwipeRouteImport.update({
   id: '/swipe',
   path: '/swipe',
@@ -134,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/my-surveys': typeof AuthenticatedMySurveysRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/swipe': typeof AuthenticatedSwipeRoute
+  '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
   '/r/$token': typeof RTokenRoute
   '/survey/$id': typeof SurveyIdRoute
   '/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
@@ -153,6 +161,7 @@ export interface FileRoutesByTo {
   '/my-surveys': typeof AuthenticatedMySurveysRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/swipe': typeof AuthenticatedSwipeRoute
+  '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
   '/r/$token': typeof RTokenRoute
   '/survey/$id': typeof SurveyIdRoute
   '/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
@@ -174,6 +183,7 @@ export interface FileRoutesById {
   '/_authenticated/my-surveys': typeof AuthenticatedMySurveysRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/swipe': typeof AuthenticatedSwipeRoute
+  '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
   '/r/$token': typeof RTokenRoute
   '/survey/$id': typeof SurveyIdRoute
   '/_authenticated/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
@@ -195,6 +205,7 @@ export interface FileRouteTypes {
     | '/my-surveys'
     | '/profile'
     | '/swipe'
+    | '/blog/student-survey-questions-guide'
     | '/r/$token'
     | '/survey/$id'
     | '/survey/$id/analyze'
@@ -214,6 +225,7 @@ export interface FileRouteTypes {
     | '/my-surveys'
     | '/profile'
     | '/swipe'
+    | '/blog/student-survey-questions-guide'
     | '/r/$token'
     | '/survey/$id'
     | '/survey/$id/analyze'
@@ -234,6 +246,7 @@ export interface FileRouteTypes {
     | '/_authenticated/my-surveys'
     | '/_authenticated/profile'
     | '/_authenticated/swipe'
+    | '/blog/student-survey-questions-guide'
     | '/r/$token'
     | '/survey/$id'
     | '/_authenticated/survey/$id/analyze'
@@ -249,6 +262,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
+  BlogStudentSurveyQuestionsGuideRoute: typeof BlogStudentSurveyQuestionsGuideRoute
   RTokenRoute: typeof RTokenRoute
   SurveyIdRoute: typeof SurveyIdRoute
 }
@@ -330,6 +344,13 @@ declare module '@tanstack/react-router' {
       path: '/r/$token'
       fullPath: '/r/$token'
       preLoaderRoute: typeof RTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/student-survey-questions-guide': {
+      id: '/blog/student-survey-questions-guide'
+      path: '/blog/student-survey-questions-guide'
+      fullPath: '/blog/student-survey-questions-guide'
+      preLoaderRoute: typeof BlogStudentSurveyQuestionsGuideRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/swipe': {
@@ -418,6 +439,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
+  BlogStudentSurveyQuestionsGuideRoute: BlogStudentSurveyQuestionsGuideRoute,
   RTokenRoute: RTokenRoute,
   SurveyIdRoute: SurveyIdRoute,
 }
