@@ -64,7 +64,7 @@ function Create() {
   const [targetInterests, setTargetInterests] = useState<InterestEntry[]>(d.targetInterests ?? []);
   const [responseGoal, setResponseGoal] = useState<string>(d.responseGoal ?? "");
   const [expiresAt, setExpiresAt] = useState<string>(d.expiresAt ?? "");
-  const [allowGeneral, setAllowGeneral] = useState(d.allowGeneral ?? false);
+  const [allowGeneral, setAllowGeneral] = useState(d.allowGeneral ?? true);
   const [questions, setQuestions] = useState<Question[]>(
     d.questions && d.questions.length > 0 ? d.questions :
     [{ id: crypto.randomUUID(), type: "text", text: "" }]
@@ -317,9 +317,9 @@ function Create() {
                 className="mt-0.5 h-4 w-4 accent-primary"
               />
               <div>
-                <p className="text-xs font-semibold">Open to anyone (beyond my campus)</p>
+                <p className="text-xs font-semibold">Open to anyone (recommended)</p>
                 <p className="text-[11px] text-muted-foreground">
-                  General (non-student) users will be able to find and answer this survey.
+                  On by default — students from other campuses and general users can find and answer this survey. Uncheck to limit responses to your own campus only.
                 </p>
               </div>
             </label>
