@@ -536,6 +536,7 @@ function SurveyPage() {
                             {avg && <p className="mt-1 text-xs text-muted-foreground">Average rating: <span className="font-semibold text-foreground">{avg}</span> / 5</p>}
                           </div>
                           <select
+                            aria-label="Select chart type"
                             value={type}
                             onChange={(e) => setChartType(q.id, e.target.value as ChartType)}
                             className="rounded-full border border-foreground/20 bg-background px-2 py-1 text-[11px] font-semibold uppercase tracking-wider"
