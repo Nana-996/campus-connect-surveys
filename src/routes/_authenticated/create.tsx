@@ -24,6 +24,15 @@ type Question = {
 
 export const Route = createFileRoute("/_authenticated/create")({
   component: Create,
+  head: () => ({
+    meta: [
+      { title: "Create a survey — CampusVerify" },
+      { name: "description", content: "Design a targeted student survey, set your tier, and publish to verified university respondents in minutes." },
+      { property: "og:title", content: "Create a survey — CampusVerify" },
+      { property: "og:description", content: "Design a targeted student survey, set your tier, and publish to verified university respondents in minutes." },
+      { name: "robots", content: "noindex,nofollow" },
+    ],
+  }),
 });
 
 const TIER_ORDER: Tier[] = ["pro", "boosted", "targeted", "basic"];
