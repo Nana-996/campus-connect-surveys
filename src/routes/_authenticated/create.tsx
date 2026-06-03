@@ -64,7 +64,7 @@ function Create() {
   const [targetInterests, setTargetInterests] = useState<InterestEntry[]>(d.targetInterests ?? []);
   const [responseGoal, setResponseGoal] = useState<string>(d.responseGoal ?? "");
   const [expiresAt, setExpiresAt] = useState<string>(d.expiresAt ?? "");
-  const [allowGeneral, setAllowGeneral] = useState(d.allowGeneral ?? false);
+  const [allowGeneral, setAllowGeneral] = useState(d.allowGeneral ?? true);
   const [questions, setQuestions] = useState<Question[]>(
     d.questions && d.questions.length > 0 ? d.questions :
     [{ id: crypto.randomUUID(), type: "text", text: "" }]
