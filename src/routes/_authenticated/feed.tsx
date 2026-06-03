@@ -25,6 +25,15 @@ type Survey = {
 
 export const Route = createFileRoute("/_authenticated/feed")({
   component: Feed,
+  head: () => ({
+    meta: [
+      { title: "Your survey feed — CampusVerify" },
+      { name: "description", content: "Browse open surveys matched to your campus, year, and interests. Answer to earn credits on CampusVerify." },
+      { property: "og:title", content: "Your survey feed — CampusVerify" },
+      { property: "og:description", content: "Browse open surveys matched to your campus, year, and interests. Answer to earn credits on CampusVerify." },
+      { name: "robots", content: "noindex,nofollow" },
+    ],
+  }),
 });
 
 // Rotating bento tones for variety
