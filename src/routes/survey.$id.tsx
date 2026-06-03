@@ -57,17 +57,36 @@ type Survey = {
 
 export const Route = createFileRoute("/survey/$id")({
   component: SurveyPage,
-  head: ({ params }) => ({
-    meta: [
-      { title: "Take this survey — CampusVerify" },
-      { name: "description", content: "Answer a verified CampusVerify survey to earn credits. Log in or create a free account to participate." },
-      { property: "og:title", content: "Take this survey — CampusVerify" },
-      { property: "og:description", content: "A verified-respondent survey on CampusVerify. Sign in or create a free account to answer and earn credits." },
-      { property: "og:url", content: `https://campus-spotlight-verify.lovable.app/survey/${params.id}` },
-      { property: "og:type", content: "article" },
-    ],
-    links: [{ rel: "canonical", href: `https://campus-spotlight-verify.lovable.app/survey/${params.id}` }],
-  }),
+  loader: async ({ params }) => {
+    try {
+      const res = await getSurveyPublic({ data: { id: params.id } });
+      return { surveyMeta: res?.survey ?? null };
+    } catch {
+      return { surveyMeta: null };
+    }
+  },
+  head: ({ params, loaderData }) => {
+    const s = loaderData?.surveyMeta;
+    const rawTitle = s?.title?.trim();
+    const truncTitle = rawTitle && rawTitle.length > 45 ? `${rawTitle.slice(0, 42)}…` : rawTitle;
+    const title = truncTitle ? `${truncTitle} — CampusVerify` : "Take this survey — CampusVerify";
+    const rawDesc = s?.description?.trim();
+    const desc = rawDesc
+      ? (rawDesc.length > 155 ? `${rawDesc.slice(0, 152)}…` : rawDesc)
+      : "Answer a verified CampusVerify survey to earn credits. Log in or create a free account to participate.";
+    const url = `https://campus-spotlight-verify.lovable.app/survey/${params.id}`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: desc },
+        { property: "og:title", content: title },
+        { property: "og:description", content: desc },
+        { property: "og:url", content: url },
+        { property: "og:type", content: "article" },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
 });
 
 function SurveyPage() {
