@@ -22,6 +22,7 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/reset-password", changefreq: "monthly", priority: "0.3" },
           { path: "/privacy", changefreq: "monthly", priority: "0.4" },
           { path: "/terms", changefreq: "monthly", priority: "0.4" },
+          { path: "/blog/student-survey-questions-guide", changefreq: "monthly", priority: "0.8" },
         ];
 
         // Fetch published surveys for dynamic /survey/$id entries
