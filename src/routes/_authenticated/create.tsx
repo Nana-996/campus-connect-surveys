@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Trash2, Plus, Zap } from "lucide-react";
-import { TIERS, type Tier, canAfford } from "@/lib/credits";
+import { TIERS, type Tier } from "@/lib/credits";
 import { InterestTagInput, type InterestEntry } from "@/components/InterestTagInput";
 import { AGE_RANGES, COUNTRIES } from "@/lib/interests";
 
