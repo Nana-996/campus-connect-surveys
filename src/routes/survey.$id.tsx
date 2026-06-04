@@ -248,14 +248,35 @@ function SurveyPage() {
       });
       if (error) throw error;
       try { localStorage.removeItem(draftKey); } catch {}
-      toast.success("Response submitted! +1 earned credit (subject to caps).");
-      navigate({ to: "/feed" });
+
+      // Look up what the response trigger awarded so we can show a clear breakdown
+      const [{ data: ledger }, { data: prof }] = await Promise.all([
+        supabase
+          .from("credit_ledger")
+          .select("delta, reason")
+          .eq("user_id", user.id)
+          .eq("survey_id", survey.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        supabase.from("profiles").select("earned_credits").eq("id", user.id).maybeSingle(),
+      ]);
+      await refreshProfile();
+
+      const delta = ledger?.delta ?? 0;
+      const reason = ledger?.reason ?? "response";
+      const newBalance = prof?.earned_credits ?? 0;
+      setResult({ delta, reason, newBalance });
+      if (delta > 0) {
+        toast.success(`+${delta} credit${delta === 1 ? "" : "s"} earned!`);
+      }
     } catch (err: any) {
       toast.error(err.message ?? "Failed to submit");
     } finally {
       setSubmitting(false);
     }
   };
+
 
   const exportCSV = () => {
     if (!survey || !responses) return;
