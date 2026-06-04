@@ -42,7 +42,7 @@ type Draft = {
   tier: Tier; title: string; description: string;
   targetDept: string; targetYear: string; targetCountry: string; targetAge: string;
   targetInterests: InterestEntry[]; responseGoal: string; expiresAt: string;
-  allowGeneral: boolean; questions: Question[];
+  allowGeneral: boolean; questions: Question[]; respondentBonus: number;
 };
 const loadDraft = (): Partial<Draft> => {
   if (typeof window === "undefined") return {};
