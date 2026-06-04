@@ -65,6 +65,9 @@ function Create() {
   const [responseGoal, setResponseGoal] = useState<string>(d.responseGoal ?? "");
   const [expiresAt, setExpiresAt] = useState<string>(d.expiresAt ?? "");
   const [allowGeneral, setAllowGeneral] = useState(d.allowGeneral ?? true);
+  const [respondentBonus, setRespondentBonus] = useState<number>(
+    Math.max(0, Math.min(3, d.respondentBonus ?? 0))
+  );
   const [questions, setQuestions] = useState<Question[]>(
     d.questions && d.questions.length > 0 ? d.questions :
     [{ id: crypto.randomUUID(), type: "text", text: "" }]
@@ -76,9 +79,13 @@ function Create() {
       localStorage.setItem(DRAFT_KEY, JSON.stringify({
         tier, title, description, targetDept, targetYear, targetCountry,
         targetAge, targetInterests, responseGoal, expiresAt, allowGeneral, questions,
+        respondentBonus,
       }));
     } catch {}
-  }, [tier, title, description, targetDept, targetYear, targetCountry, targetAge, targetInterests, responseGoal, expiresAt, allowGeneral, questions]);
+  }, [tier, title, description, targetDept, targetYear, targetCountry, targetAge, targetInterests, responseGoal, expiresAt, allowGeneral, questions, respondentBonus]);
+
+  // Reset bonus when switching off Pro
+  useEffect(() => { if (tier !== "pro" && respondentBonus !== 0) setRespondentBonus(0); }, [tier]);
 
   const addQ = (type: Question["type"]) =>
     setQuestions((q) => [...q, {
