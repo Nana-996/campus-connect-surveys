@@ -116,6 +116,11 @@ function SurveyPage() {
   const [copied, setCopied] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [result, setResult] = useState<null | {
+    delta: number;
+    reason: string;
+    newBalance: number;
+  }>(null);
 
   const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/survey/${id}` : `/survey/${id}`;
   const handleShare = async () => {
