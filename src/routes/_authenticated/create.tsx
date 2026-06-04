@@ -338,7 +338,48 @@ function Create() {
           )}
         </div>
 
-
+        {/* Pro-only: respondent bonus credits */}
+        {tier === "pro" && (
+          <div className="rounded-3xl border-2 border-primary/40 bg-primary/5 p-6 shadow-paper">
+            <div className="flex items-center gap-2">
+              <Zap className="h-4 w-4 text-primary" />
+              <h2 className="font-serif text-2xl leading-tight">Reward your responders</h2>
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Pro perk — give each respondent extra credits on top of the standard +1 for completing your survey. Higher rewards attract more responses faster.
+            </p>
+            <div className="mt-4 grid grid-cols-4 gap-2">
+              {[0, 1, 2, 3].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => setRespondentBonus(n)}
+                  className={`rounded-2xl border-2 px-3 py-3 text-center transition ${
+                    respondentBonus === n
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-foreground/15 bg-card hover:border-foreground/40"
+                  }`}
+                >
+                  <div className="font-serif text-2xl leading-none">+{n}</div>
+                  <div className="mt-1 text-[10px] uppercase tracking-wider opacity-80">
+                    {n === 0 ? "none" : `bonus`}
+                  </div>
+                </button>
+              ))}
+            </div>
+            <div className="mt-3 flex items-center justify-between rounded-xl bg-background/60 px-3 py-2 text-xs">
+              <span className="text-muted-foreground">
+                Respondent earns <span className="font-bold text-foreground">{1 + respondentBonus} credit{1 + respondentBonus === 1 ? "" : "s"}</span> per quality response
+              </span>
+              <span className="font-mono font-bold text-primary">
+                {bonusTotal > 0 ? `+${bonusTotal} reserved` : "no extra cost"}
+              </span>
+            </div>
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              Max +3 bonus credits per response. The total reward pool ({respondentBonus} × {goalNum} response goal = {bonusTotal} credits) is reserved from your balance at publish.
+            </p>
+          </div>
+        )}
 
 
         {/* Questions */}
