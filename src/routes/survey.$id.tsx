@@ -438,6 +438,7 @@ function SurveyPage() {
   const content = (() => {
     if (loading) return <p className="text-sm text-muted-foreground">Loading...</p>;
     if (!survey) return <p className="text-sm text-muted-foreground">Survey not found.</p>;
+    if (result) return <SubmissionResult result={result} onClose={() => navigate({ to: "/feed" })} />;
     return (
       <div>
         {user ? (
