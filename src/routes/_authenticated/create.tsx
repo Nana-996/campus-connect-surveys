@@ -96,18 +96,25 @@ function Create() {
   const updateQ = (id: string, patch: Partial<Question>) =>
     setQuestions((q) => q.map((x) => (x.id === id ? { ...x, ...patch } : x)));
 
+  const tierMax = TIERS[tier].responseGoal;
+  const goalNum = responseGoal ? Math.max(1, Math.min(tierMax, parseInt(responseGoal, 10) || tierMax)) : tierMax;
+  const bonusTotal = tier === "pro" ? respondentBonus * goalNum : 0;
+  const totalCost = TIERS[tier].cost + bonusTotal;
+  const canAffordTotal = (profile?.earned_credits ?? 0) >= totalCost;
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!profile) return;
-    const afford = canAfford(tier, profile.earned_credits);
-    if (!afford.ok) { toast.error(afford.reason!); return; }
+    if (!canAffordTotal) {
+      const need = totalCost - profile.earned_credits;
+      toast.error(`Need ${need} more credit${need === 1 ? "" : "s"} — answer surveys to earn them.`);
+      return;
+    }
     if (questions.length === 0 || questions.some((q) => !q.text.trim())) {
       toast.error("Each question needs text."); return;
     }
     setSubmitting(true);
     try {
-      const tierMax = TIERS[tier].responseGoal;
-      const goalNum = responseGoal ? Math.max(1, Math.min(tierMax, parseInt(responseGoal, 10))) : tierMax;
       const expiresIso = expiresAt ? new Date(expiresAt).toISOString() : null;
       const { data, error } = await supabase
         .from("surveys")
@@ -118,15 +125,13 @@ function Create() {
           description: description.trim(),
           questions: questions as any,
           tier,
-          // Student-only structured targeting
           target_department: tier === "basic" || isGeneral ? null : (targetDept || null),
           target_year: tier === "basic" || isGeneral ? null : (targetYear || null),
-          // Shared structured targeting
           target_country: tier === "basic" ? null : (targetCountry || null),
           target_age_range: tier === "basic" ? null : (targetAge || null),
           target_interests: tier === "basic" ? [] : targetInterests.map((t) => t.tag),
           response_goal: goalNum,
-          // General users have no campus, so their surveys are always public.
+          respondent_bonus: tier === "pro" ? respondentBonus : 0,
           allow_general_respondents: isGeneral ? true : allowGeneral,
           ...(expiresIso ? { expires_at: expiresIso } : {}),
         })
@@ -145,7 +150,7 @@ function Create() {
   };
 
   const selected = TIERS[tier];
-  const afford = profile ? canAfford(tier, profile.earned_credits) : { ok: false };
+
 
   return (
     <div>
