@@ -91,7 +91,7 @@ export const Route = createFileRoute("/survey/$id")({
 
 function SurveyPage() {
   const { id } = Route.useParams();
-  const { user, isPreviewMode } = useAuth();
+  const { user, isPreviewMode, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const fetchPublic = useServerFn(getSurveyPublic);
   const fetchAuthed = useServerFn(getSurveyForRespondent);
@@ -116,6 +116,11 @@ function SurveyPage() {
   const [copied, setCopied] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [result, setResult] = useState<null | {
+    delta: number;
+    reason: string;
+    newBalance: number;
+  }>(null);
 
   const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/survey/${id}` : `/survey/${id}`;
   const handleShare = async () => {
@@ -243,14 +248,35 @@ function SurveyPage() {
       });
       if (error) throw error;
       try { localStorage.removeItem(draftKey); } catch {}
-      toast.success("Response submitted! +1 earned credit (subject to caps).");
-      navigate({ to: "/feed" });
+
+      // Look up what the response trigger awarded so we can show a clear breakdown
+      const [{ data: ledger }, { data: prof }] = await Promise.all([
+        supabase
+          .from("credit_ledger")
+          .select("delta, reason")
+          .eq("user_id", user.id)
+          .eq("survey_id", survey.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        supabase.from("profiles").select("earned_credits").eq("id", user.id).maybeSingle(),
+      ]);
+      await refreshProfile();
+
+      const delta = ledger?.delta ?? 0;
+      const reason = ledger?.reason ?? "response";
+      const newBalance = prof?.earned_credits ?? 0;
+      setResult({ delta, reason, newBalance });
+      if (delta > 0) {
+        toast.success(`+${delta} credit${delta === 1 ? "" : "s"} earned!`);
+      }
     } catch (err: any) {
       toast.error(err.message ?? "Failed to submit");
     } finally {
       setSubmitting(false);
     }
   };
+
 
   const exportCSV = () => {
     if (!survey || !responses) return;
@@ -412,6 +438,7 @@ function SurveyPage() {
   const content = (() => {
     if (loading) return <p className="text-sm text-muted-foreground">Loading...</p>;
     if (!survey) return <p className="text-sm text-muted-foreground">Survey not found.</p>;
+    if (result) return <SubmissionResult result={result} onClose={() => navigate({ to: "/feed" })} />;
     return (
       <div>
         {user ? (
@@ -676,3 +703,75 @@ function SurveyPage() {
     </div>
   );
 }
+
+function SubmissionResult({
+  result,
+  onClose,
+}: {
+  result: { delta: number; reason: string; newBalance: number };
+  onClose: () => void;
+}) {
+  const earned = result.delta > 0;
+  const reasonLabel = (() => {
+    switch (result.reason) {
+      case "response":
+      case "response_with_bonus":
+        return earned ? "Quality response confirmed" : "Response recorded";
+      case "response_no_credit_low_quality":
+        return "Response too quick or incomplete — no credit awarded this time";
+      case "cap_reached":
+        return "You've hit today's earning cap (3/day, 10/week) — credit not awarded";
+      default:
+        return "Response recorded";
+    }
+  })();
+
+  return (
+    <div className="mx-auto max-w-xl">
+      <div className={`rounded-3xl border-2 p-8 shadow-paper text-center ${
+        earned ? "border-primary bg-primary/10" : "border-foreground/20 bg-card"
+      }`}>
+        <div className={`mx-auto flex h-20 w-20 items-center justify-center rounded-full ${
+          earned ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground"
+        }`}>
+          {earned ? (
+            <span className="font-serif text-3xl leading-none">+{result.delta}</span>
+          ) : (
+            <Check className="h-8 w-8" />
+          )}
+        </div>
+        <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.25em] text-muted-foreground">
+          {earned ? "Credits earned" : "Submitted"}
+        </p>
+        <h1 className="mt-2 font-serif text-4xl leading-[0.95]">
+          {earned ? <>You earned <em className="text-primary">{result.delta} credit{result.delta === 1 ? "" : "s"}</em>.</> : "Thanks for responding."}
+        </h1>
+        <p className="mt-3 text-sm text-muted-foreground">{reasonLabel}</p>
+
+        <div className="mt-6 rounded-2xl border border-foreground/15 bg-background/60 p-4">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Your wallet</p>
+          <p className="mt-1 font-serif text-5xl text-primary">{result.newBalance}</p>
+          <p className="text-[11px] text-muted-foreground">total earned credits</p>
+        </div>
+
+        {!earned && (
+          <p className="mt-4 text-[11px] text-muted-foreground">
+            Tip: take at least 15 seconds and answer every question thoughtfully to earn credit.
+          </p>
+        )}
+
+        <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
+          <Button onClick={onClose} size="lg" className="rounded-full bg-primary">
+            Answer more surveys
+          </Button>
+          <Link to="/profile">
+            <Button variant="outline" size="lg" className="rounded-full w-full sm:w-auto">
+              View wallet
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+

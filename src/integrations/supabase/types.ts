@@ -403,6 +403,7 @@ export type Database = {
           is_active: boolean
           paid_cost: number
           questions: Json
+          respondent_bonus: number
           response_count: number
           response_goal: number
           target_age_range: string | null
@@ -425,6 +426,7 @@ export type Database = {
           is_active?: boolean
           paid_cost?: number
           questions?: Json
+          respondent_bonus?: number
           response_count?: number
           response_goal?: number
           target_age_range?: string | null
@@ -447,6 +449,7 @@ export type Database = {
           is_active?: boolean
           paid_cost?: number
           questions?: Json
+          respondent_bonus?: number
           response_count?: number
           response_goal?: number
           target_age_range?: string | null

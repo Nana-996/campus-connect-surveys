@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Trash2, Plus, Zap } from "lucide-react";
-import { TIERS, type Tier, canAfford } from "@/lib/credits";
+import { TIERS, type Tier } from "@/lib/credits";
 import { InterestTagInput, type InterestEntry } from "@/components/InterestTagInput";
 import { AGE_RANGES, COUNTRIES } from "@/lib/interests";
 
@@ -42,7 +42,7 @@ type Draft = {
   tier: Tier; title: string; description: string;
   targetDept: string; targetYear: string; targetCountry: string; targetAge: string;
   targetInterests: InterestEntry[]; responseGoal: string; expiresAt: string;
-  allowGeneral: boolean; questions: Question[];
+  allowGeneral: boolean; questions: Question[]; respondentBonus: number;
 };
 const loadDraft = (): Partial<Draft> => {
   if (typeof window === "undefined") return {};
@@ -65,6 +65,9 @@ function Create() {
   const [responseGoal, setResponseGoal] = useState<string>(d.responseGoal ?? "");
   const [expiresAt, setExpiresAt] = useState<string>(d.expiresAt ?? "");
   const [allowGeneral, setAllowGeneral] = useState(d.allowGeneral ?? true);
+  const [respondentBonus, setRespondentBonus] = useState<number>(
+    Math.max(0, Math.min(3, d.respondentBonus ?? 0))
+  );
   const [questions, setQuestions] = useState<Question[]>(
     d.questions && d.questions.length > 0 ? d.questions :
     [{ id: crypto.randomUUID(), type: "text", text: "" }]
@@ -76,9 +79,13 @@ function Create() {
       localStorage.setItem(DRAFT_KEY, JSON.stringify({
         tier, title, description, targetDept, targetYear, targetCountry,
         targetAge, targetInterests, responseGoal, expiresAt, allowGeneral, questions,
+        respondentBonus,
       }));
     } catch {}
-  }, [tier, title, description, targetDept, targetYear, targetCountry, targetAge, targetInterests, responseGoal, expiresAt, allowGeneral, questions]);
+  }, [tier, title, description, targetDept, targetYear, targetCountry, targetAge, targetInterests, responseGoal, expiresAt, allowGeneral, questions, respondentBonus]);
+
+  // Reset bonus when switching off Pro
+  useEffect(() => { if (tier !== "pro" && respondentBonus !== 0) setRespondentBonus(0); }, [tier]);
 
   const addQ = (type: Question["type"]) =>
     setQuestions((q) => [...q, {
@@ -89,18 +96,25 @@ function Create() {
   const updateQ = (id: string, patch: Partial<Question>) =>
     setQuestions((q) => q.map((x) => (x.id === id ? { ...x, ...patch } : x)));
 
+  const tierMax = TIERS[tier].responseGoal;
+  const goalNum = responseGoal ? Math.max(1, Math.min(tierMax, parseInt(responseGoal, 10) || tierMax)) : tierMax;
+  const bonusTotal = tier === "pro" ? respondentBonus * goalNum : 0;
+  const totalCost = TIERS[tier].cost + bonusTotal;
+  const canAffordTotal = (profile?.earned_credits ?? 0) >= totalCost;
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!profile) return;
-    const afford = canAfford(tier, profile.earned_credits);
-    if (!afford.ok) { toast.error(afford.reason!); return; }
+    if (!canAffordTotal) {
+      const need = totalCost - profile.earned_credits;
+      toast.error(`Need ${need} more credit${need === 1 ? "" : "s"} — answer surveys to earn them.`);
+      return;
+    }
     if (questions.length === 0 || questions.some((q) => !q.text.trim())) {
       toast.error("Each question needs text."); return;
     }
     setSubmitting(true);
     try {
-      const tierMax = TIERS[tier].responseGoal;
-      const goalNum = responseGoal ? Math.max(1, Math.min(tierMax, parseInt(responseGoal, 10))) : tierMax;
       const expiresIso = expiresAt ? new Date(expiresAt).toISOString() : null;
       const { data, error } = await supabase
         .from("surveys")
@@ -111,15 +125,13 @@ function Create() {
           description: description.trim(),
           questions: questions as any,
           tier,
-          // Student-only structured targeting
           target_department: tier === "basic" || isGeneral ? null : (targetDept || null),
           target_year: tier === "basic" || isGeneral ? null : (targetYear || null),
-          // Shared structured targeting
           target_country: tier === "basic" ? null : (targetCountry || null),
           target_age_range: tier === "basic" ? null : (targetAge || null),
           target_interests: tier === "basic" ? [] : targetInterests.map((t) => t.tag),
           response_goal: goalNum,
-          // General users have no campus, so their surveys are always public.
+          respondent_bonus: tier === "pro" ? respondentBonus : 0,
           allow_general_respondents: isGeneral ? true : allowGeneral,
           ...(expiresIso ? { expires_at: expiresIso } : {}),
         })
@@ -138,7 +150,7 @@ function Create() {
   };
 
   const selected = TIERS[tier];
-  const afford = profile ? canAfford(tier, profile.earned_credits) : { ok: false };
+
 
   return (
     <div>
@@ -326,7 +338,48 @@ function Create() {
           )}
         </div>
 
-
+        {/* Pro-only: respondent bonus credits */}
+        {tier === "pro" && (
+          <div className="rounded-3xl border-2 border-primary/40 bg-primary/5 p-6 shadow-paper">
+            <div className="flex items-center gap-2">
+              <Zap className="h-4 w-4 text-primary" />
+              <h2 className="font-serif text-2xl leading-tight">Reward your responders</h2>
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Pro perk — give each respondent extra credits on top of the standard +1 for completing your survey. Higher rewards attract more responses faster.
+            </p>
+            <div className="mt-4 grid grid-cols-4 gap-2">
+              {[0, 1, 2, 3].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => setRespondentBonus(n)}
+                  className={`rounded-2xl border-2 px-3 py-3 text-center transition ${
+                    respondentBonus === n
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-foreground/15 bg-card hover:border-foreground/40"
+                  }`}
+                >
+                  <div className="font-serif text-2xl leading-none">+{n}</div>
+                  <div className="mt-1 text-[10px] uppercase tracking-wider opacity-80">
+                    {n === 0 ? "none" : `bonus`}
+                  </div>
+                </button>
+              ))}
+            </div>
+            <div className="mt-3 flex items-center justify-between rounded-xl bg-background/60 px-3 py-2 text-xs">
+              <span className="text-muted-foreground">
+                Respondent earns <span className="font-bold text-foreground">{1 + respondentBonus} credit{1 + respondentBonus === 1 ? "" : "s"}</span> per quality response
+              </span>
+              <span className="font-mono font-bold text-primary">
+                {bonusTotal > 0 ? `+${bonusTotal} reserved` : "no extra cost"}
+              </span>
+            </div>
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              Max +3 bonus credits per response. The total reward pool ({respondentBonus} × {goalNum} response goal = {bonusTotal} credits) is reserved from your balance at publish.
+            </p>
+          </div>
+        )}
 
 
         {/* Questions */}
@@ -414,13 +467,16 @@ function Create() {
           </Button>
         </div>
 
-        {!afford.ok && (
-          <p className="text-center text-xs font-medium text-destructive">{afford.reason}</p>
+        {!canAffordTotal && (
+          <p className="text-center text-xs font-medium text-destructive">
+            Need {totalCost - (profile?.earned_credits ?? 0)} more credit{(totalCost - (profile?.earned_credits ?? 0)) === 1 ? "" : "s"} — answer surveys to earn them.
+          </p>
         )}
-        <Button type="submit" size="lg" disabled={submitting || !afford.ok}
+        <Button type="submit" size="lg" disabled={submitting || !canAffordTotal}
           className="h-14 w-full rounded-full bg-primary text-base">
-          {submitting ? "Publishing…" : `Publish ${selected.label} · ${selected.cost} credits →`}
+          {submitting ? "Publishing…" : `Publish ${selected.label} · ${totalCost} credit${totalCost === 1 ? "" : "s"} →`}
         </Button>
+
       </form>
     </div>
   );
