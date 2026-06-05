@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -9,12 +9,111 @@ import { toast } from "sonner";
 import {
   ArrowLeft, BarChart3, Download, FileText, Filter, Layers, Lock,
   PieChart as PieIcon, Share2, Sparkles, Table as TableIcon, X, Save, Trash2, Copy, Eye,
+  BarChartHorizontal, LineChart as LineIcon, AreaChart as AreaIcon, CircleDashed, Columns3,
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
-  PieChart, Pie, Cell, Legend, AreaChart, Area,
+  PieChart, Pie, Cell, Legend, AreaChart, Area, LineChart, Line,
 } from "recharts";
 import jsPDF from "jspdf";
+
+type ChartType = "hbar" | "bar" | "pie" | "donut" | "line" | "area";
+const ALL_CHART_TYPES: ChartType[] = ["hbar", "bar", "pie", "donut", "line", "area"];
+
+function ChartTypeToggle({
+  value, onChange, options = ALL_CHART_TYPES,
+}: { value: ChartType; onChange: (t: ChartType) => void; options?: ChartType[] }) {
+  const meta: Record<ChartType, { icon: any; label: string }> = {
+    hbar:  { icon: BarChartHorizontal, label: "Horizontal bar" },
+    bar:   { icon: Columns3,           label: "Column" },
+    pie:   { icon: PieIcon,            label: "Pie" },
+    donut: { icon: CircleDashed,       label: "Donut" },
+    line:  { icon: LineIcon,           label: "Line" },
+    area:  { icon: AreaIcon,           label: "Area" },
+  };
+  return (
+    <div className="inline-flex items-center gap-0.5 rounded-full border border-foreground/15 bg-background p-0.5">
+      {options.map((t) => {
+        const Icon = meta[t].icon;
+        const active = value === t;
+        return (
+          <button
+            key={t}
+            type="button"
+            title={meta[t].label}
+            aria-label={meta[t].label}
+            aria-pressed={active}
+            onClick={() => onChange(t)}
+            className={`grid h-7 w-7 place-items-center rounded-full transition-colors ${
+              active ? "bg-foreground text-background" : "text-muted-foreground hover:bg-accent hover:text-foreground"
+            }`}
+          >
+            <Icon className="h-3.5 w-3.5" />
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function QuestionChart({ data, type, height = 224 }: { data: { label: string; count: number }[]; type: ChartType; height?: number }) {
+  return (
+    <div style={{ height }}>
+      <ResponsiveContainer width="100%" height="100%">
+        {type === "hbar" ? (
+          <BarChart data={data} layout="vertical" margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+            <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
+            <YAxis type="category" dataKey="label" tick={{ fontSize: 11 }} width={100} />
+            <Tooltip />
+            <Bar dataKey="count" fill="var(--primary)" radius={[0, 4, 4, 0]} />
+          </BarChart>
+        ) : type === "bar" ? (
+          <BarChart data={data} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+            <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+            <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+            <Tooltip />
+            <Bar dataKey="count" fill="var(--primary)" radius={[4, 4, 0, 0]} />
+          </BarChart>
+        ) : type === "line" ? (
+          <LineChart data={data} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+            <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+            <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+            <Tooltip />
+            <Line type="monotone" dataKey="count" stroke="var(--primary)" strokeWidth={2} dot={{ r: 3 }} />
+          </LineChart>
+        ) : type === "area" ? (
+          <AreaChart data={data} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+            <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+            <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+            <Tooltip />
+            <Area type="monotone" dataKey="count" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.25} />
+          </AreaChart>
+        ) : (
+          <PieChart>
+            <Tooltip />
+            <Legend wrapperStyle={{ fontSize: 11 }} />
+            <Pie
+              data={data}
+              dataKey="count"
+              nameKey="label"
+              cx="50%"
+              cy="50%"
+              outerRadius="80%"
+              innerRadius={type === "donut" ? "50%" : 0}
+              paddingAngle={2}
+            >
+              {data.map((_, i) => <Cell key={i} fill={PALETTE[i % PALETTE.length]} />)}
+            </Pie>
+          </PieChart>
+        )}
+      </ResponsiveContainer>
+    </div>
+  );
+}
 
 
 const PALETTE = ["#4a6b52", "#7c9a6b", "#c98a4b", "#b8c47a", "#8e7a5a", "#6b8e9e", "#a47b4c"];
@@ -499,6 +598,11 @@ function OverviewView({ survey, filtered, hiddenQs }: { survey: Survey; filtered
 
   const top3 = survey.questions.filter((q) => (q.type === "choice" || q.type === "rating") && !hiddenQs.has(q.id)).slice(0, 3);
 
+  const [timelineType, setTimelineType] = useState<ChartType>("area");
+  const [topTypes, setTopTypes] = useState<Record<string, ChartType>>({});
+  const setTopType = (qid: string, t: ChartType) =>
+    setTopTypes((m) => ({ ...m, [qid]: t }));
+
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-3">
@@ -508,16 +612,37 @@ function OverviewView({ survey, filtered, hiddenQs }: { survey: Survey; filtered
       </div>
 
       <div className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
-        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Responses over time</p>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Responses over time</p>
+          <ChartTypeToggle value={timelineType} onChange={setTimelineType} options={["area", "line", "bar"]} />
+        </div>
         <div className="mt-3 h-44">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={timeline} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-              <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-              <Tooltip />
-              <Area type="monotone" dataKey="count" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.25} />
-            </AreaChart>
+            {timelineType === "area" ? (
+              <AreaChart data={timeline} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                <Tooltip />
+                <Area type="monotone" dataKey="count" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.25} />
+              </AreaChart>
+            ) : timelineType === "line" ? (
+              <LineChart data={timeline} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                <Tooltip />
+                <Line type="monotone" dataKey="count" stroke="var(--primary)" strokeWidth={2} dot={{ r: 3 }} />
+              </LineChart>
+            ) : (
+              <BarChart data={timeline} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                <Tooltip />
+                <Bar dataKey="count" fill="var(--primary)" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            )}
           </ResponsiveContainer>
         </div>
       </div>
@@ -525,19 +650,15 @@ function OverviewView({ survey, filtered, hiddenQs }: { survey: Survey; filtered
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {top3.map((q) => {
           const data = aggregateQuestion(q, filtered);
+          const t = topTypes[q.id] ?? "bar";
           return (
             <div key={q.id} className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
-              <p className="font-serif text-lg leading-tight">{q.text}</p>
-              <div className="mt-2 h-40">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={data} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                    <XAxis dataKey="label" tick={{ fontSize: 10 }} />
-                    <YAxis allowDecimals={false} tick={{ fontSize: 10 }} />
-                    <Tooltip />
-                    <Bar dataKey="count" fill="var(--primary)" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+              <div className="flex items-start justify-between gap-2">
+                <p className="font-serif text-lg leading-tight">{q.text}</p>
+                <ChartTypeToggle value={t} onChange={(nt) => setTopType(q.id, nt)} options={["bar", "hbar", "pie", "donut", "line"]} />
+              </div>
+              <div className="mt-2">
+                <QuestionChart data={data} type={t} height={160} />
               </div>
             </div>
           );
@@ -560,6 +681,8 @@ function Stat({ label, value, sub }: { label: string; value: string; sub?: strin
 function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs }: {
   survey: Survey; filtered: Response[]; hiddenQs: Set<string>; setHiddenQs: (s: Set<string>) => void;
 }) {
+  const [types, setTypes] = useState<Record<string, ChartType>>({});
+  const setType = (qid: string, t: ChartType) => setTypes((m) => ({ ...m, [qid]: t }));
   const toggle = (qid: string) => {
     const next = new Set(hiddenQs);
     if (next.has(qid)) next.delete(qid); else next.add(qid);
@@ -583,22 +706,15 @@ function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs }: {
         }
         const data = aggregateQuestion(q, filtered);
         const total = data.reduce((s, x) => s + x.count, 0) || 1;
+        const t = types[q.id] ?? "hbar";
         return (
           <div key={q.id} className={`rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper ${hidden ? "opacity-50" : ""}`}>
-            <Header q={q} qi={qi} hidden={hidden} toggle={() => toggle(q.id)} n={filtered.length} />
+            <Header q={q} qi={qi} hidden={hidden} toggle={() => toggle(q.id)} n={filtered.length}
+              rightExtra={!hidden ? <ChartTypeToggle value={t} onChange={(nt) => setType(q.id, nt)} /> : undefined}
+            />
             {!hidden && (
               <div className="mt-3 grid gap-4 sm:grid-cols-[1fr_240px]">
-                <div className="h-56">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={data} layout="vertical" margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                      <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
-                      <YAxis type="category" dataKey="label" tick={{ fontSize: 11 }} width={100} />
-                      <Tooltip />
-                      <Bar dataKey="count" fill="var(--primary)" radius={[0, 4, 4, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
+                <QuestionChart data={data} type={t} height={224} />
                 <div className="text-xs">
                   <table className="w-full">
                     <thead>
@@ -630,16 +746,19 @@ function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs }: {
   );
 }
 
-function Header({ q, qi, hidden, toggle, n }: { q: Question; qi: number; hidden: boolean; toggle: () => void; n?: number }) {
+function Header({ q, qi, hidden, toggle, n, rightExtra }: { q: Question; qi: number; hidden: boolean; toggle: () => void; n?: number; rightExtra?: ReactNode }) {
   return (
     <div className="flex items-start justify-between gap-3">
       <div>
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Q{qi + 1} · {q.type}{n != null && ` · n=${n}`}</p>
         <p className="mt-1 font-serif text-xl leading-tight">{q.text}</p>
       </div>
-      <button onClick={toggle} className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground">
-        {hidden ? "Show" : "Hide"}
-      </button>
+      <div className="flex items-center gap-2">
+        {rightExtra}
+        <button onClick={toggle} className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground">
+          {hidden ? "Show" : "Hide"}
+        </button>
+      </div>
     </div>
   );
 }
@@ -648,6 +767,7 @@ function CompareView({ survey, filtered, profileMap }: { survey: Survey; filtere
   const choiceQs = survey.questions.filter((q) => q.type === "choice" || q.type === "rating");
   const [qid, setQid] = useState(choiceQs[0]?.id ?? "");
   const [dim, setDim] = useState<keyof Profile>("department");
+  const [mode, setMode] = useState<"grouped" | "stacked" | "line">("grouped");
 
   const q = choiceQs.find((x) => x.id === qid);
   if (!q) return <div className="rounded-3xl border border-foreground/15 bg-card p-6 text-sm text-muted-foreground shadow-paper">No comparable questions in this survey.</div>;
@@ -678,19 +798,47 @@ function CompareView({ survey, filtered, profileMap }: { survey: Survey; filtere
           <option value="country">Country</option>
           <option value="age_range">Age range</option>
         </select>
+        <div className="ml-auto inline-flex items-center gap-0.5 rounded-full border border-foreground/15 bg-background p-0.5">
+          {([
+            { k: "grouped", label: "Grouped" },
+            { k: "stacked", label: "Stacked" },
+            { k: "line",    label: "Line" },
+          ] as const).map((m) => (
+            <button key={m.k} type="button" onClick={() => setMode(m.k)}
+              className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wider transition-colors ${
+                mode === m.k ? "bg-foreground text-background" : "text-muted-foreground hover:bg-accent hover:text-foreground"
+              }`}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
       </div>
       <div className="mt-4 h-72">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-            <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-            <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-            <Tooltip />
-            <Legend wrapperStyle={{ fontSize: 11 }} />
-            {groups.map((g, i) => (
-              <Bar key={g} dataKey={g} fill={PALETTE[i % PALETTE.length]} radius={[4, 4, 0, 0]} />
-            ))}
-          </BarChart>
+          {mode === "line" ? (
+            <LineChart data={data} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+              <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+              <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+              <Tooltip />
+              <Legend wrapperStyle={{ fontSize: 11 }} />
+              {groups.map((g, i) => (
+                <Line key={g} type="monotone" dataKey={g} stroke={PALETTE[i % PALETTE.length]} strokeWidth={2} dot={{ r: 3 }} />
+              ))}
+            </LineChart>
+          ) : (
+            <BarChart data={data} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+              <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+              <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+              <Tooltip />
+              <Legend wrapperStyle={{ fontSize: 11 }} />
+              {groups.map((g, i) => (
+                <Bar key={g} dataKey={g} stackId={mode === "stacked" ? "s" : undefined} fill={PALETTE[i % PALETTE.length]} radius={[4, 4, 0, 0]} />
+              ))}
+            </BarChart>
+          )}
         </ResponsiveContainer>
       </div>
       {suppressedGroups.length > 0 && (
