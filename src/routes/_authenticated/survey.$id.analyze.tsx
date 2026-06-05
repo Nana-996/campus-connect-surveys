@@ -746,7 +746,7 @@ function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs }: {
   );
 }
 
-function Header({ q, qi, hidden, toggle, n, rightExtra }: { q: Question; qi: number; hidden: boolean; toggle: () => void; n?: number; rightExtra?: React.ReactNode }) {
+function Header({ q, qi, hidden, toggle, n, rightExtra }: { q: Question; qi: number; hidden: boolean; toggle: () => void; n?: number; rightExtra?: ReactNode }) {
   return (
     <div className="flex items-start justify-between gap-3">
       <div>
