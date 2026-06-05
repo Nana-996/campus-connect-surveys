@@ -681,6 +681,8 @@ function Stat({ label, value, sub }: { label: string; value: string; sub?: strin
 function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs }: {
   survey: Survey; filtered: Response[]; hiddenQs: Set<string>; setHiddenQs: (s: Set<string>) => void;
 }) {
+  const [types, setTypes] = useState<Record<string, ChartType>>({});
+  const setType = (qid: string, t: ChartType) => setTypes((m) => ({ ...m, [qid]: t }));
   const toggle = (qid: string) => {
     const next = new Set(hiddenQs);
     if (next.has(qid)) next.delete(qid); else next.add(qid);
@@ -704,22 +706,15 @@ function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs }: {
         }
         const data = aggregateQuestion(q, filtered);
         const total = data.reduce((s, x) => s + x.count, 0) || 1;
+        const t = types[q.id] ?? "hbar";
         return (
           <div key={q.id} className={`rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper ${hidden ? "opacity-50" : ""}`}>
-            <Header q={q} qi={qi} hidden={hidden} toggle={() => toggle(q.id)} n={filtered.length} />
+            <Header q={q} qi={qi} hidden={hidden} toggle={() => toggle(q.id)} n={filtered.length}
+              rightExtra={!hidden ? <ChartTypeToggle value={t} onChange={(nt) => setType(q.id, nt)} /> : undefined}
+            />
             {!hidden && (
               <div className="mt-3 grid gap-4 sm:grid-cols-[1fr_240px]">
-                <div className="h-56">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={data} layout="vertical" margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                      <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
-                      <YAxis type="category" dataKey="label" tick={{ fontSize: 11 }} width={100} />
-                      <Tooltip />
-                      <Bar dataKey="count" fill="var(--primary)" radius={[0, 4, 4, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
+                <QuestionChart data={data} type={t} height={224} />
                 <div className="text-xs">
                   <table className="w-full">
                     <thead>
@@ -751,16 +746,19 @@ function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs }: {
   );
 }
 
-function Header({ q, qi, hidden, toggle, n }: { q: Question; qi: number; hidden: boolean; toggle: () => void; n?: number }) {
+function Header({ q, qi, hidden, toggle, n, rightExtra }: { q: Question; qi: number; hidden: boolean; toggle: () => void; n?: number; rightExtra?: React.ReactNode }) {
   return (
     <div className="flex items-start justify-between gap-3">
       <div>
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Q{qi + 1} · {q.type}{n != null && ` · n=${n}`}</p>
         <p className="mt-1 font-serif text-xl leading-tight">{q.text}</p>
       </div>
-      <button onClick={toggle} className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground">
-        {hidden ? "Show" : "Hide"}
-      </button>
+      <div className="flex items-center gap-2">
+        {rightExtra}
+        <button onClick={toggle} className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground">
+          {hidden ? "Show" : "Hide"}
+        </button>
+      </div>
     </div>
   );
 }
