@@ -598,6 +598,11 @@ function OverviewView({ survey, filtered, hiddenQs }: { survey: Survey; filtered
 
   const top3 = survey.questions.filter((q) => (q.type === "choice" || q.type === "rating") && !hiddenQs.has(q.id)).slice(0, 3);
 
+  const [timelineType, setTimelineType] = useState<ChartType>("area");
+  const [topTypes, setTopTypes] = useState<Record<string, ChartType>>({});
+  const setTopType = (qid: string, t: ChartType) =>
+    setTopTypes((m) => ({ ...m, [qid]: t }));
+
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-3">
@@ -607,16 +612,37 @@ function OverviewView({ survey, filtered, hiddenQs }: { survey: Survey; filtered
       </div>
 
       <div className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
-        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Responses over time</p>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Responses over time</p>
+          <ChartTypeToggle value={timelineType} onChange={setTimelineType} options={["area", "line", "bar"]} />
+        </div>
         <div className="mt-3 h-44">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={timeline} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-              <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-              <Tooltip />
-              <Area type="monotone" dataKey="count" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.25} />
-            </AreaChart>
+            {timelineType === "area" ? (
+              <AreaChart data={timeline} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                <Tooltip />
+                <Area type="monotone" dataKey="count" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.25} />
+              </AreaChart>
+            ) : timelineType === "line" ? (
+              <LineChart data={timeline} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                <Tooltip />
+                <Line type="monotone" dataKey="count" stroke="var(--primary)" strokeWidth={2} dot={{ r: 3 }} />
+              </LineChart>
+            ) : (
+              <BarChart data={timeline} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                <Tooltip />
+                <Bar dataKey="count" fill="var(--primary)" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            )}
           </ResponsiveContainer>
         </div>
       </div>
@@ -624,19 +650,15 @@ function OverviewView({ survey, filtered, hiddenQs }: { survey: Survey; filtered
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {top3.map((q) => {
           const data = aggregateQuestion(q, filtered);
+          const t = topTypes[q.id] ?? "bar";
           return (
             <div key={q.id} className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
-              <p className="font-serif text-lg leading-tight">{q.text}</p>
-              <div className="mt-2 h-40">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={data} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                    <XAxis dataKey="label" tick={{ fontSize: 10 }} />
-                    <YAxis allowDecimals={false} tick={{ fontSize: 10 }} />
-                    <Tooltip />
-                    <Bar dataKey="count" fill="var(--primary)" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+              <div className="flex items-start justify-between gap-2">
+                <p className="font-serif text-lg leading-tight">{q.text}</p>
+                <ChartTypeToggle value={t} onChange={(nt) => setTopType(q.id, nt)} options={["bar", "hbar", "pie", "donut", "line"]} />
+              </div>
+              <div className="mt-2">
+                <QuestionChart data={data} type={t} height={160} />
               </div>
             </div>
           );
