@@ -9,12 +9,111 @@ import { toast } from "sonner";
 import {
   ArrowLeft, BarChart3, Download, FileText, Filter, Layers, Lock,
   PieChart as PieIcon, Share2, Sparkles, Table as TableIcon, X, Save, Trash2, Copy, Eye,
+  BarChartHorizontal, LineChart as LineIcon, AreaChart as AreaIcon, CircleDashed, Columns3,
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
-  PieChart, Pie, Cell, Legend, AreaChart, Area,
+  PieChart, Pie, Cell, Legend, AreaChart, Area, LineChart, Line,
 } from "recharts";
 import jsPDF from "jspdf";
+
+type ChartType = "hbar" | "bar" | "pie" | "donut" | "line" | "area";
+const ALL_CHART_TYPES: ChartType[] = ["hbar", "bar", "pie", "donut", "line", "area"];
+
+function ChartTypeToggle({
+  value, onChange, options = ALL_CHART_TYPES,
+}: { value: ChartType; onChange: (t: ChartType) => void; options?: ChartType[] }) {
+  const meta: Record<ChartType, { icon: any; label: string }> = {
+    hbar:  { icon: BarChartHorizontal, label: "Horizontal bar" },
+    bar:   { icon: Columns3,           label: "Column" },
+    pie:   { icon: PieIcon,            label: "Pie" },
+    donut: { icon: CircleDashed,       label: "Donut" },
+    line:  { icon: LineIcon,           label: "Line" },
+    area:  { icon: AreaIcon,           label: "Area" },
+  };
+  return (
+    <div className="inline-flex items-center gap-0.5 rounded-full border border-foreground/15 bg-background p-0.5">
+      {options.map((t) => {
+        const Icon = meta[t].icon;
+        const active = value === t;
+        return (
+          <button
+            key={t}
+            type="button"
+            title={meta[t].label}
+            aria-label={meta[t].label}
+            aria-pressed={active}
+            onClick={() => onChange(t)}
+            className={`grid h-7 w-7 place-items-center rounded-full transition-colors ${
+              active ? "bg-foreground text-background" : "text-muted-foreground hover:bg-accent hover:text-foreground"
+            }`}
+          >
+            <Icon className="h-3.5 w-3.5" />
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function QuestionChart({ data, type, height = 224 }: { data: { label: string; count: number }[]; type: ChartType; height?: number }) {
+  return (
+    <div style={{ height }}>
+      <ResponsiveContainer width="100%" height="100%">
+        {type === "hbar" ? (
+          <BarChart data={data} layout="vertical" margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+            <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
+            <YAxis type="category" dataKey="label" tick={{ fontSize: 11 }} width={100} />
+            <Tooltip />
+            <Bar dataKey="count" fill="var(--primary)" radius={[0, 4, 4, 0]} />
+          </BarChart>
+        ) : type === "bar" ? (
+          <BarChart data={data} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+            <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+            <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+            <Tooltip />
+            <Bar dataKey="count" fill="var(--primary)" radius={[4, 4, 0, 0]} />
+          </BarChart>
+        ) : type === "line" ? (
+          <LineChart data={data} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+            <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+            <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+            <Tooltip />
+            <Line type="monotone" dataKey="count" stroke="var(--primary)" strokeWidth={2} dot={{ r: 3 }} />
+          </LineChart>
+        ) : type === "area" ? (
+          <AreaChart data={data} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+            <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+            <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+            <Tooltip />
+            <Area type="monotone" dataKey="count" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.25} />
+          </AreaChart>
+        ) : (
+          <PieChart>
+            <Tooltip />
+            <Legend wrapperStyle={{ fontSize: 11 }} />
+            <Pie
+              data={data}
+              dataKey="count"
+              nameKey="label"
+              cx="50%"
+              cy="50%"
+              outerRadius="80%"
+              innerRadius={type === "donut" ? "50%" : 0}
+              paddingAngle={2}
+            >
+              {data.map((_, i) => <Cell key={i} fill={PALETTE[i % PALETTE.length]} />)}
+            </Pie>
+          </PieChart>
+        )}
+      </ResponsiveContainer>
+    </div>
+  );
+}
 
 
 const PALETTE = ["#4a6b52", "#7c9a6b", "#c98a4b", "#b8c47a", "#8e7a5a", "#6b8e9e", "#a47b4c"];
