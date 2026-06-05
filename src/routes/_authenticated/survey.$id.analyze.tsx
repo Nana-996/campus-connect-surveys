@@ -767,6 +767,7 @@ function CompareView({ survey, filtered, profileMap }: { survey: Survey; filtere
   const choiceQs = survey.questions.filter((q) => q.type === "choice" || q.type === "rating");
   const [qid, setQid] = useState(choiceQs[0]?.id ?? "");
   const [dim, setDim] = useState<keyof Profile>("department");
+  const [mode, setMode] = useState<"grouped" | "stacked" | "line">("grouped");
 
   const q = choiceQs.find((x) => x.id === qid);
   if (!q) return <div className="rounded-3xl border border-foreground/15 bg-card p-6 text-sm text-muted-foreground shadow-paper">No comparable questions in this survey.</div>;
@@ -797,19 +798,47 @@ function CompareView({ survey, filtered, profileMap }: { survey: Survey; filtere
           <option value="country">Country</option>
           <option value="age_range">Age range</option>
         </select>
+        <div className="ml-auto inline-flex items-center gap-0.5 rounded-full border border-foreground/15 bg-background p-0.5">
+          {([
+            { k: "grouped", label: "Grouped" },
+            { k: "stacked", label: "Stacked" },
+            { k: "line",    label: "Line" },
+          ] as const).map((m) => (
+            <button key={m.k} type="button" onClick={() => setMode(m.k)}
+              className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wider transition-colors ${
+                mode === m.k ? "bg-foreground text-background" : "text-muted-foreground hover:bg-accent hover:text-foreground"
+              }`}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
       </div>
       <div className="mt-4 h-72">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-            <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-            <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-            <Tooltip />
-            <Legend wrapperStyle={{ fontSize: 11 }} />
-            {groups.map((g, i) => (
-              <Bar key={g} dataKey={g} fill={PALETTE[i % PALETTE.length]} radius={[4, 4, 0, 0]} />
-            ))}
-          </BarChart>
+          {mode === "line" ? (
+            <LineChart data={data} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+              <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+              <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+              <Tooltip />
+              <Legend wrapperStyle={{ fontSize: 11 }} />
+              {groups.map((g, i) => (
+                <Line key={g} type="monotone" dataKey={g} stroke={PALETTE[i % PALETTE.length]} strokeWidth={2} dot={{ r: 3 }} />
+              ))}
+            </LineChart>
+          ) : (
+            <BarChart data={data} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+              <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+              <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+              <Tooltip />
+              <Legend wrapperStyle={{ fontSize: 11 }} />
+              {groups.map((g, i) => (
+                <Bar key={g} dataKey={g} stackId={mode === "stacked" ? "s" : undefined} fill={PALETTE[i % PALETTE.length]} radius={[4, 4, 0, 0]} />
+              ))}
+            </BarChart>
+          )}
         </ResponsiveContainer>
       </div>
       {suppressedGroups.length > 0 && (
