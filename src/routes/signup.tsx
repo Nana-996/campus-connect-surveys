@@ -65,6 +65,12 @@ function SignupPage() {
       toast.error(message);
       return;
     }
+    if (userType === "student" && !/^[A-Za-z0-9/_-]{1,32}$/.test(indexNumber.trim())) {
+      const message = "Enter a valid index / student number (letters, numbers, dash, slash; max 32).";
+      setFormError(message);
+      toast.error(message);
+      return;
+    }
     setSubmitting(true);
     try {
       const { error } = await supabase.auth.signUp({
