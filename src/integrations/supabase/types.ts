@@ -166,6 +166,7 @@ export type Database = {
           flag_reason: string | null
           full_name: string
           id: string
+          index_number: string | null
           interests: string[]
           interests_raw: string[]
           is_flagged: boolean
@@ -185,6 +186,7 @@ export type Database = {
           flag_reason?: string | null
           full_name?: string
           id: string
+          index_number?: string | null
           interests?: string[]
           interests_raw?: string[]
           is_flagged?: boolean
@@ -204,6 +206,7 @@ export type Database = {
           flag_reason?: string | null
           full_name?: string
           id?: string
+          index_number?: string | null
           interests?: string[]
           interests_raw?: string[]
           is_flagged?: boolean
@@ -535,6 +538,17 @@ export type Database = {
       current_year: { Args: never; Returns: string }
       expire_earned_credits: { Args: never; Returns: undefined }
       get_shared_dashboard: { Args: { _token: string }; Returns: Json }
+      get_university_survey_tracking: {
+        Args: { _survey_id: string }
+        Returns: {
+          department: string
+          full_name: string
+          index_number: string
+          responded_at: string
+          student_id: string
+          year: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -543,6 +557,23 @@ export type Database = {
         Returns: boolean
       }
       is_academic_domain: { Args: { _domain: string }; Returns: boolean }
+      list_university_surveys: {
+        Args: never
+        Returns: {
+          created_at: string
+          creator_name: string
+          expires_at: string
+          id: string
+          is_active: boolean
+          response_count: number
+          response_goal: number
+          title: string
+        }[]
+      }
+      update_my_student_info: {
+        Args: { _department: string; _index_number: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user" | "manager"
