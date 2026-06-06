@@ -72,6 +72,11 @@ function Profile() {
         </div>
       )}
 
+      {!isGeneral && !((profile as any).index_number) && (
+        <IndexBackfill currentDepartment={profile.department || ""} />
+      )}
+
+
       {/* Wallet bento */}
       <div className="mt-8 grid gap-4 sm:grid-cols-6">
         {/* Credits - hero */}
