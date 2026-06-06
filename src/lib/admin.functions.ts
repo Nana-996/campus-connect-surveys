@@ -126,6 +126,20 @@ export const setUserAdminRole = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const setUserManagerRole = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .inputValidator((d: unknown) =>
+    z.object({ userId: z.string().uuid(), grant: z.boolean() }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    if (data.grant) {
+      await supabaseAdmin.from("user_roles").insert({ user_id: data.userId, role: "manager" as any }).select();
+    } else {
+      await supabaseAdmin.from("user_roles").delete().eq("user_id", data.userId).eq("role", "manager" as any);
+    }
+    return { ok: true };
+  });
+
 // ---------- Surveys ----------
 export const listAdminSurveys = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
