@@ -83,6 +83,7 @@ function SignupPage() {
             user_type: userType,
             department: userType === "student" ? department : "",
             year: userType === "student" ? year : "",
+            index_number: userType === "student" ? indexNumber.trim() : "",
             country: userType === "general" ? country : "",
             age_range: userType === "general" ? ageRange : "",
             interests: interests.map((i) => i.tag),
