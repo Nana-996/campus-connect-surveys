@@ -15,6 +15,7 @@ import {
   grantCreditsToUser,
   setUserFlag,
   setUserAdminRole,
+  setUserManagerRole,
   listAdminSurveys,
   setSurveyActive,
   deleteSurvey,
@@ -24,6 +25,7 @@ import {
   listOpenFlags,
   resolveFlag,
 } from "@/lib/admin.functions";
+import { Briefcase } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: Admin,
