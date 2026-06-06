@@ -2,10 +2,15 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, Sparkles, Clock, AlertTriangle, Globe2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { ShieldCheck, Sparkles, Clock, AlertTriangle, Globe2, IdCard } from "lucide-react";
 import { DAILY_EARN_CAP, WEEKLY_EARN_CAP, EARNED_EXPIRY_DAYS } from "@/lib/credits";
 import { ageLabel } from "@/lib/interests";
+import { updateMyStudentInfo } from "@/lib/manager.functions";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   component: Profile,
