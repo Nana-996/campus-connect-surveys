@@ -99,6 +99,7 @@ function UsersPanel() {
   const grant = useServerFn(grantCreditsToUser);
   const flag = useServerFn(setUserFlag);
   const setRole = useServerFn(setUserAdminRole);
+  const setMgrRole = useServerFn(setUserManagerRole);
   const [search, setSearch] = useState("");
   const { data: users = [] } = useQuery({
     queryKey: ["admin", "users", search],
