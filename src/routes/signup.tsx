@@ -244,6 +244,23 @@ function SignupPage() {
                 </div>
               </div>
             )}
+            {userType === "student" && (
+              <div>
+                <Label htmlFor="indexno" className="text-xs font-semibold uppercase tracking-wider">Index / Student number</Label>
+                <Input
+                  id="indexno"
+                  required
+                  value={indexNumber}
+                  onChange={(e) => setIndexNumber(e.target.value)}
+                  placeholder="e.g. 10876543 or UG/2024/0123"
+                  maxLength={32}
+                  className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card font-mono"
+                />
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  Used by your faculty managers to track survey completion. Visible only to admins and managers at your university.
+                </p>
+              </div>
+            )}
             {userType === "general" && (
               <div className="grid grid-cols-2 gap-3">
                 <div>
