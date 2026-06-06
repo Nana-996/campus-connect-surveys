@@ -41,6 +41,7 @@ function SignupPage() {
   const [password, setPassword] = useState("");
   const [department, setDepartment] = useState("");
   const [year, setYear] = useState("");
+  const [indexNumber, setIndexNumber] = useState("");
   const [country, setCountry] = useState("");
   const [ageRange, setAgeRange] = useState("");
   const [interests, setInterests] = useState<InterestEntry[]>([]);
@@ -64,6 +65,12 @@ function SignupPage() {
       toast.error(message);
       return;
     }
+    if (userType === "student" && !/^[A-Za-z0-9/_-]{1,32}$/.test(indexNumber.trim())) {
+      const message = "Enter a valid index / student number (letters, numbers, dash, slash; max 32).";
+      setFormError(message);
+      toast.error(message);
+      return;
+    }
     setSubmitting(true);
     try {
       const { error } = await supabase.auth.signUp({
@@ -76,6 +83,7 @@ function SignupPage() {
             user_type: userType,
             department: userType === "student" ? department : "",
             year: userType === "student" ? year : "",
+            index_number: userType === "student" ? indexNumber.trim() : "",
             country: userType === "general" ? country : "",
             age_range: userType === "general" ? ageRange : "",
             interests: interests.map((i) => i.tag),
@@ -234,6 +242,23 @@ function SignupPage() {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+            )}
+            {userType === "student" && (
+              <div>
+                <Label htmlFor="indexno" className="text-xs font-semibold uppercase tracking-wider">Index / Student number</Label>
+                <Input
+                  id="indexno"
+                  required
+                  value={indexNumber}
+                  onChange={(e) => setIndexNumber(e.target.value)}
+                  placeholder="e.g. 10876543 or UG/2024/0123"
+                  maxLength={32}
+                  className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card font-mono"
+                />
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  Used by your faculty managers to track survey completion. Visible only to admins and managers at your university.
+                </p>
               </div>
             )}
             {userType === "general" && (

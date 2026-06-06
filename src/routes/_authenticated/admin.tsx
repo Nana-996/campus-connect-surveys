@@ -15,6 +15,7 @@ import {
   grantCreditsToUser,
   setUserFlag,
   setUserAdminRole,
+  setUserManagerRole,
   listAdminSurveys,
   setSurveyActive,
   deleteSurvey,
@@ -24,6 +25,7 @@ import {
   listOpenFlags,
   resolveFlag,
 } from "@/lib/admin.functions";
+import { Briefcase } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: Admin,
@@ -97,6 +99,7 @@ function UsersPanel() {
   const grant = useServerFn(grantCreditsToUser);
   const flag = useServerFn(setUserFlag);
   const setRole = useServerFn(setUserAdminRole);
+  const setMgrRole = useServerFn(setUserManagerRole);
   const [search, setSearch] = useState("");
   const { data: users = [] } = useQuery({
     queryKey: ["admin", "users", search],
@@ -137,7 +140,8 @@ function UsersPanel() {
                 <td className="px-3 py-2">{u.earned_credits}</td>
                 <td className="px-3 py-2">
                   {u.is_flagged && <Badge variant="destructive" className="mr-1">Flagged</Badge>}
-                  {u.roles?.includes("admin") && <Badge>Admin</Badge>}
+                  {u.roles?.includes("admin") && <Badge className="mr-1">Admin</Badge>}
+                  {u.roles?.includes("manager") && <Badge variant="secondary">Manager</Badge>}
                 </td>
                 <td className="px-3 py-2">
                   <div className="flex flex-wrap justify-end gap-1">
@@ -155,6 +159,14 @@ function UsersPanel() {
                       toast.success(u.is_flagged ? "Unflagged" : "Flagged"); refresh();
                     }}>
                       {u.is_flagged ? <FlagOff className="h-3 w-3" /> : <Flag className="h-3 w-3" />}
+                    </Button>
+                    <Button size="sm" variant="outline" title={u.roles?.includes("manager") ? "Revoke manager" : "Make faculty manager"} onClick={async () => {
+                      const isMgr = u.roles?.includes("manager");
+                      if (!confirm(isMgr ? "Revoke manager role?" : `Grant manager role to ${u.full_name || u.id}? They will see who in ${u.university_domain} has responded to each survey.`)) return;
+                      await setMgrRole({ data: { userId: u.id, grant: !isMgr } });
+                      toast.success("Manager role updated"); refresh();
+                    }}>
+                      <Briefcase className="h-3 w-3" />
                     </Button>
                     <Button size="sm" variant="outline" onClick={async () => {
                       const isAdmin = u.roles?.includes("admin");

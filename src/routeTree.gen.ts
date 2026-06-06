@@ -24,9 +24,11 @@ import { Route as BlogStudentSurveyQuestionsGuideRouteImport } from './routes/bl
 import { Route as AuthenticatedSwipeRouteImport } from './routes/_authenticated/swipe'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedMySurveysRouteImport } from './routes/_authenticated/my-surveys'
+import { Route as AuthenticatedManageRouteImport } from './routes/_authenticated/manage'
 import { Route as AuthenticatedFeedRouteImport } from './routes/_authenticated/feed'
 import { Route as AuthenticatedCreateRouteImport } from './routes/_authenticated/create'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedManageSurveyIdRouteImport } from './routes/_authenticated/manage.$surveyId'
 import { Route as AuthenticatedSurveyIdAnalyzeRouteImport } from './routes/_authenticated/survey.$id.analyze'
 
 const TermsRoute = TermsRouteImport.update({
@@ -104,6 +106,11 @@ const AuthenticatedMySurveysRoute = AuthenticatedMySurveysRouteImport.update({
   path: '/my-surveys',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedManageRoute = AuthenticatedManageRouteImport.update({
+  id: '/manage',
+  path: '/manage',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedFeedRoute = AuthenticatedFeedRouteImport.update({
   id: '/feed',
   path: '/feed',
@@ -119,6 +126,12 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedManageSurveyIdRoute =
+  AuthenticatedManageSurveyIdRouteImport.update({
+    id: '/$surveyId',
+    path: '/$surveyId',
+    getParentRoute: () => AuthenticatedManageRoute,
+  } as any)
 const AuthenticatedSurveyIdAnalyzeRoute =
   AuthenticatedSurveyIdAnalyzeRouteImport.update({
     id: '/survey/$id/analyze',
@@ -138,12 +151,14 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/create': typeof AuthenticatedCreateRoute
   '/feed': typeof AuthenticatedFeedRoute
+  '/manage': typeof AuthenticatedManageRouteWithChildren
   '/my-surveys': typeof AuthenticatedMySurveysRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/swipe': typeof AuthenticatedSwipeRoute
   '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
   '/r/$token': typeof RTokenRoute
   '/survey/$id': typeof SurveyIdRoute
+  '/manage/$surveyId': typeof AuthenticatedManageSurveyIdRoute
   '/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
 }
 export interface FileRoutesByTo {
@@ -158,12 +173,14 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/create': typeof AuthenticatedCreateRoute
   '/feed': typeof AuthenticatedFeedRoute
+  '/manage': typeof AuthenticatedManageRouteWithChildren
   '/my-surveys': typeof AuthenticatedMySurveysRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/swipe': typeof AuthenticatedSwipeRoute
   '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
   '/r/$token': typeof RTokenRoute
   '/survey/$id': typeof SurveyIdRoute
+  '/manage/$surveyId': typeof AuthenticatedManageSurveyIdRoute
   '/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
 }
 export interface FileRoutesById {
@@ -180,12 +197,14 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/create': typeof AuthenticatedCreateRoute
   '/_authenticated/feed': typeof AuthenticatedFeedRoute
+  '/_authenticated/manage': typeof AuthenticatedManageRouteWithChildren
   '/_authenticated/my-surveys': typeof AuthenticatedMySurveysRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/swipe': typeof AuthenticatedSwipeRoute
   '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
   '/r/$token': typeof RTokenRoute
   '/survey/$id': typeof SurveyIdRoute
+  '/_authenticated/manage/$surveyId': typeof AuthenticatedManageSurveyIdRoute
   '/_authenticated/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
 }
 export interface FileRouteTypes {
@@ -202,12 +221,14 @@ export interface FileRouteTypes {
     | '/admin'
     | '/create'
     | '/feed'
+    | '/manage'
     | '/my-surveys'
     | '/profile'
     | '/swipe'
     | '/blog/student-survey-questions-guide'
     | '/r/$token'
     | '/survey/$id'
+    | '/manage/$surveyId'
     | '/survey/$id/analyze'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -222,12 +243,14 @@ export interface FileRouteTypes {
     | '/admin'
     | '/create'
     | '/feed'
+    | '/manage'
     | '/my-surveys'
     | '/profile'
     | '/swipe'
     | '/blog/student-survey-questions-guide'
     | '/r/$token'
     | '/survey/$id'
+    | '/manage/$surveyId'
     | '/survey/$id/analyze'
   id:
     | '__root__'
@@ -243,12 +266,14 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/create'
     | '/_authenticated/feed'
+    | '/_authenticated/manage'
     | '/_authenticated/my-surveys'
     | '/_authenticated/profile'
     | '/_authenticated/swipe'
     | '/blog/student-survey-questions-guide'
     | '/r/$token'
     | '/survey/$id'
+    | '/_authenticated/manage/$surveyId'
     | '/_authenticated/survey/$id/analyze'
   fileRoutesById: FileRoutesById
 }
@@ -374,6 +399,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMySurveysRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/manage': {
+      id: '/_authenticated/manage'
+      path: '/manage'
+      fullPath: '/manage'
+      preLoaderRoute: typeof AuthenticatedManageRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/feed': {
       id: '/_authenticated/feed'
       path: '/feed'
@@ -395,6 +427,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/manage/$surveyId': {
+      id: '/_authenticated/manage/$surveyId'
+      path: '/$surveyId'
+      fullPath: '/manage/$surveyId'
+      preLoaderRoute: typeof AuthenticatedManageSurveyIdRouteImport
+      parentRoute: typeof AuthenticatedManageRoute
+    }
     '/_authenticated/survey/$id/analyze': {
       id: '/_authenticated/survey/$id/analyze'
       path: '/survey/$id/analyze'
@@ -405,10 +444,22 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedManageRouteChildren {
+  AuthenticatedManageSurveyIdRoute: typeof AuthenticatedManageSurveyIdRoute
+}
+
+const AuthenticatedManageRouteChildren: AuthenticatedManageRouteChildren = {
+  AuthenticatedManageSurveyIdRoute: AuthenticatedManageSurveyIdRoute,
+}
+
+const AuthenticatedManageRouteWithChildren =
+  AuthenticatedManageRoute._addFileChildren(AuthenticatedManageRouteChildren)
+
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedCreateRoute: typeof AuthenticatedCreateRoute
   AuthenticatedFeedRoute: typeof AuthenticatedFeedRoute
+  AuthenticatedManageRoute: typeof AuthenticatedManageRouteWithChildren
   AuthenticatedMySurveysRoute: typeof AuthenticatedMySurveysRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedSwipeRoute: typeof AuthenticatedSwipeRoute
@@ -419,6 +470,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedCreateRoute: AuthenticatedCreateRoute,
   AuthenticatedFeedRoute: AuthenticatedFeedRoute,
+  AuthenticatedManageRoute: AuthenticatedManageRouteWithChildren,
   AuthenticatedMySurveysRoute: AuthenticatedMySurveysRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedSwipeRoute: AuthenticatedSwipeRoute,
@@ -446,13 +498,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
