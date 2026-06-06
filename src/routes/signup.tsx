@@ -41,6 +41,7 @@ function SignupPage() {
   const [password, setPassword] = useState("");
   const [department, setDepartment] = useState("");
   const [year, setYear] = useState("");
+  const [indexNumber, setIndexNumber] = useState("");
   const [country, setCountry] = useState("");
   const [ageRange, setAgeRange] = useState("");
   const [interests, setInterests] = useState<InterestEntry[]>([]);
