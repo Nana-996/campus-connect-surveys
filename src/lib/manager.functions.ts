@@ -56,8 +56,8 @@ export const updateMyStudentInfo = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.rpc("update_my_student_info", {
-      _index_number: data.index_number ?? null,
-      _department: data.department ?? null,
+      _index_number: data.index_number ?? "",
+      _department: data.department ?? "",
     });
     if (error) throw new Error(error.message);
     return { ok: true };
