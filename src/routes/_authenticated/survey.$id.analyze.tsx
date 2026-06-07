@@ -197,7 +197,7 @@ function AnalyzePage() {
       setLoading(false);
     })();
     return () => { active = false; };
-  }, [id, user, isPreviewMode]);
+  }, [id, user]);
 
   const isPremium = useMemo(() => {
     // Premium features are free for now — all signed-in creators get full access.
