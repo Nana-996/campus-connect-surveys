@@ -6,7 +6,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { INTEREST_TAGS, tagLabel } from "@/lib/interests";
-import { normalizeInterestTag } from "@/lib/interests.functions";
+import { normalizeInterestTag, normalizeInterestTagAI } from "@/lib/interests.functions";
 
 export type InterestEntry = { raw: string; tag: string };
 
@@ -19,6 +19,7 @@ type Props = {
 
 export function InterestTagInput({ value, onChange, placeholder, max = 8 }: Props) {
   const normalize = useServerFn(normalizeInterestTag);
+  const normalizeAI = useServerFn(normalizeInterestTagAI);
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -32,7 +33,12 @@ export function InterestTagInput({ value, onChange, placeholder, max = 8 }: Prop
     setBusy(true);
     try {
       const res = await normalize({ data: { raw } });
-      onChange([...value, { raw, tag: res.tag }]);
+      let tag = res.tag;
+      if ((res as any).source === "needs_ai") {
+        const aiRes = await normalizeAI({ data: { raw } });
+        tag = aiRes.tag;
+      }
+      onChange([...value, { raw, tag }]);
       setDraft("");
     } catch {
       onChange([...value, { raw, tag: "other" }]);

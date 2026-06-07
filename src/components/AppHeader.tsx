@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Coins, Home, PlusCircle, FolderOpen, User, LogOut, Zap, Briefcase } from "lucide-react";
+import { Coins, Home, PlusCircle, FolderOpen, User, LogOut, Zap, Briefcase, Shield } from "lucide-react";
 import { getMyManagerScope } from "@/lib/manager.functions";
 
 export function AppHeader() {
@@ -18,6 +18,7 @@ export function AppHeader() {
     staleTime: 60_000,
   });
   const showFaculty = !!scope?.canAccess;
+  const isAdmin = !!scope?.isAdmin;
 
   return (
     <header className="sticky top-0 z-40 border-b border-foreground/15 bg-background/85 backdrop-blur">
@@ -54,6 +55,7 @@ export function AppHeader() {
         <NavItem to="/create" icon={<PlusCircle className="h-5 w-5" />} label="Create" />
         <NavItem to="/my-surveys" icon={<FolderOpen className="h-5 w-5" />} label="Mine" />
         {showFaculty && <NavItem to="/manage" icon={<Briefcase className="h-5 w-5" />} label="Faculty" />}
+        {isAdmin && <NavItem to="/admin" icon={<Shield className="h-5 w-5" />} label="Admin" />}
         <NavItem to="/profile" icon={<User className="h-5 w-5" />} label="Profile" />
       </nav>
       <nav className="mx-auto hidden max-w-5xl items-center gap-1 border-t border-foreground/10 px-5 py-2 sm:flex">
@@ -62,6 +64,7 @@ export function AppHeader() {
         <DesktopLink to="/create">Create survey</DesktopLink>
         <DesktopLink to="/my-surveys">My surveys</DesktopLink>
         {showFaculty && <DesktopLink to="/manage">Faculty</DesktopLink>}
+        {isAdmin && <DesktopLink to="/admin">Admin</DesktopLink>}
         <DesktopLink to="/profile">Profile</DesktopLink>
       </nav>
     </header>

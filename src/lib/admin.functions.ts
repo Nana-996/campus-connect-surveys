@@ -16,6 +16,30 @@ const requireAdmin = createMiddleware({ type: "function" })
     return next();
   });
 
+function genericError(e: any): never {
+  console.error("[admin]", e);
+  throw new Error("Database operation failed");
+}
+
+// ---------- First-admin bootstrap ----------
+export const bootstrapFirstAdmin = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: existing } = await supabaseAdmin
+      .from("user_roles")
+      .select("id")
+      .eq("role", "admin")
+      .limit(1);
+    if (existing && existing.length > 0) {
+      throw new Error("An admin already exists");
+    }
+    const { error } = await supabaseAdmin
+      .from("user_roles")
+      .insert({ user_id: context.userId, role: "admin" });
+    if (error) genericError(error);
+    return { ok: true };
+  });
+
 // ---------- Metrics ----------
 export const getAdminMetrics = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
@@ -56,7 +80,7 @@ export const listAdminUsers = createServerFn({ method: "GET" })
       q = q.or(`full_name.ilike.%${safe}%,university_domain.ilike.%${safe}%,university_name.ilike.%${safe}%`);
     }
     const { data: rows, error } = await q;
-    if (error) throw new Error(error.message);
+    if (error) genericError(error);
     const ids = (rows ?? []).map((r) => r.id);
     const { data: roles } = await supabaseAdmin.from("user_roles").select("user_id, role").in("user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]);
     const roleMap = new Map<string, string[]>();
@@ -88,14 +112,15 @@ export const grantCreditsToUser = createServerFn({ method: "POST" })
     const next = Math.max(0, (profile as any).earned_credits + data.amount);
     const patch: Record<string, number> = { earned_credits: next };
     const { error: e2 } = await supabaseAdmin.from("profiles").update(patch as any).eq("id", data.userId);
-    if (e2) throw new Error(e2.message);
-    await supabaseAdmin.from("credit_ledger").insert({
+    if (e2) genericError(e2);
+    const { error: e3 } = await supabaseAdmin.from("credit_ledger").insert({
       user_id: data.userId,
       wallet: data.wallet,
       delta: data.amount,
       reason: `admin:${data.reason}:by:${context.userId}`,
       expires_at: data.amount > 0 ? new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString() : null,
     });
+    if (e3) genericError(e3);
     return { ok: true, balance: next };
   });
 
@@ -109,7 +134,7 @@ export const setUserFlag = createServerFn({ method: "POST" })
       .from("profiles")
       .update({ is_flagged: data.flagged, flag_reason: data.flagged ? data.reason ?? "admin" : null })
       .eq("id", data.userId);
-    if (error) throw new Error(error.message);
+    if (error) genericError(error);
     return { ok: true };
   });
 
@@ -119,10 +144,23 @@ export const setUserAdminRole = createServerFn({ method: "POST" })
     z.object({ userId: z.string().uuid(), grant: z.boolean() }).parse(d),
   )
   .handler(async ({ data }) => {
+    if (!data.grant) {
+      const { data: admins, error: countErr } = await supabaseAdmin
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "admin");
+      if (countErr) genericError(countErr);
+      const adminIds = new Set((admins ?? []).map((a: any) => a.user_id));
+      if (adminIds.size <= 1 && adminIds.has(data.userId)) {
+        throw new Error("Cannot revoke the last admin");
+      }
+    }
     if (data.grant) {
-      await supabaseAdmin.from("user_roles").insert({ user_id: data.userId, role: "admin" }).select();
+      const { error } = await supabaseAdmin.from("user_roles").insert({ user_id: data.userId, role: "admin" }).select();
+      if (error) genericError(error);
     } else {
-      await supabaseAdmin.from("user_roles").delete().eq("user_id", data.userId).eq("role", "admin");
+      const { error } = await supabaseAdmin.from("user_roles").delete().eq("user_id", data.userId).eq("role", "admin");
+      if (error) genericError(error);
     }
     return { ok: true };
   });
@@ -134,9 +172,11 @@ export const setUserManagerRole = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     if (data.grant) {
-      await supabaseAdmin.from("user_roles").insert({ user_id: data.userId, role: "manager" as any }).select();
+      const { error } = await supabaseAdmin.from("user_roles").insert({ user_id: data.userId, role: "manager" as any }).select();
+      if (error) genericError(error);
     } else {
-      await supabaseAdmin.from("user_roles").delete().eq("user_id", data.userId).eq("role", "manager" as any);
+      const { error } = await supabaseAdmin.from("user_roles").delete().eq("user_id", data.userId).eq("role", "manager" as any);
+      if (error) genericError(error);
     }
     return { ok: true };
   });
@@ -150,7 +190,7 @@ export const listAdminSurveys = createServerFn({ method: "GET" })
       .select("id, title, creator_id, university_domain, tier, is_active, response_count, response_goal, created_at, expires_at, allow_general_respondents")
       .order("created_at", { ascending: false })
       .limit(200);
-    if (error) throw new Error(error.message);
+    if (error) genericError(error);
     return data ?? [];
   });
 
@@ -159,7 +199,7 @@ export const setSurveyActive = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ surveyId: z.string().uuid(), active: z.boolean() }).parse(d))
   .handler(async ({ data }) => {
     const { error } = await supabaseAdmin.from("surveys").update({ is_active: data.active }).eq("id", data.surveyId);
-    if (error) throw new Error(error.message);
+    if (error) genericError(error);
     return { ok: true };
   });
 
@@ -170,7 +210,7 @@ export const deleteSurvey = createServerFn({ method: "POST" })
     await supabaseAdmin.from("survey_responses").delete().eq("survey_id", data.surveyId);
     await supabaseAdmin.from("survey_visualizations").delete().eq("survey_id", data.surveyId);
     const { error } = await supabaseAdmin.from("surveys").delete().eq("id", data.surveyId);
-    if (error) throw new Error(error.message);
+    if (error) genericError(error);
     return { ok: true };
   });
 
@@ -179,7 +219,7 @@ export const listDisposableDomains = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
   .handler(async () => {
     const { data, error } = await supabaseAdmin.from("disposable_domains").select("domain, created_at").order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) genericError(error);
     return data ?? [];
   });
 
@@ -190,7 +230,10 @@ export const addDisposableDomain = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { error } = await supabaseAdmin.from("disposable_domains").insert({ domain: data.domain.toLowerCase() });
-    if (error) throw new Error(error.message);
+    if (error) {
+      if (error.message?.includes("duplicate")) throw new Error("Domain already blocked");
+      genericError(error);
+    }
     return { ok: true };
   });
 
@@ -199,7 +242,7 @@ export const removeDisposableDomain = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ domain: z.string() }).parse(d))
   .handler(async ({ data }) => {
     const { error } = await supabaseAdmin.from("disposable_domains").delete().eq("domain", data.domain.toLowerCase());
-    if (error) throw new Error(error.message);
+    if (error) genericError(error);
     return { ok: true };
   });
 
@@ -208,7 +251,7 @@ export const listOpenFlags = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
   .handler(async () => {
     const { data, error } = await supabaseAdmin.from("review_flags").select("*").eq("resolved", false).order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) genericError(error);
     return data ?? [];
   });
 
@@ -217,6 +260,6 @@ export const resolveFlag = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data }) => {
     const { error } = await supabaseAdmin.from("review_flags").update({ resolved: true }).eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) genericError(error);
     return { ok: true };
   });

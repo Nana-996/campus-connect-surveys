@@ -565,6 +565,7 @@ export type Database = {
       current_year: { Args: never; Returns: string }
       expire_earned_credits: { Args: never; Returns: undefined }
       get_shared_dashboard: { Args: { _token: string }; Returns: Json }
+      get_survey_share_card: { Args: { _survey_id: string }; Returns: Json }
       get_university_survey_tracking: {
         Args: { _survey_id: string }
         Returns: {
