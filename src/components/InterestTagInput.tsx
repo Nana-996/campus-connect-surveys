@@ -6,7 +6,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { INTEREST_TAGS, tagLabel } from "@/lib/interests";
-import { normalizeInterestTag } from "@/lib/interests.functions";
+import { normalizeInterestTag, normalizeInterestTagAI } from "@/lib/interests.functions";
 
 export type InterestEntry = { raw: string; tag: string };
 
