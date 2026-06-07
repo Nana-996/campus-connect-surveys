@@ -64,14 +64,8 @@ function Feed() {
 
   useEffect(() => {
     if (!user) return;
-    if (isPreviewMode) {
-      setSurveys([]);
-      setAnswered(new Set());
-      setCampusDepts([profile?.department].filter(Boolean) as string[]);
-      setCampusYears([profile?.year].filter(Boolean) as string[]);
-      setLoading(false);
-      return;
-    }
+    
+
     let active = true;
     (async () => {
       try {
