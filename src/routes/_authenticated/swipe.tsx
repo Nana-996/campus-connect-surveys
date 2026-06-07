@@ -38,7 +38,7 @@ function isSwipeable(s: Survey) {
 }
 
 function SwipePage() {
-  const { user, isPreviewMode } = useAuth();
+  const { user } = useAuth();
   const [queue, setQueue] = useState<Survey[]>([]);
   const [loading, setLoading] = useState(true);
   const [answeredCount, setAnsweredCount] = useState(0);
