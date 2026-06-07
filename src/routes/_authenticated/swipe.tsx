@@ -84,6 +84,16 @@ function SwipePage() {
     toast.success("Answered ✓", { duration: 1200 });
   };
 
+  // Record server-side start time when a new top card is shown so the
+  // response trigger can compute trustworthy duration_ms.
+  useEffect(() => {
+    if (!user || !top) return;
+    supabase.rpc("begin_survey_response", { _survey_id: top.id }).then(({ error }) => {
+      if (error) console.warn("begin_survey_response failed", error);
+    });
+  }, [user, top?.id]);
+
+
   return (
     <div>
       <Link to="/feed" className="mb-4 inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground">
