@@ -36,7 +36,7 @@ type AccountTab = "student" | "general";
 function AuthPage() {
   const navigate = useNavigate();
   const search = Route.useSearch();
-  const { user, loading, signIn, signOut, enterPreviewMode } = useAuth();
+  const { user, loading, signIn, signOut } = useAuth();
 
   const [tab, setTab] = useState<AccountTab>(search.as ?? "student");
   const [email, setEmail] = useState("");
