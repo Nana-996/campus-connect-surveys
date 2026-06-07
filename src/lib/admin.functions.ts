@@ -43,7 +43,7 @@ export const getAdminMetrics = createServerFn({ method: "GET" })
 export const listAdminUsers = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
   .inputValidator((d: { search?: string } | undefined) =>
-    z.object({ search: z.string().max(120).optional() }).parse(d ?? {}),
+    z.object({ search: z.string().max(120).regex(/^[^(),.%_]*$/).optional() }).parse(d ?? {}),
   )
   .handler(async ({ data }) => {
     let q = supabaseAdmin
@@ -52,7 +52,8 @@ export const listAdminUsers = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(200);
     if (data.search) {
-      q = q.or(`full_name.ilike.%${data.search}%,university_domain.ilike.%${data.search}%,university_name.ilike.%${data.search}%`);
+      const safe = data.search.replace(/[(),.%_]/g, "");
+      q = q.or(`full_name.ilike.%${safe}%,university_domain.ilike.%${safe}%,university_name.ilike.%${safe}%`);
     }
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
