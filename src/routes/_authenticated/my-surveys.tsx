@@ -31,7 +31,7 @@ export const Route = createFileRoute("/_authenticated/my-surveys")({
 });
 
 function MySurveys() {
-  const { user, isPreviewMode } = useAuth();
+  const { user } = useAuth();
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [loading, setLoading] = useState(true);
   const [sharedId, setSharedId] = useState<string | null>(null);
