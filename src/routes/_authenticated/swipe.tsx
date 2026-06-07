@@ -45,7 +45,7 @@ function SwipePage() {
   const [skipCount, setSkipCount] = useState(0);
 
   useEffect(() => {
-    if (!user || isPreviewMode) { setLoading(false); return; }
+    if (!user) { setLoading(false); return; }
     let active = true;
     (async () => {
       const [{ data, error }, { data: resps, error: rerr }] = await Promise.all([
