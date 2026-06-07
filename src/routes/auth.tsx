@@ -204,17 +204,6 @@ function AuthPage() {
               {submitting ? "Please wait…" : `Log in as ${isStudent ? "Student" : "General"}`}
               <ArrowUpRight className="ml-1 h-4 w-4" />
             </Button>
-            <Button
-              type="button"
-              className="h-12 w-full rounded-full border-foreground/30 text-base"
-              variant="outline"
-              onClick={() => {
-                enterPreviewMode();
-                navigate({ to: "/feed" });
-              }}
-            >
-              Enter preview mode
-            </Button>
           </form>
           <p className="mt-6 text-center text-xs text-muted-foreground">
             New here?{" "}
