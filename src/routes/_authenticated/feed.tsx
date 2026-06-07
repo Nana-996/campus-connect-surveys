@@ -96,7 +96,7 @@ function Feed() {
       }
     })();
     return () => { active = false; };
-  }, [user, isPreviewMode, profile?.department, profile?.year, isGeneral]);
+  }, [user, profile?.department, profile?.year, isGeneral]);
 
   // Student cohort options
   const departments = Array.from(new Set([
