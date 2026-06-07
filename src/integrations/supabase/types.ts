@@ -283,6 +283,32 @@ export type Database = {
           },
         ]
       }
+      survey_response_starts: {
+        Row: {
+          started_at: string
+          survey_id: string
+          user_id: string
+        }
+        Insert: {
+          started_at?: string
+          survey_id: string
+          user_id: string
+        }
+        Update: {
+          started_at?: string
+          survey_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_response_starts_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       survey_responses: {
         Row: {
           answers: Json
@@ -530,6 +556,7 @@ export type Database = {
       }
     }
     Functions: {
+      begin_survey_response: { Args: { _survey_id: string }; Returns: string }
       current_age_range: { Args: never; Returns: string }
       current_country: { Args: never; Returns: string }
       current_department: { Args: never; Returns: string }

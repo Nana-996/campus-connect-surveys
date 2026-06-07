@@ -211,6 +211,12 @@ function SurveyPage() {
         const { data: own } = await supabase.from("survey_responses").select("id").eq("survey_id", id).eq("respondent_id", user.id).maybeSingle();
         if (!active) return;
         setAlreadyAnswered(!!own);
+        // Record server-side start time for credit-quality gating.
+        if (!own) {
+          await supabase.rpc("begin_survey_response", { _survey_id: id }).then(({ error }) => {
+            if (error) console.warn("begin_survey_response failed", error);
+          });
+        }
       }
     })();
     return () => { active = false; };
