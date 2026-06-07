@@ -1,39 +1,46 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { createClient } from "@supabase/supabase-js";
 
 const inputSchema = z.object({ id: z.string().uuid() });
 
-// Public preview of a survey (no auth). Returns only metadata safe to expose
-// on a share link — NO questions, NO inactive surveys. Used to render the
-// "Verify to view the questions" landing card.
+// Public share-card metadata (no auth). Returns only safe-to-expose fields.
+// Uses a public-safe database RPC rather than supabaseAdmin to avoid
+// service-role enumeration risk.
 export const getSurveyPublic = createServerFn({ method: "GET" })
   .inputValidator((data) => inputSchema.parse(data))
   .handler(async ({ data }) => {
-    const { data: s, error } = await supabaseAdmin
-      .from("surveys")
-      .select(
-        "id, creator_id, title, description, response_count, response_goal, expires_at, target_department, target_year, is_active",
-      )
-      .eq("id", data.id)
-      .eq("is_active", true)
-      .maybeSingle();
-    if (error) {
-      console.error("[getSurveyPublic] error", error);
+    const url = process.env.SUPABASE_URL;
+    const key = process.env.SUPABASE_PUBLISHABLE_KEY;
+    if (!url || !key) {
       return { survey: null as null, ownerName: null as string | null };
     }
-    if (!s) return { survey: null, ownerName: null };
-
-    const { data: prof } = await supabaseAdmin
-      .from("profiles")
-      .select("full_name, university_name")
-      .eq("id", s.creator_id)
-      .maybeSingle();
-
+    const client = createClient(url, key, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data: result, error } = await client.rpc("get_survey_share_card", {
+      _survey_id: data.id,
+    });
+    if (error || !result) {
+      console.error("[getSurveyPublic] rpc error", error);
+      return { survey: null, ownerName: null };
+    }
+    const s = result as Record<string, any>;
     return {
-      survey: s,
-      ownerName: prof?.full_name || prof?.university_name || null,
+      survey: {
+        id: s.id,
+        creator_id: s.creator_id,
+        title: s.title,
+        description: s.description,
+        response_count: s.response_count,
+        response_goal: s.response_goal,
+        expires_at: s.expires_at,
+        target_department: s.target_department,
+        target_year: s.target_year,
+        is_active: s.is_active,
+      },
+      ownerName: s.owner_name || null,
     };
   });
 
