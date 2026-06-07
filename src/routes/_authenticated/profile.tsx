@@ -13,7 +13,7 @@ export const Route = createFileRoute("/_authenticated/profile")({
 });
 
 function Profile() {
-  const { profile, user, isPreviewMode } = useAuth();
+  const { profile, user } = useAuth();
   const [responses, setResponses] = useState<any[]>([]);
   const [ledger, setLedger] = useState<any[]>([]);
   const [caps, setCaps] = useState<{ day_count: number; week_count: number } | null>(null);
@@ -21,7 +21,6 @@ function Profile() {
 
   useEffect(() => {
     if (!user) return;
-    if (isPreviewMode) return;
     let active = true;
     (async () => {
       const [resps, led, c] = await Promise.all([
