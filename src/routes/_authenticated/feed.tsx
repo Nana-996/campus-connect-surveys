@@ -46,7 +46,7 @@ const TONES = [
 ];
 
 function Feed() {
-  const { user, profile, isPreviewMode } = useAuth();
+  const { user, profile } = useAuth();
   const isGeneral = profile?.user_type === "general";
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [answered, setAnswered] = useState<Set<string>>(new Set());
