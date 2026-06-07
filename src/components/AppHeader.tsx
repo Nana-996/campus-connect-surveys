@@ -18,6 +18,7 @@ export function AppHeader() {
     staleTime: 60_000,
   });
   const showFaculty = !!scope?.canAccess;
+  const isAdmin = !!scope?.isAdmin;
 
   return (
     <header className="sticky top-0 z-40 border-b border-foreground/15 bg-background/85 backdrop-blur">
