@@ -70,11 +70,8 @@ function MySurveys() {
 
   useEffect(() => {
     if (!user) return;
-    if (isPreviewMode) {
-      setSurveys([]);
-      setLoading(false);
-      return;
-    }
+    
+
     let active = true;
     (async () => {
       const { data, error } = await supabase
