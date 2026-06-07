@@ -91,7 +91,7 @@ export const Route = createFileRoute("/survey/$id")({
 
 function SurveyPage() {
   const { id } = Route.useParams();
-  const { user, isPreviewMode, refreshProfile } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const fetchPublic = useServerFn(getSurveyPublic);
   const fetchAuthed = useServerFn(getSurveyForRespondent);
