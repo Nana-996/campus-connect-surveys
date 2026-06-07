@@ -16,6 +16,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AdminSetupRouteImport } from './routes/admin-setup'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SurveyIdRouteImport } from './routes/survey.$id'
@@ -64,6 +65,11 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSetupRoute = AdminSetupRouteImport.update({
+  id: '/admin-setup',
+  path: '/admin-setup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -141,6 +147,7 @@ const AuthenticatedSurveyIdAnalyzeRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin-setup': typeof AdminSetupRoute
   '/auth': typeof AuthRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/privacy': typeof PrivacyRoute
@@ -163,6 +170,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin-setup': typeof AdminSetupRoute
   '/auth': typeof AuthRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/privacy': typeof PrivacyRoute
@@ -187,6 +195,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/admin-setup': typeof AdminSetupRoute
   '/auth': typeof AuthRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/privacy': typeof PrivacyRoute
@@ -211,6 +220,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin-setup'
     | '/auth'
     | '/forgot-password'
     | '/privacy'
@@ -233,6 +243,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin-setup'
     | '/auth'
     | '/forgot-password'
     | '/privacy'
@@ -256,6 +267,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/admin-setup'
     | '/auth'
     | '/forgot-password'
     | '/privacy'
@@ -280,6 +292,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  AdminSetupRoute: typeof AdminSetupRoute
   AuthRoute: typeof AuthRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -341,6 +354,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-setup': {
+      id: '/admin-setup'
+      path: '/admin-setup'
+      fullPath: '/admin-setup'
+      preLoaderRoute: typeof AdminSetupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -484,6 +504,7 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  AdminSetupRoute: AdminSetupRoute,
   AuthRoute: AuthRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   PrivacyRoute: PrivacyRoute,

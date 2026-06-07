@@ -26,7 +26,7 @@ function AdminSetupPage() {
     queryKey: ["admin-setup", "check"],
     queryFn: async () => {
       try {
-        await bootstrap({ data: {} });
+        await bootstrap();
         return false; // succeeded → no admin existed before
       } catch (e: any) {
         if (e.message?.includes("already exists")) return true;
@@ -39,7 +39,7 @@ function AdminSetupPage() {
 
   const claim = useMutation({
     mutationFn: async () => {
-      const res = await bootstrap({ data: {} });
+      const res = await bootstrap();
       return res;
     },
     onSuccess: () => {
