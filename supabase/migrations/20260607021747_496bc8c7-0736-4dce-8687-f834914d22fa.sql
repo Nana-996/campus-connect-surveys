@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Profiles: manager reads university students" ON public.profiles;
