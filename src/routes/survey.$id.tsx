@@ -184,13 +184,13 @@ function SurveyPage() {
       }
     })();
     return () => { active = false; };
-  }, [id, isPreviewMode, fetchPublic, fetchAuthed, user]);
+  }, [id, fetchPublic, fetchAuthed, user]);
 
   // Auto-open the verify modal for unauthenticated visitors as soon as the survey loads.
   useEffect(() => {
-    if (!loading && survey && !user && !isPreviewMode) setVerifyOpen(true);
+    if (!loading && survey && !user) setVerifyOpen(true);
     if (user) setVerifyOpen(false);
-  }, [loading, survey, user, isPreviewMode]);
+  }, [loading, survey, user]);
 
   // Load creator-only or respondent-state data once signed in.
   useEffect(() => {
