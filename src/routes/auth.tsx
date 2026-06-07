@@ -36,7 +36,7 @@ type AccountTab = "student" | "general";
 function AuthPage() {
   const navigate = useNavigate();
   const search = Route.useSearch();
-  const { user, loading, signIn, signOut, enterPreviewMode } = useAuth();
+  const { user, loading, signIn, signOut } = useAuth();
 
   const [tab, setTab] = useState<AccountTab>(search.as ?? "student");
   const [email, setEmail] = useState("");
@@ -203,17 +203,6 @@ function AuthPage() {
             <Button type="submit" className="h-12 w-full rounded-full bg-primary text-base" disabled={submitting}>
               {submitting ? "Please wait…" : `Log in as ${isStudent ? "Student" : "General"}`}
               <ArrowUpRight className="ml-1 h-4 w-4" />
-            </Button>
-            <Button
-              type="button"
-              className="h-12 w-full rounded-full border-foreground/30 text-base"
-              variant="outline"
-              onClick={() => {
-                enterPreviewMode();
-                navigate({ to: "/feed" });
-              }}
-            >
-              Enter preview mode
             </Button>
           </form>
           <p className="mt-6 text-center text-xs text-muted-foreground">

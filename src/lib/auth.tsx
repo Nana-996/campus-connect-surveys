@@ -24,26 +24,13 @@ type AuthCtx = {
   session: Session | null;
   profile: Profile | null;
   profileError: string | null;
-  isPreviewMode: boolean;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  enterPreviewMode: () => void;
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
 };
 
 const Ctx = createContext<AuthCtx | undefined>(undefined);
-const PREVIEW_MODE_KEY = "campusverify-preview-mode";
-const previewUser = { id: "00000000-0000-4000-8000-000000000001", email: "student@campus.edu" } as User;
-const previewProfile: Profile = {
-  id: "00000000-0000-4000-8000-000000000001",
-  full_name: "Preview Student",
-  university_name: "Campus University",
-  university_domain: "campus.edu",
-  department: "Research Methods",
-  year: "Year 3",
-  earned_credits: 4,
-};
 
 const fallbackProfileFor = (authUser: User): Profile => {
   const emailDomain = authUser.email?.split("@")[1]?.toLowerCase() ?? "";
@@ -65,7 +52,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [profileError, setProfileError] = useState<string | null>(null);
-  const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const loadProfile = async (authUser: User) => {
@@ -149,13 +135,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setProfileError(err.message ?? "Could not load your profile.");
           })
           .finally(() => setLoading(false));
-      }
-      else {
-        const previewEnabled = localStorage.getItem(PREVIEW_MODE_KEY) === "true";
-        if (previewEnabled) {
-          setIsPreviewMode(true);
-          setProfile(previewProfile);
-        }
+      } else {
         setLoading(false);
       }
     });
@@ -163,35 +143,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value: AuthCtx = {
-    user: session?.user ?? (isPreviewMode ? previewUser : null),
+    user: session?.user ?? null,
     session,
     profile,
     profileError,
-    isPreviewMode,
     loading,
     signIn: async (email, password) => {
       setProfileError(null);
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
-      localStorage.removeItem(PREVIEW_MODE_KEY);
-      setIsPreviewMode(false);
       setSession(data.session);
       if (data.user) await loadProfile(data.user);
     },
-    enterPreviewMode: () => {
-      localStorage.setItem(PREVIEW_MODE_KEY, "true");
-      setSession(null);
-      setProfileError(null);
-      setIsPreviewMode(true);
-      setProfile(previewProfile);
-    },
     refreshProfile: async () => {
-      if (isPreviewMode) return;
       if (session?.user) await loadProfile(session.user);
     },
     signOut: async () => {
-      localStorage.removeItem(PREVIEW_MODE_KEY);
-      setIsPreviewMode(false);
       setProfile(null);
       await supabase.auth.signOut();
     },

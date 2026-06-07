@@ -31,7 +31,7 @@ export const Route = createFileRoute("/_authenticated/my-surveys")({
 });
 
 function MySurveys() {
-  const { user, isPreviewMode } = useAuth();
+  const { user } = useAuth();
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [loading, setLoading] = useState(true);
   const [sharedId, setSharedId] = useState<string | null>(null);
@@ -70,11 +70,8 @@ function MySurveys() {
 
   useEffect(() => {
     if (!user) return;
-    if (isPreviewMode) {
-      setSurveys([]);
-      setLoading(false);
-      return;
-    }
+    
+
     let active = true;
     (async () => {
       const { data, error } = await supabase
@@ -88,7 +85,7 @@ function MySurveys() {
       setLoading(false);
     })();
     return () => { active = false; };
-  }, [user, isPreviewMode]);
+  }, [user]);
 
   return (
     <div>

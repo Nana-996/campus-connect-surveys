@@ -38,14 +38,14 @@ function isSwipeable(s: Survey) {
 }
 
 function SwipePage() {
-  const { user, isPreviewMode } = useAuth();
+  const { user } = useAuth();
   const [queue, setQueue] = useState<Survey[]>([]);
   const [loading, setLoading] = useState(true);
   const [answeredCount, setAnsweredCount] = useState(0);
   const [skipCount, setSkipCount] = useState(0);
 
   useEffect(() => {
-    if (!user || isPreviewMode) { setLoading(false); return; }
+    if (!user) { setLoading(false); return; }
     let active = true;
     (async () => {
       const [{ data, error }, { data: resps, error: rerr }] = await Promise.all([
@@ -61,7 +61,7 @@ function SwipePage() {
       setLoading(false);
     })();
     return () => { active = false; };
-  }, [user, isPreviewMode]);
+  }, [user]);
 
   const top = queue[0];
 

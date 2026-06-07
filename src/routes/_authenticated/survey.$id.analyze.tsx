@@ -146,7 +146,7 @@ export const Route = createFileRoute("/_authenticated/survey/$id/analyze")({
 
 function AnalyzePage() {
   const { id } = Route.useParams();
-  const { user, isPreviewMode } = useAuth();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [survey, setSurvey] = useState<Survey | null>(null);
   const [responses, setResponses] = useState<Response[]>([]);
@@ -161,7 +161,7 @@ function AnalyzePage() {
   const promptUpgrade = (feature: string, description?: string) => setUpgradePrompt({ open: true, feature, description });
 
   useEffect(() => {
-    if (!user || isPreviewMode) { setLoading(false); return; }
+    if (!user) { setLoading(false); return; }
     let active = true;
     (async () => {
       const [{ data: s }, { data: r }] = await Promise.all([
@@ -197,7 +197,7 @@ function AnalyzePage() {
       setLoading(false);
     })();
     return () => { active = false; };
-  }, [id, user, isPreviewMode]);
+  }, [id, user]);
 
   const isPremium = useMemo(() => {
     // Premium features are free for now — all signed-in creators get full access.

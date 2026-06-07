@@ -46,7 +46,7 @@ const TONES = [
 ];
 
 function Feed() {
-  const { user, profile, isPreviewMode } = useAuth();
+  const { user, profile } = useAuth();
   const isGeneral = profile?.user_type === "general";
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [answered, setAnswered] = useState<Set<string>>(new Set());
@@ -64,14 +64,8 @@ function Feed() {
 
   useEffect(() => {
     if (!user) return;
-    if (isPreviewMode) {
-      setSurveys([]);
-      setAnswered(new Set());
-      setCampusDepts([profile?.department].filter(Boolean) as string[]);
-      setCampusYears([profile?.year].filter(Boolean) as string[]);
-      setLoading(false);
-      return;
-    }
+    
+
     let active = true;
     (async () => {
       try {
@@ -102,7 +96,7 @@ function Feed() {
       }
     })();
     return () => { active = false; };
-  }, [user, isPreviewMode, profile?.department, profile?.year, isGeneral]);
+  }, [user, profile?.department, profile?.year, isGeneral]);
 
   // Student cohort options
   const departments = Array.from(new Set([
