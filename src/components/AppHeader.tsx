@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Coins, Home, PlusCircle, FolderOpen, User, LogOut, Zap, Briefcase } from "lucide-react";
+import { Coins, Home, PlusCircle, FolderOpen, User, LogOut, Zap, Briefcase, Shield } from "lucide-react";
 import { getMyManagerScope } from "@/lib/manager.functions";
 
 export function AppHeader() {
