@@ -165,7 +165,7 @@ function SurveyPage() {
   // Load survey: authenticated users get full questions via RLS-scoped fetch;
   // anonymous viewers only see metadata (no questions) for the verify card.
   useEffect(() => {
-    if (isPreviewMode) { setLoading(false); return; }
+    
     let active = true;
     (async () => {
       try {
