@@ -61,7 +61,7 @@ function SwipePage() {
       setLoading(false);
     })();
     return () => { active = false; };
-  }, [user, isPreviewMode]);
+  }, [user]);
 
   const top = queue[0];
 
