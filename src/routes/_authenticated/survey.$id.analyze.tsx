@@ -146,7 +146,7 @@ export const Route = createFileRoute("/_authenticated/survey/$id/analyze")({
 
 function AnalyzePage() {
   const { id } = Route.useParams();
-  const { user, isPreviewMode } = useAuth();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [survey, setSurvey] = useState<Survey | null>(null);
   const [responses, setResponses] = useState<Response[]>([]);
