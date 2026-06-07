@@ -161,7 +161,7 @@ function AnalyzePage() {
   const promptUpgrade = (feature: string, description?: string) => setUpgradePrompt({ open: true, feature, description });
 
   useEffect(() => {
-    if (!user || isPreviewMode) { setLoading(false); return; }
+    if (!user) { setLoading(false); return; }
     let active = true;
     (async () => {
       const [{ data: s }, { data: r }] = await Promise.all([
