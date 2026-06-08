@@ -165,6 +165,33 @@ export const setUserAdminRole = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const grantAdminByEmail = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .inputValidator((d: unknown) =>
+    z.object({ email: z.string().email().max(254) }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    const email = data.email.trim().toLowerCase();
+    // Find the user by email via the Admin API.
+    let userId: string | null = null;
+    let page = 1;
+    while (page <= 20 && !userId) {
+      const { data: list, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 200 });
+      if (error) genericError(error);
+      const match = list.users.find((u) => (u.email ?? "").toLowerCase() === email);
+      if (match) { userId = match.id; break; }
+      if (list.users.length < 200) break;
+      page += 1;
+    }
+    if (!userId) throw new Error("No user with that email has signed up yet");
+    // Idempotent: ignore unique-constraint conflict.
+    const { error: insErr } = await supabaseAdmin
+      .from("user_roles")
+      .upsert({ user_id: userId, role: "admin" }, { onConflict: "user_id,role" });
+    if (insErr) genericError(insErr);
+    return { ok: true, userId };
+  });
+
 export const setUserManagerRole = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
   .inputValidator((d: unknown) =>

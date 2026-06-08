@@ -1,73 +1,50 @@
+## 1. Fix the password reset link
 
-## What we're building
+**Problem.** The reset email link opens `/reset-password` but the page is stuck on "Waiting for the reset link to validate…". Supabase now sends reset links as `?code=<pkce_code>` (PKCE flow) instead of the old `#access_token=...` hash, so our current page — which only listens for `onAuthStateChange` / `getSession()` — never sees a session.
 
-A new **manager** role you (owner/admin) can grant to faculty / department heads. Managers see every student in their university and, for every survey in that university, who responded and who didn't — by name, index number, and department. They never see answer content. You keep sole power to grant credits.
+**Fix.** In `src/routes/reset-password.tsx`:
+- Read `?code` from the URL search params on mount.
+- If present, call `supabase.auth.exchangeCodeForSession(code)`; on success mark `ready = true` and strip `code` from the URL.
+- Keep the existing `onAuthStateChange` / `getSession` fallback for hash-based links.
+- Show a clear error if the exchange fails ("Reset link expired or already used — request a new one") and link back to `/forgot-password`.
 
-## Database changes (one migration)
+No other files change.
 
-- Add `'manager'` to the `app_role` enum.
-- Add `profiles.index_number text` (nullable so existing accounts keep working; required for new student signups at the application layer). Add a partial unique index on `(university_domain, lower(index_number))` so two students in the same university can't share one.
-- Allow managers to update `index_number` and `department` on their own profile (existing `protect_profile_sensitive_columns` trigger already locks the sensitive ones — no change there).
-- Add a **manager visibility policy** on `profiles`: a user with `has_role(auth.uid(),'manager')` can `SELECT` profiles whose `university_domain = current_university_domain()` and `user_type='student'`. Admins continue to see all (via existing admin policies / server fns).
-- New SECURITY DEFINER function `get_university_survey_tracking(_survey_id uuid)` returns one row per student in the caller's university:
-  `{ student_id, full_name, index_number, department, responded_at | null }`.
-  Authorization inside the function: caller must be `admin` OR `manager` whose university matches the survey's `university_domain` (or the survey's `allow_general_respondents` survey is rejected — out of scope for tracking). It does **not** return answers.
-- New SECURITY DEFINER function `list_university_surveys()` returns surveys in the caller's university (id, title, response_count, response_goal, created_at, expires_at, creator name) for the manager dashboard.
+## 2. Admin claim — assign admin to a different email
 
-## Server functions (new file `src/lib/manager.functions.ts`)
+You chose "Assign admin to a different email". The current `/admin-setup` page only works when no admin exists, so it can't help you. I'll add an authenticated server flow that lets the current admin promote another user by email, and a migration to transfer the existing admin row to the email you provide.
 
-- `getMyManagerScope()` — returns whether the caller is a manager/admin and their `university_domain` + `university_name`.
-- `listUniversitySurveys()` — wraps `list_university_surveys()`.
-- `getSurveyTracking({ surveyId })` — wraps `get_university_survey_tracking`.
+**Step A — Tell me the target email.**
+Before I run anything, reply with the email address that should become the admin (the account must already exist — i.e. the person has signed up). Example: `you@yourschool.edu`.
 
-## Admin additions (`src/lib/admin.functions.ts` + Admin tab)
+**Step B — One-time migration (auto-generated once you give the email).**
+A single SQL migration that:
+- Looks up the user id for that email in `auth.users`.
+- Deletes the existing admin role row (`8cdee73e-…`, "Nana Afia…").
+- Inserts a new admin row for the target user id.
+- Wrapped in a transaction; fails loudly if the email isn't found.
 
-- `setUserManagerRole({ userId, grant })` — owner-only; mirrors the existing admin-role toggle.
-- New **Managers** tab in `/admin` listing every user with the manager role, plus an "Add manager" search-and-grant flow against existing users (we onboard by promoting an existing verified account — keeps the academic-email rule).
-- The existing `grantCreditsToUser` stays admin-only as you requested.
+**Step C — Ongoing admin onboarding (no more SQL needed after this).**
+Add a new server function `grantAdminByEmail(email)` in `src/lib/admin.functions.ts`:
+- Guarded by the existing `requireAdmin` middleware (only current admins can call it).
+- Uses `supabaseAdmin.auth.admin.listUsers()` (or `getUserByEmail`) to resolve the email to a user id.
+- Inserts `{ user_id, role: 'admin' }` into `public.user_roles` (idempotent).
+- Returns `{ ok: true }` or a sanitized error.
 
-## New manager route
+Surface it in the existing `/admin` page as a small "Promote user to admin" form (email input + button) in the Users section. The existing `setUserAdminRole` toggle (with sole-admin guard) stays as-is for revoking.
 
-`src/routes/_authenticated/manage.tsx` — visible only to managers/admins (gated by `getMyManagerScope`):
+## 3. Technical details
 
-```text
-┌─────────────────────────────────────────────┐
-│ Faculty dashboard — {university_name}       │
-│ {N students tracked}                        │
-├─────────────────────────────────────────────┤
-│ Survey                Responded   Goal      │
-│ Mental Health Q1      42 / 120    Open  →   │
-│ Internship Plans      88 / 200    Open  →   │
-└─────────────────────────────────────────────┘
-```
+**Files changed**
+- `src/routes/reset-password.tsx` — handle `?code=` PKCE exchange.
+- `src/lib/admin.functions.ts` — add `grantAdminByEmail` server fn.
+- `src/routes/_authenticated/admin.tsx` — add "Promote by email" UI in the users panel.
+- New migration: transfer admin role from current holder to the email you provide.
 
-Drill-in (`/manage/$surveyId`) shows two tabs — **Responded** and **Not yet responded** — each a searchable table of `name · index number · department · responded_at`. Export-to-CSV button on both. No answer data anywhere on the page.
+**Not changed**
+- `bootstrapFirstAdmin` and `/admin-setup` stay (still useful if all admins are ever removed).
+- Sole-admin guard in `setUserAdminRole` stays.
+- No auth or RLS changes; `user_roles` writes continue to go through service-role server functions only.
 
-## Signup form (`src/routes/signup.tsx`)
-
-- Add **Index / Student number** field, required when `user_type = 'student'`, validated `1–32` chars, alphanumeric + dash. Passed through `raw_user_meta_data.index_number` and persisted by extending `handle_new_user()` to read it.
-- Add an inline "Update your index number" prompt in `/profile` so existing students can backfill — uses a small `updateMyStudentInfo` server fn that only allows `index_number` + `department` writes.
-
-## Header / nav
-
-Add a **"Faculty"** link in `AppHeader` that's only shown when `getMyManagerScope().role !== 'none'`.
-
-## Security & privacy guarantees
-
-- Manager role is stored in `user_roles` and checked via `has_role`. No client can self-grant.
-- Tracking functions return identity + responded/not-responded only; answers (`answers` JSONB) are never selected.
-- Manager scope is derived server-side from their own `university_domain`; they cannot pass another domain in.
-- Credit granting remains admin-only.
-- The existing protected-columns trigger on `profiles` already blocks managers from changing `earned_credits`, `user_type`, `university_domain`, etc.
-
-## Files touched
-
-- New migration (enum + column + index + 2 functions + policy + `handle_new_user` patch).
-- New: `src/lib/manager.functions.ts`, `src/routes/_authenticated/manage.tsx`, `src/routes/_authenticated/manage.$surveyId.tsx`.
-- Edited: `src/lib/admin.functions.ts`, `src/routes/_authenticated/admin.tsx` (Managers tab), `src/routes/signup.tsx` (index field), `src/routes/_authenticated/profile.tsx` (backfill), `src/components/AppHeader.tsx` (Faculty link).
-
-## Out of scope (call out if you want them next)
-
-- Per-department restriction for managers (you chose university-wide).
-- Letting managers publish or grade surveys themselves.
-- Email invitations to onboard managers who don't yet have accounts.
+**Open question blocking step B**
+What email should become the new admin?

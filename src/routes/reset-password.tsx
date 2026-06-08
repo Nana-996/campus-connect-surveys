@@ -33,16 +33,31 @@ function ResetPasswordPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Supabase fires a PASSWORD_RECOVERY event once it hydrates the recovery session
-  // from the URL hash. Only then can we call updateUser.
+  // Reset links arrive in two shapes:
+  //  - PKCE (current Supabase default): ?code=<...> in the query string → exchange for a session.
+  //  - Legacy: #access_token=...&type=recovery in the hash → onAuthStateChange fires PASSWORD_RECOVERY.
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "PASSWORD_RECOVERY" || session) setReady(true);
     });
-    // also handle the case where the session is already established
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) setReady(true);
-    });
+
+    const url = new URL(window.location.href);
+    const code = url.searchParams.get("code");
+    if (code) {
+      supabase.auth.exchangeCodeForSession(code).then(({ error: exErr }) => {
+        if (exErr) {
+          setError("Reset link is invalid or has expired. Request a new one.");
+          return;
+        }
+        setReady(true);
+        url.searchParams.delete("code");
+        window.history.replaceState({}, "", url.pathname + (url.search ? url.search : "") + url.hash);
+      });
+    } else {
+      supabase.auth.getSession().then(({ data }) => {
+        if (data.session) setReady(true);
+      });
+    }
     return () => subscription.unsubscribe();
   }, []);
 
@@ -76,9 +91,9 @@ function ResetPasswordPage() {
       </p>
 
       {!ready ? (
-        <p className="mt-8 rounded-2xl border border-foreground/15 bg-card p-5 text-sm text-muted-foreground">
-          Waiting for the reset link to validate… If you opened this page directly,
-          request a new link from <Link to="/forgot-password" search={{ as: tab }} className="font-semibold underline text-foreground">Forgot password</Link>.
+        <p className={`mt-8 rounded-2xl border p-5 text-sm ${error ? "border-destructive/40 bg-destructive/10 text-destructive" : "border-foreground/15 bg-card text-muted-foreground"}`}>
+          {error ?? "Waiting for the reset link to validate…"} {" "}
+          Request a new link from <Link to="/forgot-password" search={{ as: tab }} className="font-semibold underline text-foreground">Forgot password</Link>.
         </p>
       ) : (
         <form onSubmit={submit} className="mt-8 space-y-4">
