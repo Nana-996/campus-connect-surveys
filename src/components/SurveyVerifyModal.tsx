@@ -244,6 +244,7 @@ export function SurveyVerifyModal({ open, onClose, onVerified, surveyTitle }: Pr
             Verified responses keep research credible.
           </p>
         </form>
+        )}
       </div>
     </div>
   );
