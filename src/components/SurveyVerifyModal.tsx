@@ -28,6 +28,7 @@ export function SurveyVerifyModal({ open, onClose, onVerified, surveyTitle }: Pr
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [signupSent, setSignupSent] = useState(false);
 
   // Lock body scroll while open
   useEffect(() => {
@@ -65,15 +66,24 @@ export function SurveyVerifyModal({ open, onClose, onVerified, surveyTitle }: Pr
     setSubmitting(true);
     try {
       if (mode === "signup") {
-        const { error: signUpError } = await supabase.auth.signUp({
+        // Send the verification email back to this exact survey URL so the
+        // respondent lands on the questions immediately after confirming.
+        const returnTo = typeof window !== "undefined" ? window.location.href : undefined;
+        const { data, error: signUpError } = await supabase.auth.signUp({
           email: parsed.data.email,
           password: parsed.data.password,
           options: {
-            emailRedirectTo: `${window.location.origin}/`,
+            emailRedirectTo: returnTo,
             data: { user_type: "general", full_name: "" },
           },
         });
         if (signUpError) throw signUpError;
+        // If email confirmation is required, no session is returned. Show the
+        // user a clear "check your inbox" state instead of silently closing.
+        if (!data.session) {
+          setSignupSent(true);
+          return;
+        }
         toast.success("Account created. You're in.");
       } else {
         await signIn(parsed.data.email, parsed.data.password);
@@ -130,6 +140,37 @@ export function SurveyVerifyModal({ open, onClose, onVerified, surveyTitle }: Pr
         </div>
 
         {/* Form */}
+        {signupSent ? (
+          <div className="space-y-4 px-6 py-6 text-center">
+            <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <ShieldCheck className="h-5 w-5" />
+            </div>
+            <h3 className="font-serif text-2xl">Check your inbox</h3>
+            <p className="text-sm text-muted-foreground">
+              We sent a verification link to <strong className="text-foreground">{email}</strong>.
+              Open it on this device — you'll come right back here to answer the survey.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              No email after a minute? Check spam, or{" "}
+              <button
+                type="button"
+                onClick={() => { setSignupSent(false); setMode("login"); setPassword(""); }}
+                className="font-semibold text-primary underline"
+              >
+                log in instead
+              </button>
+              .
+            </p>
+            <Button
+              type="button"
+              onClick={onClose}
+              variant="outline"
+              className="h-11 w-full rounded-full"
+            >
+              Close
+            </Button>
+          </div>
+        ) : (
         <form onSubmit={submit} className="space-y-4 px-6 py-6">
           <div className="space-y-1.5">
             <Label htmlFor="verify-email" className="text-xs font-bold uppercase tracking-wider">
@@ -203,6 +244,7 @@ export function SurveyVerifyModal({ open, onClose, onVerified, surveyTitle }: Pr
             Verified responses keep research credible.
           </p>
         </form>
+        )}
       </div>
     </div>
   );
