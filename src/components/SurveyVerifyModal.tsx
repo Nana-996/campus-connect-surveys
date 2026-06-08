@@ -28,6 +28,7 @@ export function SurveyVerifyModal({ open, onClose, onVerified, surveyTitle }: Pr
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [signupSent, setSignupSent] = useState(false);
 
   // Lock body scroll while open
   useEffect(() => {
