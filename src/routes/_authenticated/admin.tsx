@@ -192,6 +192,38 @@ function UsersPanel() {
   );
 }
 
+function PromoteAdminByEmail({ onDone }: { onDone: () => void }) {
+  const promote = useServerFn(grantAdminByEmail);
+  const [email, setEmail] = useState("");
+  const [busy, setBusy] = useState(false);
+  return (
+    <form
+      className="mb-4 flex flex-col gap-2 rounded-2xl border border-foreground/15 bg-card p-3 sm:flex-row sm:items-end"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        if (!email) return;
+        setBusy(true);
+        try {
+          await promote({ data: { email } });
+          toast.success(`${email} is now an admin`);
+          setEmail("");
+          onDone();
+        } catch (err: any) {
+          toast.error(err.message ?? "Could not promote user");
+        } finally {
+          setBusy(false);
+        }
+      }}
+    >
+      <div className="flex-1">
+        <Label htmlFor="promote-email" className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Promote user to admin by email</Label>
+        <Input id="promote-email" type="email" placeholder="person@school.edu" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 h-10 rounded-xl" />
+      </div>
+      <Button type="submit" disabled={busy || !email}><UserPlus className="mr-1 h-3 w-3" /> {busy ? "Promoting…" : "Make admin"}</Button>
+    </form>
+  );
+}
+
 // ---------------- Surveys ----------------
 function SurveysPanel() {
   const qc = useQueryClient();
