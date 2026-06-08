@@ -66,15 +66,24 @@ export function SurveyVerifyModal({ open, onClose, onVerified, surveyTitle }: Pr
     setSubmitting(true);
     try {
       if (mode === "signup") {
-        const { error: signUpError } = await supabase.auth.signUp({
+        // Send the verification email back to this exact survey URL so the
+        // respondent lands on the questions immediately after confirming.
+        const returnTo = typeof window !== "undefined" ? window.location.href : undefined;
+        const { data, error: signUpError } = await supabase.auth.signUp({
           email: parsed.data.email,
           password: parsed.data.password,
           options: {
-            emailRedirectTo: `${window.location.origin}/`,
+            emailRedirectTo: returnTo,
             data: { user_type: "general", full_name: "" },
           },
         });
         if (signUpError) throw signUpError;
+        // If email confirmation is required, no session is returned. Show the
+        // user a clear "check your inbox" state instead of silently closing.
+        if (!data.session) {
+          setSignupSent(true);
+          return;
+        }
         toast.success("Account created. You're in.");
       } else {
         await signIn(parsed.data.email, parsed.data.password);
