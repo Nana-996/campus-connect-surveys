@@ -50,8 +50,10 @@ function ResetPasswordPage() {
           return;
         }
         setReady(true);
+        // Clean up the code parameter while preserving other query params (like 'as')
         url.searchParams.delete("code");
-        window.history.replaceState({}, "", url.pathname + (url.search ? url.search : "") + url.hash);
+        const newUrl = url.pathname + (url.search ? url.search : "") + url.hash;
+        window.history.replaceState({}, "", newUrl);
       });
     } else {
       supabase.auth.getSession().then(({ data }) => {
