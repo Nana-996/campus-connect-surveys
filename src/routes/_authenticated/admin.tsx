@@ -111,6 +111,7 @@ function UsersPanel() {
 
   return (
     <div>
+      <PromoteAdminByEmail onDone={refresh} />
       <div className="mb-3 flex gap-2">
         <Input placeholder="Search name, university, domain…" value={search} onChange={(e) => setSearch(e.target.value)} className="h-10 rounded-xl" />
       </div>
