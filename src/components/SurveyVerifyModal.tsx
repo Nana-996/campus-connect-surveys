@@ -140,6 +140,37 @@ export function SurveyVerifyModal({ open, onClose, onVerified, surveyTitle }: Pr
         </div>
 
         {/* Form */}
+        {signupSent ? (
+          <div className="space-y-4 px-6 py-6 text-center">
+            <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <ShieldCheck className="h-5 w-5" />
+            </div>
+            <h3 className="font-serif text-2xl">Check your inbox</h3>
+            <p className="text-sm text-muted-foreground">
+              We sent a verification link to <strong className="text-foreground">{email}</strong>.
+              Open it on this device — you'll come right back here to answer the survey.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              No email after a minute? Check spam, or{" "}
+              <button
+                type="button"
+                onClick={() => { setSignupSent(false); setMode("login"); setPassword(""); }}
+                className="font-semibold text-primary underline"
+              >
+                log in instead
+              </button>
+              .
+            </p>
+            <Button
+              type="button"
+              onClick={onClose}
+              variant="outline"
+              className="h-11 w-full rounded-full"
+            >
+              Close
+            </Button>
+          </div>
+        ) : (
         <form onSubmit={submit} className="space-y-4 px-6 py-6">
           <div className="space-y-1.5">
             <Label htmlFor="verify-email" className="text-xs font-bold uppercase tracking-wider">
