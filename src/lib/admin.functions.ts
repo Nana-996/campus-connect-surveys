@@ -192,7 +192,7 @@ export const grantAdminByEmail = createServerFn({ method: "POST" })
     return { ok: true, userId };
   });
 
-
+export const setUserManagerRole = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
   .inputValidator((d: unknown) =>
     z.object({ userId: z.string().uuid(), grant: z.boolean() }).parse(d),
