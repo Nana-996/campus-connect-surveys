@@ -33,16 +33,31 @@ function ResetPasswordPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Supabase fires a PASSWORD_RECOVERY event once it hydrates the recovery session
-  // from the URL hash. Only then can we call updateUser.
+  // Reset links arrive in two shapes:
+  //  - PKCE (current Supabase default): ?code=<...> in the query string → exchange for a session.
+  //  - Legacy: #access_token=...&type=recovery in the hash → onAuthStateChange fires PASSWORD_RECOVERY.
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "PASSWORD_RECOVERY" || session) setReady(true);
     });
-    // also handle the case where the session is already established
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) setReady(true);
-    });
+
+    const url = new URL(window.location.href);
+    const code = url.searchParams.get("code");
+    if (code) {
+      supabase.auth.exchangeCodeForSession(code).then(({ error: exErr }) => {
+        if (exErr) {
+          setError("Reset link is invalid or has expired. Request a new one.");
+          return;
+        }
+        setReady(true);
+        url.searchParams.delete("code");
+        window.history.replaceState({}, "", url.pathname + (url.search ? url.search : "") + url.hash);
+      });
+    } else {
+      supabase.auth.getSession().then(({ data }) => {
+        if (data.session) setReady(true);
+      });
+    }
     return () => subscription.unsubscribe();
   }, []);
 
