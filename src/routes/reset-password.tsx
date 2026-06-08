@@ -91,9 +91,9 @@ function ResetPasswordPage() {
       </p>
 
       {!ready ? (
-        <p className="mt-8 rounded-2xl border border-foreground/15 bg-card p-5 text-sm text-muted-foreground">
-          Waiting for the reset link to validate… If you opened this page directly,
-          request a new link from <Link to="/forgot-password" search={{ as: tab }} className="font-semibold underline text-foreground">Forgot password</Link>.
+        <p className={`mt-8 rounded-2xl border p-5 text-sm ${error ? "border-destructive/40 bg-destructive/10 text-destructive" : "border-foreground/15 bg-card text-muted-foreground"}`}>
+          {error ?? "Waiting for the reset link to validate…"} {" "}
+          Request a new link from <Link to="/forgot-password" search={{ as: tab }} className="font-semibold underline text-foreground">Forgot password</Link>.
         </p>
       ) : (
         <form onSubmit={submit} className="mt-8 space-y-4">
