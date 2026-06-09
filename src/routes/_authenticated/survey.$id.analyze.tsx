@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { getOwnerSurveyResults } from "@/lib/survey-owner.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -147,6 +149,7 @@ export const Route = createFileRoute("/_authenticated/survey/$id/analyze")({
 function AnalyzePage() {
   const { id } = Route.useParams();
   const { user } = useAuth();
+  const fetchOwnerResults = useServerFn(getOwnerSurveyResults);
   const [loading, setLoading] = useState(true);
   const [survey, setSurvey] = useState<Survey | null>(null);
   const [responses, setResponses] = useState<Response[]>([]);
@@ -164,40 +167,22 @@ function AnalyzePage() {
     if (!user) { setLoading(false); return; }
     let active = true;
     (async () => {
-      const [{ data: s }, { data: r }] = await Promise.all([
-        supabase.from("surveys").select("*").eq("id", id).maybeSingle(),
-        supabase.from("survey_responses").select("*").eq("survey_id", id).order("created_at", { ascending: false }),
-      ]);
+      const ownerData = await fetchOwnerResults({ data: { surveyId: id } });
       if (!active) return;
-      if (!s || s.creator_id !== user.id) { setLoading(false); return; }
-      setSurvey(s as unknown as Survey);
-      const resps = (r as unknown as Response[]) ?? [];
+      if (!ownerData.survey) { setLoading(false); return; }
+      setSurvey(ownerData.survey as unknown as Survey);
+      const resps = (ownerData.responses as unknown as Response[]) ?? [];
       setResponses(resps);
 
-      // Pull demographic info for filters via the safe campus_directory view
-      const ids = Array.from(new Set(resps.map((x) => x.respondent_id)));
-      if (ids.length) {
-        const { data: profs } = await supabase
-          .from("campus_directory" as any)
-          .select("id, full_name, department, year, country, age_range, university_name")
-          .in("id", ids);
-        if (!active) return;
-        const map: Record<string, Profile> = {};
-        ((profs as any) ?? []).forEach((pr: Profile) => { map[pr.id] = pr; });
-        setProfileMap(map);
-      }
-
-      const [{ data: vs }, { data: ts }] = await Promise.all([
-        supabase.from("survey_report_views" as any).select("*").eq("survey_id", id).order("created_at", { ascending: false }),
-        supabase.from("survey_share_tokens" as any).select("*").eq("survey_id", id).order("created_at", { ascending: false }),
-      ]);
-      if (!active) return;
-      setSavedViews((vs as any) ?? []);
-      setShareTokens((ts as any) ?? []);
+      const map: Record<string, Profile> = {};
+      ((ownerData.profiles as unknown as Profile[]) ?? []).forEach((pr) => { map[pr.id] = pr; });
+      setProfileMap(map);
+      setSavedViews((ownerData.savedViews as any) ?? []);
+      setShareTokens((ownerData.shareTokens as any) ?? []);
       setLoading(false);
     })();
     return () => { active = false; };
-  }, [id, user]);
+  }, [id, user, fetchOwnerResults]);
 
   const isPremium = useMemo(() => {
     // Premium features are free for now — all signed-in creators get full access.
@@ -317,7 +302,9 @@ function AnalyzePage() {
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = `${survey.title.replace(/\s+/g, "_")}_responses.csv`;
+    document.body.appendChild(a);
     a.click();
+    a.remove();
     URL.revokeObjectURL(a.href);
   };
 
