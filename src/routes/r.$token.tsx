@@ -40,7 +40,12 @@ function SharedDashboard() {
     (async () => {
       const { data: d, error: err } = await supabase.rpc("get_shared_dashboard" as any, { _token: token });
       if (!active) return;
-      if (err) { setError(err.message); setLoading(false); return; }
+      if (err) {
+        console.error("[shared-dashboard]", err.message);
+        setError("This dashboard link is invalid, expired, or revoked.");
+        setLoading(false);
+        return;
+      }
       if (!d) { setError("This dashboard link is invalid, expired, or revoked."); setLoading(false); return; }
       setData(d as unknown as Shared);
       setLoading(false);

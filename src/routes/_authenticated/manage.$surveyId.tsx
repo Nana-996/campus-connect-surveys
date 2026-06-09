@@ -10,12 +10,15 @@ import { getMyManagerScope, getSurveyTracking } from "@/lib/manager.functions";
 
 export const Route = createFileRoute("/_authenticated/manage/$surveyId")({
   component: ManageSurveyPage,
-  errorComponent: ({ error }) => (
-    <div className="rounded-3xl border border-foreground/15 bg-card p-8 text-center">
-      <p className="font-serif text-2xl">Cannot load tracking</p>
-      <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
-    </div>
-  ),
+  errorComponent: ({ error }) => {
+    console.error("[manage-survey]", error);
+    return (
+      <div className="rounded-3xl border border-foreground/15 bg-card p-8 text-center">
+        <p className="font-serif text-2xl">Cannot load tracking</p>
+        <p className="mt-2 text-sm text-muted-foreground">Something went wrong loading this survey. Please try again or contact support.</p>
+      </div>
+    );
+  },
   notFoundComponent: () => <p className="text-muted-foreground">Survey not found.</p>,
 });
 
