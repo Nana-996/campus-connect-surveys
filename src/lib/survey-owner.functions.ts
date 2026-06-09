@@ -38,12 +38,12 @@ export const getOwnerSurveyResults = createServerFn({ method: "GET" })
         .select("question_id, chart_type")
         .eq("survey_id", data.surveyId),
       supabaseAdmin
-        .from("survey_report_views")
+        .from("survey_report_views" as any)
         .select("id, survey_id, creator_id, name, config, created_at")
         .eq("survey_id", data.surveyId)
         .order("created_at", { ascending: false }),
       supabaseAdmin
-        .from("survey_share_tokens")
+        .from("survey_share_tokens" as any)
         .select("id, survey_id, creator_id, token, expires_at, revoked, created_at")
         .eq("survey_id", data.surveyId)
         .order("created_at", { ascending: false }),
