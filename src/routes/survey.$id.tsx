@@ -22,6 +22,7 @@ import {
 import { SurveyVerifyModal } from "@/components/SurveyVerifyModal";
 import { AppHeader } from "@/components/AppHeader";
 import { getSurveyPublic, getSurveyForRespondent } from "@/lib/survey-public.functions";
+import { getOwnerSurveyResults } from "@/lib/survey-owner.functions";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
   PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, RadarChart, Radar,
@@ -95,6 +96,7 @@ function SurveyPage() {
   const navigate = useNavigate();
   const fetchPublic = useServerFn(getSurveyPublic);
   const fetchAuthed = useServerFn(getSurveyForRespondent);
+  const fetchOwnerResults = useServerFn(getOwnerSurveyResults);
   const [survey, setSurvey] = useState<Survey | null>(null);
   const [ownerName, setOwnerName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -198,14 +200,11 @@ function SurveyPage() {
     let active = true;
     (async () => {
       if (survey.creator_id === user.id) {
-        const [{ data: r }, { data: viz }] = await Promise.all([
-          supabase.from("survey_responses").select("*").eq("survey_id", id).order("created_at", { ascending: false }),
-          supabase.from("survey_visualizations").select("question_id, chart_type").eq("survey_id", id),
-        ]);
+        const ownerData = await fetchOwnerResults({ data: { surveyId: id } });
         if (!active) return;
-        setResponses(r ?? []);
+        setResponses(ownerData.responses ?? []);
         const map: Record<string, ChartType> = {};
-        (viz ?? []).forEach((v: any) => { map[v.question_id] = v.chart_type as ChartType; });
+        (ownerData.visualizations ?? []).forEach((v: any) => { map[v.question_id] = v.chart_type as ChartType; });
         setChartTypes(map);
       } else {
         const { data: own } = await supabase.from("survey_responses").select("id").eq("survey_id", id).eq("respondent_id", user.id).maybeSingle();
@@ -220,7 +219,7 @@ function SurveyPage() {
       }
     })();
     return () => { active = false; };
-  }, [id, user, survey]);
+  }, [id, user, survey, fetchOwnerResults]);
 
   const setChartType = async (questionId: string, type: ChartType) => {
     setChartTypes((m) => ({ ...m, [questionId]: type }));
@@ -298,7 +297,9 @@ function SurveyPage() {
     const a = document.createElement("a");
     a.href = url;
     a.download = `${survey.title.replace(/\s+/g, "_")}.csv`;
+    document.body.appendChild(a);
     a.click();
+    a.remove();
     URL.revokeObjectURL(url);
   };
 
