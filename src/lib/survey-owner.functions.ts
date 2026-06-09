@@ -22,7 +22,12 @@ export const getOwnerSurveyResults = createServerFn({ method: "GET" })
       return { survey: null, responses: [], profiles: [], visualizations: [] };
     }
 
-    const [{ data: responses, error: responseError }, { data: visualizations, error: vizError }] = await Promise.all([
+    const [
+      { data: responses, error: responseError },
+      { data: visualizations, error: vizError },
+      { data: savedViews, error: savedViewsError },
+      { data: shareTokens, error: shareTokensError },
+    ] = await Promise.all([
       supabaseAdmin
         .from("survey_responses")
         .select("id, survey_id, respondent_id, answers, created_at, duration_ms")
@@ -32,8 +37,18 @@ export const getOwnerSurveyResults = createServerFn({ method: "GET" })
         .from("survey_visualizations")
         .select("question_id, chart_type")
         .eq("survey_id", data.surveyId),
+      supabaseAdmin
+        .from("survey_report_views")
+        .select("id, survey_id, creator_id, name, config, created_at")
+        .eq("survey_id", data.surveyId)
+        .order("created_at", { ascending: false }),
+      supabaseAdmin
+        .from("survey_share_tokens")
+        .select("id, survey_id, creator_id, token, expires_at, revoked, created_at")
+        .eq("survey_id", data.surveyId)
+        .order("created_at", { ascending: false }),
     ]);
-    if (responseError || vizError) throw new Error("Could not load survey responses");
+    if (responseError || vizError || savedViewsError || shareTokensError) throw new Error("Could not load survey responses");
 
     const respondentIds = Array.from(new Set((responses ?? []).map((r) => r.respondent_id)));
     const { data: profiles, error: profileError } = respondentIds.length
@@ -49,5 +64,7 @@ export const getOwnerSurveyResults = createServerFn({ method: "GET" })
       responses: responses ?? [],
       profiles: (profiles ?? []).map((p) => ({ ...p, full_name: "" })),
       visualizations: visualizations ?? [],
+      savedViews: savedViews ?? [],
+      shareTokens: shareTokens ?? [],
     };
   });
