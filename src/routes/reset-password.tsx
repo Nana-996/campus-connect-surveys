@@ -34,17 +34,52 @@ function ResetPasswordPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Reset links can arrive as ?code=..., ?token_hash=...&type=recovery,
-  // or legacy #access_token=...&refresh_token=... hashes. Accept all of them.
+  // Supabase auto-processes recovery links (PKCE ?code= and implicit
+  // #access_token=...) via detectSessionInUrl. We listen for the resulting
+  // session/event, and only fall back to a manual exchange when auto-detection
+  // didn't fire (e.g. token_hash style links).
   useEffect(() => {
     let cancelled = false;
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "PASSWORD_RECOVERY" || session) setReady(true);
+      console.log("[reset-password] auth event", event, !!session);
+      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN" || session) {
+        if (cancelled) return;
+        setReady(true);
+        setError(null);
+      }
     });
+
+    const cleanUrl = (url: URL) => {
+      url.searchParams.delete("code");
+      url.searchParams.delete("token_hash");
+      url.searchParams.delete("type");
+      url.hash = "";
+      window.history.replaceState({}, "", url.pathname + (url.search || ""));
+    };
 
     const validateLink = async () => {
       const url = new URL(window.location.href);
       const hash = new URLSearchParams(url.hash.replace(/^#/, ""));
+
+      // Surface error returns from the email link (e.g. expired, otp_invalid).
+      const errParam = url.searchParams.get("error_description") ?? hash.get("error_description")
+        ?? url.searchParams.get("error") ?? hash.get("error");
+      if (errParam) {
+        console.error("[reset-password] link error", errParam);
+        if (!cancelled) setError(decodeURIComponent(errParam.replace(/\+/g, " ")));
+        return;
+      }
+
+      // Let Supabase's detectSessionInUrl run first.
+      await new Promise((r) => setTimeout(r, 100));
+      const { data: existing } = await supabase.auth.getSession();
+      if (existing.session) {
+        if (cancelled) return;
+        setReady(true);
+        cleanUrl(url);
+        return;
+      }
+
       const code = url.searchParams.get("code") ?? hash.get("code");
       const tokenHash = url.searchParams.get("token_hash") ?? hash.get("token_hash");
       const type = (url.searchParams.get("type") ?? hash.get("type") ?? "recovery") as EmailOtpType;
@@ -62,18 +97,14 @@ function ResetPasswordPage() {
           const { error: sessionErr } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
           if (sessionErr) throw sessionErr;
         } else {
-          const { data } = await supabase.auth.getSession();
-          if (!data.session) throw new Error("No reset session found");
+          throw new Error("This page expects a reset link from your email. Request a new one.");
         }
         if (cancelled) return;
         setReady(true);
-        url.searchParams.delete("code");
-        url.searchParams.delete("token_hash");
-        url.searchParams.delete("type");
-        window.history.replaceState({}, "", url.pathname + (url.search ? url.search : ""));
-      } catch (err) {
-        console.error("[reset-password]", err);
-        if (!cancelled) setError("Reset link is invalid or has expired. Request a new one.");
+        cleanUrl(url);
+      } catch (err: any) {
+        console.error("[reset-password] validate failed", err);
+        if (!cancelled) setError(err?.message ?? "Reset link is invalid or has expired. Request a new one.");
       }
     };
     validateLink();

@@ -200,12 +200,17 @@ function SurveyPage() {
     let active = true;
     (async () => {
       if (survey.creator_id === user.id) {
-        const ownerData = await fetchOwnerResults({ data: { surveyId: id } });
-        if (!active) return;
-        setResponses(ownerData.responses ?? []);
-        const map: Record<string, ChartType> = {};
-        (ownerData.visualizations ?? []).forEach((v: any) => { map[v.question_id] = v.chart_type as ChartType; });
-        setChartTypes(map);
+        try {
+          const ownerData = await fetchOwnerResults({ data: { surveyId: id } });
+          if (!active) return;
+          setResponses(ownerData.responses ?? []);
+          const map: Record<string, ChartType> = {};
+          (ownerData.visualizations ?? []).forEach((v: any) => { map[v.question_id] = v.chart_type as ChartType; });
+          setChartTypes(map);
+        } catch (err: any) {
+          console.error("[survey owner results] load failed", err);
+          toast.error(err?.message ?? "Couldn't load responses. Try refreshing.");
+        }
       } else {
         const { data: own } = await supabase.from("survey_responses").select("id").eq("survey_id", id).eq("respondent_id", user.id).maybeSingle();
         if (!active) return;

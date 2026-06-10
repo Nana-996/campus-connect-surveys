@@ -167,19 +167,25 @@ function AnalyzePage() {
     if (!user) { setLoading(false); return; }
     let active = true;
     (async () => {
-      const ownerData = await fetchOwnerResults({ data: { surveyId: id } });
-      if (!active) return;
-      if (!ownerData.survey) { setLoading(false); return; }
-      setSurvey(ownerData.survey as unknown as Survey);
-      const resps = (ownerData.responses as unknown as Response[]) ?? [];
-      setResponses(resps);
+      try {
+        const ownerData = await fetchOwnerResults({ data: { surveyId: id } });
+        if (!active) return;
+        if (!ownerData.survey) { setLoading(false); return; }
+        setSurvey(ownerData.survey as unknown as Survey);
+        const resps = (ownerData.responses as unknown as Response[]) ?? [];
+        setResponses(resps);
 
-      const map: Record<string, Profile> = {};
-      ((ownerData.profiles as unknown as Profile[]) ?? []).forEach((pr) => { map[pr.id] = pr; });
-      setProfileMap(map);
-      setSavedViews((ownerData.savedViews as any) ?? []);
-      setShareTokens((ownerData.shareTokens as any) ?? []);
-      setLoading(false);
+        const map: Record<string, Profile> = {};
+        ((ownerData.profiles as unknown as Profile[]) ?? []).forEach((pr) => { map[pr.id] = pr; });
+        setProfileMap(map);
+        setSavedViews((ownerData.savedViews as any) ?? []);
+        setShareTokens((ownerData.shareTokens as any) ?? []);
+      } catch (err: any) {
+        console.error("[analyze] load failed", err);
+        toast.error(err?.message ?? "Couldn't load survey results.");
+      } finally {
+        if (active) setLoading(false);
+      }
     })();
     return () => { active = false; };
   }, [id, user, fetchOwnerResults]);
