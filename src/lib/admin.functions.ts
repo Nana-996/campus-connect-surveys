@@ -290,3 +290,10 @@ export const resolveFlag = createServerFn({ method: "POST" })
     if (error) genericError(error);
     return { ok: true };
   });
+
+export const checkAdminExists = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const { data, error } = await supabaseAdmin.rpc("admin_exists");
+    if (error) genericError(error);
+    return { exists: !!data };
+  });
