@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
-import { bootstrapFirstAdmin } from "@/lib/admin.functions";
+import { bootstrapFirstAdmin, checkAdminExists } from "@/lib/admin.functions";
 import { Shield, ArrowRight, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 
@@ -22,16 +22,12 @@ function AdminSetupPage() {
   const navigate = useNavigate();
   const bootstrap = useServerFn(bootstrapFirstAdmin);
 
+  const checkExists = useServerFn(checkAdminExists);
   const { data: hasAdmin, isLoading: checking } = useQuery({
     queryKey: ["admin-setup", "check"],
     queryFn: async () => {
-      try {
-        await bootstrap();
-        return false; // succeeded → no admin existed before
-      } catch (e: any) {
-        if (e.message?.includes("already exists")) return true;
-        throw e;
-      }
+      const res = await checkExists();
+      return res.exists;
     },
     retry: false,
     enabled: !loading && !!user,

@@ -556,6 +556,7 @@ export type Database = {
       }
     }
     Functions: {
+      admin_exists: { Args: never; Returns: boolean }
       begin_survey_response: { Args: { _survey_id: string }; Returns: string }
       current_age_range: { Args: never; Returns: string }
       current_country: { Args: never; Returns: string }
