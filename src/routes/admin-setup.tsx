@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
-import { bootstrapFirstAdmin } from "@/lib/admin.functions";
+import { bootstrapFirstAdmin, checkAdminExists } from "@/lib/admin.functions";
 import { Shield, ArrowRight, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 
