@@ -49,7 +49,36 @@ function ManagePage() {
         </p>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-foreground/15 bg-card">
+      {/* Mobile: card list (Track always visible) */}
+      <ul className="space-y-3 md:hidden">
+        {surveys.length === 0 && (
+          <li className="rounded-2xl border border-foreground/15 bg-card p-6 text-center text-muted-foreground">
+            No surveys in your university yet.
+          </li>
+        )}
+        {surveys.map((s) => (
+          <li key={s.id} className="rounded-2xl border border-foreground/15 bg-card p-4">
+            <p className="font-serif text-lg leading-tight">{s.title}</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">{s.creator_name}</p>
+            <div className="mt-2 flex items-center justify-between text-xs">
+              <span>{s.response_count}/{s.response_goal} responses</span>
+              <span className={s.is_active ? "text-primary font-semibold" : "text-muted-foreground"}>
+                {s.is_active ? "Active" : "Inactive"}
+              </span>
+            </div>
+            <Link
+              to="/manage/$surveyId"
+              params={{ surveyId: s.id }}
+              className="mt-3 inline-flex w-full items-center justify-center gap-1 rounded-full bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"
+            >
+              Track <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </li>
+        ))}
+      </ul>
+
+      {/* Desktop: table */}
+      <div className="hidden md:block overflow-x-auto rounded-2xl border border-foreground/15 bg-card">
         <table className="w-full text-sm">
           <thead className="bg-secondary text-left text-xs uppercase tracking-wider">
             <tr>
