@@ -566,6 +566,23 @@ export type Database = {
       current_year: { Args: never; Returns: string }
       expire_earned_credits: { Args: never; Returns: undefined }
       get_shared_dashboard: { Args: { _token: string }; Returns: Json }
+      get_survey_responses_for_manager: {
+        Args: { _survey_id: string }
+        Returns: {
+          answers: Json
+          created_at: string
+          department: string
+          duration_ms: number
+          full_name: string
+          index_number: string
+          is_identified: boolean
+          quality_score: number
+          respondent_label: string
+          response_id: string
+          user_type: string
+          year: string
+        }[]
+      }
       get_survey_share_card: { Args: { _survey_id: string }; Returns: Json }
       get_university_survey_tracking: {
         Args: { _survey_id: string }
