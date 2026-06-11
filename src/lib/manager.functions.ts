@@ -46,6 +46,43 @@ export const getSurveyTracking = createServerFn({ method: "POST" })
     }>;
   });
 
+export const getSurveyResponsesForManager = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ surveyId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: rows, error } = await context.supabase.rpc("get_survey_responses_for_manager", { _survey_id: data.surveyId });
+    if (error) throw new Error(error.message);
+    return (rows ?? []) as Array<{
+      response_id: string;
+      created_at: string;
+      duration_ms: number | null;
+      quality_score: number | null;
+      answers: Record<string, string>;
+      is_identified: boolean;
+      respondent_label: string;
+      full_name: string | null;
+      index_number: string | null;
+      department: string | null;
+      year: string | null;
+      user_type: string | null;
+    }>;
+  });
+
+export const getSurveyQuestionsForManager = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ surveyId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: row, error } = await context.supabase
+      .from("surveys")
+      .select("id,title,questions")
+      .eq("id", data.surveyId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return row as { id: string; title: string; questions: Array<{ id: string; text: string; type: string; options?: string[] }> } | null;
+  });
+
+
+
 export const updateMyStudentInfo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
