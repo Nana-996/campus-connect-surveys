@@ -6,7 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download, CheckCircle2, Circle } from "lucide-react";
-import { getMyManagerScope, getSurveyTracking } from "@/lib/manager.functions";
+import { getMyManagerScope, getSurveyTracking, getSurveyResponsesForManager, getSurveyQuestionsForManager } from "@/lib/manager.functions";
+import { MessageSquare } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/manage/$surveyId")({
   component: ManageSurveyPage,
@@ -35,6 +36,8 @@ function ManageSurveyPage() {
   const { surveyId } = Route.useParams();
   const fetchScope = useServerFn(getMyManagerScope);
   const fetchTracking = useServerFn(getSurveyTracking);
+  const fetchResponses = useServerFn(getSurveyResponsesForManager);
+  const fetchQuestions = useServerFn(getSurveyQuestionsForManager);
   const { data: scope } = useQuery({ queryKey: ["mgr", "scope"], queryFn: () => fetchScope(), retry: false });
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["mgr", "tracking", surveyId],
@@ -42,6 +45,19 @@ function ManageSurveyPage() {
     enabled: !!scope?.canAccess,
     retry: false,
   });
+  const { data: responses = [] } = useQuery({
+    queryKey: ["mgr", "responses", surveyId],
+    queryFn: () => fetchResponses({ data: { surveyId } }),
+    enabled: !!scope?.canAccess,
+    retry: false,
+  });
+  const { data: surveyMeta } = useQuery({
+    queryKey: ["mgr", "questions", surveyId],
+    queryFn: () => fetchQuestions({ data: { surveyId } }),
+    enabled: !!scope?.canAccess,
+    retry: false,
+  });
+  const questions = surveyMeta?.questions ?? [];
 
   const [q, setQ] = useState("");
   const filtered = useMemo(() => {
@@ -106,8 +122,11 @@ function ManageSurveyPage() {
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Loading students…</p>
       ) : (
-        <Tabs defaultValue="responded">
+        <Tabs defaultValue="responses">
           <TabsList>
+            <TabsTrigger value="responses">
+              <MessageSquare className="mr-1 h-3 w-3" /> Responses · {responses.length}
+            </TabsTrigger>
             <TabsTrigger value="responded">
               <CheckCircle2 className="mr-1 h-3 w-3" /> Responded · {responded.length}
             </TabsTrigger>
@@ -115,6 +134,45 @@ function ManageSurveyPage() {
               <Circle className="mr-1 h-3 w-3" /> Pending · {pending.length}
             </TabsTrigger>
           </TabsList>
+          <TabsContent value="responses" className="mt-4">
+            <ResponsesList responses={responses} questions={questions} />
+            <div className="mt-3 flex justify-end">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  const header = ["respondent", "type", "index_number", "department", "year", "submitted_at", ...questions.map((q) => q.text)];
+                  const lines = [header.join(",")].concat(
+                    responses.map((r) =>
+                      [
+                        r.respondent_label,
+                        r.user_type ?? "",
+                        r.index_number ?? "",
+                        r.department ?? "",
+                        r.year ?? "",
+                        r.created_at,
+                        ...questions.map((q) => r.answers?.[q.id] ?? ""),
+                      ]
+                        .map((v) => {
+                          const s = String(v ?? "").replace(/"/g, '""');
+                          return /[",\n]/.test(s) ? `"${s}"` : s;
+                        })
+                        .join(","),
+                    ),
+                  );
+                  const blob = new Blob([lines.join("\n")], { type: "text/csv" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = `responses-${surveyId.slice(0, 8)}.csv`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }}
+              >
+                <Download className="mr-1 h-3 w-3" /> Export responses CSV
+              </Button>
+            </div>
+          </TabsContent>
           <TabsContent value="responded" className="mt-4">
             <StudentTable rows={responded} showRespondedAt />
             <div className="mt-3 flex justify-end">
@@ -136,6 +194,63 @@ function ManageSurveyPage() {
     </div>
   );
 }
+
+function ResponsesList({
+  responses,
+  questions,
+}: {
+  responses: Array<{
+    response_id: string;
+    created_at: string;
+    quality_score: number | null;
+    duration_ms: number | null;
+    answers: Record<string, string>;
+    is_identified: boolean;
+    respondent_label: string;
+    full_name: string | null;
+    index_number: string | null;
+    department: string | null;
+    year: string | null;
+    user_type: string | null;
+  }>;
+  questions: Array<{ id: string; text: string; type: string }>;
+}) {
+  if (responses.length === 0) {
+    return <p className="rounded-2xl border border-foreground/15 bg-card p-6 text-center text-sm text-muted-foreground">No responses yet.</p>;
+  }
+  return (
+    <div className="space-y-3">
+      {responses.map((r) => (
+        <details key={r.response_id} className="group rounded-2xl border border-foreground/15 bg-card p-4 open:shadow-sm">
+          <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-2 text-sm">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-semibold">{r.respondent_label}</span>
+              {r.is_identified ? (
+                <>
+                  {r.index_number && <span className="rounded-full bg-secondary px-2 py-0.5 font-mono text-[10px]">{r.index_number}</span>}
+                  {r.department && <span className="text-xs text-muted-foreground">{r.department}</span>}
+                  {r.year && <span className="text-xs text-muted-foreground">· {r.year}</span>}
+                </>
+              ) : (
+                <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">Anonymous</span>
+              )}
+            </div>
+            <span className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString()}</span>
+          </summary>
+          <div className="mt-4 space-y-3 border-t border-foreground/10 pt-3">
+            {questions.map((q) => (
+              <div key={q.id}>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{q.text}</p>
+                <p className="mt-0.5 whitespace-pre-wrap text-sm">{r.answers?.[q.id] || <span className="text-muted-foreground">—</span>}</p>
+              </div>
+            ))}
+          </div>
+        </details>
+      ))}
+    </div>
+  );
+}
+
 
 function StudentTable({ rows, showRespondedAt }: { rows: Row[]; showRespondedAt?: boolean }) {
   return (
