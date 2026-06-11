@@ -142,6 +142,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => sub.subscription.unsubscribe();
   }, []);
 
+  // Live-sync profile so admin credit grants & trigger updates appear immediately.
+  useEffect(() => {
+    const uid = session?.user?.id;
+    if (!uid) return;
+    const channel = supabase
+      .channel(`profile-${uid}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${uid}` },
+        (payload) => {
+          setProfile((prev) => (prev ? { ...prev, ...(payload.new as Partial<Profile>) } : (payload.new as Profile)));
+        },
+      )
+      .subscribe();
+    const onFocus = () => {
+      if (session?.user) loadProfile(session.user).catch(() => {});
+    };
+    window.addEventListener("focus", onFocus);
+    return () => {
+      supabase.removeChannel(channel);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [session?.user?.id]);
+
   const value: AuthCtx = {
     user: session?.user ?? null,
     session,
