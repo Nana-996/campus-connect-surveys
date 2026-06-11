@@ -36,6 +36,8 @@ function ManageSurveyPage() {
   const { surveyId } = Route.useParams();
   const fetchScope = useServerFn(getMyManagerScope);
   const fetchTracking = useServerFn(getSurveyTracking);
+  const fetchResponses = useServerFn(getSurveyResponsesForManager);
+  const fetchQuestions = useServerFn(getSurveyQuestionsForManager);
   const { data: scope } = useQuery({ queryKey: ["mgr", "scope"], queryFn: () => fetchScope(), retry: false });
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["mgr", "tracking", surveyId],
@@ -43,6 +45,19 @@ function ManageSurveyPage() {
     enabled: !!scope?.canAccess,
     retry: false,
   });
+  const { data: responses = [] } = useQuery({
+    queryKey: ["mgr", "responses", surveyId],
+    queryFn: () => fetchResponses({ data: { surveyId } }),
+    enabled: !!scope?.canAccess,
+    retry: false,
+  });
+  const { data: surveyMeta } = useQuery({
+    queryKey: ["mgr", "questions", surveyId],
+    queryFn: () => fetchQuestions({ data: { surveyId } }),
+    enabled: !!scope?.canAccess,
+    retry: false,
+  });
+  const questions = surveyMeta?.questions ?? [];
 
   const [q, setQ] = useState("");
   const filtered = useMemo(() => {
