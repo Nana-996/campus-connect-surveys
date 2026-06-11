@@ -6,7 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download, CheckCircle2, Circle } from "lucide-react";
-import { getMyManagerScope, getSurveyTracking } from "@/lib/manager.functions";
+import { getMyManagerScope, getSurveyTracking, getSurveyResponsesForManager, getSurveyQuestionsForManager } from "@/lib/manager.functions";
+import { MessageSquare } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/manage/$surveyId")({
   component: ManageSurveyPage,
