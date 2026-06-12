@@ -112,3 +112,8 @@
       repeating-linear-gradient(0deg, color-mix(in oklab, var(--foreground) 3%, transparent) 0 1px, transparent 1px 3px);
   }
 }
+
+@layer base {
+  html, body { overflow-x: hidden; }
+  body { max-width: 100vw; }
+}

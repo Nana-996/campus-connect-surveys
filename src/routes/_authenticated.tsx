@@ -76,9 +76,9 @@ function AuthedLayout() {
   }
 
   return (
-    <div className="min-h-screen pb-20 sm:pb-0">
+    <div className="min-h-screen overflow-x-hidden pb-20 sm:pb-0">
       <AppHeader />
-      <main className="mx-auto max-w-5xl px-5 py-8 sm:py-10">
+      <main className="mx-auto min-w-0 max-w-5xl px-4 py-8 sm:px-5 sm:py-10">
         <Outlet />
       </main>
     </div>
