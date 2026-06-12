@@ -155,6 +155,74 @@ export type Database = {
         }
         Relationships: []
       }
+      poll_responses: {
+        Row: {
+          answer: string
+          created_at: string
+          id: string
+          poll_id: string
+          respondent_id: string
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          id?: string
+          poll_id: string
+          respondent_id: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          id?: string
+          poll_id?: string
+          respondent_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_responses_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      polls: {
+        Row: {
+          created_at: string
+          creator_id: string
+          expires_at: string
+          id: string
+          is_active: boolean
+          options: string[]
+          question: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          creator_id: string
+          expires_at?: string
+          id?: string
+          is_active?: boolean
+          options?: string[]
+          question: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          creator_id?: string
+          expires_at?: string
+          id?: string
+          is_active?: boolean
+          options?: string[]
+          question?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age_range: string | null
@@ -565,6 +633,13 @@ export type Database = {
       current_university_domain: { Args: never; Returns: string }
       current_year: { Args: never; Returns: string }
       expire_earned_credits: { Args: never; Returns: undefined }
+      get_poll_results: {
+        Args: { _poll_id: string }
+        Returns: {
+          answer: string
+          count: number
+        }[]
+      }
       get_shared_dashboard: { Args: { _token: string }; Returns: Json }
       get_survey_responses_for_manager: {
         Args: { _survey_id: string }
