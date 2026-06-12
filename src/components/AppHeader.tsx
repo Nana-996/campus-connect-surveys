@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Coins, Home, PlusCircle, FolderOpen, User, LogOut, Zap, Briefcase, Shield } from "lucide-react";
+import { Coins, Home, PlusCircle, FolderOpen, User, LogOut, BarChart3, Briefcase, Shield } from "lucide-react";
 import { getMyManagerScope } from "@/lib/manager.functions";
 
 export function AppHeader() {
@@ -22,21 +22,21 @@ export function AppHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-foreground/15 bg-background/85 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-5">
-        <Link to="/feed" className="flex items-baseline gap-2">
-          <span className="font-serif text-3xl leading-none text-primary">CampusVerify</span>
+      <div className="mx-auto grid h-16 max-w-5xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 sm:px-5">
+        <Link to="/feed" className="flex min-w-0 items-baseline gap-2">
+          <span className="truncate font-serif text-2xl leading-none text-primary sm:text-3xl">CampusVerify</span>
           <span className="hidden font-sans text-[10px] uppercase tracking-[0.25em] text-muted-foreground sm:inline">
             est. today
           </span>
         </Link>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <Link
             to="/feed"
-            className="flex items-center gap-1 rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground hover:opacity-90"
+            className="flex items-center gap-1 rounded-full bg-accent px-2.5 py-1.5 text-xs font-semibold text-accent-foreground hover:opacity-90"
             title="Answer surveys in your feed to earn more credits"
           >
             <Coins className="h-3.5 w-3.5" />
-            {earnedCredits} credits
+            <span className="whitespace-nowrap">{earnedCredits}</span>
           </Link>
           <Button
             variant="ghost"
@@ -49,9 +49,9 @@ export function AppHeader() {
           </Button>
         </div>
       </div>
-      <nav className="mx-auto flex max-w-5xl items-center justify-around border-t border-foreground/10 bg-card px-2 py-1.5 sm:hidden">
+      <nav className="mx-auto flex max-w-5xl items-center justify-around border-t border-foreground/10 bg-card px-1 py-1.5 sm:hidden">
         <NavItem to="/feed" icon={<Home className="h-5 w-5" />} label="Feed" />
-        <NavItem to="/swipe" icon={<Zap className="h-5 w-5" />} label="Swipe" />
+        <NavItem to="/polls" icon={<BarChart3 className="h-5 w-5" />} label="Polls" />
         <NavItem to="/create" icon={<PlusCircle className="h-5 w-5" />} label="Create" />
         <NavItem to="/my-surveys" icon={<FolderOpen className="h-5 w-5" />} label="Mine" />
         {showFaculty && <NavItem to="/manage" icon={<Briefcase className="h-5 w-5" />} label="Faculty" />}
@@ -60,7 +60,7 @@ export function AppHeader() {
       </nav>
       <nav className="mx-auto hidden max-w-5xl items-center gap-1 border-t border-foreground/10 px-5 py-2 sm:flex">
         <DesktopLink to="/feed">Feed</DesktopLink>
-        <DesktopLink to="/swipe">Swipe</DesktopLink>
+        <DesktopLink to="/polls">Polls</DesktopLink>
         <DesktopLink to="/create">Create survey</DesktopLink>
         <DesktopLink to="/my-surveys">My surveys</DesktopLink>
         {showFaculty && <DesktopLink to="/manage">Faculty</DesktopLink>}
@@ -75,7 +75,7 @@ function NavItem({ to, icon, label }: { to: string; icon: React.ReactNode; label
   return (
     <Link
       to={to}
-      className="flex flex-col items-center gap-0.5 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
+      className="flex min-w-0 flex-col items-center gap-0.5 px-1.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
       activeProps={{ className: "text-primary" }}
     >
       {icon}

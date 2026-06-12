@@ -22,8 +22,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SurveyIdRouteImport } from './routes/survey.$id'
 import { Route as RTokenRouteImport } from './routes/r.$token'
 import { Route as BlogStudentSurveyQuestionsGuideRouteImport } from './routes/blog.student-survey-questions-guide'
-import { Route as AuthenticatedSwipeRouteImport } from './routes/_authenticated/swipe'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedPollsRouteImport } from './routes/_authenticated/polls'
 import { Route as AuthenticatedMySurveysRouteImport } from './routes/_authenticated/my-surveys'
 import { Route as AuthenticatedManageRouteImport } from './routes/_authenticated/manage'
 import { Route as AuthenticatedFeedRouteImport } from './routes/_authenticated/feed'
@@ -97,14 +97,14 @@ const BlogStudentSurveyQuestionsGuideRoute =
     path: '/blog/student-survey-questions-guide',
     getParentRoute: () => rootRouteImport,
   } as any)
-const AuthenticatedSwipeRoute = AuthenticatedSwipeRouteImport.update({
-  id: '/swipe',
-  path: '/swipe',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedPollsRoute = AuthenticatedPollsRouteImport.update({
+  id: '/polls',
+  path: '/polls',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedMySurveysRoute = AuthenticatedMySurveysRouteImport.update({
@@ -160,8 +160,8 @@ export interface FileRoutesByFullPath {
   '/feed': typeof AuthenticatedFeedRoute
   '/manage': typeof AuthenticatedManageRouteWithChildren
   '/my-surveys': typeof AuthenticatedMySurveysRoute
+  '/polls': typeof AuthenticatedPollsRoute
   '/profile': typeof AuthenticatedProfileRoute
-  '/swipe': typeof AuthenticatedSwipeRoute
   '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
   '/r/$token': typeof RTokenRoute
   '/survey/$id': typeof SurveyIdRoute
@@ -183,8 +183,8 @@ export interface FileRoutesByTo {
   '/feed': typeof AuthenticatedFeedRoute
   '/manage': typeof AuthenticatedManageRouteWithChildren
   '/my-surveys': typeof AuthenticatedMySurveysRoute
+  '/polls': typeof AuthenticatedPollsRoute
   '/profile': typeof AuthenticatedProfileRoute
-  '/swipe': typeof AuthenticatedSwipeRoute
   '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
   '/r/$token': typeof RTokenRoute
   '/survey/$id': typeof SurveyIdRoute
@@ -208,8 +208,8 @@ export interface FileRoutesById {
   '/_authenticated/feed': typeof AuthenticatedFeedRoute
   '/_authenticated/manage': typeof AuthenticatedManageRouteWithChildren
   '/_authenticated/my-surveys': typeof AuthenticatedMySurveysRoute
+  '/_authenticated/polls': typeof AuthenticatedPollsRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
-  '/_authenticated/swipe': typeof AuthenticatedSwipeRoute
   '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
   '/r/$token': typeof RTokenRoute
   '/survey/$id': typeof SurveyIdRoute
@@ -233,8 +233,8 @@ export interface FileRouteTypes {
     | '/feed'
     | '/manage'
     | '/my-surveys'
+    | '/polls'
     | '/profile'
-    | '/swipe'
     | '/blog/student-survey-questions-guide'
     | '/r/$token'
     | '/survey/$id'
@@ -256,8 +256,8 @@ export interface FileRouteTypes {
     | '/feed'
     | '/manage'
     | '/my-surveys'
+    | '/polls'
     | '/profile'
-    | '/swipe'
     | '/blog/student-survey-questions-guide'
     | '/r/$token'
     | '/survey/$id'
@@ -280,8 +280,8 @@ export interface FileRouteTypes {
     | '/_authenticated/feed'
     | '/_authenticated/manage'
     | '/_authenticated/my-surveys'
+    | '/_authenticated/polls'
     | '/_authenticated/profile'
-    | '/_authenticated/swipe'
     | '/blog/student-survey-questions-guide'
     | '/r/$token'
     | '/survey/$id'
@@ -398,18 +398,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogStudentSurveyQuestionsGuideRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/swipe': {
-      id: '/_authenticated/swipe'
-      path: '/swipe'
-      fullPath: '/swipe'
-      preLoaderRoute: typeof AuthenticatedSwipeRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/profile': {
       id: '/_authenticated/profile'
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/polls': {
+      id: '/_authenticated/polls'
+      path: '/polls'
+      fullPath: '/polls'
+      preLoaderRoute: typeof AuthenticatedPollsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/my-surveys': {
@@ -481,8 +481,8 @@ interface AuthenticatedRouteChildren {
   AuthenticatedFeedRoute: typeof AuthenticatedFeedRoute
   AuthenticatedManageRoute: typeof AuthenticatedManageRouteWithChildren
   AuthenticatedMySurveysRoute: typeof AuthenticatedMySurveysRoute
+  AuthenticatedPollsRoute: typeof AuthenticatedPollsRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
-  AuthenticatedSwipeRoute: typeof AuthenticatedSwipeRoute
   AuthenticatedSurveyIdAnalyzeRoute: typeof AuthenticatedSurveyIdAnalyzeRoute
 }
 
@@ -492,8 +492,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedFeedRoute: AuthenticatedFeedRoute,
   AuthenticatedManageRoute: AuthenticatedManageRouteWithChildren,
   AuthenticatedMySurveysRoute: AuthenticatedMySurveysRoute,
+  AuthenticatedPollsRoute: AuthenticatedPollsRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
-  AuthenticatedSwipeRoute: AuthenticatedSwipeRoute,
   AuthenticatedSurveyIdAnalyzeRoute: AuthenticatedSurveyIdAnalyzeRoute,
 }
 
