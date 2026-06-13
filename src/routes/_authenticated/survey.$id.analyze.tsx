@@ -315,6 +315,7 @@ function AnalyzePage() {
 
   const captureNodeToPng = async (node: HTMLElement): Promise<{ dataUrl: string; width: number; height: number } | null> => {
     try {
+      const { default: html2canvas } = await import("html2canvas-pro");
       const canvas = await html2canvas(node, {
         scale: 2,
         backgroundColor: "#ffffff",
@@ -335,6 +336,7 @@ function AnalyzePage() {
     await new Promise((r) => setTimeout(r, 400));
     const toastId = toast.loading("Building report…");
     try {
+    const { default: jsPDF } = await import("jspdf");
     const doc = new jsPDF({ unit: "pt", format: "a4" });
     const margin = 40;
     const W = doc.internal.pageSize.getWidth();
@@ -409,6 +411,7 @@ function AnalyzePage() {
   };
 
   const exportQuestionPDF = async (q: Question, qi: number) => {
+    const { default: jsPDF } = await import("jspdf");
     const doc = new jsPDF({ unit: "pt", format: "a4" });
     const margin = 40;
     const W = doc.internal.pageSize.getWidth();
