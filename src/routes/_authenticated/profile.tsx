@@ -16,13 +16,18 @@ export const Route = createFileRoute("/_authenticated/profile")({
 });
 
 function Profile() {
-  const { profile, user } = useAuth();
+  const { profile, user, refreshProfile } = useAuth();
   const [responses, setResponses] = useState<any[]>([]);
   const [ledger, setLedger] = useState<any[]>([]);
   const [caps, setCaps] = useState<{ day_count: number; week_count: number } | null>(null);
   const [nextExpiry, setNextExpiry] = useState<string | null>(null);
+  const [name, setName] = useState(profile?.full_name ?? "");
+  const [savingName, setSavingName] = useState(false);
 
   useEffect(() => {
+    setName(profile?.full_name ?? "");
+  }, [profile?.full_name]);
+
     if (!user) return;
     let active = true;
     (async () => {
