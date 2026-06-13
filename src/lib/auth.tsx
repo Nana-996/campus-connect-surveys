@@ -156,13 +156,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         },
       )
       .subscribe();
-    const onFocus = () => {
-      if (session?.user) loadProfile(session.user).catch(() => {});
-    };
-    window.addEventListener("focus", onFocus);
     return () => {
       supabase.removeChannel(channel);
-      window.removeEventListener("focus", onFocus);
     };
   }, [session?.user?.id]);
 
