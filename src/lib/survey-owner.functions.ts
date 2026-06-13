@@ -1,8 +1,17 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { createHash } from "crypto";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const surveyIdSchema = z.object({ surveyId: z.string().uuid() });
+
+// Stable opaque pseudonym per (survey, respondent). Owners see a UUID-shaped
+// token they can use as a grouping key, but it cannot be linked back to a
+// real user account.
+function pseudonymize(surveyId: string, respondentId: string): string {
+  const h = createHash("sha256").update(`${surveyId}:${respondentId}`).digest("hex");
+  return [h.slice(0, 8), h.slice(8, 12), h.slice(12, 16), h.slice(16, 20), h.slice(20, 32)].join("-");
+}
 
 export const getOwnerSurveyResults = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -23,7 +32,7 @@ export const getOwnerSurveyResults = createServerFn({ method: "GET" })
     }
 
     const [
-      { data: responses, error: responseError },
+      { data: rawResponses, error: responseError },
       { data: visualizations, error: vizError },
       { data: savedViews, error: savedViewsError },
       { data: shareTokens, error: shareTokensError },
@@ -50,8 +59,26 @@ export const getOwnerSurveyResults = createServerFn({ method: "GET" })
     ]);
     if (responseError || vizError || savedViewsError || shareTokensError) throw new Error("Could not load survey responses");
 
-    const respondentIds = Array.from(new Set((responses ?? []).map((r) => r.respondent_id)));
-    const { data: profiles, error: profileError } = respondentIds.length
+    // Map real respondent_id -> opaque pseudonym before anything leaves the server.
+    // This prevents survey creators from correlating a real user UUID with
+    // their exact answers, while keeping a stable grouping key for analytics.
+    const realToPseudo = new Map<string, string>();
+    for (const r of rawResponses ?? []) {
+      if (!realToPseudo.has(r.respondent_id)) {
+        realToPseudo.set(r.respondent_id, pseudonymize(data.surveyId, r.respondent_id));
+      }
+    }
+    const responses = (rawResponses ?? []).map((r) => ({
+      id: r.id,
+      survey_id: r.survey_id,
+      respondent_id: realToPseudo.get(r.respondent_id)!,
+      answers: r.answers,
+      created_at: r.created_at,
+      duration_ms: r.duration_ms,
+    }));
+
+    const respondentIds = Array.from(realToPseudo.keys());
+    const { data: rawProfiles, error: profileError } = respondentIds.length
       ? await supabaseAdmin
           .from("profiles")
           .select("id, department, year, country, age_range, university_name")
@@ -59,10 +86,18 @@ export const getOwnerSurveyResults = createServerFn({ method: "GET" })
       : { data: [], error: null };
     if (profileError) throw new Error("Could not load response demographics");
 
+    // Re-key profile rows by the same pseudonym so analyze/report UIs keep
+    // working without changes.
+    const profiles = (rawProfiles ?? []).map((p) => ({
+      ...p,
+      id: realToPseudo.get(p.id) ?? p.id,
+      full_name: "",
+    }));
+
     return {
       survey,
-      responses: responses ?? [],
-      profiles: (profiles ?? []).map((p) => ({ ...p, full_name: "" })),
+      responses,
+      profiles,
       visualizations: visualizations ?? [],
       savedViews: savedViews ?? [],
       shareTokens: shareTokens ?? [],
