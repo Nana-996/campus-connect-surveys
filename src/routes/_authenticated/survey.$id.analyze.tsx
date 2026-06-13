@@ -190,7 +190,9 @@ function AnalyzePage() {
       }
     })();
     return () => { active = false; };
-  }, [id, user, fetchOwnerResults]);
+    // Depend on user?.id (stable string) — not `user` (new object on every Supabase token refresh).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, user?.id]);
 
   const isPremium = useMemo(() => {
     // Premium features are free for now — all signed-in creators get full access.
