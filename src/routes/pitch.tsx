@@ -48,7 +48,7 @@ const PALETTE = {
 /* ---------- slide content ---------- */
 type Slide = {
   id: string;
-  render: () => JSX.Element;
+  render: () => React.ReactElement;
 };
 
 const fadeUp: Variants = {
