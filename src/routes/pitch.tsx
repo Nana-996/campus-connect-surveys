@@ -27,6 +27,14 @@ import {
   Send,
   PenLine,
   ArrowDownToLine,
+  ClipboardList,
+  UserCheck,
+  Settings,
+  Star,
+  Link2,
+  Bell,
+  Award,
+  Trophy,
 } from "lucide-react";
 
 export const Route = createFileRoute("/pitch")({
