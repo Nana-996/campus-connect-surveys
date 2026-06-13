@@ -27,6 +27,14 @@ import {
   Send,
   PenLine,
   ArrowDownToLine,
+  ClipboardList,
+  UserCheck,
+  Settings,
+  Star,
+  Link2,
+  Bell,
+  Award,
+  Trophy,
 } from "lucide-react";
 
 export const Route = createFileRoute("/pitch")({
@@ -790,6 +798,277 @@ const Slide10 = () => {
   );
 };
 
+/* ============ SLIDE — Faculty Tracking ============ */
+const SlideFaculty = () => {
+  const rows = [
+    { name: "Ama Mensah", dept: "Pharmacy · Y4", idx: "PHA/2021/0142", status: "Responded", when: "2h ago" },
+    { name: "Kwame Boateng", dept: "Pharmacy · Y4", idx: "PHA/2021/0157", status: "Responded", when: "5h ago" },
+    { name: "Akosua Nyarko", dept: "Pharmacy · Y4", idx: "PHA/2021/0166", status: "Pending", when: "—" },
+    { name: "Yaw Ofori", dept: "Pharmacy · Y3", idx: "PHA/2022/0089", status: "Pending", when: "—" },
+    { name: "Esi Adjei", dept: "Pharmacy · Y4", idx: "PHA/2021/0178", status: "Responded", when: "1d ago" },
+  ];
+  return (
+    <SlideShell bg="cream">
+      <Kicker dark>Faculty supervisor mode</Kicker>
+      <motion.h2
+        variants={fadeUp}
+        custom={1}
+        className="mt-6 max-w-5xl text-[58px] leading-[1.02] tracking-tight"
+        style={{ fontFamily: SERIF, color: C.green }}
+      >
+        Lecturers see <em style={{ color: C.limeDeep }}>exactly</em> who has — and hasn't — responded.
+      </motion.h2>
+      <p className="mt-4 max-w-3xl text-lg" style={{ color: C.mutedDark, fontFamily: SANS }}>
+        University-scoped tracking by department, year, and index number. Answer content stays confidential — only participation is visible. Chase the gaps, not every student.
+      </p>
+
+      <div className="mt-8 grid w-full grid-cols-5 gap-6">
+        {/* mock tracking table */}
+        <motion.div variants={fadeUp} custom={2} className="col-span-3 overflow-hidden rounded-2xl border" style={{ borderColor: C.lineDark, background: "rgba(255,255,255,0.6)" }}>
+          <div className="flex items-center justify-between px-5 py-3 text-xs font-bold uppercase tracking-[0.22em]" style={{ background: C.green, color: C.lime, fontFamily: SANS }}>
+            <span>Survey · Drug Adherence Y3–Y4</span>
+            <span>62 / 80 responded</span>
+          </div>
+          <table className="w-full text-[13px]" style={{ fontFamily: SANS }}>
+            <thead style={{ background: "rgba(26,58,42,0.06)" }}>
+              <tr className="text-left uppercase tracking-wider" style={{ color: C.green }}>
+                <th className="px-4 py-2">Student</th>
+                <th className="px-4 py-2">Dept · Year</th>
+                <th className="px-4 py-2">Index</th>
+                <th className="px-4 py-2">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.idx} className="border-t" style={{ borderColor: C.lineDark, color: C.green }}>
+                  <td className="px-4 py-2 font-medium">{r.name}</td>
+                  <td className="px-4 py-2 opacity-75">{r.dept}</td>
+                  <td className="px-4 py-2 opacity-60">{r.idx}</td>
+                  <td className="px-4 py-2">
+                    <span
+                      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold"
+                      style={{
+                        background: r.status === "Responded" ? C.lime : "rgba(26,58,42,0.12)",
+                        color: r.status === "Responded" ? C.green : C.green,
+                      }}
+                    >
+                      {r.status === "Responded" ? <CheckCircle2 className="h-3 w-3" /> : <Bell className="h-3 w-3" />}
+                      {r.status} {r.status === "Responded" && <span className="opacity-60">· {r.when}</span>}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </motion.div>
+
+        {/* benefits */}
+        <motion.div variants={fadeUp} custom={3} className="col-span-2 flex flex-col gap-4">
+          {[
+            { icon: UserCheck, t: "Live participation map", d: "Filter by department, year, or index — instantly see who is missing." },
+            { icon: Bell, t: "Targeted follow-up", d: "Contact only the non-respondents. No more group-blast spam." },
+            { icon: ShieldCheck, t: "Answers stay private", d: "Supervisors see participation, never individual responses." },
+          ].map((b, i) => (
+            <div key={b.t} className="flex items-start gap-3 rounded-xl border p-4" style={{ borderColor: C.lineDark, background: "rgba(26,58,42,0.04)" }}>
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ background: C.green, color: C.lime }}>
+                <b.icon className="h-4 w-4" />
+              </div>
+              <div>
+                <div className="text-[15px] font-semibold" style={{ color: C.green, fontFamily: SANS }}>{b.t}</div>
+                <div className="text-[13px]" style={{ color: C.mutedDark, fontFamily: SANS }}>{b.d}</div>
+              </div>
+            </div>
+          ))}
+        </motion.div>
+      </div>
+    </SlideShell>
+  );
+};
+
+/* ============ SLIDE — Admin Console ============ */
+const SlideAdmin = () => {
+  const tools = [
+    { icon: Coins, t: "Grant bonus credits", d: "Reward power users, run campus campaigns, or top-up researchers running large studies — all from one panel." },
+    { icon: ShieldCheck, t: "Flag & moderate users", d: "Lock suspicious accounts, surface low-quality respondents, resolve review flags from the community." },
+    { icon: Settings, t: "Role management", d: "Promote faculty as managers, grant admins by email, revoke access with one click." },
+    { icon: Filter, t: "Domain blocklist", d: "Auto-reject disposable email domains so only real .edu / .ac inboxes get verified." },
+    { icon: FileBarChart, t: "Live platform metrics", d: "Users, active surveys, 24h responses, open flags — a real-time pulse of the network." },
+    { icon: Database, t: "Survey takedown", d: "One-click deactivate or delete any survey violating policy. Audit-logged." },
+  ];
+  return (
+    <SlideShell bg="green">
+      <Kicker>Owner controls</Kicker>
+      <motion.h2
+        variants={fadeUp}
+        custom={1}
+        className="mt-6 max-w-5xl text-[58px] leading-[1.02] tracking-tight"
+        style={{ fontFamily: SERIF, color: C.cream }}
+      >
+        A purpose-built <span style={{ color: C.lime, fontStyle: "italic" }}>admin console</span> — not a database editor.
+      </motion.h2>
+      <p className="mt-4 max-w-3xl text-lg" style={{ color: C.muted, fontFamily: SANS }}>
+        Every operational lever the platform owner needs lives in <code style={{ color: C.lime }}>/admin</code>. Secured by row-level policies + a security-definer <code style={{ color: C.lime }}>has_role()</code> check on every action.
+      </p>
+      <div className="mt-10 grid w-full grid-cols-3 gap-5">
+        {tools.map((t, i) => (
+          <motion.div
+            key={t.t}
+            variants={fadeUp}
+            custom={2 + i}
+            className="rounded-2xl border p-6"
+            style={{ borderColor: C.line, background: "rgba(245,240,232,0.04)" }}
+          >
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl" style={{ background: C.lime, color: C.green }}>
+              <t.icon className="h-5 w-5" />
+            </div>
+            <h3 className="mt-4 text-xl" style={{ fontFamily: SERIF, color: C.cream }}>{t.t}</h3>
+            <p className="mt-2 text-[14px] leading-relaxed" style={{ color: C.muted, fontFamily: SANS }}>{t.d}</p>
+          </motion.div>
+        ))}
+      </div>
+    </SlideShell>
+  );
+};
+
+/* ============ SLIDE — Lecturer Evaluations ============ */
+const SlideLecturer = () => (
+  <SlideShell bg="cream">
+    <Kicker dark>Built-in templates</Kicker>
+    <motion.h2
+      variants={fadeUp}
+      custom={1}
+      className="mt-6 max-w-5xl text-[58px] leading-[1.02] tracking-tight"
+      style={{ fontFamily: SERIF, color: C.green }}
+    >
+      Lecturer evaluations, <em style={{ color: C.limeDeep }}>standardised</em> and campus-scoped.
+    </motion.h2>
+    <p className="mt-4 max-w-3xl text-lg" style={{ color: C.mutedDark, fontFamily: SANS }}>
+      A first-class lecturers directory plus a pre-loaded evaluation template means quality-assurance offices can launch a faculty-wide review in minutes — not weeks.
+    </p>
+    <div className="mt-10 grid w-full grid-cols-2 gap-8">
+      <motion.div variants={fadeUp} custom={2} className="rounded-2xl border p-7" style={{ borderColor: C.lineDark, background: "rgba(26,58,42,0.04)" }}>
+        <div className="flex items-center gap-3">
+          <Star className="h-6 w-6" style={{ color: C.limeDeep }} />
+          <h3 className="text-xl font-semibold uppercase tracking-[0.18em]" style={{ color: C.green, fontFamily: SANS }}>Two creation paths</h3>
+        </div>
+        <ul className="mt-5 space-y-3 text-[15px]" style={{ color: C.green, fontFamily: SANS }}>
+          {[
+            "Admin: launch evaluations across an entire faculty",
+            "Faculty manager: launch within their own department",
+            "Pre-filled standard form — teaching clarity, fairness, engagement, materials, overall rating",
+            "Visibility rules: only the rated lecturer + admin see results",
+          ].map((x) => (
+            <li key={x} className="flex gap-2"><span style={{ color: C.limeDeep }}>›</span>{x}</li>
+          ))}
+        </ul>
+      </motion.div>
+      <motion.div variants={fadeUp} custom={3} className="rounded-2xl p-7" style={{ background: C.green, color: C.cream }}>
+        <div className="text-xs font-bold uppercase tracking-[0.22em]" style={{ color: C.lime, fontFamily: SANS }}>Sample question</div>
+        <p className="mt-4 text-2xl leading-tight" style={{ fontFamily: SERIF }}>
+          "How would you rate the clarity of Dr. Owusu's lectures this semester?"
+        </p>
+        <div className="mt-6 flex gap-2">
+          {[1,2,3,4,5].map((n) => (
+            <div key={n} className="flex h-12 w-12 items-center justify-center rounded-full border" style={{ borderColor: C.lime, color: C.lime, fontFamily: SANS, fontWeight: 600 }}>{n}</div>
+          ))}
+        </div>
+        <p className="mt-6 text-sm" style={{ color: C.muted, fontFamily: SANS }}>
+          Aggregated, anonymised, and exportable as a semester report.
+        </p>
+      </motion.div>
+    </div>
+  </SlideShell>
+);
+
+/* ============ SLIDE — Quality & Integrity ============ */
+const SlideQuality = () => {
+  const items = [
+    { icon: Award, t: "Quality score per response", d: "Auto-computed from completion time, straight-lining, open-text length. Low-quality responses can be excluded from analysis." },
+    { icon: ShieldCheck, t: "Anonymous by default", d: "Respondents opt in to share identity. Identified respondents are visible to faculty trackers but never to peers." },
+    { icon: Link2, t: "Shareable referral links", d: "Each survey gets a private link with a token. Off-platform recipients verify before answering — no spoofing." },
+    { icon: Trophy, t: "Earned vs purchased credits", d: "Two-wallet ledger keeps the economy honest. Expiry on bonus grants prevents hoarding." },
+  ];
+  return (
+    <SlideShell bg="green">
+      <Kicker>Trust layer</Kicker>
+      <motion.h2
+        variants={fadeUp}
+        custom={1}
+        className="mt-6 max-w-5xl text-[58px] leading-[1.02] tracking-tight"
+        style={{ fontFamily: SERIF, color: C.cream }}
+      >
+        Real responses. <span style={{ color: C.lime, fontStyle: "italic" }}>Honest</span> data.
+      </motion.h2>
+      <div className="mt-10 grid w-full grid-cols-2 gap-6">
+        {items.map((it, i) => (
+          <motion.div key={it.t} variants={fadeUp} custom={2 + i} className="flex gap-5 rounded-2xl border p-6" style={{ borderColor: C.line, background: "rgba(245,240,232,0.04)" }}>
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl" style={{ background: C.lime, color: C.green }}>
+              <it.icon className="h-6 w-6" />
+            </div>
+            <div>
+              <h3 className="text-xl" style={{ fontFamily: SERIF, color: C.cream }}>{it.t}</h3>
+              <p className="mt-1 text-[14px] leading-relaxed" style={{ color: C.muted, fontFamily: SANS }}>{it.d}</p>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </SlideShell>
+  );
+};
+
+/* ============ SLIDE — Why we win ============ */
+const SlideAdvantage = () => {
+  const rows = [
+    { f: "Verified university respondents", cv: true, sm: false, gf: false },
+    { f: "Department + year targeting", cv: true, sm: "Paid panel only", gf: false },
+    { f: "Free to publish (credits, no cash)", cv: true, sm: false, gf: true },
+    { f: "Faculty participation tracking", cv: true, sm: false, gf: false },
+    { f: "Built-in sentiment + keyword analytics", cv: true, sm: "Enterprise tier", gf: false },
+    { f: "Offline-first for low connectivity", cv: true, sm: false, gf: false },
+    { f: "Lecturer evaluation templates", cv: true, sm: false, gf: false },
+  ];
+  const cell = (v: any) => v === true
+    ? <CheckCircle2 className="mx-auto h-5 w-5" style={{ color: C.limeDeep }} />
+    : v === false
+      ? <span className="text-2xl" style={{ color: C.green, opacity: 0.2 }}>—</span>
+      : <span className="text-xs" style={{ color: C.mutedDark, fontFamily: SANS }}>{v}</span>;
+  return (
+    <SlideShell bg="cream">
+      <Kicker dark>Why we win</Kicker>
+      <motion.h2
+        variants={fadeUp}
+        custom={1}
+        className="mt-6 max-w-4xl text-[58px] leading-[1.02] tracking-tight"
+        style={{ fontFamily: SERIF, color: C.green }}
+      >
+        Built for campus. <em style={{ color: C.limeDeep }}>Nothing else comes close.</em>
+      </motion.h2>
+      <motion.div variants={fadeUp} custom={2} className="mt-10 w-full overflow-hidden rounded-2xl border" style={{ borderColor: C.lineDark, background: "rgba(255,255,255,0.5)" }}>
+        <table className="w-full text-[15px]" style={{ fontFamily: SANS }}>
+          <thead style={{ background: C.green, color: C.cream }}>
+            <tr>
+              <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-[0.2em]">Feature</th>
+              <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-[0.2em]" style={{ color: C.lime }}>CampusVerify</th>
+              <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-[0.2em]">SurveyMonkey</th>
+              <th className="px-6 py-4 text-center text-xs font-bold uppercase tracking-[0.2em]">Google Forms</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.f} className="border-t" style={{ borderColor: C.lineDark, color: C.green }}>
+                <td className="px-6 py-3 font-medium">{r.f}</td>
+                <td className="px-6 py-3 text-center" style={{ background: "rgba(184,224,74,0.12)" }}>{cell(r.cv)}</td>
+                <td className="px-6 py-3 text-center">{cell(r.sm)}</td>
+                <td className="px-6 py-3 text-center">{cell(r.gf)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </motion.div>
+    </SlideShell>
+  );
+};
+
 /* ============ SLIDE 11 — Vision ============ */
 const Slide11 = () => {
   const roadmap = [
@@ -869,8 +1148,13 @@ const SLIDES = [
   { id: "feed", render: Slide5 },
   { id: "creation", render: Slide6 },
   { id: "analytics", render: Slide7 },
+  { id: "quality", render: SlideQuality },
+  { id: "faculty", render: SlideFaculty },
+  { id: "lecturer", render: SlideLecturer },
+  { id: "admin", render: SlideAdmin },
   { id: "security", render: Slide8 },
   { id: "offline", render: Slide9 },
+  { id: "advantage", render: SlideAdvantage },
   { id: "users", render: Slide10 },
   { id: "vision", render: Slide11 },
 ];
