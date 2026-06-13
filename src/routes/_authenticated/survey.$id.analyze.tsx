@@ -332,6 +332,11 @@ function AnalyzePage() {
 
   const exportPDF = async () => {
     if (!isPremium) return promptUpgrade("Branded PDF reports", "Generate a polished, presentation-ready PDF report with your university name and CampusVerify footer — ready to email or hand in.");
+    // Ensure charts are mounted in DOM so html2canvas can capture them
+    setView("questions");
+    await new Promise((r) => setTimeout(r, 400));
+    const toastId = toast.loading("Building report…");
+    try {
     const doc = new jsPDF({ unit: "pt", format: "a4" });
     const margin = 40;
     const W = doc.internal.pageSize.getWidth();
