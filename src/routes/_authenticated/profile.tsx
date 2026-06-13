@@ -28,6 +28,7 @@ function Profile() {
     setName(profile?.full_name ?? "");
   }, [profile?.full_name]);
 
+  useEffect(() => {
     if (!user) return;
     let active = true;
     (async () => {
