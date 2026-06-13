@@ -82,6 +82,7 @@ function AuthedLayout() {
       <main className="mx-auto min-w-0 max-w-5xl px-4 py-8 sm:px-5 sm:py-10">
         <Outlet />
       </main>
+      <SupportCard variant="floating" />
     </div>
   );
 }
