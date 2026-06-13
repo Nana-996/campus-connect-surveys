@@ -83,6 +83,30 @@ function SignupPage() {
       toast.error(message);
       return;
     }
+    if (userType === "student" && !department.trim()) {
+      const message = "Department is required for student accounts.";
+      setFormError(message);
+      toast.error(message);
+      return;
+    }
+    if (userType === "student" && !year) {
+      const message = "Year is required for student accounts.";
+      setFormError(message);
+      toast.error(message);
+      return;
+    }
+    if (userType === "general" && !country) {
+      const message = "Country is required for general accounts.";
+      setFormError(message);
+      toast.error(message);
+      return;
+    }
+    if (userType === "general" && !ageRange) {
+      const message = "Age range is required for general accounts.";
+      setFormError(message);
+      toast.error(message);
+      return;
+    }
     setSubmitting(true);
     try {
       const { error } = await supabase.auth.signUp({
