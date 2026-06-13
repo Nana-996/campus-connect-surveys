@@ -83,6 +83,30 @@ function SignupPage() {
       toast.error(message);
       return;
     }
+    if (userType === "student" && !department.trim()) {
+      const message = "Department is required for student accounts.";
+      setFormError(message);
+      toast.error(message);
+      return;
+    }
+    if (userType === "student" && !year) {
+      const message = "Year is required for student accounts.";
+      setFormError(message);
+      toast.error(message);
+      return;
+    }
+    if (userType === "general" && !country) {
+      const message = "Country is required for general accounts.";
+      setFormError(message);
+      toast.error(message);
+      return;
+    }
+    if (userType === "general" && !ageRange) {
+      const message = "Age range is required for general accounts.";
+      setFormError(message);
+      toast.error(message);
+      return;
+    }
     setSubmitting(true);
     try {
       const { error } = await supabase.auth.signUp({
@@ -233,10 +257,11 @@ function SignupPage() {
             {userType === "student" && (
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label htmlFor="dept" className="text-xs font-semibold uppercase tracking-wider">Department</Label>
+                  <Label htmlFor="dept" className="text-xs font-semibold uppercase tracking-wider">Department <span className="text-destructive">*</span></Label>
                   <Input
                     id="dept"
                     list="dept-suggestions"
+                    required
                     value={department}
                     onChange={(e) => { setDepartment(e.target.value); setFormError(null); }}
                     onBlur={(e) => {
@@ -255,8 +280,8 @@ function SignupPage() {
                   </datalist>
                 </div>
                 <div>
-                  <Label htmlFor="year" className="text-xs font-semibold uppercase tracking-wider">Year</Label>
-                  <Select value={year} onValueChange={setYear}>
+                  <Label htmlFor="year" className="text-xs font-semibold uppercase tracking-wider">Year <span className="text-destructive">*</span></Label>
+                  <Select value={year} onValueChange={(v) => { setYear(v); setFormError(null); }}>
                     <SelectTrigger id="year" className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"><SelectValue placeholder="Year" /></SelectTrigger>
                     <SelectContent>
                       {YEAR_OPTIONS.map((y) => (
