@@ -291,7 +291,7 @@ function Landing() {
       </main>
 
       <footer className="mt-20 border-t border-foreground/15">
-        <div className="mx-auto grid max-w-6xl gap-8 px-6 py-12 sm:grid-cols-4">
+        <div className="mx-auto grid max-w-6xl gap-8 px-6 py-12 sm:grid-cols-5">
           <div className="sm:col-span-2">
             <p className="font-serif text-3xl text-primary">CampusVerify</p>
             <p className="mt-2 max-w-xs text-xs text-muted-foreground">
@@ -314,6 +314,24 @@ function Landing() {
               <li><Link to="/terms" className="hover:text-primary">Terms of Service</Link></li>
               <li><Link to="/privacy" className="hover:text-primary">Privacy Policy</Link></li>
               <li><Link to="/forgot-password" className="hover:text-primary">Forgot password</Link></li>
+            </ul>
+          </div>
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Support</p>
+            <ul className="mt-3 space-y-2 text-sm">
+              <li>
+                <a
+                  href="https://chat.whatsapp.com/IU9duPqSXvG7Qb2U9IIoR3"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 hover:text-[#25D366]"
+                >
+                  <span className="inline-block h-2 w-2 rounded-full bg-[#25D366]" />
+                  WhatsApp Support
+                </a>
+              </li>
+              <li><Link to="/guide" className="hover:text-primary">User Guide</Link></li>
+              <li><Link to="/pitch" className="hover:text-primary">About CampusVerify</Link></li>
             </ul>
           </div>
         </div>

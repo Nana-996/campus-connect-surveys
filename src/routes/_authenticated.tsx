@@ -2,6 +2,7 @@ import { createFileRoute, Outlet, useNavigate, useRouter } from "@tanstack/react
 import { useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { AppHeader } from "@/components/AppHeader";
+import { SupportCard } from "@/components/SupportHelp";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -81,6 +82,7 @@ function AuthedLayout() {
       <main className="mx-auto min-w-0 max-w-5xl px-4 py-8 sm:px-5 sm:py-10">
         <Outlet />
       </main>
+      <SupportCard variant="floating" />
     </div>
   );
 }
