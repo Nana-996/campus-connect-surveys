@@ -52,9 +52,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      { name: "theme-color", content: "#1f4d33" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "default" },
+      { name: "apple-mobile-web-app-title", content: "CampusVerify" },
       { title: "CampusVerify — Verified student research" },
-      { name: "description", content: "CampusVerify connects researchers with verified students for honest, campus-scoped survey responses. Earn credits to answer, spend to publish." },
+      { name: "description", content: "Verified student research. Cache surveys, answer offline, sync when you reconnect." },
       { property: "og:title", content: "CampusVerify — Verified student research" },
       { name: "twitter:title", content: "CampusVerify — Verified student research" },
       { property: "og:description", content: "Run surveys with verified university students. Earn credits by answering, spend to publish — no bots, no randoms." },
@@ -66,6 +70,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:site_name", content: "CampusVerify" },
     ],
     links: [
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/icons/icon-192.png" },
+      { rel: "icon", type: "image/png", sizes: "512x512", href: "/icons/icon-512.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "preconnect", href: "https://vwrhclqxuabltajcbmno.supabase.co", crossOrigin: "anonymous" },
@@ -112,10 +119,15 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useEffect(() => {
+    installAutoSync();
+    void registerPwa();
+  }, []);
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <Outlet />
+        <OfflineIndicator />
         <Toaster />
       </AuthProvider>
     </QueryClientProvider>
