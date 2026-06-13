@@ -15,6 +15,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PitchRouteImport } from './routes/pitch'
+import { Route as GuideRouteImport } from './routes/guide'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminSetupRouteImport } from './routes/admin-setup'
@@ -63,6 +64,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const PitchRoute = PitchRouteImport.update({
   id: '/pitch',
   path: '/pitch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuideRoute = GuideRouteImport.update({
+  id: '/guide',
+  path: '/guide',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -170,6 +176,7 @@ export interface FileRoutesByFullPath {
   '/admin-setup': typeof AdminSetupRoute
   '/auth': typeof AuthRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/guide': typeof GuideRoute
   '/pitch': typeof PitchRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -196,6 +203,7 @@ export interface FileRoutesByTo {
   '/admin-setup': typeof AdminSetupRoute
   '/auth': typeof AuthRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/guide': typeof GuideRoute
   '/pitch': typeof PitchRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -224,6 +232,7 @@ export interface FileRoutesById {
   '/admin-setup': typeof AdminSetupRoute
   '/auth': typeof AuthRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/guide': typeof GuideRoute
   '/pitch': typeof PitchRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -252,6 +261,7 @@ export interface FileRouteTypes {
     | '/admin-setup'
     | '/auth'
     | '/forgot-password'
+    | '/guide'
     | '/pitch'
     | '/privacy'
     | '/reset-password'
@@ -278,6 +288,7 @@ export interface FileRouteTypes {
     | '/admin-setup'
     | '/auth'
     | '/forgot-password'
+    | '/guide'
     | '/pitch'
     | '/privacy'
     | '/reset-password'
@@ -305,6 +316,7 @@ export interface FileRouteTypes {
     | '/admin-setup'
     | '/auth'
     | '/forgot-password'
+    | '/guide'
     | '/pitch'
     | '/privacy'
     | '/reset-password'
@@ -333,6 +345,7 @@ export interface RootRouteChildren {
   AdminSetupRoute: typeof AdminSetupRoute
   AuthRoute: typeof AuthRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
+  GuideRoute: typeof GuideRoute
   PitchRoute: typeof PitchRoute
   PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -386,6 +399,13 @@ declare module '@tanstack/react-router' {
       path: '/pitch'
       fullPath: '/pitch'
       preLoaderRoute: typeof PitchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guide': {
+      id: '/guide'
+      path: '/guide'
+      fullPath: '/guide'
+      preLoaderRoute: typeof GuideRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -570,6 +590,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminSetupRoute: AdminSetupRoute,
   AuthRoute: AuthRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
+  GuideRoute: GuideRoute,
   PitchRoute: PitchRoute,
   PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
