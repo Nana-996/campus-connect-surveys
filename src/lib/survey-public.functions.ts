@@ -45,6 +45,57 @@ export const getSurveyPublic = createServerFn({ method: "GET" })
     };
   });
 
+// Internal metadata keys that must never reach respondents on evaluations.
+// Stripped from each question and from each option (when options are objects).
+const EVAL_INTERNAL_KEYS = new Set([
+  "correct_answer",
+  "correctAnswer",
+  "correct",
+  "answer_key",
+  "answerKey",
+  "rubric",
+  "scoring",
+  "score",
+  "weight",
+  "points",
+  "explanation",
+  "feedback",
+  "is_correct",
+  "isCorrect",
+  "marks",
+  "grading",
+  "grader_notes",
+  "internal_notes",
+]);
+
+function stripInternalKeys<T extends Record<string, any>>(obj: T): T {
+  const out: Record<string, any> = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (EVAL_INTERNAL_KEYS.has(k)) continue;
+    out[k] = v;
+  }
+  return out as T;
+}
+
+// Sanitize the questions payload for evaluation surveys before it leaves the
+// server. Respondents must never see scoring rubrics, correct answers, or
+// other grader-only metadata authors may have stashed on each question.
+export function sanitizeEvaluationQuestions(questions: unknown): unknown {
+  if (!Array.isArray(questions)) return questions;
+  return questions.map((q) => {
+    if (!q || typeof q !== "object") return q;
+    const cleaned = stripInternalKeys(q as Record<string, any>);
+    if (Array.isArray(cleaned.options)) {
+      cleaned.options = cleaned.options.map((opt: any) =>
+        opt && typeof opt === "object" && !Array.isArray(opt)
+          ? stripInternalKeys(opt)
+          : opt,
+      );
+    }
+    return cleaned;
+  });
+}
+
 // Authenticated fetch — returns the full survey including questions.
 // RLS is enforced via the user-scoped supabase client from auth middleware,
 // so targeting (university domain, dept, year, etc.) is honored.
@@ -56,7 +107,7 @@ export const getSurveyForRespondent = createServerFn({ method: "GET" })
     const { data: s, error } = await supabase
       .from("surveys")
       .select(
-        "id, creator_id, title, description, questions, response_count, response_goal, expires_at, target_department, target_year, is_active, university_domain, allow_general_respondents",
+        "id, creator_id, title, description, questions, response_count, response_goal, expires_at, target_department, target_year, is_active, university_domain, allow_general_respondents, is_evaluation",
       )
       .eq("id", data.id)
       .maybeSingle();
@@ -65,6 +116,13 @@ export const getSurveyForRespondent = createServerFn({ method: "GET" })
       return { survey: null as null, ownerName: null as string | null };
     }
     if (!s) return { survey: null, ownerName: null };
+
+    // Evaluation surveys carry grader-only metadata on each question (correct
+    // answers, rubrics, point values). Strip it before returning to the
+    // respondent — they should only see question text, type, and options.
+    if ((s as any).is_evaluation) {
+      (s as any).questions = sanitizeEvaluationQuestions((s as any).questions);
+    }
 
     const { data: prof } = await supabaseAdmin
       .from("profiles")
