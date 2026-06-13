@@ -908,13 +908,12 @@ function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs, onExportPDF, o
                     </thead>
                     <tbody>
                       {data.map((d) => {
-                        const pct = ((d.count / total) * 100).toFixed(1);
-                        const safe = safeCount(d.count);
+                        const pct = total > 0 ? ((d.count / total) * 100).toFixed(1) : "0.0";
                         return (
                           <tr key={d.label} className="border-b border-foreground/5">
                             <td className="py-1">{d.label}</td>
-                            <td className="py-1 text-right font-mono">{safe ?? "—"}</td>
-                            <td className="py-1 text-right font-mono text-muted-foreground">{safe ? `${pct}%` : "—"}</td>
+                            <td className="py-1 text-right font-mono">{d.count}</td>
+                            <td className="py-1 text-right font-mono text-muted-foreground">{pct}%</td>
                           </tr>
                         );
                       })}
