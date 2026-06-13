@@ -204,13 +204,20 @@ function SignupPage() {
               <Label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider">
                 {userType === "student" ? "University email" : "Email"}
               </Label>
-              <Input id="email" type="email" required value={email} onChange={(e) => { setEmail(e.target.value); setFormError(null); }}
+              <Input id="email" type="email" required value={email}
+                onChange={(e) => { setEmail(e.target.value); setFormError(null); validateEmail(e.target.value); }}
+                onBlur={(e) => validateEmail(e.target.value)}
                 placeholder={userType === "student" ? "you@yourschool.edu" : "you@example.com"}
-                className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card" />
+                className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"
+                aria-invalid={!!emailError}
+              />
               {userType === "student" && (
                 <p className="mt-1 text-[11px] text-muted-foreground">
                   Must end in <code>.edu</code>, <code>.edu.xx</code>, or <code>.ac.xx</code>.
                 </p>
+              )}
+              {emailError && (
+                <p className="mt-1 text-[11px] text-destructive">{emailError}</p>
               )}
             </div>
             <div>
