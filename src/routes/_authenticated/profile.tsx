@@ -301,3 +301,12 @@ function Field({ label, value }: { label: string; value: string }) {
   );
 }
 
+
+function ReadOnlyField({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{label}</p>
+      <p className="mt-1 rounded-md border border-foreground/10 bg-muted/40 px-3 py-2 text-sm font-medium break-words">{value}</p>
+    </div>
+  );
+}
