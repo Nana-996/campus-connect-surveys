@@ -2,9 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { Users, Filter, ArrowUpRight, Sparkles } from "lucide-react";
+import { Users, Filter, ArrowUpRight, Sparkles, WifiOff } from "lucide-react";
 
 import { tagLabel, ageLabel, AGE_RANGES, COUNTRIES, INTEREST_TAGS } from "@/lib/interests";
+import { cacheFeed, getCachedFeed } from "@/lib/offline-store";
 
 type Survey = {
   id: string;
@@ -51,6 +52,7 @@ function Feed() {
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [answered, setAnswered] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+  const [fromCache, setFromCache] = useState(false);
   // Student filters
   const [deptFilter, setDeptFilter] = useState<string>("all");
   const [yearFilter, setYearFilter] = useState<string>("all");
@@ -64,10 +66,24 @@ function Feed() {
 
   useEffect(() => {
     if (!user) return;
-    
-
     let active = true;
     (async () => {
+      // Show cached feed instantly while we attempt a refresh.
+      try {
+        const cached = await getCachedFeed(user.id);
+        if (cached && active) {
+          setSurveys(cached.surveys as Survey[]);
+          setAnswered(new Set(cached.answered));
+          setFromCache(true);
+          setLoading(false);
+        }
+      } catch {}
+
+      if (typeof navigator !== "undefined" && navigator.onLine === false) {
+        if (active) setLoading(false);
+        return;
+      }
+
       try {
         const peersPromise = isGeneral
           ? Promise.resolve({ data: [], error: null } as any)
@@ -88,9 +104,13 @@ function Feed() {
           return bB - aB;
         });
         setSurveys(rows);
-        setAnswered(new Set((resps ?? []).map((r: any) => r.survey_id)));
+        const answeredIds = (resps ?? []).map((r: any) => r.survey_id);
+        setAnswered(new Set(answeredIds));
         setCampusDepts(Array.from(new Set((peers ?? []).map((p: any) => p.department).filter(Boolean))) as string[]);
         setCampusYears(Array.from(new Set((peers ?? []).map((p: any) => p.year).filter(Boolean))) as string[]);
+        setFromCache(false);
+        // Persist for offline browsing (cap to 50 to keep storage light).
+        void cacheFeed({ user_id: user.id, surveys: rows.slice(0, 50), answered: answeredIds });
       } finally {
         if (active) setLoading(false);
       }
