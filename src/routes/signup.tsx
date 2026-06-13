@@ -168,7 +168,11 @@ function SignupPage() {
           <div className="mt-6 grid grid-cols-2 gap-3">
             <button
               type="button"
-              onClick={() => setUserType("student")}
+              onClick={() => {
+                setUserType("student");
+                setEmailError(null);
+                validateEmail(email);
+              }}
               className={`rounded-2xl border-2 p-4 text-left transition ${
                 userType === "student"
                   ? "border-primary bg-primary text-primary-foreground"
