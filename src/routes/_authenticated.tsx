@@ -2,6 +2,7 @@ import { createFileRoute, Outlet, useNavigate, useRouter } from "@tanstack/react
 import { useEffect } from "react";
 import { useAuth } from "@/lib/auth";
 import { AppHeader } from "@/components/AppHeader";
+import { SupportCard } from "@/components/SupportHelp";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated")({
