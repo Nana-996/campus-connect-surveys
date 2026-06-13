@@ -219,13 +219,14 @@ function SurveyPage() {
       }
     })();
     return () => { active = false; };
-  }, [id, fetchPublic, fetchAuthed, user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, user?.id]);
 
   // Auto-open the verify modal for unauthenticated visitors as soon as the survey loads.
   useEffect(() => {
     if (!loading && survey && !user) setVerifyOpen(true);
     if (user) setVerifyOpen(false);
-  }, [loading, survey, user]);
+  }, [loading, survey, user?.id]);
 
   // Load creator-only or respondent-state data once signed in.
   useEffect(() => {
