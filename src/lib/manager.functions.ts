@@ -2,6 +2,11 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+function fail(e: any, label: string): never {
+  console.error(`[manager:${label}]`, e);
+  throw new Error("Operation failed");
+}
+
 export const getMyManagerScope = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -26,7 +31,7 @@ export const listUniversitySurveys = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase.rpc("list_university_surveys");
-    if (error) throw new Error(error.message);
+    if (error) fail(error, "list_university_surveys");
     return (data ?? []) as Array<{
       id: string; title: string; creator_name: string;
       response_count: number; response_goal: number; is_active: boolean;
@@ -39,7 +44,7 @@ export const getSurveyTracking = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ surveyId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { data: rows, error } = await context.supabase.rpc("get_university_survey_tracking", { _survey_id: data.surveyId });
-    if (error) throw new Error(error.message);
+    if (error) fail(error, "get_survey_tracking");
     return (rows ?? []) as Array<{
       student_id: string; full_name: string; index_number: string | null;
       department: string | null; year: string | null; responded_at: string | null;
@@ -51,7 +56,7 @@ export const getSurveyResponsesForManager = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ surveyId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { data: rows, error } = await context.supabase.rpc("get_survey_responses_for_manager", { _survey_id: data.surveyId });
-    if (error) throw new Error(error.message);
+    if (error) fail(error, "get_survey_responses_for_manager");
     return (rows ?? []) as Array<{
       response_id: string;
       created_at: string;
@@ -77,7 +82,7 @@ export const getSurveyQuestionsForManager = createServerFn({ method: "POST" })
       .select("id,title,questions")
       .eq("id", data.surveyId)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) fail(error, "get_survey_questions_for_manager");
     return row as { id: string; title: string; questions: Array<{ id: string; text: string; type: string; options?: string[] }> } | null;
   });
 
@@ -96,6 +101,14 @@ export const updateMyStudentInfo = createServerFn({ method: "POST" })
       _index_number: data.index_number ?? "",
       _department: data.department ?? "",
     });
-    if (error) throw new Error(error.message);
+    if (error) {
+      // Preserve user-actionable validation messages from the RPC (e.g. "index already registered").
+      const msg = error.message || "";
+      const safe = /already registered|Invalid index number|Not authenticated/i.test(msg)
+        ? msg
+        : "Could not save your info";
+      console.error("[manager:update_my_student_info]", error);
+      throw new Error(safe);
+    }
     return { ok: true };
   });
