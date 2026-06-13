@@ -23,6 +23,8 @@ import { SurveyVerifyModal } from "@/components/SurveyVerifyModal";
 import { AppHeader } from "@/components/AppHeader";
 import { getSurveyPublic, getSurveyForRespondent } from "@/lib/survey-public.functions";
 import { getOwnerSurveyResults } from "@/lib/survey-owner.functions";
+import { cacheSurvey, getCachedSurvey, enqueueResponse } from "@/lib/offline-store";
+import { syncQueuedResponses } from "@/lib/offline-sync";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
   PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, RadarChart, Radar,
@@ -166,21 +168,52 @@ function SurveyPage() {
 
   // Load survey: authenticated users get full questions via RLS-scoped fetch;
   // anonymous viewers only see metadata (no questions) for the verify card.
+  // When offline, fall back to a previously cached copy so users can re-open
+  // and fill out questions without a connection.
   useEffect(() => {
-    
     let active = true;
     (async () => {
+      const useCache = async () => {
+        try {
+          const cached = await getCachedSurvey(id);
+          if (cached && active) {
+            setSurvey(cached as unknown as Survey);
+            setOwnerName(null);
+          }
+        } catch {}
+      };
+      if (typeof navigator !== "undefined" && navigator.onLine === false) {
+        await useCache();
+        if (active) setLoading(false);
+        return;
+      }
       try {
         const res = user
           ? await fetchAuthed({ data: { id } })
           : await fetchPublic({ data: { id } });
         if (!active) return;
-        if (!res.survey) { setSurvey(null); setLoading(false); return; }
+        if (!res.survey) { await useCache(); setLoading(false); return; }
         const surveyData = { ...(res.survey as any), questions: (res.survey as any).questions ?? [] };
         setSurvey(surveyData as Survey);
         setOwnerName(res.ownerName);
+        // Persist for offline re-open (only if questions are present).
+        if (Array.isArray(surveyData.questions) && surveyData.questions.length > 0) {
+          void cacheSurvey({
+            id: surveyData.id,
+            creator_id: surveyData.creator_id,
+            title: surveyData.title,
+            description: surveyData.description ?? "",
+            questions: surveyData.questions,
+            response_count: surveyData.response_count ?? 0,
+            response_goal: surveyData.response_goal ?? 0,
+            expires_at: surveyData.expires_at,
+            target_department: surveyData.target_department ?? null,
+            target_year: surveyData.target_year ?? null,
+          });
+        }
       } catch (e) {
-        console.warn("Survey load failed", e);
+        console.warn("Survey load failed, trying offline cache", e);
+        await useCache();
       } finally {
         if (active) setLoading(false);
       }
@@ -249,7 +282,20 @@ function SurveyPage() {
       return;
     }
     setSubmitting(true);
+    const isOffline = typeof navigator !== "undefined" && navigator.onLine === false;
     try {
+      if (isOffline) {
+        await enqueueResponse({
+          survey_id: survey.id,
+          respondent_id: user.id,
+          answers,
+          duration_ms: duration,
+        });
+        try { localStorage.removeItem(draftKey); } catch {}
+        setResult({ delta: 0, reason: "queued_offline", newBalance: 0 });
+        toast.success("Saved offline — we'll sync it when you're back online.");
+        return;
+      }
       const { error } = await supabase.from("survey_responses").insert({
         survey_id: survey.id,
         respondent_id: user.id,
@@ -280,7 +326,26 @@ function SurveyPage() {
       if (delta > 0) {
         toast.success(`+${delta} credit${delta === 1 ? "" : "s"} earned!`);
       }
+      // Opportunistically flush any other queued offline responses.
+      void syncQueuedResponses();
     } catch (err: any) {
+      // Network-style failure: save offline instead of losing the answers.
+      const msg = String(err?.message ?? err ?? "").toLowerCase();
+      const looksLikeNetwork = msg.includes("network") || msg.includes("fetch") || msg.includes("failed to fetch") || msg.includes("load failed");
+      if (looksLikeNetwork) {
+        try {
+          await enqueueResponse({
+            survey_id: survey.id,
+            respondent_id: user.id,
+            answers,
+            duration_ms: duration,
+          });
+          try { localStorage.removeItem(draftKey); } catch {}
+          setResult({ delta: 0, reason: "queued_offline", newBalance: 0 });
+          toast.success("Connection dropped — saved offline. We'll sync it for you.");
+          return;
+        } catch {}
+      }
       toast.error(err.message ?? "Failed to submit");
     } finally {
       setSubmitting(false);
