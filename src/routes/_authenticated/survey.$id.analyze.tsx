@@ -449,8 +449,7 @@ function AnalyzePage() {
       const total = data.reduce((s, x) => s + x.count, 0) || 1;
       data.forEach((c) => {
         const pct = ((c.count / total) * 100).toFixed(1);
-        const display = c.count < SUPPRESS_THRESHOLD ? "— (n<5, hidden)" : `${c.count} (${pct}%)`;
-        line(`  • ${c.label}: ${display}`, 10);
+        line(`  • ${c.label}: ${c.count} (${pct}%)`, 10);
       });
     } else {
       const answers = filtered
