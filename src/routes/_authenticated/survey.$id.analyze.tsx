@@ -806,8 +806,10 @@ function Stat({ label, value, sub }: { label: string; value: string; sub?: strin
   );
 }
 
-function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs }: {
+function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs, onExportPDF, onExportCSV }: {
   survey: Survey; filtered: Response[]; hiddenQs: Set<string>; setHiddenQs: (s: Set<string>) => void;
+  onExportPDF: (q: Question, qi: number) => Promise<void> | void;
+  onExportCSV: (q: Question, qi: number) => void;
 }) {
   const [types, setTypes] = useState<Record<string, ChartType>>({});
   const setType = (qid: string, t: ChartType) => setTypes((m) => ({ ...m, [qid]: t }));
@@ -816,6 +818,26 @@ function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs }: {
     if (next.has(qid)) next.delete(qid); else next.add(qid);
     setHiddenQs(next);
   };
+  const exportButtons = (q: Question, qi: number) => (
+    <div className="inline-flex items-center gap-1">
+      <button
+        type="button"
+        onClick={() => onExportCSV(q, qi)}
+        title="Export this question as CSV"
+        className="rounded-full border border-foreground/15 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground hover:bg-accent hover:text-foreground"
+      >
+        CSV
+      </button>
+      <button
+        type="button"
+        onClick={() => onExportPDF(q, qi)}
+        title="Export this question as PDF"
+        className="rounded-full border border-foreground/15 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground hover:bg-accent hover:text-foreground"
+      >
+        PDF
+      </button>
+    </div>
+  );
   return (
     <div className="space-y-4">
       {survey.questions.map((q, qi) => {
@@ -825,8 +847,10 @@ function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs }: {
             .map((r) => ({ id: r.id, text: String(r.answers?.[q.id] ?? "").trim(), at: r.created_at }))
             .filter((a) => a.text.length > 0);
           return (
-            <div key={q.id} className={`rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper ${hidden ? "opacity-50" : ""}`}>
-              <Header q={q} qi={qi} hidden={hidden} toggle={() => toggle(q.id)} />
+            <div key={q.id} id={`q-card-${q.id}`} className={`rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper ${hidden ? "opacity-50" : ""}`}>
+              <Header q={q} qi={qi} hidden={hidden} toggle={() => toggle(q.id)}
+                rightExtra={!hidden ? exportButtons(q, qi) : undefined}
+              />
               {!hidden && (
                 <div className="mt-3 space-y-2">
                   <p className="text-xs text-muted-foreground">
@@ -855,9 +879,14 @@ function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs }: {
         const total = data.reduce((s, x) => s + x.count, 0) || 1;
         const t = types[q.id] ?? "hbar";
         return (
-          <div key={q.id} className={`rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper ${hidden ? "opacity-50" : ""}`}>
+          <div key={q.id} id={`q-card-${q.id}`} className={`rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper ${hidden ? "opacity-50" : ""}`}>
             <Header q={q} qi={qi} hidden={hidden} toggle={() => toggle(q.id)} n={filtered.length}
-              rightExtra={!hidden ? <ChartTypeToggle value={t} onChange={(nt) => setType(q.id, nt)} /> : undefined}
+              rightExtra={!hidden ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  <ChartTypeToggle value={t} onChange={(nt) => setType(q.id, nt)} />
+                  {exportButtons(q, qi)}
+                </div>
+              ) : undefined}
             />
             {!hidden && (
               <div className="mt-3 grid gap-4 sm:grid-cols-[1fr_240px]">
@@ -892,6 +921,7 @@ function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs }: {
     </div>
   );
 }
+
 
 function Header({ q, qi, hidden, toggle, n, rightExtra }: { q: Question; qi: number; hidden: boolean; toggle: () => void; n?: number; rightExtra?: ReactNode }) {
   return (
