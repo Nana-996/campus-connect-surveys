@@ -191,7 +191,7 @@ function AuthPage() {
                 required
                 minLength={6}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => { setPassword(e.target.value); setFormError(null); }}
                 className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"
               />
             </div>
