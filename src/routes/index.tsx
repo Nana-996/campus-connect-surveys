@@ -316,6 +316,24 @@ function Landing() {
               <li><Link to="/forgot-password" className="hover:text-primary">Forgot password</Link></li>
             </ul>
           </div>
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Support</p>
+            <ul className="mt-3 space-y-2 text-sm">
+              <li>
+                <a
+                  href="https://chat.whatsapp.com/IU9duPqSXvG7Qb2U9IIoR3"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 hover:text-[#25D366]"
+                >
+                  <span className="inline-block h-2 w-2 rounded-full bg-[#25D366]" />
+                  WhatsApp Support
+                </a>
+              </li>
+              <li><Link to="/guide" className="hover:text-primary">User Guide</Link></li>
+              <li><Link to="/pitch" className="hover:text-primary">About CampusVerify</Link></li>
+            </ul>
+          </div>
         </div>
         <div className="border-t border-foreground/10 py-6 text-center">
           <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
