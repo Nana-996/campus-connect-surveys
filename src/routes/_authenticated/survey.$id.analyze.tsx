@@ -699,7 +699,7 @@ function PremiumLockCard({ label }: { label: string }) {
       </div>
       <p className="mt-3 font-serif text-2xl">{label}</p>
       <p className="mt-1 text-sm text-muted-foreground">
-        Answer surveys in your feed to keep your credit balance topped up.
+        Answer surveys in your feed to keep your credit balance healthy.
       </p>
     </div>
   );

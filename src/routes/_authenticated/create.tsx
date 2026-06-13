@@ -390,11 +390,11 @@ function Create() {
                 Respondent earns <span className="font-bold text-foreground">{1 + respondentBonus} credit{1 + respondentBonus === 1 ? "" : "s"}</span> per quality response
               </span>
               <span className="font-mono font-bold text-primary">
-                {bonusTotal > 0 ? `+${bonusTotal} reserved` : "no extra cost"}
+                {bonusTotal > 0 ? `+${bonusTotal} bonus credits` : "no extra credits"}
               </span>
             </div>
             <p className="mt-2 text-[11px] text-muted-foreground">
-              Max +3 bonus credits per response. The total reward pool ({respondentBonus} × {goalNum} response goal = {bonusTotal} credits) is reserved from your balance at publish.
+              Max +3 bonus credits per response. The total reward pool ({respondentBonus} × {goalNum} response goal = {bonusTotal} credits) is held from your balance at publish.
             </p>
           </div>
         )}

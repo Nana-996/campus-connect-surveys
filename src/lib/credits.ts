@@ -46,7 +46,6 @@ export const EARNED_EXPIRY_DAYS = 30;
 export function canAfford(
   tier: Tier,
   earned: number,
-  _paid = 0,
 ): { ok: boolean; reason?: string; shortReason?: string } {
   const t = TIERS[tier];
   if (earned < t.cost) {

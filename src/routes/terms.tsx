@@ -32,7 +32,7 @@ function TermsPage() {
         </section>
         <section>
           <h2 className="font-serif text-2xl">3. Credits</h2>
-          <p>Credits are an in-platform unit used to publish and answer surveys. Earned credits expire 30 days from issue. Paid credits do not expire. Credits have no cash value and are non-refundable except where required by law.</p>
+          <p>Credits are an in-platform unit used to publish and answer surveys. Earned credits expire 30 days from issue. Credits have no cash value and are non-refundable except where required by law.</p>
         </section>
         <section>
           <h2 className="font-serif text-2xl">4. Acceptable use</h2>
@@ -52,7 +52,7 @@ function TermsPage() {
         </section>
         <section>
           <h2 className="font-serif text-2xl">8. Limitation of liability</h2>
-          <p>To the maximum extent permitted by law, CampusVerify is not liable for indirect, incidental, or consequential damages. Our total liability for any claim is limited to the amount you paid us in the 6 months before the claim.</p>
+          <p>To the maximum extent permitted by law, CampusVerify is not liable for indirect, incidental, or consequential damages. Our total liability for any claim is limited to the greater of the amount in your credit balance or zero.</p>
         </section>
         <section>
           <h2 className="font-serif text-2xl">9. Changes</h2>
