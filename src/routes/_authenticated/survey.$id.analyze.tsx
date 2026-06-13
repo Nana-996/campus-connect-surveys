@@ -386,8 +386,7 @@ function AnalyzePage() {
         const total = data.reduce((s, x) => s + x.count, 0) || 1;
         data.forEach((c) => {
           const pct = ((c.count / total) * 100).toFixed(1);
-          const display = c.count < SUPPRESS_THRESHOLD ? "— (n<5, hidden)" : `${c.count} (${pct}%)`;
-          line(`  • ${c.label}: ${display}`, 10);
+          line(`  • ${c.label}: ${c.count} (${pct}%)`, 10);
         });
       } else {
         const answers = filtered
@@ -450,8 +449,7 @@ function AnalyzePage() {
       const total = data.reduce((s, x) => s + x.count, 0) || 1;
       data.forEach((c) => {
         const pct = ((c.count / total) * 100).toFixed(1);
-        const display = c.count < SUPPRESS_THRESHOLD ? "— (n<5, hidden)" : `${c.count} (${pct}%)`;
-        line(`  • ${c.label}: ${display}`, 10);
+        line(`  • ${c.label}: ${c.count} (${pct}%)`, 10);
       });
     } else {
       const answers = filtered
@@ -908,13 +906,12 @@ function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs, onExportPDF, o
                     </thead>
                     <tbody>
                       {data.map((d) => {
-                        const pct = ((d.count / total) * 100).toFixed(1);
-                        const safe = safeCount(d.count);
+                        const pct = total > 0 ? ((d.count / total) * 100).toFixed(1) : "0.0";
                         return (
                           <tr key={d.label} className="border-b border-foreground/5">
                             <td className="py-1">{d.label}</td>
-                            <td className="py-1 text-right font-mono">{safe ?? "—"}</td>
-                            <td className="py-1 text-right font-mono text-muted-foreground">{safe ? `${pct}%` : "—"}</td>
+                            <td className="py-1 text-right font-mono">{d.count}</td>
+                            <td className="py-1 text-right font-mono text-muted-foreground">{pct}%</td>
                           </tr>
                         );
                       })}
