@@ -17,8 +17,6 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
   PieChart, Pie, Cell, Legend, AreaChart, Area, LineChart, Line,
 } from "recharts";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas-pro";
 
 type ChartType = "hbar" | "bar" | "pie" | "donut" | "line" | "area";
 const ALL_CHART_TYPES: ChartType[] = ["hbar", "bar", "pie", "donut", "line", "area"];
