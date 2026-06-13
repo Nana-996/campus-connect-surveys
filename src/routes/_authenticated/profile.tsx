@@ -274,10 +274,6 @@ function Profile() {
           ))}
         </ul>
       )}
-
-      <div className="mt-10">
-        <SupportCard variant="default" />
-      </div>
     </div>
   );
 }
