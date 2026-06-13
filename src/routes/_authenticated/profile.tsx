@@ -3,21 +3,30 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, Sparkles, Clock, AlertTriangle, Globe2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ShieldCheck, Sparkles, Clock, AlertTriangle, Globe2, Lock } from "lucide-react";
 import { DAILY_EARN_CAP, WEEKLY_EARN_CAP, EARNED_EXPIRY_DAYS } from "@/lib/credits";
 import { ageLabel } from "@/lib/interests";
 import { IndexBackfill } from "@/components/IndexBackfill";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   component: Profile,
 });
 
 function Profile() {
-  const { profile, user } = useAuth();
+  const { profile, user, refreshProfile } = useAuth();
   const [responses, setResponses] = useState<any[]>([]);
   const [ledger, setLedger] = useState<any[]>([]);
   const [caps, setCaps] = useState<{ day_count: number; week_count: number } | null>(null);
   const [nextExpiry, setNextExpiry] = useState<string | null>(null);
+  const [name, setName] = useState(profile?.full_name ?? "");
+  const [savingName, setSavingName] = useState(false);
+
+  useEffect(() => {
+    setName(profile?.full_name ?? "");
+  }, [profile?.full_name]);
 
   useEffect(() => {
     if (!user) return;
@@ -72,7 +81,89 @@ function Profile() {
       )}
 
 
-      {/* Wallet bento */}
+      {/* Personal info & edit name */}
+      <section className="mt-8 rounded-3xl border border-foreground/15 bg-card p-6 shadow-paper">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="font-serif text-2xl leading-tight">Personal info</h2>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-secondary-foreground">
+            <Lock className="h-3 w-3" /> Private to you
+          </span>
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Only you can see this information. Your email is never shown publicly or to survey owners.
+        </p>
+
+        <form
+          className="mt-5 grid gap-4 sm:grid-cols-2"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            const trimmed = name.trim();
+            if (!trimmed) {
+              toast.error("Name cannot be empty");
+              return;
+            }
+            if (trimmed.length > 80) {
+              toast.error("Name must be 80 characters or fewer");
+              return;
+            }
+            if (trimmed === profile.full_name) return;
+            setSavingName(true);
+            const { error } = await supabase
+              .from("profiles")
+              .update({ full_name: trimmed })
+              .eq("id", profile.id);
+            setSavingName(false);
+            if (error) {
+              toast.error(error.message || "Could not update your name");
+              return;
+            }
+            toast.success("Name updated");
+            await refreshProfile();
+          }}
+        >
+          <div className="sm:col-span-2">
+            <Label htmlFor="profile-name" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              Full name
+            </Label>
+            <div className="mt-1 flex gap-2">
+              <Input
+                id="profile-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                maxLength={80}
+                placeholder="Your name"
+                autoComplete="name"
+              />
+              <Button type="submit" disabled={savingName || name.trim() === (profile.full_name ?? "")}>
+                {savingName ? "Saving…" : "Save"}
+              </Button>
+            </div>
+          </div>
+
+          <ReadOnlyField label="Email" value={user?.email ?? "—"} />
+          <ReadOnlyField label="Account type" value={isGeneral ? "General" : "Student"} />
+          {!isGeneral ? (
+            <>
+              <ReadOnlyField label="University" value={profile.university_name || "—"} />
+              <ReadOnlyField label="Verified domain" value={profile.university_domain || "—"} />
+              <ReadOnlyField label="Department" value={profile.department || "—"} />
+              <ReadOnlyField label="Year" value={profile.year || "—"} />
+              <ReadOnlyField label="Index number" value={(profile as any).index_number || "—"} />
+            </>
+          ) : (
+            <>
+              <ReadOnlyField label="Country" value={profile.country || "—"} />
+              <ReadOnlyField label="Age range" value={profile.age_range ? ageLabel(profile.age_range) : "—"} />
+            </>
+          )}
+        </form>
+
+        <p className="mt-4 text-[11px] text-muted-foreground">
+          University, account type, and credits are locked for fairness and can't be edited here.
+        </p>
+      </section>
+
+
       <div className="mt-8 grid gap-4 sm:grid-cols-6">
         {/* Credits - hero */}
         <div className="sm:col-span-4 rounded-3xl bg-primary p-7 text-primary-foreground shadow-paper">
@@ -210,3 +301,12 @@ function Field({ label, value }: { label: string; value: string }) {
   );
 }
 
+
+function ReadOnlyField({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{label}</p>
+      <p className="mt-1 rounded-md border border-foreground/10 bg-muted/40 px-3 py-2 text-sm font-medium break-words">{value}</p>
+    </div>
+  );
+}
