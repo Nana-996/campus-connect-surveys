@@ -18,6 +18,7 @@ import {
   PieChart, Pie, Cell, Legend, AreaChart, Area, LineChart, Line,
 } from "recharts";
 import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 type ChartType = "hbar" | "bar" | "pie" | "donut" | "line" | "area";
 const ALL_CHART_TYPES: ChartType[] = ["hbar", "bar", "pie", "donut", "line", "area"];
