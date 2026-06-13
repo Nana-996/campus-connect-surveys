@@ -10,6 +10,7 @@ import { DAILY_EARN_CAP, WEEKLY_EARN_CAP, EARNED_EXPIRY_DAYS } from "@/lib/credi
 import { ageLabel } from "@/lib/interests";
 import { IndexBackfill } from "@/components/IndexBackfill";
 import { toast } from "sonner";
+import { safeErrorMessage } from "@/lib/safe-error";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   component: Profile,
@@ -114,7 +115,7 @@ function Profile() {
               .eq("id", profile.id);
             setSavingName(false);
             if (error) {
-              toast.error(error.message || "Could not update your name");
+              toast.error(safeErrorMessage(error, "Could not update your name."));
               return;
             }
             toast.success("Name updated");

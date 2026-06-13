@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
+import { safeErrorMessage } from "@/lib/safe-error";
 import { Plus, Star, Trash2, X, BarChart3, Users, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,7 +55,7 @@ function PollsPage() {
         .limit(100),
       supabase.from("poll_responses").select("poll_id, answer").eq("respondent_id", user.id),
     ]);
-    if (pErr) toast.error(pErr.message);
+    if (pErr) toast.error(safeErrorMessage(pErr, "Could not load polls."));
     const polls = (pollData ?? []) as Poll[];
     setPolls(polls);
     const votes: Record<string, string> = {};
@@ -85,7 +86,7 @@ function PollsPage() {
       .from("poll_responses")
       .insert({ poll_id: poll.id, respondent_id: user.id, answer });
     if (error) {
-      toast.error(error.message);
+      toast.error(safeErrorMessage(error, "Could not save your vote."));
       return;
     }
     setMyVotes((m) => ({ ...m, [poll.id]: answer }));
@@ -99,7 +100,7 @@ function PollsPage() {
     if (!confirm("Delete this poll?")) return;
     const { error } = await supabase.from("polls").delete().eq("id", id);
     if (error) {
-      toast.error(error.message);
+      toast.error(safeErrorMessage(error, "Could not delete the poll."));
       return;
     }
     setPolls((p) => p.filter((x) => x.id !== id));
@@ -302,7 +303,7 @@ function PollComposer({ onClose, onCreated }: { onClose: () => void; onCreated: 
       .insert({ creator_id: user.id, question: q, type, options: opts });
     setSubmitting(false);
     if (error) {
-      toast.error(error.message);
+      toast.error(safeErrorMessage(error, "Could not post the poll."));
       return;
     }
     toast.success("Poll posted");

@@ -32,11 +32,14 @@ function NotFoundComponent() {
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
+  // Log full error for developers; never render raw message to users.
+  // eslint-disable-next-line no-console
+  console.error("[root-error]", error);
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold">Something went wrong</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
+        <p className="mt-2 text-sm text-muted-foreground">We hit an unexpected error. Please try again.</p>
         <button
           onClick={() => { router.invalidate(); reset(); }}
           className="mt-4 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"

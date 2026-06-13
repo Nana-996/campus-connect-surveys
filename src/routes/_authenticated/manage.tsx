@@ -6,12 +6,16 @@ import { getMyManagerScope, listUniversitySurveys } from "@/lib/manager.function
 
 export const Route = createFileRoute("/_authenticated/manage")({
   component: ManagePage,
-  errorComponent: ({ error }) => (
-    <div className="rounded-3xl border border-foreground/15 bg-card p-8 text-center">
-      <p className="font-serif text-2xl">Something went wrong</p>
-      <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
-    </div>
-  ),
+  errorComponent: ({ error }) => {
+    // eslint-disable-next-line no-console
+    console.error("[manage-error]", error);
+    return (
+      <div className="rounded-3xl border border-foreground/15 bg-card p-8 text-center">
+        <p className="font-serif text-2xl">Something went wrong</p>
+        <p className="mt-2 text-sm text-muted-foreground">We couldn't load this page. Please try again.</p>
+      </div>
+    );
+  },
   notFoundComponent: () => <p className="text-muted-foreground">Not found.</p>,
 });
 

@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { safeErrorMessage } from "@/lib/safe-error";
 import { Users, Eye, ArrowUpRight, BarChart3, Share2, Copy, Check, Trash2 } from "lucide-react";
 import {
   AlertDialog,
@@ -61,7 +62,7 @@ function MySurveys() {
     setDeleting(false);
     setDeleteTarget(null);
     if (error) {
-      toast.error(error.message || "Failed to delete survey.");
+      toast.error(safeErrorMessage(error, "Failed to delete survey."));
       return;
     }
     setSurveys((prev) => prev.filter((s) => s.id !== deleteTarget.id));
