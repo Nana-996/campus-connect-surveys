@@ -498,6 +498,7 @@ export type Database = {
           expires_at: string
           id: string
           is_active: boolean
+          min_response_seconds: number
           paid_cost: number
           questions: Json
           respondent_bonus: number
@@ -521,6 +522,7 @@ export type Database = {
           expires_at?: string
           id?: string
           is_active?: boolean
+          min_response_seconds?: number
           paid_cost?: number
           questions?: Json
           respondent_bonus?: number
@@ -544,6 +546,7 @@ export type Database = {
           expires_at?: string
           id?: string
           is_active?: boolean
+          min_response_seconds?: number
           paid_cost?: number
           questions?: Json
           respondent_bonus?: number

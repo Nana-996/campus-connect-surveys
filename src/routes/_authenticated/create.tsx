@@ -43,6 +43,7 @@ type Draft = {
   targetDept: string; targetYear: string; targetCountry: string; targetAge: string;
   targetInterests: InterestEntry[]; responseGoal: string; expiresAt: string;
   allowGeneral: boolean; questions: Question[]; respondentBonus: number;
+  minResponseSeconds: string;
 };
 const loadDraft = (): Partial<Draft> => {
   if (typeof window === "undefined") return {};
@@ -68,6 +69,7 @@ function Create() {
   const [respondentBonus, setRespondentBonus] = useState<number>(
     Math.max(0, Math.min(3, d.respondentBonus ?? 0))
   );
+  const [minResponseSeconds, setMinResponseSeconds] = useState<string>(d.minResponseSeconds ?? "15");
   const [questions, setQuestions] = useState<Question[]>(
     d.questions && d.questions.length > 0 ? d.questions :
     [{ id: crypto.randomUUID(), type: "text", text: "" }]
@@ -79,10 +81,10 @@ function Create() {
       localStorage.setItem(DRAFT_KEY, JSON.stringify({
         tier, title, description, targetDept, targetYear, targetCountry,
         targetAge, targetInterests, responseGoal, expiresAt, allowGeneral, questions,
-        respondentBonus,
+        respondentBonus, minResponseSeconds,
       }));
     } catch {}
-  }, [tier, title, description, targetDept, targetYear, targetCountry, targetAge, targetInterests, responseGoal, expiresAt, allowGeneral, questions, respondentBonus]);
+  }, [tier, title, description, targetDept, targetYear, targetCountry, targetAge, targetInterests, responseGoal, expiresAt, allowGeneral, questions, respondentBonus, minResponseSeconds]);
 
   // Reset bonus when switching off Pro
   useEffect(() => { if (tier !== "pro" && respondentBonus !== 0) setRespondentBonus(0); }, [tier]);
@@ -132,6 +134,7 @@ function Create() {
           target_interests: tier === "basic" ? [] : targetInterests.map((t) => t.tag),
           response_goal: goalNum,
           respondent_bonus: tier === "pro" ? respondentBonus : 0,
+          min_response_seconds: Math.max(0, Math.min(600, parseInt(minResponseSeconds, 10) || 15)),
           allow_general_respondents: isGeneral ? true : allowGeneral,
           ...(expiresIso ? { expires_at: expiresIso } : {}),
         })
@@ -313,6 +316,21 @@ function Create() {
                   onChange={(e) => setExpiresAt(e.target.value)}
                 />
               </div>
+            </div>
+            <div className="mt-4">
+              <Label htmlFor="speed-trap" className="text-xs">Speed trap · minimum seconds before submit</Label>
+              <Input
+                id="speed-trap"
+                type="number"
+                min={0}
+                max={600}
+                value={minResponseSeconds}
+                onChange={(e) => setMinResponseSeconds(e.target.value)}
+                placeholder="15"
+              />
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                Anti-farming: responses submitted faster than this earn no credits and are silently flagged for review. Respondents don't see the threshold. Default 15s; set 0 to disable.
+              </p>
             </div>
           </div>
 
