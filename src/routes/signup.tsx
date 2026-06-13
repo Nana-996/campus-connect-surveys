@@ -48,6 +48,18 @@ function SignupPage() {
   const [submitting, setSubmitting] = useState(false);
   const [signupNotice, setSignupNotice] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
+
+  const validateEmail = (value: string) => {
+    const domain = value.trim().split("@")[1]?.toLowerCase().trim() ?? "";
+    if (userType === "student" && domain && !ACADEMIC_RE.test(domain)) {
+      setEmailError(
+        `"${domain}" isn't a recognized university domain. Use an academic email ending in .edu, .edu.xx, or .ac.xx.`
+      );
+    } else {
+      setEmailError(null);
+    }
+  };
 
   // Don't auto-redirect signed-in users away from /signup — that creates a
   // race where clicks on the freshly-mounted form look like they caused a
