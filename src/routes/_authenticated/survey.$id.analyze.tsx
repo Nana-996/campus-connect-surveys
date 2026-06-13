@@ -1015,6 +1015,7 @@ function OpenEndedSummary({ question, answers }: {
 }
 
 
+function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs, onExportPDF, onExportCSV }: {
   survey: Survey; filtered: Response[]; hiddenQs: Set<string>; setHiddenQs: (s: Set<string>) => void;
   onExportPDF: (q: Question, qi: number) => Promise<void> | void;
   onExportCSV: (q: Question, qi: number) => void;
