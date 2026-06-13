@@ -1061,24 +1061,11 @@ function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs, onExportPDF, o
                 rightExtra={!hidden ? exportButtons(q, qi) : undefined}
               />
               {!hidden && (
-                <div className="mt-3 space-y-2">
+                <div className="mt-3 space-y-3">
                   <p className="text-xs text-muted-foreground">
-                    Free-text question — {answers.length} of {filtered.length} answered. Responses are shown anonymously (no respondent identity).
+                    Free-text question — {answers.length} of {filtered.length} answered. Responses are shown anonymously.
                   </p>
-                  {answers.length === 0 ? (
-                    <p className="rounded-xl border border-dashed border-foreground/15 p-4 text-center text-xs text-muted-foreground">No text responses yet.</p>
-                  ) : (
-                    <ul className="space-y-2">
-                      {answers.map((a, idx) => (
-                        <li key={a.id} className="rounded-xl border border-foreground/10 bg-background p-3 text-sm">
-                          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                            Anonymous #{idx + 1} · {new Date(a.at).toLocaleDateString()}
-                          </p>
-                          <p className="mt-1 whitespace-pre-wrap break-words">{a.text}</p>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                  <OpenEndedSummary question={q} answers={answers} />
                 </div>
               )}
             </div>
