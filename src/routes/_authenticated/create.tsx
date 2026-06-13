@@ -189,6 +189,21 @@ function Create() {
         <span className="text-muted-foreground">earn more by answering surveys</span>
       </p>
 
+      {lecturerId && (
+        <div className="mt-4 rounded-2xl border-2 border-primary/40 bg-primary/5 p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">Lecturer evaluation</p>
+          <p className="mt-1 text-sm">
+            This survey will be linked to{" "}
+            <strong>{lecturerName ?? "the selected lecturer"}</strong> and tagged as an official
+            evaluation. Standard credit cost still applies because you chose the custom builder.
+          </p>
+          <div className="mt-3 max-w-xs">
+            <Label htmlFor="course-code" className="text-xs">Course code (optional)</Label>
+            <Input id="course-code" value={courseCode} onChange={(e) => setCourseCode(e.target.value)} placeholder="CSCD403" />
+          </div>
+        </div>
+      )}
+
       <form onSubmit={submit} className="mt-8 space-y-6">
         {/* Tier selector */}
         <div>
