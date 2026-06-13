@@ -22,8 +22,14 @@ type Question = {
   options?: string[];
 };
 
+type CreateSearch = { lecturer?: string; course?: string };
+
 export const Route = createFileRoute("/_authenticated/create")({
   component: Create,
+  validateSearch: (s: Record<string, unknown>): CreateSearch => ({
+    lecturer: typeof s.lecturer === "string" ? s.lecturer : undefined,
+    course: typeof s.course === "string" ? s.course : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Create a survey — CampusVerify" },
