@@ -185,14 +185,14 @@ function SignupPage() {
           <form onSubmit={submit} className="mt-6 space-y-4">
             <div>
               <Label htmlFor="name" className="text-xs font-semibold uppercase tracking-wider">Full name</Label>
-              <Input id="name" required value={fullName} onChange={(e) => setFullName(e.target.value)}
+              <Input id="name" required value={fullName} onChange={(e) => { setFullName(e.target.value); setFormError(null); }}
                 className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card" />
             </div>
             <div>
               <Label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider">
                 {userType === "student" ? "University email" : "Email"}
               </Label>
-              <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+              <Input id="email" type="email" required value={email} onChange={(e) => { setEmail(e.target.value); setFormError(null); }}
                 placeholder={userType === "student" ? "you@yourschool.edu" : "you@example.com"}
                 className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card" />
               {userType === "student" && (
@@ -204,7 +204,7 @@ function SignupPage() {
             <div>
               <Label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider">Password</Label>
               <PasswordInput id="password" required minLength={6} value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => { setPassword(e.target.value); setFormError(null); }}
                 className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card" />
             </div>
             {userType === "student" && (
@@ -215,7 +215,7 @@ function SignupPage() {
                     id="dept"
                     list="dept-suggestions"
                     value={department}
-                    onChange={(e) => setDepartment(e.target.value)}
+                    onChange={(e) => { setDepartment(e.target.value); setFormError(null); }}
                     onBlur={(e) => {
                       const v = e.target.value.trim();
                       if (!v) return;
@@ -251,7 +251,7 @@ function SignupPage() {
                   id="indexno"
                   required
                   value={indexNumber}
-                  onChange={(e) => setIndexNumber(e.target.value)}
+                  onChange={(e) => { setIndexNumber(e.target.value); setFormError(null); }}
                   placeholder="e.g. 10876543 or UG/2024/0123"
                   maxLength={32}
                   className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card font-mono"
