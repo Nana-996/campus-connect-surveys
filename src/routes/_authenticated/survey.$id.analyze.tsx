@@ -12,11 +12,14 @@ import {
   ArrowLeft, BarChart3, Download, FileText, Filter, Layers, Lock,
   PieChart as PieIcon, Share2, Sparkles, Table as TableIcon, X, Save, Trash2, Copy, Eye,
   BarChartHorizontal, LineChart as LineIcon, AreaChart as AreaIcon, CircleDashed, Columns3,
+  Search, MessageSquare,
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
   PieChart, Pie, Cell, Legend, AreaChart, Area, LineChart, Line,
 } from "recharts";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { analyzeSentiment, classifyResponse } from "@/lib/text-analysis";
 
 type ChartType = "hbar" | "bar" | "pie" | "donut" | "line" | "area";
 const ALL_CHART_TYPES: ChartType[] = ["hbar", "bar", "pie", "donut", "line", "area"];
