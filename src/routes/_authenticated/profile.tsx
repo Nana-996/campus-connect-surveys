@@ -3,10 +3,13 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, Sparkles, Clock, AlertTriangle, Globe2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ShieldCheck, Sparkles, Clock, AlertTriangle, Globe2, Lock } from "lucide-react";
 import { DAILY_EARN_CAP, WEEKLY_EARN_CAP, EARNED_EXPIRY_DAYS } from "@/lib/credits";
 import { ageLabel } from "@/lib/interests";
 import { IndexBackfill } from "@/components/IndexBackfill";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   component: Profile,
