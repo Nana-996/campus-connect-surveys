@@ -291,7 +291,7 @@ function Landing() {
       </main>
 
       <footer className="mt-20 border-t border-foreground/15">
-        <div className="mx-auto grid max-w-6xl gap-8 px-6 py-12 sm:grid-cols-4">
+        <div className="mx-auto grid max-w-6xl gap-8 px-6 py-12 sm:grid-cols-5">
           <div className="sm:col-span-2">
             <p className="font-serif text-3xl text-primary">CampusVerify</p>
             <p className="mt-2 max-w-xs text-xs text-muted-foreground">
