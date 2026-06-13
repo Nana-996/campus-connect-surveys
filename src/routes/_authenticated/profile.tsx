@@ -52,7 +52,7 @@ function Profile() {
       setNextExpiry(earliest?.expires_at ?? null);
     })();
     return () => { active = false; };
-  }, [user]);
+  }, [user?.id]);
 
   if (!profile) return null;
   const isGeneral = profile.user_type === "general";

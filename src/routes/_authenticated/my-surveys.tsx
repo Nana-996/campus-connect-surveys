@@ -85,7 +85,7 @@ function MySurveys() {
       setLoading(false);
     })();
     return () => { active = false; };
-  }, [user]);
+  }, [user?.id]);
 
   return (
     <div>
