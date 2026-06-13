@@ -18,6 +18,7 @@ import {
   PieChart, Pie, Cell, Legend, AreaChart, Area, LineChart, Line,
 } from "recharts";
 import jsPDF from "jspdf";
+import html2canvas from "html2canvas-pro";
 
 type ChartType = "hbar" | "bar" | "pie" | "donut" | "line" | "area";
 const ALL_CHART_TYPES: ChartType[] = ["hbar", "bar", "pie", "donut", "line", "area"];
@@ -314,8 +315,28 @@ function AnalyzePage() {
     URL.revokeObjectURL(a.href);
   };
 
-  const exportPDF = () => {
+  const captureNodeToPng = async (node: HTMLElement): Promise<{ dataUrl: string; width: number; height: number } | null> => {
+    try {
+      const canvas = await html2canvas(node, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+        useCORS: true,
+        logging: false,
+      });
+      return { dataUrl: canvas.toDataURL("image/png"), width: canvas.width, height: canvas.height };
+    } catch (err) {
+      console.error("[analyze] capture failed", err);
+      return null;
+    }
+  };
+
+  const exportPDF = async () => {
     if (!isPremium) return promptUpgrade("Branded PDF reports", "Generate a polished, presentation-ready PDF report with your university name and CampusVerify footer — ready to email or hand in.");
+    // Ensure charts are mounted in DOM so html2canvas can capture them
+    setView("questions");
+    await new Promise((r) => setTimeout(r, 400));
+    const toastId = toast.loading("Building report…");
+    try {
     const doc = new jsPDF({ unit: "pt", format: "a4" });
     const margin = 40;
     const W = doc.internal.pageSize.getWidth();
@@ -330,6 +351,8 @@ function AnalyzePage() {
         doc.text(ln, margin, y); y += size + 4;
       }
     };
+    const ensureSpace = (h: number) => { if (y + h > H - margin - 30) { doc.addPage(); y = margin; } };
+
     line("CampusVerify · Survey Report", 9);
     line(survey.title, 20, true);
     if (survey.description) line(survey.description, 10);
@@ -337,11 +360,28 @@ function AnalyzePage() {
     if (activeFilterChips.length) line(`Filters: ${activeFilterChips.map((c) => `${c.k}=${c.v}`).join(", ")}`, 10);
     line(`Generated ${new Date().toLocaleString()}`, 9);
     y += 10;
-    survey.questions.forEach((q, qi) => {
-      if (hiddenQs.has(q.id)) return;
+
+    for (let qi = 0; qi < survey.questions.length; qi++) {
+      const q = survey.questions[qi];
+      if (hiddenQs.has(q.id)) continue;
       y += 6;
       line(`Q${qi + 1}. ${q.text}`, 12, true);
+
       if (q.type === "choice" || q.type === "rating") {
+        // Capture chart if present in DOM
+        const node = document.getElementById(`q-card-${q.id}`);
+        if (node) {
+          const cap = await captureNodeToPng(node);
+          if (cap) {
+            const maxW = W - margin * 2;
+            const ratio = cap.height / cap.width;
+            const drawW = Math.min(maxW, 460);
+            const drawH = drawW * ratio;
+            ensureSpace(drawH + 8);
+            doc.addImage(cap.dataUrl, "PNG", margin, y, drawW, drawH);
+            y += drawH + 8;
+          }
+        }
         const data = aggregateQuestion(q, filtered);
         const total = data.reduce((s, x) => s + x.count, 0) || 1;
         data.forEach((c) => {
@@ -350,14 +390,108 @@ function AnalyzePage() {
           line(`  • ${c.label}: ${display}`, 10);
         });
       } else {
-        const answered = filtered.filter((r) => String(r.answers?.[q.id] ?? "").trim()).length;
-        line(`  ${answered} of ${n} answered (free-text answers omitted from report)`, 10);
+        const answers = filtered
+          .map((r) => String(r.answers?.[q.id] ?? "").trim())
+          .filter((t) => t.length > 0);
+        line(`  ${answers.length} of ${n} answered · responses shown anonymously`, 10);
+        answers.forEach((t, idx) => {
+          line(`  Anonymous #${idx + 1}: ${t}`, 10);
+        });
       }
-    });
-    const footer = `Generated on CampusVerify · n=${n} · privacy: groups <5 suppressed`;
+    }
+      const footer = `Generated on CampusVerify · n=${n} · privacy: groups <5 suppressed`;
+      doc.setFontSize(8); doc.setTextColor(120);
+      doc.text(footer, margin, H - 20);
+      doc.save(`${survey.title.replace(/\s+/g, "_")}_report.pdf`);
+      toast.success("Report downloaded.", { id: toastId });
+    } catch (err: any) {
+      console.error("[analyze] exportPDF failed", err);
+      toast.error(err?.message ?? "Couldn't generate report.", { id: toastId });
+    }
+  };
+
+  const exportQuestionPDF = async (q: Question, qi: number) => {
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const margin = 40;
+    const W = doc.internal.pageSize.getWidth();
+    const H = doc.internal.pageSize.getHeight();
+    let y = margin;
+    const line = (txt: string, size = 11, bold = false) => {
+      doc.setFont("helvetica", bold ? "bold" : "normal");
+      doc.setFontSize(size);
+      const wrapped = doc.splitTextToSize(txt, W - margin * 2);
+      for (const ln of wrapped) {
+        if (y > H - margin - 30) { doc.addPage(); y = margin; }
+        doc.text(ln, margin, y); y += size + 4;
+      }
+    };
+    line("CampusVerify · Question Export", 9);
+    line(survey.title, 14, true);
+    line(`Q${qi + 1}. ${q.text}`, 13, true);
+    line(`n = ${n}${activeFilterChips.length ? ` · filters: ${activeFilterChips.map((c) => `${c.k}=${c.v}`).join(", ")}` : ""}`, 10);
+    y += 6;
+
+    if (q.type === "choice" || q.type === "rating") {
+      const node = document.getElementById(`q-card-${q.id}`);
+      if (node) {
+        const cap = await captureNodeToPng(node);
+        if (cap) {
+          const maxW = W - margin * 2;
+          const ratio = cap.height / cap.width;
+          const drawW = Math.min(maxW, 500);
+          const drawH = drawW * ratio;
+          if (y + drawH > H - margin - 30) { doc.addPage(); y = margin; }
+          doc.addImage(cap.dataUrl, "PNG", margin, y, drawW, drawH);
+          y += drawH + 10;
+        }
+      }
+      const data = aggregateQuestion(q, filtered);
+      const total = data.reduce((s, x) => s + x.count, 0) || 1;
+      data.forEach((c) => {
+        const pct = ((c.count / total) * 100).toFixed(1);
+        const display = c.count < SUPPRESS_THRESHOLD ? "— (n<5, hidden)" : `${c.count} (${pct}%)`;
+        line(`  • ${c.label}: ${display}`, 10);
+      });
+    } else {
+      const answers = filtered
+        .map((r) => String(r.answers?.[q.id] ?? "").trim())
+        .filter((t) => t.length > 0);
+      line(`${answers.length} of ${n} answered · responses shown anonymously`, 10, true);
+      y += 4;
+      answers.forEach((t, idx) => {
+        line(`Anonymous #${idx + 1}: ${t}`, 10);
+      });
+      if (answers.length === 0) line("No text responses yet.", 10);
+    }
     doc.setFontSize(8); doc.setTextColor(120);
-    doc.text(footer, margin, H - 20);
-    doc.save(`${survey.title.replace(/\s+/g, "_")}_report.pdf`);
+    doc.text(`Generated on CampusVerify · ${new Date().toLocaleString()}`, margin, H - 20);
+    doc.save(`${survey.title.replace(/\s+/g, "_")}_Q${qi + 1}.pdf`);
+  };
+
+  const exportQuestionCSV = (q: Question, qi: number) => {
+    let csv = "";
+    if (q.type === "choice" || q.type === "rating") {
+      const data = aggregateQuestion(q, filtered);
+      const total = data.reduce((s, x) => s + x.count, 0) || 1;
+      csv = ["option,count,percent"]
+        .concat(data.map((d) => `"${d.label.replace(/"/g, '""')}",${d.count},${((d.count / total) * 100).toFixed(2)}`))
+        .join("\n");
+    } else {
+      const answers = filtered
+        .map((r, i) => ({ idx: i + 1, text: String(r.answers?.[q.id] ?? "").trim(), at: r.created_at }))
+        .filter((a) => a.text.length > 0);
+      csv = ["anonymous_id,submitted_at,answer"]
+        .concat(answers.map((a) => `${a.idx},${a.at},"${a.text.replace(/"/g, '""')}"`))
+        .join("\n");
+    }
+    const blob = new Blob([csv], { type: "text/csv" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${survey.title.replace(/\s+/g, "_")}_Q${qi + 1}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
   };
 
   return (
@@ -498,7 +632,8 @@ function AnalyzePage() {
           ) : view === "overview" ? (
             <OverviewView survey={survey} filtered={filtered} hiddenQs={hiddenQs} />
           ) : view === "questions" ? (
-            <QuestionsView survey={survey} filtered={filtered} hiddenQs={hiddenQs} setHiddenQs={setHiddenQs} />
+            <QuestionsView survey={survey} filtered={filtered} hiddenQs={hiddenQs} setHiddenQs={setHiddenQs}
+              onExportPDF={exportQuestionPDF} onExportCSV={exportQuestionCSV} />
           ) : view === "compare" ? (
             isPremium
               ? <CompareView survey={survey} filtered={filtered} profileMap={profileMap} />
@@ -671,8 +806,10 @@ function Stat({ label, value, sub }: { label: string; value: string; sub?: strin
   );
 }
 
-function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs }: {
+function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs, onExportPDF, onExportCSV }: {
   survey: Survey; filtered: Response[]; hiddenQs: Set<string>; setHiddenQs: (s: Set<string>) => void;
+  onExportPDF: (q: Question, qi: number) => Promise<void> | void;
+  onExportCSV: (q: Question, qi: number) => void;
 }) {
   const [types, setTypes] = useState<Record<string, ChartType>>({});
   const setType = (qid: string, t: ChartType) => setTypes((m) => ({ ...m, [qid]: t }));
@@ -681,6 +818,26 @@ function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs }: {
     if (next.has(qid)) next.delete(qid); else next.add(qid);
     setHiddenQs(next);
   };
+  const exportButtons = (q: Question, qi: number) => (
+    <div className="inline-flex items-center gap-1">
+      <button
+        type="button"
+        onClick={() => onExportCSV(q, qi)}
+        title="Export this question as CSV"
+        className="rounded-full border border-foreground/15 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground hover:bg-accent hover:text-foreground"
+      >
+        CSV
+      </button>
+      <button
+        type="button"
+        onClick={() => onExportPDF(q, qi)}
+        title="Export this question as PDF"
+        className="rounded-full border border-foreground/15 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground hover:bg-accent hover:text-foreground"
+      >
+        PDF
+      </button>
+    </div>
+  );
   return (
     <div className="space-y-4">
       {survey.questions.map((q, qi) => {
@@ -690,8 +847,10 @@ function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs }: {
             .map((r) => ({ id: r.id, text: String(r.answers?.[q.id] ?? "").trim(), at: r.created_at }))
             .filter((a) => a.text.length > 0);
           return (
-            <div key={q.id} className={`rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper ${hidden ? "opacity-50" : ""}`}>
-              <Header q={q} qi={qi} hidden={hidden} toggle={() => toggle(q.id)} />
+            <div key={q.id} id={`q-card-${q.id}`} className={`rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper ${hidden ? "opacity-50" : ""}`}>
+              <Header q={q} qi={qi} hidden={hidden} toggle={() => toggle(q.id)}
+                rightExtra={!hidden ? exportButtons(q, qi) : undefined}
+              />
               {!hidden && (
                 <div className="mt-3 space-y-2">
                   <p className="text-xs text-muted-foreground">
@@ -720,9 +879,14 @@ function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs }: {
         const total = data.reduce((s, x) => s + x.count, 0) || 1;
         const t = types[q.id] ?? "hbar";
         return (
-          <div key={q.id} className={`rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper ${hidden ? "opacity-50" : ""}`}>
+          <div key={q.id} id={`q-card-${q.id}`} className={`rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper ${hidden ? "opacity-50" : ""}`}>
             <Header q={q} qi={qi} hidden={hidden} toggle={() => toggle(q.id)} n={filtered.length}
-              rightExtra={!hidden ? <ChartTypeToggle value={t} onChange={(nt) => setType(q.id, nt)} /> : undefined}
+              rightExtra={!hidden ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  <ChartTypeToggle value={t} onChange={(nt) => setType(q.id, nt)} />
+                  {exportButtons(q, qi)}
+                </div>
+              ) : undefined}
             />
             {!hidden && (
               <div className="mt-3 grid gap-4 sm:grid-cols-[1fr_240px]">
@@ -757,6 +921,7 @@ function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs }: {
     </div>
   );
 }
+
 
 function Header({ q, qi, hidden, toggle, n, rightExtra }: { q: Question; qi: number; hidden: boolean; toggle: () => void; n?: number; rightExtra?: ReactNode }) {
   return (
