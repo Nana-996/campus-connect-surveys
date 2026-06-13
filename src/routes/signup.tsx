@@ -48,6 +48,18 @@ function SignupPage() {
   const [submitting, setSubmitting] = useState(false);
   const [signupNotice, setSignupNotice] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
+
+  const validateEmail = (value: string) => {
+    const domain = value.trim().split("@")[1]?.toLowerCase().trim() ?? "";
+    if (userType === "student" && domain && !ACADEMIC_RE.test(domain)) {
+      setEmailError(
+        `"${domain}" isn't a recognized university domain. Use an academic email ending in .edu, .edu.xx, or .ac.xx.`
+      );
+    } else {
+      setEmailError(null);
+    }
+  };
 
   // Don't auto-redirect signed-in users away from /signup — that creates a
   // race where clicks on the freshly-mounted form look like they caused a
@@ -156,7 +168,11 @@ function SignupPage() {
           <div className="mt-6 grid grid-cols-2 gap-3">
             <button
               type="button"
-              onClick={() => setUserType("student")}
+              onClick={() => {
+                setUserType("student");
+                setEmailError(null);
+                validateEmail(email);
+              }}
               className={`rounded-2xl border-2 p-4 text-left transition ${
                 userType === "student"
                   ? "border-primary bg-primary text-primary-foreground"
@@ -169,7 +185,7 @@ function SignupPage() {
             </button>
             <button
               type="button"
-              onClick={() => setUserType("general")}
+              onClick={() => { setUserType("general"); setEmailError(null); }}
               className={`rounded-2xl border-2 p-4 text-left transition ${
                 userType === "general"
                   ? "border-primary bg-primary text-primary-foreground"
@@ -192,13 +208,20 @@ function SignupPage() {
               <Label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider">
                 {userType === "student" ? "University email" : "Email"}
               </Label>
-              <Input id="email" type="email" required value={email} onChange={(e) => { setEmail(e.target.value); setFormError(null); }}
+              <Input id="email" type="email" required value={email}
+                onChange={(e) => { setEmail(e.target.value); setFormError(null); validateEmail(e.target.value); }}
+                onBlur={(e) => validateEmail(e.target.value)}
                 placeholder={userType === "student" ? "you@yourschool.edu" : "you@example.com"}
-                className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card" />
+                className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"
+                aria-invalid={!!emailError}
+              />
               {userType === "student" && (
                 <p className="mt-1 text-[11px] text-muted-foreground">
                   Must end in <code>.edu</code>, <code>.edu.xx</code>, or <code>.ac.xx</code>.
                 </p>
+              )}
+              {emailError && (
+                <p className="mt-1 text-[11px] text-destructive">{emailError}</p>
               )}
             </div>
             <div>
