@@ -1,7 +1,28 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, BarChart3, Coins, Sparkles, ArrowUpRight, GraduationCap, Globe2, Send, Inbox, Trophy } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetClose,
+} from "@/components/ui/sheet";
+import {
+  ShieldCheck,
+  BarChart3,
+  Coins,
+  Sparkles,
+  ArrowUpRight,
+  GraduationCap,
+  Globe2,
+  Send,
+  Inbox,
+  Trophy,
+  Menu,
+} from "lucide-react";
+
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -41,24 +62,70 @@ function Landing() {
     <div className="min-h-screen">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
         <Link to="/" className="font-serif text-3xl text-primary">CampusVerify</Link>
+
+        {/* Desktop nav */}
         <nav className="hidden items-center gap-6 text-xs font-semibold uppercase tracking-wider text-muted-foreground sm:flex">
           <a href="#how-it-works" className="hover:text-foreground">How it works</a>
           <Link to="/about" className="hover:text-foreground">About</Link>
           <a href="#faq" className="hover:text-foreground">FAQ</a>
         </nav>
+
         <div className="flex items-center gap-2">
-          {isSignedIn ? (
-            <Link to="/feed">
-              <Button className="rounded-full bg-primary px-5">Go to feed <ArrowUpRight className="ml-1 h-4 w-4" /></Button>
-            </Link>
-          ) : (
-            <>
-              <Link to="/auth"><Button variant="ghost" className="rounded-full">Log in</Button></Link>
-              <Link to="/signup">
-                <Button className="rounded-full bg-primary px-5">Get started</Button>
+          {/* Desktop auth buttons */}
+          <div className="hidden sm:flex items-center gap-2">
+            {isSignedIn ? (
+              <Link to="/feed">
+                <Button className="rounded-full bg-primary px-5">Go to feed <ArrowUpRight className="ml-1 h-4 w-4" /></Button>
               </Link>
-            </>
-          )}
+            ) : (
+              <>
+                <Link to="/auth"><Button variant="ghost" className="rounded-full">Log in</Button></Link>
+                <Link to="/signup">
+                  <Button className="rounded-full bg-primary px-5">Get started</Button>
+                </Link>
+              </>
+            )}
+          </div>
+
+          {/* Mobile hamburger */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="sm:hidden rounded-full" aria-label="Open menu">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-3/4 sm:max-w-sm">
+              <SheetHeader>
+                <SheetTitle className="font-serif text-2xl text-primary text-left">CampusVerify</SheetTitle>
+              </SheetHeader>
+              <nav className="mt-8 flex flex-col gap-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                <SheetClose asChild>
+                  <a href="#how-it-works" className="py-2 hover:text-foreground">How it works</a>
+                </SheetClose>
+                <SheetClose asChild>
+                  <Link to="/about" className="py-2 hover:text-foreground">About</Link>
+                </SheetClose>
+                <SheetClose asChild>
+                  <a href="#faq" className="py-2 hover:text-foreground">FAQ</a>
+                </SheetClose>
+                <div className="my-2 h-px bg-border" />
+                {isSignedIn ? (
+                  <SheetClose asChild>
+                    <Link to="/feed" className="py-2 hover:text-foreground">Go to feed</Link>
+                  </SheetClose>
+                ) : (
+                  <>
+                    <SheetClose asChild>
+                      <Link to="/auth" className="py-2 hover:text-foreground">Log in</Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Link to="/signup" className="py-2 text-primary hover:text-primary/80">Get started</Link>
+                    </SheetClose>
+                  </>
+                )}
+              </nav>
+            </SheetContent>
+          </Sheet>
         </div>
       </header>
 
