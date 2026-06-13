@@ -28,7 +28,7 @@ import {
   PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, RadarChart, Radar,
   PolarGrid, PolarAngleAxis, PolarRadiusAxis, Legend,
 } from "recharts";
-import jsPDF from "jspdf";
+
 
 type ChartType = "bar" | "pie" | "donut" | "line" | "area" | "radar" | "horizontal";
 const CHART_TYPES: { value: ChartType; label: string }[] = [
@@ -308,8 +308,9 @@ function SurveyPage() {
     URL.revokeObjectURL(url);
   };
 
-  const exportPDF = () => {
+  const exportPDF = async () => {
     if (!survey || !responses) return;
+    const { default: jsPDF } = await import("jspdf");
     const doc = new jsPDF({ unit: "pt", format: "a4" });
     const margin = 40;
     const pageW = doc.internal.pageSize.getWidth();
