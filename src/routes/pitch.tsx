@@ -1148,8 +1148,13 @@ const SLIDES = [
   { id: "feed", render: Slide5 },
   { id: "creation", render: Slide6 },
   { id: "analytics", render: Slide7 },
+  { id: "quality", render: SlideQuality },
+  { id: "faculty", render: SlideFaculty },
+  { id: "lecturer", render: SlideLecturer },
+  { id: "admin", render: SlideAdmin },
   { id: "security", render: Slide8 },
   { id: "offline", render: Slide9 },
+  { id: "advantage", render: SlideAdvantage },
   { id: "users", render: Slide10 },
   { id: "vision", render: Slide11 },
 ];
