@@ -815,7 +815,206 @@ function Stat({ label, value, sub }: { label: string; value: string; sub?: strin
   );
 }
 
-function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs, onExportPDF, onExportCSV }: {
+type SentimentLabel = "positive" | "neutral" | "negative";
+
+const SENTIMENT_TONE: Record<SentimentLabel, { bar: string; chip: string; dot: string; label: string }> = {
+  positive: { bar: "#16a34a", chip: "bg-emerald-100 text-emerald-800 border-emerald-200", dot: "bg-emerald-500", label: "Positive" },
+  neutral:  { bar: "#737373", chip: "bg-neutral-100 text-neutral-800 border-neutral-200", dot: "bg-neutral-400", label: "Neutral" },
+  negative: { bar: "#dc2626", chip: "bg-rose-100 text-rose-800 border-rose-200", dot: "bg-rose-500", label: "Negative" },
+};
+
+function OpenEndedSummary({ question, answers }: {
+  question: Question;
+  answers: { id: string; text: string; at: string }[];
+}) {
+  const [open, setOpen] = useState(false);
+  const [filter, setFilter] = useState<"all" | SentimentLabel>("all");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+
+  const classified = useMemo(
+    () => answers.map((a, idx) => ({ ...a, idx, sentiment: classifyResponse(a.text) as SentimentLabel })),
+    [answers],
+  );
+  const sentiment = useMemo(() => analyzeSentiment(answers.map((a) => a.text)), [answers]);
+  const chartData = [
+    { label: "Positive", count: sentiment.positive, fill: SENTIMENT_TONE.positive.bar },
+    { label: "Neutral",  count: sentiment.neutral,  fill: SENTIMENT_TONE.neutral.bar },
+    { label: "Negative", count: sentiment.negative, fill: SENTIMENT_TONE.negative.bar },
+  ];
+
+  // Representative quotes: shortest in each bucket
+  const quotes: { sentiment: SentimentLabel; text: string }[] = [];
+  for (const s of ["positive", "neutral", "negative"] as SentimentLabel[]) {
+    const bucket = classified.filter((c) => c.sentiment === s);
+    if (bucket.length === 0) continue;
+    const shortest = bucket.reduce((a, b) => (a.text.length <= b.text.length ? a : b));
+    quotes.push({ sentiment: s, text: shortest.text });
+  }
+
+  const filteredList = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return classified.filter((c) => {
+      if (filter !== "all" && c.sentiment !== filter) return false;
+      if (q && !c.text.toLowerCase().includes(q)) return false;
+      return true;
+    });
+  }, [classified, filter, search]);
+
+  const PAGE_SIZE = 20;
+  const pageCount = Math.max(1, Math.ceil(filteredList.length / PAGE_SIZE));
+  const curPage = Math.min(page, pageCount);
+  const pageItems = filteredList.slice((curPage - 1) * PAGE_SIZE, curPage * PAGE_SIZE);
+
+  useEffect(() => { setPage(1); }, [filter, search]);
+
+  if (answers.length === 0) {
+    return (
+      <p className="rounded-xl border border-dashed border-foreground/15 p-4 text-center text-xs text-muted-foreground">
+        No text responses yet.
+      </p>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Sentiment overview */}
+      <div className="rounded-2xl border border-foreground/10 bg-background p-4">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+            Sentiment · {sentiment.total} response{sentiment.total === 1 ? "" : "s"}
+          </p>
+          <div className="flex flex-wrap gap-1.5 text-[10px]">
+            {(["positive","neutral","negative"] as SentimentLabel[]).map((s) => (
+              <span key={s} className="inline-flex items-center gap-1 text-muted-foreground">
+                <span className={`h-2 w-2 rounded-full ${SENTIMENT_TONE[s].dot}`} />
+                {SENTIMENT_TONE[s].label} {sentiment[s]}%
+              </span>
+            ))}
+          </div>
+        </div>
+        <div className="mt-3" style={{ height: 120 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+              <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} unit="%" />
+              <Tooltip formatter={(v: number) => `${v}%`} />
+              <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                {chartData.map((d) => <Cell key={d.label} fill={d.fill} />)}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Representative quotes */}
+      {quotes.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+            Representative quotes
+          </p>
+          <ul className="space-y-2">
+            {quotes.map((q) => (
+              <li key={q.sentiment} className="rounded-xl border border-foreground/10 bg-background p-3 text-sm">
+                <span className={`mb-1.5 inline-block rounded-full border px-2 py-0.5 text-[10px] font-semibold ${SENTIMENT_TONE[q.sentiment].chip}`}>
+                  {SENTIMENT_TONE[q.sentiment].label}
+                </span>
+                <p className="whitespace-pre-wrap break-words italic">"{q.text}"</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Drawer trigger */}
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetTrigger asChild>
+          <Button variant="outline" size="sm" className="rounded-full">
+            <MessageSquare className="mr-1 h-3.5 w-3.5" />
+            View all {answers.length} response{answers.length === 1 ? "" : "s"}
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="right" className="w-full max-w-md overflow-y-auto sm:max-w-lg">
+          <SheetHeader>
+            <SheetTitle className="pr-6 text-base">{question.text}</SheetTitle>
+            <p className="text-xs text-muted-foreground">
+              {answers.length} response{answers.length === 1 ? "" : "s"} · shown anonymously
+            </p>
+          </SheetHeader>
+
+          <div className="mt-4 space-y-3">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search responses…"
+                className="pl-8"
+              />
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {(["all","positive","neutral","negative"] as const).map((s) => {
+                const active = filter === s;
+                const label = s === "all" ? "All" : SENTIMENT_TONE[s].label;
+                const count = s === "all" ? classified.length : classified.filter((c) => c.sentiment === s).length;
+                return (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setFilter(s)}
+                    className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors ${
+                      active ? "bg-foreground text-background border-foreground" : "border-foreground/15 text-muted-foreground hover:bg-accent"
+                    }`}
+                  >
+                    {s !== "all" && <span className={`h-1.5 w-1.5 rounded-full ${SENTIMENT_TONE[s as SentimentLabel].dot}`} />}
+                    {label} <span className="opacity-70">· {count}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="mt-4 space-y-2">
+            {pageItems.length === 0 ? (
+              <p className="rounded-xl border border-dashed border-foreground/15 p-4 text-center text-xs text-muted-foreground">
+                No responses match.
+              </p>
+            ) : (
+              pageItems.map((a) => (
+                <div key={a.id} className="rounded-xl border border-foreground/10 bg-background p-3 text-sm">
+                  <div className="mb-1 flex items-center justify-between gap-2">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      Anonymous #{a.idx + 1} · {new Date(a.at).toLocaleDateString()}
+                    </span>
+                    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${SENTIMENT_TONE[a.sentiment].chip}`}>
+                      {SENTIMENT_TONE[a.sentiment].label}
+                    </span>
+                  </div>
+                  <p className="whitespace-pre-wrap break-words">{a.text}</p>
+                </div>
+              ))
+            )}
+          </div>
+
+          {pageCount > 1 && (
+            <div className="mt-4 flex items-center justify-between gap-2 text-xs">
+              <span className="text-muted-foreground">
+                Page {curPage} of {pageCount} · {filteredList.length} match{filteredList.length === 1 ? "" : "es"}
+              </span>
+              <div className="flex gap-1">
+                <Button variant="outline" size="sm" disabled={curPage <= 1} onClick={() => setPage(curPage - 1)}>Prev</Button>
+                <Button variant="outline" size="sm" disabled={curPage >= pageCount} onClick={() => setPage(curPage + 1)}>Next</Button>
+              </div>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
+    </div>
+  );
+}
+
+
   survey: Survey; filtered: Response[]; hiddenQs: Set<string>; setHiddenQs: (s: Set<string>) => void;
   onExportPDF: (q: Question, qi: number) => Promise<void> | void;
   onExportCSV: (q: Question, qi: number) => void;
