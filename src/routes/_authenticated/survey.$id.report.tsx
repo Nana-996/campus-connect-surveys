@@ -10,11 +10,12 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowUp, ArrowDown, FileDown, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowUp, ArrowDown, FileDown, Loader2, Sparkles } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
   PieChart, Pie, Cell, Legend,
 } from "recharts";
+import { analyzeSentiment, topWords, suggestInterpretation, type Sentiment } from "@/lib/text-analysis";
 
 type Question = { id: string; type: "text" | "choice" | "rating"; text: string; options?: string[] };
 type Survey = {
@@ -27,12 +28,13 @@ type ResponseRow = {
 };
 
 const PALETTE = ["#4a6b52", "#7c9a6b", "#c98a4b", "#b8c47a", "#8e7a5a", "#6b8e9e", "#a47b4c"];
+const SENTIMENT_COLORS = { positive: "#4a6b52", neutral: "#8e7a5a", negative: "#b04a3f" };
 
 type SectionConfig = {
   qid: string;
   included: boolean;
   comment: string;
-  showRawText: boolean; // for text questions: full vs summarized
+  showRawText: boolean; // for text questions: include raw responses in appendix
 };
 
 export const Route = createFileRoute("/_authenticated/survey/$id/report")({
@@ -45,6 +47,12 @@ function aggregate(q: Question, rows: ResponseRow[]) {
     label,
     count: rows.filter((r) => String(r.answers?.[q.id] ?? "") === label).length,
   }));
+}
+
+function textAnswersFor(q: Question, rows: ResponseRow[]): string[] {
+  return rows
+    .map((r) => String(r.answers?.[q.id] ?? "").trim())
+    .filter((t) => t.length > 0);
 }
 
 function ReportBuilderPage() {
@@ -76,7 +84,7 @@ function ReportBuilderPage() {
         setReportTitle(`${s.title} — Report`);
         setSummary(autoSummary(s, rs));
         setSections(s.questions.map((q) => ({
-          qid: q.id, included: true, comment: "", showRawText: true,
+          qid: q.id, included: true, comment: "", showRawText: false,
         })));
       } catch (err: any) {
         toast.error(err?.message ?? "Couldn't load report data.");
@@ -106,6 +114,14 @@ function ReportBuilderPage() {
     });
   };
 
+  const suggestComment = (qid: string) => {
+    const q = qMap[qid];
+    if (!q || q.type !== "text") return;
+    const text = suggestInterpretation(textAnswersFor(q, responses));
+    updateSection(qid, { comment: text });
+    toast.success("Interpretation drafted from response data.");
+  };
+
   const reportRef = useRef<HTMLDivElement | null>(null);
 
   const exportPDF = async () => {
@@ -113,7 +129,6 @@ function ReportBuilderPage() {
     setExporting(true);
     const toastId = toast.loading("Generating PDF…");
     try {
-      // Give recharts a tick to finish layout
       await new Promise((r) => setTimeout(r, 250));
       const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
         import("html2canvas-pro"),
@@ -138,14 +153,12 @@ function ReportBuilderPage() {
         });
         const imgData = canvas.toDataURL("image/png");
         if (i > 0) doc.addPage();
-        // Fit image to A4 preserving aspect
         const ratio = canvas.height / canvas.width;
         const drawW = W;
         const drawH = drawW * ratio;
         if (drawH <= H) {
           doc.addImage(imgData, "PNG", 0, 0, drawW, drawH);
         } else {
-          // Page taller than A4: scale down to fit height
           const scaledH = H;
           const scaledW = scaledH / ratio;
           const x = (W - scaledW) / 2;
@@ -167,6 +180,10 @@ function ReportBuilderPage() {
   if (!survey) return <p className="text-sm text-muted-foreground">Survey not found.</p>;
 
   const includedSections = sections.filter((s) => s.included);
+  const appendixSections = includedSections.filter((s) => {
+    const q = qMap[s.qid];
+    return q?.type === "text" && s.showRawText;
+  });
 
   return (
     <div>
@@ -263,15 +280,26 @@ function ReportBuilderPage() {
                           className="text-xs"
                         />
                         {q.type === "text" && (
-                          <div className="flex items-center justify-between text-[11px]">
-                            <span className="text-muted-foreground">
-                              {s.showRawText ? "Show full responses" : "Summarize (first 5 only)"}
-                            </span>
-                            <Switch
-                              checked={s.showRawText}
-                              onCheckedChange={(v) => updateSection(s.qid, { showRawText: v })}
-                            />
-                          </div>
+                          <>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => suggestComment(s.qid)}
+                              className="h-7 w-full rounded-full text-[11px]"
+                            >
+                              <Sparkles className="mr-1 h-3 w-3" /> Suggest from data
+                            </Button>
+                            <div className="flex items-center justify-between gap-2 text-[11px]">
+                              <span className="text-muted-foreground">
+                                Include raw responses in appendix
+                              </span>
+                              <Switch
+                                checked={s.showRawText}
+                                onCheckedChange={(v) => updateSection(s.qid, { showRawText: v })}
+                              />
+                            </div>
+                          </>
                         )}
                       </div>
                     )}
@@ -303,11 +331,19 @@ function ReportBuilderPage() {
                     question={q}
                     responses={responses}
                     comment={s.comment}
-                    showRawText={s.showRawText}
                   />
                 );
               })}
               <ClosingPage totalResponses={responses.length} />
+              {appendixSections.length > 0 && (
+                <RawResponsesAppendix
+                  sections={appendixSections.map((s) => {
+                    const q = qMap[s.qid];
+                    const originalIdx = sections.findIndex((x) => x.qid === s.qid);
+                    return { question: q, index: originalIdx + 1, answers: textAnswersFor(q, responses) };
+                  })}
+                />
+              )}
             </div>
           </div>
         </main>
@@ -329,11 +365,10 @@ function autoSummary(s: Survey, rs: ResponseRow[]) {
 }
 
 // ============= Page components =============
-// Each [data-report-page] becomes one A4 page in the PDF.
 
 const PAGE_STYLE: React.CSSProperties = {
-  width: 794,             // ~ A4 width @ 96dpi
-  minHeight: 1123,        // ~ A4 height @ 96dpi
+  width: 794,
+  minHeight: 1123,
   padding: "64px 72px",
   backgroundColor: "#ffffff",
   color: "#1a1a1a",
@@ -404,10 +439,10 @@ function Meta({ label, value }: { label: string; value: string }) {
 }
 
 function QuestionReportPage({
-  index, question, responses, comment, showRawText,
+  index, question, responses, comment,
 }: {
   index: number; question: Question; responses: ResponseRow[];
-  comment: string; showRawText: boolean;
+  comment: string;
 }) {
   const answered = responses.filter((r) => String(r.answers?.[question.id] ?? "").trim() !== "").length;
 
@@ -425,7 +460,7 @@ function QuestionReportPage({
 
       <div style={{ marginTop: 24 }}>
         {question.type === "text"
-          ? <TextResponsesBlock question={question} responses={responses} showAll={showRawText} />
+          ? <TextAnalysisBlock question={question} responses={responses} />
           : <ChoiceBlock question={question} responses={responses} />}
       </div>
 
@@ -501,38 +536,68 @@ function ChoiceBlock({ question, responses }: { question: Question; responses: R
   );
 }
 
-function TextResponsesBlock({
-  question, responses, showAll,
-}: { question: Question; responses: ResponseRow[]; showAll: boolean }) {
-  const all = responses
-    .map((r) => String(r.answers?.[question.id] ?? "").trim())
-    .filter((t) => t.length > 0);
-  const shown = showAll ? all : all.slice(0, 5);
+function TextAnalysisBlock({ question, responses }: { question: Question; responses: ResponseRow[] }) {
+  const answers = textAnswersFor(question, responses);
+  const sentiment = useMemo(() => analyzeSentiment(answers), [answers]);
+  const words = useMemo(() => topWords(answers, 5), [answers]);
 
-  if (all.length === 0) {
+  if (answers.length === 0) {
     return <p style={{ fontSize: 13, color: "#888", fontStyle: "italic" }}>No text responses submitted.</p>;
   }
 
+  const sentimentData = [
+    { label: "Positive", value: sentiment.positive, fill: SENTIMENT_COLORS.positive },
+    { label: "Neutral", value: sentiment.neutral, fill: SENTIMENT_COLORS.neutral },
+    { label: "Negative", value: sentiment.negative, fill: SENTIMENT_COLORS.negative },
+  ];
+  const maxWord = words[0]?.count ?? 1;
+
   return (
     <div>
-      {!showAll && all.length > shown.length && (
-        <p style={{ fontSize: 12, color: "#666", marginBottom: 12, fontFamily: "sans-serif" }}>
-          Showing first {shown.length} of {all.length} responses.
-        </p>
-      )}
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        {shown.map((t, i) => (
-          <div key={i} style={{
-            padding: 14, background: "#fafaf7", borderLeft: "2px solid #c98a4b",
-            fontSize: 13, lineHeight: 1.6, color: "#222",
-          }}>
-            <div style={{ fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase", color: "#888", marginBottom: 6, fontFamily: "sans-serif" }}>
-              Anonymous #{i + 1}
-            </div>
-            <div style={{ whiteSpace: "pre-wrap" }}>{t}</div>
-          </div>
-        ))}
+      <SectionLabel>Sentiment (keyword-based)</SectionLabel>
+      <div style={{ width: "100%", height: 200, background: "#fff", marginTop: 8 }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={sentimentData} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+            <XAxis dataKey="label" tick={{ fontSize: 12, fontFamily: "sans-serif" }} />
+            <YAxis unit="%" domain={[0, 100]} tick={{ fontSize: 12, fontFamily: "sans-serif" }} />
+            <Tooltip formatter={(v: number) => `${v}%`} />
+            <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+              {sentimentData.map((d, i) => <Cell key={i} fill={d.fill} />)}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
       </div>
+      <p style={{ fontSize: 11, color: "#777", fontFamily: "sans-serif", marginTop: 4 }}>
+        Based on {sentiment.total} response{sentiment.total === 1 ? "" : "s"} analyzed against a built-in keyword list. Indicative, not clinical.
+      </p>
+
+      <div style={{ marginTop: 24 }}>
+        <SectionLabel>Top 5 words (stop words excluded)</SectionLabel>
+        {words.length === 0 ? (
+          <p style={{ fontSize: 13, color: "#888", fontStyle: "italic", marginTop: 8 }}>No notable terms detected.</p>
+        ) : (
+          <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 6, fontFamily: "sans-serif" }}>
+            {words.map((w) => (
+              <div key={w.word} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13 }}>
+                <span style={{ width: 110, color: "#222", fontWeight: 600 }}>{w.word}</span>
+                <div style={{ flex: 1, background: "#eee", height: 10, borderRadius: 4, overflow: "hidden" }}>
+                  <div style={{ width: `${(w.count / maxWord) * 100}%`, height: "100%", background: "#4a6b52" }} />
+                </div>
+                <span style={{ width: 36, textAlign: "right", color: "#555" }}>{w.count}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{ fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: "#666", fontFamily: "sans-serif" }}>
+      {children}
     </div>
   );
 }
@@ -553,13 +618,67 @@ function ClosingPage({ totalResponses }: { totalResponses: number }) {
         sum to 100% due to rounding.
       </p>
       <p style={{ fontSize: 13, lineHeight: 1.7, color: "#222", marginTop: 16 }}>
-        For questions about the methodology or the original instrument, please contact the survey owner directly through
-        the CampusVerify platform.
+        Sentiment percentages for open-ended questions are computed locally using a built-in keyword list (no AI services
+        are used). They are indicative signals to guide interpretation, not a substitute for careful reading of the raw
+        text.
       </p>
 
       <PageFooter>
         <span>CampusVerify Report</span>
         <span>End of report</span>
+      </PageFooter>
+    </div>
+  );
+}
+
+function RawResponsesAppendix({
+  sections,
+}: {
+  sections: { question: Question; index: number; answers: string[] }[];
+}) {
+  return (
+    <div data-report-page style={PAGE_STYLE}>
+      <div style={{ fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "#888", fontFamily: "sans-serif" }}>
+        Appendix B
+      </div>
+      <h2 style={{ fontSize: 24, lineHeight: 1.25, margin: "8px 0 16px", fontWeight: 700 }}>
+        Raw open-ended responses
+      </h2>
+      <p style={{ fontSize: 12, color: "#666", fontFamily: "sans-serif", marginBottom: 20 }}>
+        Verbatim, anonymized responses for the questions opted in below. Included for reference; aggregate analysis above remains the primary summary.
+      </p>
+
+      {sections.map((s) => (
+        <div key={s.question.id} style={{ marginBottom: 28 }}>
+          <div style={{ fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "#888", fontFamily: "sans-serif" }}>
+            Question {s.index}
+          </div>
+          <h3 style={{ fontSize: 16, margin: "4px 0 12px", fontWeight: 700 }}>
+            Q{s.index}. {s.question.text}
+          </h3>
+          {s.answers.length === 0 ? (
+            <p style={{ fontSize: 13, color: "#888", fontStyle: "italic" }}>No responses.</p>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {s.answers.map((t, i) => (
+                <div key={i} style={{
+                  padding: 12, background: "#fafaf7", borderLeft: "2px solid #c98a4b",
+                  fontSize: 12.5, lineHeight: 1.55, color: "#222",
+                }}>
+                  <div style={{ fontSize: 9.5, letterSpacing: "0.15em", textTransform: "uppercase", color: "#888", marginBottom: 4, fontFamily: "sans-serif" }}>
+                    Anonymous #{i + 1}
+                  </div>
+                  <div style={{ whiteSpace: "pre-wrap" }}>{t}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+
+      <PageFooter>
+        <span>CampusVerify Report</span>
+        <span>Raw responses</span>
       </PageFooter>
     </div>
   );
