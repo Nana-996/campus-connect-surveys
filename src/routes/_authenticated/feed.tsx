@@ -191,6 +191,14 @@ function Feed() {
         </Link>
       </div>
 
+      {fromCache && (
+        <div className="mb-4 flex items-center gap-2 rounded-2xl border border-foreground/20 bg-card px-3 py-2 text-xs text-muted-foreground shadow-paper">
+          <WifiOff className="h-3.5 w-3.5" />
+          Showing your last cached feed. New surveys appear when you reconnect.
+        </div>
+      )}
+
+
       <div className="mb-6 flex flex-wrap items-center gap-2 text-xs">
         <Filter className="h-3.5 w-3.5 text-muted-foreground" />
         <button
