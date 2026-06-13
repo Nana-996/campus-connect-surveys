@@ -282,7 +282,20 @@ function SurveyPage() {
       return;
     }
     setSubmitting(true);
+    const isOffline = typeof navigator !== "undefined" && navigator.onLine === false;
     try {
+      if (isOffline) {
+        await enqueueResponse({
+          survey_id: survey.id,
+          respondent_id: user.id,
+          answers,
+          duration_ms: duration,
+        });
+        try { localStorage.removeItem(draftKey); } catch {}
+        setResult({ delta: 0, reason: "queued_offline", newBalance: 0 });
+        toast.success("Saved offline — we'll sync it when you're back online.");
+        return;
+      }
       const { error } = await supabase.from("survey_responses").insert({
         survey_id: survey.id,
         respondent_id: user.id,
@@ -313,7 +326,26 @@ function SurveyPage() {
       if (delta > 0) {
         toast.success(`+${delta} credit${delta === 1 ? "" : "s"} earned!`);
       }
+      // Opportunistically flush any other queued offline responses.
+      void syncQueuedResponses();
     } catch (err: any) {
+      // Network-style failure: save offline instead of losing the answers.
+      const msg = String(err?.message ?? err ?? "").toLowerCase();
+      const looksLikeNetwork = msg.includes("network") || msg.includes("fetch") || msg.includes("failed to fetch") || msg.includes("load failed");
+      if (looksLikeNetwork) {
+        try {
+          await enqueueResponse({
+            survey_id: survey.id,
+            respondent_id: user.id,
+            answers,
+            duration_ms: duration,
+          });
+          try { localStorage.removeItem(draftKey); } catch {}
+          setResult({ delta: 0, reason: "queued_offline", newBalance: 0 });
+          toast.success("Connection dropped — saved offline. We'll sync it for you.");
+          return;
+        } catch {}
+      }
       toast.error(err.message ?? "Failed to submit");
     } finally {
       setSubmitting(false);
