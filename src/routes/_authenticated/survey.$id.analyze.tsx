@@ -399,10 +399,15 @@ function AnalyzePage() {
         });
       }
     }
-    const footer = `Generated on CampusVerify · n=${n} · privacy: groups <5 suppressed`;
-    doc.setFontSize(8); doc.setTextColor(120);
-    doc.text(footer, margin, H - 20);
-    doc.save(`${survey.title.replace(/\s+/g, "_")}_report.pdf`);
+      const footer = `Generated on CampusVerify · n=${n} · privacy: groups <5 suppressed`;
+      doc.setFontSize(8); doc.setTextColor(120);
+      doc.text(footer, margin, H - 20);
+      doc.save(`${survey.title.replace(/\s+/g, "_")}_report.pdf`);
+      toast.success("Report downloaded.", { id: toastId });
+    } catch (err: any) {
+      console.error("[analyze] exportPDF failed", err);
+      toast.error(err?.message ?? "Couldn't generate report.", { id: toastId });
+    }
   };
 
   const exportQuestionPDF = async (q: Question, qi: number) => {
