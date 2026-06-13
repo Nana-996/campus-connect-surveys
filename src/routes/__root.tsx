@@ -7,8 +7,12 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/lib/auth";
+import { OfflineIndicator } from "@/components/OfflineIndicator";
+import { registerPwa } from "@/lib/pwa-register";
+import { installAutoSync } from "@/lib/offline-sync";
 
 import appCss from "../styles.css?url";
 
