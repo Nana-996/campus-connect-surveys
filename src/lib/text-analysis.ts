@@ -43,7 +43,7 @@ function tokenize(text: string): string[] {
     .filter(Boolean);
 }
 
-function classifyResponse(text: string): "positive" | "negative" | "neutral" {
+export function classifyResponse(text: string): "positive" | "negative" | "neutral" {
   const tokens = tokenize(text);
   let score = 0;
   for (let i = 0; i < tokens.length; i++) {
