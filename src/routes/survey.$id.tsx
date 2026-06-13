@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { safeErrorMessage } from "@/lib/safe-error";
 import { Download, ArrowLeft, Users, FileText, BarChart3, TrendingUp, Activity, Hash, Lock, ShieldCheck, Share2, Copy, Check, Trash2 } from "lucide-react";
 import {
   AlertDialog,
@@ -157,7 +158,7 @@ function SurveyPage() {
     setDeleting(false);
     setDeleteOpen(false);
     if (error) {
-      toast.error(error.message || "Failed to delete survey.");
+      toast.error(safeErrorMessage(error, "Failed to delete survey."));
       return;
     }
     toast.success("Survey deleted.");

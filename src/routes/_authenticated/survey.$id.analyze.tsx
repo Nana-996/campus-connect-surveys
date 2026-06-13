@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { safeErrorMessage } from "@/lib/safe-error";
 import {
   ArrowLeft, BarChart3, Download, FileText, Filter, Layers, Lock,
   PieChart as PieIcon, Share2, Sparkles, Table as TableIcon, X, Save, Trash2, Copy, Eye,
@@ -248,7 +249,7 @@ function AnalyzePage() {
       survey_id: id, creator_id: user!.id, name,
       config: { view, filters, hiddenQs: Array.from(hiddenQs) },
     });
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(safeErrorMessage(error, "Could not save the view."));
     const { data } = await supabase.from("survey_report_views" as any).select("*").eq("survey_id", id).order("created_at", { ascending: false });
     setSavedViews((data as any) ?? []);
     toast.success("View saved.");
@@ -271,7 +272,7 @@ function AnalyzePage() {
       survey_id: id, creator_id: user!.id, token,
       expires_at: new Date(Date.now() + 90 * 86400_000).toISOString(),
     });
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(safeErrorMessage(error, "Could not create share link."));
     const { data } = await supabase.from("survey_share_tokens" as any).select("*").eq("survey_id", id).order("created_at", { ascending: false });
     setShareTokens((data as any) ?? []);
     setNewToken(token);

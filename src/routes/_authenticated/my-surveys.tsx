@@ -61,7 +61,7 @@ function MySurveys() {
     setDeleting(false);
     setDeleteTarget(null);
     if (error) {
-      toast.error(error.message || "Failed to delete survey.");
+      toast.error(safeErrorMessage(error, "Failed to delete survey."));
       return;
     }
     setSurveys((prev) => prev.filter((s) => s.id !== deleteTarget.id));
