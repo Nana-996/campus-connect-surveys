@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
 import {
@@ -7,20 +6,27 @@ import {
   ArrowRight,
   ShieldCheck,
   Coins,
-  Wifi,
+  WifiOff,
   Users,
   FileBarChart,
   GraduationCap,
-  Lock,
   Sparkles,
   Maximize2,
   Database,
-  MapPin,
-  TrendingUp,
-  Quote,
   Target,
   Layers,
-  Globe2,
+  Building2,
+  FlaskConical,
+  Smartphone,
+  CheckCircle2,
+  TrendingUp,
+  Handshake,
+  Rocket,
+  DollarSign,
+  Filter,
+  Send,
+  PenLine,
+  ArrowDownToLine,
 } from "lucide-react";
 
 export const Route = createFileRoute("/pitch")({
@@ -28,46 +34,76 @@ export const Route = createFileRoute("/pitch")({
   head: () => ({
     meta: [
       { title: "CampusVerify — Pitch Deck" },
-      { name: "description", content: "Animated pitch deck for CampusVerify, a campus-scoped survey platform for Ghanaian universities." },
+      { name: "description", content: "The verified student research network. A premium pitch deck for CampusVerify." },
       { name: "robots", content: "noindex" },
     ],
   }),
 });
 
-/* ---------- design tokens (scoped to this route) ---------- */
-const PALETTE = {
-  bg: "#0B1020",
-  bgSoft: "#111733",
-  ink: "#F7F4EC",
-  inkSoft: "#C9C5B8",
-  primary: "#E94F37", // Ghana-flag-inspired red
-  gold: "#F2C14E",
-  green: "#3DA35D",
-  line: "rgba(247,244,236,0.12)",
+/* ---------- brand tokens ---------- */
+const C = {
+  green: "#1a3a2a",
+  greenDeep: "#102218",
+  greenSoft: "#234835",
+  cream: "#f5f0e8",
+  creamSoft: "#e8e0d2",
+  lime: "#b8e04a",
+  limeDeep: "#9bc436",
+  ink: "#0d1f15",
+  muted: "rgba(245,240,232,0.72)",
+  mutedDark: "rgba(26,58,42,0.72)",
+  line: "rgba(245,240,232,0.14)",
+  lineDark: "rgba(26,58,42,0.16)",
 };
 
-/* ---------- slide content ---------- */
-type Slide = {
-  id: string;
-  render: () => React.ReactElement;
-};
+const SERIF = `'Cormorant Garamond', 'Playfair Display', Georgia, serif`;
+const SANS = `'Inter', 'Helvetica Neue', system-ui, sans-serif`;
 
+/* ---------- motion ---------- */
 const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 24 },
+  hidden: { opacity: 0, y: 28 },
   show: (i: number = 0) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: 0.15 + i * 0.08, duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+    transition: { delay: 0.12 + i * 0.08, duration: 0.6, ease: [0.22, 1, 0.36, 1] },
   }),
 };
 
-function Kicker({ children }: { children: React.ReactNode }) {
+const fadeIn: Variants = {
+  hidden: { opacity: 0 },
+  show: (i: number = 0) => ({
+    opacity: 1,
+    transition: { delay: 0.1 + i * 0.1, duration: 0.7, ease: "easeOut" },
+  }),
+};
+
+/* ---------- shared bits ---------- */
+function Wordmark({ dark = false }: { dark?: boolean }) {
+  return (
+    <div
+      className="flex items-center gap-2 text-[13px] font-bold uppercase tracking-[0.28em]"
+      style={{ color: dark ? C.green : C.cream, fontFamily: SANS }}
+    >
+      <span
+        className="inline-block h-2 w-2 rounded-full"
+        style={{ background: C.lime, boxShadow: `0 0 14px ${C.lime}` }}
+      />
+      Campus<span style={{ color: dark ? C.green : C.lime }}>Verify</span>
+    </div>
+  );
+}
+
+function Kicker({ children, dark = false }: { children: React.ReactNode; dark?: boolean }) {
   return (
     <motion.span
       variants={fadeUp}
       custom={0}
-      className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-bold uppercase tracking-[0.22em]"
-      style={{ borderColor: PALETTE.line, color: PALETTE.gold }}
+      className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.28em]"
+      style={{
+        borderColor: dark ? C.lineDark : C.line,
+        color: dark ? C.green : C.lime,
+        fontFamily: SANS,
+      }}
     >
       <Sparkles className="h-3 w-3" /> {children}
     </motion.span>
@@ -76,341 +112,773 @@ function Kicker({ children }: { children: React.ReactNode }) {
 
 function SlideShell({
   children,
-  align = "center",
+  bg = "cream",
+  align = "start",
 }: {
   children: React.ReactNode;
+  bg?: "green" | "cream";
   align?: "center" | "start";
 }) {
+  const isGreen = bg === "green";
   return (
     <div
-      className={`flex h-full w-full flex-col px-16 py-14 ${
-        align === "center" ? "items-center justify-center text-center" : "items-start justify-center"
-      }`}
+      className="relative h-full w-full overflow-hidden"
+      style={{
+        background: isGreen
+          ? `radial-gradient(900px 500px at 12% 8%, rgba(184,224,74,0.10), transparent 60%), radial-gradient(700px 400px at 88% 92%, rgba(184,224,74,0.06), transparent 60%), ${C.green}`
+          : C.cream,
+        color: isGreen ? C.cream : C.green,
+      }}
     >
-      {children}
+      {/* grain */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-[0.06] mix-blend-overlay"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 1px 1px, rgba(0,0,0,0.6) 1px, transparent 0)",
+          backgroundSize: "3px 3px",
+        }}
+      />
+      {/* geometric corner shape */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rotate-12 opacity-[0.08]"
+        style={{ background: isGreen ? C.lime : C.green, borderRadius: "30%" }}
+      />
+      <div
+        className={`relative flex h-full w-full flex-col px-16 py-14 ${
+          align === "center" ? "items-center justify-center text-center" : "items-start justify-start"
+        }`}
+      >
+        {children}
+      </div>
     </div>
   );
 }
 
-/* Slide 1 — Title */
-const SlideTitle = () => (
-  <SlideShell>
-    <Kicker>A pitch for the board</Kicker>
+/* ============ SLIDE 1 — Hook ============ */
+const Slide1 = () => (
+  <SlideShell bg="green" align="center">
+    <div className="absolute left-12 top-10"><Wordmark /></div>
+    <Kicker>A pitch · 2026</Kicker>
     <motion.h1
       variants={fadeUp}
       custom={1}
-      className="mt-8 font-serif text-[120px] leading-[0.9] tracking-tight"
-      style={{ color: PALETTE.ink }}
+      className="mt-10 max-w-[1100px] text-[88px] leading-[0.98] tracking-tight"
+      style={{ fontFamily: SERIF, color: C.cream }}
     >
-      Campus<span style={{ color: PALETTE.primary }}>Verify</span>
+      Thesis season shouldn't mean{" "}
+      <span style={{ color: C.lime, fontStyle: "italic" }}>DMing strangers</span>{" "}
+      on WhatsApp.
     </motion.h1>
     <motion.p
       variants={fadeUp}
       custom={2}
-      className="mt-8 max-w-3xl text-2xl"
-      style={{ color: PALETTE.inkSoft }}
+      className="mt-10 text-2xl"
+      style={{ color: C.muted, fontFamily: SANS, fontWeight: 300 }}
     >
-      A verified, campus-scoped research platform built for Ghanaian universities — so student
-      research is finally <em style={{ color: PALETTE.gold }}>honest, affordable, and ours.</em>
+      CampusVerify — the verified student research network.
     </motion.p>
     <motion.div
       variants={fadeUp}
       custom={3}
-      className="mt-12 flex items-center gap-3 text-sm uppercase tracking-[0.3em]"
-      style={{ color: PALETTE.inkSoft }}
-    >
-      <MapPin className="h-4 w-4" style={{ color: PALETTE.green }} /> Made for Ghana · Built with care
-    </motion.div>
+      className="mt-16 h-px w-32"
+      style={{ background: C.lime }}
+    />
   </SlideShell>
 );
 
-/* Slide 2 — The Problem */
-const SlideProblem = () => (
-  <SlideShell align="start">
-    <Kicker>The problem</Kicker>
-    <motion.h2 variants={fadeUp} custom={1} className="mt-6 font-serif text-7xl tracking-tight" style={{ color: PALETTE.ink }}>
-      Student research is broken — in two ways.
-    </motion.h2>
-    <div className="mt-12 grid w-full grid-cols-2 gap-8">
-      {[
-        {
-          n: "01",
-          h: "Data you can't trust",
-          p: "Free tools let anyone respond. A dissertation about engineering students in Kumasi can end up answered by bots, click-farms, or strangers from another continent.",
-        },
-        {
-          n: "02",
-          h: "Cost you can't afford",
-          p: "Paid panels charge in dollars. Undergraduates fall back on WhatsApp groups — and students with smaller networks systematically get less data.",
-        },
-      ].map((c, i) => (
-        <motion.div
-          key={c.n}
-          variants={fadeUp}
-          custom={2 + i}
-          className="rounded-2xl border p-8"
-          style={{ borderColor: PALETTE.line, background: PALETTE.bgSoft }}
-        >
-          <div className="font-serif text-5xl" style={{ color: PALETTE.primary }}>{c.n}</div>
-          <h3 className="mt-4 text-2xl font-semibold" style={{ color: PALETTE.ink }}>{c.h}</h3>
-          <p className="mt-3 text-lg leading-relaxed" style={{ color: PALETTE.inkSoft }}>{c.p}</p>
-        </motion.div>
-      ))}
-    </div>
-  </SlideShell>
-);
+/* ============ SLIDE 2 — Problem ============ */
+const Slide2 = () => {
+  const points = [
+    "Students post surveys to WhatsApp groups and get responses from bots, friends, and people who don't fit their target sample.",
+    "There is no way to verify a respondent is actually a university student, in the right department, in the right year.",
+    "Survey panels like SurveyMonkey Audience cost $200–$500 per study — completely inaccessible to students.",
+  ];
+  return (
+    <SlideShell bg="cream">
+      <Kicker dark>The problem</Kicker>
+      <motion.h2
+        variants={fadeUp}
+        custom={1}
+        className="mt-6 max-w-4xl text-[68px] leading-[1.02] tracking-tight"
+        style={{ fontFamily: SERIF, color: C.green }}
+      >
+        The undergraduate research data crisis.
+      </motion.h2>
+      <div className="mt-12 grid w-full max-w-5xl gap-5">
+        {points.map((p, i) => (
+          <motion.div
+            key={i}
+            variants={fadeUp}
+            custom={2 + i}
+            className="flex items-start gap-6 border-l-4 py-3 pl-6"
+            style={{ borderColor: C.lime }}
+          >
+            <div
+              className="text-5xl font-light leading-none"
+              style={{ fontFamily: SERIF, color: C.green, opacity: 0.4 }}
+            >
+              0{i + 1}
+            </div>
+            <p
+              className="text-xl leading-[1.45]"
+              style={{ color: C.green, fontFamily: SANS, fontWeight: 400 }}
+            >
+              {p}
+            </p>
+          </motion.div>
+        ))}
+      </div>
+      <motion.p
+        variants={fadeUp}
+        custom={6}
+        className="mt-10 text-base italic"
+        style={{ color: C.mutedDark, fontFamily: SERIF }}
+      >
+        The result: low-quality data, failed peer review, and wasted semesters.
+      </motion.p>
+    </SlideShell>
+  );
+};
 
-/* Slide 3 — The Solution */
-const SlideSolution = () => (
-  <SlideShell>
-    <Kicker>Our answer</Kicker>
-    <motion.h2 variants={fadeUp} custom={1} className="mt-6 max-w-5xl font-serif text-7xl leading-[1] tracking-tight" style={{ color: PALETTE.ink }}>
-      A <span style={{ color: PALETTE.gold }}>credit-powered</span> feed of <span style={{ color: PALETTE.primary }}>verified classmates.</span>
-    </motion.h2>
-    <motion.p variants={fadeUp} custom={2} className="mt-8 max-w-3xl text-xl" style={{ color: PALETTE.inkSoft }}>
-      Sign up with your academic email. Your domain decides your campus. Earn credits by answering,
-      spend them to publish. No money changes hands — and every researcher is also a respondent.
-    </motion.p>
-    <motion.div variants={fadeUp} custom={3} className="mt-12 flex items-center gap-10">
-      {[
-        { icon: GraduationCap, label: "Verified academic email" },
-        { icon: Users, label: "Scoped to your campus" },
-        { icon: Coins, label: "Credit, not cash" },
-      ].map(({ icon: Icon, label }, i) => (
-        <motion.div key={label} variants={fadeUp} custom={4 + i} className="flex flex-col items-center gap-3">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full" style={{ background: PALETTE.bgSoft, border: `1px solid ${PALETTE.line}` }}>
-            <Icon className="h-7 w-7" style={{ color: PALETTE.gold }} />
-          </div>
-          <span className="text-sm uppercase tracking-[0.18em]" style={{ color: PALETTE.inkSoft }}>{label}</span>
-        </motion.div>
-      ))}
-    </motion.div>
-  </SlideShell>
-);
-
-/* Slide 4 — Why this matters for Ghana */
-const SlideGhana = () => (
-  <SlideShell align="start">
-    <Kicker>Why it matters here</Kicker>
-    <motion.h2 variants={fadeUp} custom={1} className="mt-6 font-serif text-7xl tracking-tight" style={{ color: PALETTE.ink }}>
-      Built for the realities of <span style={{ color: PALETTE.green }}>Ghanaian campuses.</span>
-    </motion.h2>
-    <div className="mt-12 grid w-full grid-cols-3 gap-6">
-      {[
-        { icon: Wifi, h: "Offline-first", p: "Campus Wi-Fi drops. Mobile data is precious. Surveys cache locally and sync when you're back online." },
-        { icon: Globe2, h: "Local-domain aware", p: "Recognises .edu.gh, .ug.edu.gh, .knust.edu.gh, .ucc.edu.gh and more — so campus identity isn't guessed." },
-        { icon: Coins, h: "Zero cost to students", p: "No subscriptions, no panel fees, no foreign-card requirement. Currency is participation." },
-      ].map((c, i) => (
-        <motion.div key={c.h} variants={fadeUp} custom={2 + i} className="rounded-2xl border p-6" style={{ borderColor: PALETTE.line, background: PALETTE.bgSoft }}>
-          <c.icon className="h-7 w-7" style={{ color: PALETTE.primary }} />
-          <h3 className="mt-4 text-xl font-semibold" style={{ color: PALETTE.ink }}>{c.h}</h3>
-          <p className="mt-2 text-base leading-relaxed" style={{ color: PALETTE.inkSoft }}>{c.p}</p>
-        </motion.div>
-      ))}
-    </div>
-  </SlideShell>
-);
-
-/* Slide 5 — Features */
-const SlideFeatures = () => (
-  <SlideShell align="start">
-    <Kicker>What students get</Kicker>
-    <motion.h2 variants={fadeUp} custom={1} className="mt-6 font-serif text-7xl tracking-tight" style={{ color: PALETTE.ink }}>
-      One platform. The whole research loop.
-    </motion.h2>
-    <div className="mt-12 grid w-full grid-cols-2 gap-6">
-      {[
-        { icon: Target, h: "Targeted recruitment", p: "Filter by department, year, interests — the precision a paid panel charges hundreds of dollars for." },
-        { icon: FileBarChart, h: "One-click reports", p: "Cover page, executive summary, per-question analysis, owner commentary — exported as a clean PDF a supervisor can sign off on." },
-        { icon: GraduationCap, h: "Lecturer evaluations", p: "A standardised, anonymous evaluation flow — so department heads get real signal, not coerced praise." },
-        { icon: Users, h: "Public-good polls", p: "General-interest polls open beyond a single campus, for when the question really is national." },
-      ].map((c, i) => (
-        <motion.div key={c.h} variants={fadeUp} custom={2 + i} className="flex items-start gap-5 rounded-2xl border p-6" style={{ borderColor: PALETTE.line, background: PALETTE.bgSoft }}>
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full" style={{ background: "rgba(233,79,55,0.12)" }}>
-            <c.icon className="h-6 w-6" style={{ color: PALETTE.primary }} />
-          </div>
-          <div>
-            <h3 className="text-xl font-semibold" style={{ color: PALETTE.ink }}>{c.h}</h3>
-            <p className="mt-1 text-base leading-relaxed" style={{ color: PALETTE.inkSoft }}>{c.p}</p>
-          </div>
-        </motion.div>
-      ))}
-    </div>
-  </SlideShell>
-);
-
-/* Slide 6 — Security & Trust */
-const SlideSecurity = () => (
-  <SlideShell align="start">
-    <Kicker>Trust by design</Kicker>
-    <motion.h2 variants={fadeUp} custom={1} className="mt-6 font-serif text-7xl tracking-tight" style={{ color: PALETTE.ink }}>
-      Privacy is enforced in the database, not just the UI.
-    </motion.h2>
-    <div className="mt-12 grid w-full grid-cols-2 gap-6">
-      {[
-        { icon: ShieldCheck, h: "Row-level security on every table", p: "Even if our app code had a bug, the database itself refuses to leak data across users or campuses." },
-        { icon: Lock, h: "Roles you can't escalate", p: "Permissions live in a separate, signed-off table — no hidden admin flag on a profile, no client-side privilege checks." },
-        { icon: Quote, h: "Respondents stay anonymous", p: "Researchers see pseudonyms, never raw identities. Evaluation answer keys are stripped server-side before students see them." },
-        { icon: Database, h: "Auditable migrations", p: "Every schema change is a numbered SQL file. The board can see exactly what changed, when, and why." },
-      ].map((c, i) => (
-        <motion.div key={c.h} variants={fadeUp} custom={2 + i} className="flex items-start gap-5 rounded-2xl border p-6" style={{ borderColor: PALETTE.line, background: PALETTE.bgSoft }}>
-          <c.icon className="h-7 w-7 shrink-0" style={{ color: PALETTE.green }} />
-          <div>
-            <h3 className="text-xl font-semibold" style={{ color: PALETTE.ink }}>{c.h}</h3>
-            <p className="mt-1 text-base leading-relaxed" style={{ color: PALETTE.inkSoft }}>{c.p}</p>
-          </div>
-        </motion.div>
-      ))}
-    </div>
-  </SlideShell>
-);
-
-/* Slide 7 — Value to the school */
-const SlideValue = () => (
-  <SlideShell align="start">
-    <Kicker>For the school</Kicker>
-    <motion.h2 variants={fadeUp} custom={1} className="mt-6 font-serif text-7xl tracking-tight" style={{ color: PALETTE.ink }}>
-      What the institution gains.
-    </motion.h2>
-    <div className="mt-12 grid w-full grid-cols-4 gap-5">
-      {[
-        { stat: "100%", label: "of respondents are verified students of the campus" },
-        { stat: "0₵", label: "cost to the student or department to participate" },
-        { stat: "1 click", label: "from raw responses to a board-ready PDF report" },
-        { stat: "Always", label: "anonymous evaluations — honest feedback for faculty" },
-      ].map((s, i) => (
-        <motion.div key={s.stat} variants={fadeUp} custom={2 + i} className="rounded-2xl border p-6" style={{ borderColor: PALETTE.line, background: PALETTE.bgSoft }}>
-          <div className="font-serif text-5xl leading-none" style={{ color: PALETTE.gold }}>{s.stat}</div>
-          <p className="mt-4 text-sm leading-relaxed" style={{ color: PALETTE.inkSoft }}>{s.label}</p>
-        </motion.div>
-      ))}
-    </div>
-    <motion.p variants={fadeUp} custom={6} className="mt-10 max-w-3xl text-xl" style={{ color: PALETTE.inkSoft }}>
-      Better dissertations. Honest lecturer feedback. A research culture that doesn't depend on
-      who has the biggest WhatsApp group.
-    </motion.p>
-  </SlideShell>
-);
-
-/* Slide 8 — How it works */
-const SlideHow = () => (
-  <SlideShell align="start">
-    <Kicker>In 60 seconds</Kicker>
-    <motion.h2 variants={fadeUp} custom={1} className="mt-6 font-serif text-7xl tracking-tight" style={{ color: PALETTE.ink }}>
-      How a student uses it.
-    </motion.h2>
-    <div className="mt-12 grid w-full grid-cols-4 gap-5">
-      {[
-        { n: "1", t: "Sign up", p: "with your academic email and verify the link." },
-        { n: "2", t: "Answer", p: "surveys from classmates and earn credits." },
-        { n: "3", t: "Publish", p: "your own survey — spend credits, target by year or department." },
-        { n: "4", t: "Report", p: "click once, download a clean PDF for your supervisor." },
-      ].map((s, i) => (
-        <motion.div key={s.n} variants={fadeUp} custom={2 + i} className="relative rounded-2xl border p-6" style={{ borderColor: PALETTE.line, background: PALETTE.bgSoft }}>
-          <div className="font-serif text-6xl leading-none" style={{ color: PALETTE.primary }}>{s.n}</div>
-          <h3 className="mt-4 text-xl font-semibold" style={{ color: PALETTE.ink }}>{s.t}</h3>
-          <p className="mt-2 text-base leading-relaxed" style={{ color: PALETTE.inkSoft }}>{s.p}</p>
-        </motion.div>
-      ))}
-    </div>
-  </SlideShell>
-);
-
-/* Slide 9 — Tech foundation */
-const SlideTech = () => (
-  <SlideShell align="start">
-    <Kicker>Engineering</Kicker>
-    <motion.h2 variants={fadeUp} custom={1} className="mt-6 font-serif text-7xl tracking-tight" style={{ color: PALETTE.ink }}>
-      A modern, low-cost, edge-deployed stack.
-    </motion.h2>
-    <div className="mt-12 grid w-full grid-cols-3 gap-6">
-      {[
-        { icon: Layers, h: "React + TanStack Start", p: "Server-rendered, type-safe routing, instant page loads even on weak networks." },
-        { icon: Database, h: "Postgres + row-level security", p: "Industry-standard database with privacy enforced at the data layer." },
-        { icon: Globe2, h: "Edge runtime", p: "Hosted on Cloudflare's network — geographically close to West African users, no cold starts." },
-      ].map((c, i) => (
-        <motion.div key={c.h} variants={fadeUp} custom={2 + i} className="rounded-2xl border p-6" style={{ borderColor: PALETTE.line, background: PALETTE.bgSoft }}>
-          <c.icon className="h-7 w-7" style={{ color: PALETTE.gold }} />
-          <h3 className="mt-4 text-xl font-semibold" style={{ color: PALETTE.ink }}>{c.h}</h3>
-          <p className="mt-2 text-base leading-relaxed" style={{ color: PALETTE.inkSoft }}>{c.p}</p>
-        </motion.div>
-      ))}
-    </div>
-    <motion.p variants={fadeUp} custom={6} className="mt-10 max-w-3xl text-lg italic" style={{ color: PALETTE.inkSoft }}>
-      Translation: the platform stays fast, stays cheap to run, and stays safe — even at university scale.
-    </motion.p>
-  </SlideShell>
-);
-
-/* Slide 10 — Roadmap */
-const SlideRoadmap = () => (
-  <SlideShell align="start">
-    <Kicker>What's next</Kicker>
-    <motion.h2 variants={fadeUp} custom={1} className="mt-6 font-serif text-7xl tracking-tight" style={{ color: PALETTE.ink }}>
-      A path from pilot to national.
-    </motion.h2>
-    <div className="mt-12 w-full space-y-5">
-      {[
-        { tag: "Now", h: "Pilot with one department", p: "Roll out to a single department; measure response rates and dissertation outcomes vs. baseline." },
-        { tag: "Term 2", h: "Campus-wide rollout", p: "Open to every verified student. Add SMS-based credit reminders for users with limited data." },
-        { tag: "Year 2", h: "Inter-university network", p: "Federate across Ghanaian universities — collaborative research at a national scale." },
-      ].map((s, i) => (
-        <motion.div key={s.tag} variants={fadeUp} custom={2 + i} className="flex items-start gap-6 rounded-2xl border p-6" style={{ borderColor: PALETTE.line, background: PALETTE.bgSoft }}>
-          <div className="w-28 shrink-0 text-sm font-bold uppercase tracking-[0.22em]" style={{ color: PALETTE.gold }}>{s.tag}</div>
-          <div>
-            <h3 className="text-2xl font-semibold" style={{ color: PALETTE.ink }}>{s.h}</h3>
-            <p className="mt-1 text-base leading-relaxed" style={{ color: PALETTE.inkSoft }}>{s.p}</p>
-          </div>
-          <TrendingUp className="ml-auto h-6 w-6 shrink-0" style={{ color: PALETTE.green }} />
-        </motion.div>
-      ))}
-    </div>
-  </SlideShell>
-);
-
-/* Slide 11 — Closing */
-const SlideClose = () => (
-  <SlideShell>
-    <Kicker>The ask</Kicker>
+/* ============ SLIDE 3 — What it is ============ */
+const Slide3 = () => (
+  <SlideShell bg="green">
+    <Kicker>What it is</Kicker>
     <motion.h2
       variants={fadeUp}
       custom={1}
-      className="mt-8 max-w-5xl font-serif text-[110px] leading-[0.95] tracking-tight"
-      style={{ color: PALETTE.ink }}
+      className="mt-6 max-w-5xl text-[60px] leading-[1.02] tracking-tight"
+      style={{ fontFamily: SERIF, color: C.cream }}
     >
-      Let our students <span style={{ color: PALETTE.primary }}>research</span>{" "}
-      like the <span style={{ color: PALETTE.gold }}>world's best.</span>
+      A <span style={{ color: C.lime }}>credit-powered</span> survey network — verified, scoped, and free.
     </motion.h2>
-    <motion.p variants={fadeUp} custom={2} className="mt-10 max-w-2xl text-2xl" style={{ color: PALETTE.inkSoft }}>
-      Endorse the pilot. We'll deliver verified data, anonymous feedback, and a research culture
-      this campus can be proud of.
+
+    <div className="mt-12 grid w-full grid-cols-2 gap-8">
+      {[
+        {
+          icon: GraduationCap,
+          tag: "Student account",
+          credits: "10 free credits on join",
+          details: [
+            "Verified .edu / .ac.xx university email",
+            "Department (searchable), year of study",
+            "Student index number, interest tags",
+          ],
+          summary: "Publish surveys to verified peers, answer surveys to earn credits, and export dissertation-ready reports.",
+        },
+        {
+          icon: Users,
+          tag: "General public account",
+          credits: "5 free credits on join",
+          details: [
+            "Any email address",
+            "Country and age range",
+            "No academic verification required",
+          ],
+          summary: "Participate in public-audience surveys and lightweight campus polls — extending sample reach beyond a single university.",
+        },
+      ].map((c, i) => (
+        <motion.div
+          key={c.tag}
+          variants={fadeUp}
+          custom={2 + i}
+          className="rounded-2xl border p-7"
+          style={{ borderColor: C.line, background: "rgba(245,240,232,0.04)" }}
+        >
+          <div className="flex items-center gap-3">
+            <c.icon className="h-6 w-6" style={{ color: C.lime }} />
+            <h3 className="text-xl font-semibold uppercase tracking-[0.18em]" style={{ color: C.cream, fontFamily: SANS }}>
+              {c.tag}
+            </h3>
+          </div>
+          <div
+            className="mt-2 inline-block rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.2em]"
+            style={{ background: C.lime, color: C.green, fontFamily: SANS }}
+          >
+            {c.credits}
+          </div>
+          <ul className="mt-5 space-y-2">
+            {c.details.map((d) => (
+              <li key={d} className="flex items-start gap-2 text-base" style={{ color: C.muted, fontFamily: SANS }}>
+                <span className="mt-2 h-1 w-1 shrink-0 rounded-full" style={{ background: C.lime }} />
+                {d}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-6 border-t pt-5 text-base leading-relaxed" style={{ borderColor: C.line, color: C.cream, fontFamily: SERIF, fontStyle: "italic" }}>
+            {c.summary}
+          </p>
+        </motion.div>
+      ))}
+    </div>
+
+    <motion.p
+      variants={fadeUp}
+      custom={5}
+      className="mt-8 text-sm uppercase tracking-[0.3em]"
+      style={{ color: C.lime, fontFamily: SANS }}
+    >
+      Every account is tied to a verified identity. No bots. No randoms.
     </motion.p>
-    <motion.div variants={fadeUp} custom={3} className="mt-14 flex items-center gap-3 text-sm uppercase tracking-[0.3em]" style={{ color: PALETTE.inkSoft }}>
-      <span style={{ color: PALETTE.green }}>●</span> Thank you · Questions welcome
-    </motion.div>
   </SlideShell>
 );
 
-/* ---------- the deck ---------- */
-const SLIDES: Slide[] = [
-  { id: "title", render: SlideTitle },
-  { id: "problem", render: SlideProblem },
-  { id: "solution", render: SlideSolution },
-  { id: "ghana", render: SlideGhana },
-  { id: "features", render: SlideFeatures },
-  { id: "security", render: SlideSecurity },
-  { id: "value", render: SlideValue },
-  { id: "how", render: SlideHow },
-  { id: "tech", render: SlideTech },
-  { id: "roadmap", render: SlideRoadmap },
-  { id: "close", render: SlideClose },
+/* ============ SLIDE 4 — Credit economy ============ */
+const Slide4 = () => {
+  const stages = [
+    { n: 1, t: "Sign up", d: "Receive 10 free credits" },
+    { n: 2, t: "Answer surveys", d: "Earn 1 credit per response" },
+    { n: 3, t: "Publish", d: "Spend credits, choose a tier" },
+    { n: 4, t: "Export", d: "Real-time responses → PDF report" },
+  ];
+  const tiers = [
+    { name: "Basic", desc: "Campus-wide, lowest cost" },
+    { name: "Targeted", desc: "Filter by department & year" },
+    { name: "Boosted", desc: "Priority placement in the feed" },
+    { name: "Pro", desc: "Maximum reach + full analytics" },
+  ];
+  return (
+    <SlideShell bg="cream">
+      <Kicker dark>The economy</Kicker>
+      <motion.h2
+        variants={fadeUp}
+        custom={1}
+        className="mt-6 max-w-4xl text-[60px] leading-[1.02] tracking-tight"
+        style={{ fontFamily: SERIF, color: C.green }}
+      >
+        A self-sustaining research ecosystem.
+      </motion.h2>
+
+      {/* circular flow */}
+      <div className="mt-10 grid w-full grid-cols-4 gap-4">
+        {stages.map((s, i) => (
+          <motion.div
+            key={s.n}
+            variants={fadeUp}
+            custom={2 + i}
+            className="relative rounded-2xl border p-5"
+            style={{ borderColor: C.lineDark, background: "rgba(26,58,42,0.04)" }}
+          >
+            <motion.div
+              animate={{ scale: [1, 1.08, 1], opacity: [0.6, 1, 0.6] }}
+              transition={{ duration: 2, repeat: Infinity, delay: i * 0.4 }}
+              className="absolute -right-2 -top-2 h-3 w-3 rounded-full"
+              style={{ background: C.lime }}
+            />
+            <div className="text-4xl font-light" style={{ fontFamily: SERIF, color: C.green }}>0{s.n}</div>
+            <div className="mt-3 text-base font-semibold uppercase tracking-[0.14em]" style={{ color: C.green, fontFamily: SANS }}>
+              {s.t}
+            </div>
+            <div className="mt-1 text-sm" style={{ color: C.mutedDark, fontFamily: SANS }}>{s.d}</div>
+            {i < 3 && (
+              <ArrowRight
+                className="absolute -right-4 top-1/2 hidden h-5 w-5 -translate-y-1/2 md:block"
+                style={{ color: C.green, opacity: 0.4 }}
+              />
+            )}
+          </motion.div>
+        ))}
+      </div>
+
+      {/* tiers */}
+      <div className="mt-8 grid w-full grid-cols-4 gap-4">
+        {tiers.map((t, i) => (
+          <motion.div
+            key={t.name}
+            variants={fadeUp}
+            custom={6 + i}
+            className="rounded-xl p-4"
+            style={{ background: C.green, color: C.cream }}
+          >
+            <div className="text-xs font-bold uppercase tracking-[0.22em]" style={{ color: C.lime, fontFamily: SANS }}>Tier</div>
+            <div className="mt-1 text-2xl font-semibold" style={{ fontFamily: SERIF }}>{t.name}</div>
+            <div className="mt-1 text-sm" style={{ color: C.muted, fontFamily: SANS }}>{t.desc}</div>
+          </motion.div>
+        ))}
+      </div>
+
+      <motion.p variants={fadeUp} custom={11} className="mt-8 text-sm uppercase tracking-[0.3em]" style={{ color: C.green, fontFamily: SANS }}>
+        Everyone gives. Everyone gets. No one pays cash.
+      </motion.p>
+    </SlideShell>
+  );
+};
+
+/* ============ SLIDE 5 — Survey feed ============ */
+const Slide5 = () => (
+  <SlideShell bg="green">
+    <Kicker>The feed</Kicker>
+    <motion.h2
+      variants={fadeUp}
+      custom={1}
+      className="mt-6 max-w-4xl text-[60px] leading-[1.02] tracking-tight"
+      style={{ fontFamily: SERIF, color: C.cream }}
+    >
+      Surveys that actually match you.
+    </motion.h2>
+
+    <div className="mt-10 grid w-full grid-cols-2 gap-10">
+      {/* mockup */}
+      <motion.div variants={fadeUp} custom={2} className="relative">
+        <div
+          className="mx-auto w-full max-w-sm rounded-3xl border p-6 shadow-2xl"
+          style={{ background: C.cream, borderColor: C.line, color: C.green }}
+        >
+          <div className="flex items-center justify-between">
+            <div className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: C.mutedDark }}>Survey feed</div>
+            <div className="text-xs" style={{ color: C.mutedDark }}>1 of 12</div>
+          </div>
+          <div
+            className="mt-4 inline-block rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.22em]"
+            style={{ background: C.lime, color: C.green }}
+          >
+            Targeted
+          </div>
+          <h3 className="mt-3 text-2xl leading-tight" style={{ fontFamily: SERIF }}>
+            Drug adherence among Health Sciences students
+          </h3>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {["Pharmacy", "Year 3–4", "12 questions"].map((t) => (
+              <span key={t} className="rounded-md border px-2 py-0.5 text-xs" style={{ borderColor: C.lineDark, color: C.green }}>{t}</span>
+            ))}
+          </div>
+          <div className="mt-5 flex items-center justify-between">
+            <div className="flex items-center gap-1.5 text-sm font-semibold">
+              <Coins className="h-4 w-4" style={{ color: C.limeDeep }} /> +1 credit
+            </div>
+            <button
+              className="rounded-full px-5 py-2 text-sm font-bold uppercase tracking-[0.18em]"
+              style={{ background: C.green, color: C.cream, fontFamily: SANS }}
+            >
+              Answer
+            </button>
+          </div>
+          <div className="mt-5 flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.28em]" style={{ color: C.mutedDark }}>
+            ← swipe →
+          </div>
+        </div>
+      </motion.div>
+
+      {/* bullets */}
+      <div className="flex flex-col justify-center">
+        {[
+          { icon: Filter, t: "Matched to you", d: "By department, year, and interests — you only see what's relevant." },
+          { icon: Building2, t: "Campus-scoped", d: "Surveys stay inside your university unless the creator opts in to a public audience." },
+          { icon: Coins, t: "Earn instantly", d: "Answering earns 1 credit, credited to your account in real time." },
+        ].map((b, i) => (
+          <motion.div key={b.t} variants={fadeUp} custom={3 + i} className="flex items-start gap-4 py-5 border-b last:border-0" style={{ borderColor: C.line }}>
+            <b.icon className="mt-1 h-6 w-6 shrink-0" style={{ color: C.lime }} />
+            <div>
+              <div className="text-lg font-semibold" style={{ color: C.cream, fontFamily: SANS }}>{b.t}</div>
+              <div className="mt-1 text-base" style={{ color: C.muted, fontFamily: SANS }}>{b.d}</div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+
+    <motion.p variants={fadeUp} custom={7} className="mt-6 text-xs uppercase tracking-[0.28em]" style={{ color: C.muted, fontFamily: SANS }}>
+      + Polls — a separate lightweight tab for quick campus opinions.
+    </motion.p>
+  </SlideShell>
+);
+
+/* ============ SLIDE 6 — Creation ============ */
+const Slide6 = () => {
+  const steps = [
+    { n: 1, icon: PenLine, t: "Write", d: "Closed-ended (multiple choice, rating scales) or open-ended (free text)." },
+    { n: 2, icon: Layers, t: "Choose tier", d: "Basic, Targeted, Boosted, or Pro." },
+    { n: 3, icon: Target, t: "Target", d: "Filter respondents by department and year of study." },
+    { n: 4, icon: Send, t: "Publish", d: "Spend credits, go live instantly." },
+  ];
+  return (
+    <SlideShell bg="cream">
+      <Kicker dark>Creation</Kicker>
+      <motion.h2
+        variants={fadeUp}
+        custom={1}
+        className="mt-6 max-w-4xl text-[60px] leading-[1.02] tracking-tight"
+        style={{ fontFamily: SERIF, color: C.green }}
+      >
+        Publish in minutes. Reach exactly who you need.
+      </motion.h2>
+
+      <div className="mt-12 grid w-full grid-cols-4 gap-4">
+        {steps.map((s, i) => (
+          <motion.div key={s.n} variants={fadeUp} custom={2 + i} className="relative">
+            <div
+              className="flex h-14 w-14 items-center justify-center rounded-full text-xl font-bold"
+              style={{ background: C.green, color: C.lime, fontFamily: SERIF }}
+            >
+              {s.n}
+            </div>
+            <s.icon className="mt-5 h-6 w-6" style={{ color: C.green }} />
+            <div className="mt-3 text-xl font-semibold uppercase tracking-[0.12em]" style={{ color: C.green, fontFamily: SANS }}>
+              {s.t}
+            </div>
+            <div className="mt-2 text-base leading-relaxed" style={{ color: C.mutedDark, fontFamily: SANS }}>
+              {s.d}
+            </div>
+            {i < 3 && (
+              <div
+                className="absolute right-0 top-7 hidden h-px w-12 md:block"
+                style={{ background: C.green, opacity: 0.25 }}
+              />
+            )}
+          </motion.div>
+        ))}
+      </div>
+
+      <motion.div
+        variants={fadeUp}
+        custom={7}
+        className="mt-12 flex w-full items-start gap-5 rounded-2xl p-7"
+        style={{ background: C.green, color: C.cream }}
+      >
+        <div
+          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl"
+          style={{ background: C.lime, color: C.green }}
+        >
+          <Target className="h-7 w-7" />
+        </div>
+        <div>
+          <div className="text-xs font-bold uppercase tracking-[0.24em]" style={{ color: C.lime }}>The differentiator</div>
+          <p className="mt-2 text-2xl leading-snug" style={{ fontFamily: SERIF }}>
+            Targeted tier is the core differentiator — a Psychology Year 3 student's survey only reaches Psychology Year 3 students.{" "}
+            <span style={{ color: C.lime, fontStyle: "italic" }}>No noise.</span>
+          </p>
+        </div>
+      </motion.div>
+    </SlideShell>
+  );
+};
+
+/* ============ SLIDE 7 — Analytics ============ */
+const Slide7 = () => {
+  const left = [
+    "Real-time response count & response rate",
+    "Overview and per-question views",
+    "Sentiment analysis per open-ended question — computed entirely client-side, no API cost",
+    "Word-frequency counter showing top keywords from free-text responses",
+    "Representative quotes: one per sentiment bucket, shown inline",
+    "Paginated drawer for all raw responses (20 at a time, searchable, filter by sentiment)",
+  ];
+  const right = [
+    "Editable report title and executive summary",
+    "Per-question sections — toggle-able inclusion & reorderable sequence",
+    "\"Suggest from data\" button auto-fills interpretation notes from computed stats",
+    "Raw responses moved to an optional PDF appendix (off by default)",
+    "Export PDF — one click, browser print API, no third-party service",
+  ];
+  return (
+    <SlideShell bg="green">
+      <Kicker>Analytics</Kicker>
+      <motion.h2
+        variants={fadeUp}
+        custom={1}
+        className="mt-6 max-w-4xl text-[58px] leading-[1.02] tracking-tight"
+        style={{ fontFamily: SERIF, color: C.cream }}
+      >
+        From raw data to dissertation-ready PDF.
+      </motion.h2>
+
+      <div className="mt-8 grid w-full grid-cols-2 gap-6">
+        {[
+          { icon: FileBarChart, title: "Analytics Dashboard", items: left },
+          { icon: ArrowDownToLine, title: "Report Builder", items: right },
+        ].map((panel, i) => (
+          <motion.div
+            key={panel.title}
+            variants={fadeUp}
+            custom={2 + i}
+            className="rounded-2xl border p-6"
+            style={{ borderColor: C.line, background: "rgba(245,240,232,0.04)" }}
+          >
+            <div className="flex items-center gap-3">
+              <panel.icon className="h-6 w-6" style={{ color: C.lime }} />
+              <h3 className="text-2xl" style={{ fontFamily: SERIF, color: C.cream }}>{panel.title}</h3>
+            </div>
+            <ul className="mt-5 space-y-3">
+              {panel.items.map((item) => (
+                <li key={item} className="flex items-start gap-3 text-[15px] leading-relaxed" style={{ color: C.muted, fontFamily: SANS }}>
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" style={{ color: C.lime }} />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+        ))}
+      </div>
+
+      <motion.p variants={fadeUp} custom={5} className="mt-6 text-base italic" style={{ color: C.lime, fontFamily: SERIF }}>
+        The only survey platform that takes you from "survey published" to "PDF submitted" without leaving the app.
+      </motion.p>
+    </SlideShell>
+  );
+};
+
+/* ============ SLIDE 8 — Security ============ */
+const Slide8 = () => {
+  const items = [
+    "Row-Level Security (RLS) on every single database table — no accidental data leaks",
+    "University email verification required before any access — enforced at the auth layer",
+    "Student index numbers visible only to university admins and faculty managers — never to other students",
+    "email_hash stored instead of raw emails in cross-table references — pseudonymisation by design",
+    "Survey responses pseudonymised for cross-campus audiences — respondent identity protected from creators",
+    "Review-flag system automated by database trigger — cannot be manipulated by users",
+  ];
+  return (
+    <SlideShell bg="cream">
+      <Kicker dark>Security</Kicker>
+      <motion.h2
+        variants={fadeUp}
+        custom={1}
+        className="mt-6 max-w-4xl text-[58px] leading-[1.02] tracking-tight"
+        style={{ fontFamily: SERIF, color: C.green }}
+      >
+        Defense-in-depth — built for institutional trust.
+      </motion.h2>
+
+      <div className="mt-10 grid w-full grid-cols-2 gap-x-10 gap-y-4">
+        {items.map((it, i) => (
+          <motion.div key={i} variants={fadeUp} custom={2 + i} className="flex items-start gap-4 border-b py-4" style={{ borderColor: C.lineDark }}>
+            <div
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
+              style={{ background: C.lime }}
+            >
+              <CheckCircle2 className="h-4 w-4" style={{ color: C.green }} />
+            </div>
+            <p className="text-[15px] leading-relaxed" style={{ color: C.green, fontFamily: SANS }}>{it}</p>
+          </motion.div>
+        ))}
+      </div>
+
+      <motion.div
+        variants={fadeUp}
+        custom={9}
+        className="mt-8 w-full rounded-2xl p-6"
+        style={{ background: C.green, color: C.cream }}
+      >
+        <div className="flex items-center gap-3">
+          <ShieldCheck className="h-6 w-6" style={{ color: C.lime }} />
+          <p className="text-lg" style={{ fontFamily: SERIF, fontStyle: "italic" }}>
+            100% verified accounts. 0 third-party ad trackers. Built to meet GDPR-adjacent standards from day one.
+          </p>
+        </div>
+      </motion.div>
+    </SlideShell>
+  );
+};
+
+/* ============ SLIDE 9 — Offline PWA ============ */
+const Slide9 = () => {
+  const items = [
+    { icon: Smartphone, t: "Offline-first PWA", d: "Installs to the home screen like a native app — no app store needed." },
+    { icon: WifiOff, t: "Answer offline", d: "Responses are saved locally when there's no connection and sync automatically when reconnected." },
+    { icon: Database, t: "Service-worker caching", d: "Core UI loads even with zero connectivity — students never lose progress mid-survey." },
+  ];
+  return (
+    <SlideShell bg="green">
+      <Kicker>Built for the field</Kicker>
+      <motion.h2
+        variants={fadeUp}
+        custom={1}
+        className="mt-6 max-w-4xl text-[60px] leading-[1.02] tracking-tight"
+        style={{ fontFamily: SERIF, color: C.cream }}
+      >
+        Works where your students actually are.
+      </motion.h2>
+      <motion.p variants={fadeUp} custom={2} className="mt-4 max-w-3xl text-xl" style={{ color: C.muted, fontFamily: SANS }}>
+        Campus Wi-Fi in West Africa is unreliable. CampusVerify is built for it.
+      </motion.p>
+
+      <div className="mt-12 grid w-full grid-cols-3 gap-6">
+        {items.map((it, i) => (
+          <motion.div
+            key={it.t}
+            variants={fadeUp}
+            custom={3 + i}
+            className="rounded-2xl border p-6"
+            style={{ borderColor: C.line, background: "rgba(245,240,232,0.04)" }}
+          >
+            <div
+              className="flex h-12 w-12 items-center justify-center rounded-xl"
+              style={{ background: C.lime, color: C.green }}
+            >
+              <it.icon className="h-6 w-6" />
+            </div>
+            <h3 className="mt-5 text-2xl" style={{ fontFamily: SERIF, color: C.cream }}>{it.t}</h3>
+            <p className="mt-2 text-base leading-relaxed" style={{ color: C.muted, fontFamily: SANS }}>{it.d}</p>
+          </motion.div>
+        ))}
+      </div>
+
+      <motion.div
+        variants={fadeUp}
+        custom={7}
+        className="mt-10 flex items-center gap-3 text-sm uppercase tracking-[0.28em]"
+        style={{ color: C.lime, fontFamily: SANS }}
+      >
+        <span className="inline-block h-2 w-2 rounded-full" style={{ background: C.lime }} />
+        Launch region: Ghana · West Africa
+      </motion.div>
+    </SlideShell>
+  );
+};
+
+/* ============ SLIDE 10 — Users ============ */
+const Slide10 = () => {
+  const users = [
+    {
+      icon: FlaskConical,
+      tag: "The researcher",
+      role: "Student creator",
+      story: "A final-year Pharmacy student at a Ghanaian university needs 80 verified responses for their dissertation on drug adherence among peers. They publish a Targeted survey scoped to Health Sciences, Years 3–4. 80 responses in 48 hours. PDF report exported. Supervisor approves.",
+    },
+    {
+      icon: Smartphone,
+      tag: "The respondent",
+      role: "Student answerer",
+      story: "A Business Year 2 student answers 10 surveys over a month — earns 10 credits — and uses them to publish their own mini-survey for a class project. Zero cash spent.",
+    },
+    {
+      icon: Building2,
+      tag: "The institution",
+      role: "University / faculty",
+      story: "Faculty managers access the /manage panel to track survey activity, view completion rates by department, and ensure research integrity across the student body. Index numbers allow audit trails.",
+    },
+  ];
+  return (
+    <SlideShell bg="cream">
+      <Kicker dark>Who it's for</Kicker>
+      <motion.h2
+        variants={fadeUp}
+        custom={1}
+        className="mt-6 max-w-4xl text-[58px] leading-[1.02] tracking-tight"
+        style={{ fontFamily: SERIF, color: C.green }}
+      >
+        One platform. Three stakeholders. Every campus.
+      </motion.h2>
+
+      <div className="mt-10 grid w-full grid-cols-3 gap-5">
+        {users.map((u, i) => (
+          <motion.div
+            key={u.tag}
+            variants={fadeUp}
+            custom={2 + i}
+            className="flex flex-col rounded-2xl border p-6"
+            style={{ borderColor: C.lineDark, background: "rgba(26,58,42,0.04)" }}
+          >
+            <div
+              className="flex h-14 w-14 items-center justify-center rounded-xl"
+              style={{ background: C.green, color: C.lime }}
+            >
+              <u.icon className="h-7 w-7" />
+            </div>
+            <div className="mt-5 text-xs font-bold uppercase tracking-[0.22em]" style={{ color: C.limeDeep, fontFamily: SANS }}>
+              {u.tag}
+            </div>
+            <h3 className="mt-1 text-2xl" style={{ fontFamily: SERIF, color: C.green }}>{u.role}</h3>
+            <p className="mt-4 text-[15px] leading-relaxed" style={{ color: C.green, fontFamily: SANS }}>{u.story}</p>
+          </motion.div>
+        ))}
+      </div>
+    </SlideShell>
+  );
+};
+
+/* ============ SLIDE 11 — Vision ============ */
+const Slide11 = () => {
+  const roadmap = [
+    { when: "Now · 2026", what: "Closed beta — single-institution pilot, Ghana" },
+    { when: "Q4 · 2026", what: "Multi-university rollout — Ghana-first expansion" },
+    { when: "2027", what: "Pan-African network — lecturer evaluations, peer polls, institutional API" },
+    { when: "2028", what: "Open research platform — white-label for university research departments" },
+  ];
+  const ctas = [
+    { icon: Handshake, t: "Partner with us", d: "Bring CampusVerify to your university." },
+    { icon: DollarSign, t: "Invest", d: "Help us scale across West Africa." },
+    { icon: Rocket, t: "Try it", d: "campus-spotlight-verify.lovable.app" },
+  ];
+  return (
+    <SlideShell bg="green">
+      <div className="absolute right-12 top-10"><Wordmark /></div>
+      <Kicker>The road</Kicker>
+      <motion.h2
+        variants={fadeUp}
+        custom={1}
+        className="mt-6 max-w-4xl text-[64px] leading-[1.0] tracking-tight"
+        style={{ fontFamily: SERIF, color: C.cream }}
+      >
+        From <span style={{ color: C.lime, fontStyle: "italic" }}>one campus</span> to <span style={{ color: C.lime, fontStyle: "italic" }}>every campus</span>.
+      </motion.h2>
+
+      {/* roadmap */}
+      <div className="relative mt-10 grid w-full grid-cols-4 gap-4">
+        <div className="absolute left-0 right-0 top-6 h-px" style={{ background: C.lime, opacity: 0.3 }} />
+        {roadmap.map((r, i) => (
+          <motion.div key={r.when} variants={fadeUp} custom={2 + i} className="relative">
+            <div
+              className="relative z-10 mx-0 h-3 w-3 rounded-full"
+              style={{ background: C.lime, boxShadow: `0 0 12px ${C.lime}`, marginTop: "18px", marginLeft: 0 }}
+            />
+            <div className="mt-5 text-xs font-bold uppercase tracking-[0.22em]" style={{ color: C.lime, fontFamily: SANS }}>{r.when}</div>
+            <div className="mt-2 text-[15px] leading-snug" style={{ color: C.cream, fontFamily: SANS }}>{r.what}</div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* CTAs */}
+      <div className="mt-10 grid w-full grid-cols-3 gap-5">
+        {ctas.map((c, i) => (
+          <motion.div
+            key={c.t}
+            variants={fadeUp}
+            custom={6 + i}
+            className="flex items-start gap-4 rounded-2xl p-6"
+            style={{ background: i === 2 ? C.lime : "rgba(245,240,232,0.06)", color: i === 2 ? C.green : C.cream, border: `1px solid ${i === 2 ? "transparent" : C.line}` }}
+          >
+            <c.icon className="h-7 w-7 shrink-0" style={{ color: i === 2 ? C.green : C.lime }} />
+            <div>
+              <div className="text-xl font-semibold" style={{ fontFamily: SANS }}>{c.t}</div>
+              <div className="mt-1 text-sm" style={{ fontFamily: SANS, opacity: i === 2 ? 0.85 : 0.7 }}>{c.d}</div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      <motion.div variants={fadeUp} custom={10} className="mt-auto flex w-full items-center justify-between pt-10">
+        <Wordmark />
+        <span className="text-sm uppercase tracking-[0.3em] italic" style={{ color: C.muted, fontFamily: SERIF }}>
+          Made on campus. For campus.
+        </span>
+      </motion.div>
+    </SlideShell>
+  );
+};
+
+/* ---------- deck ---------- */
+const SLIDES = [
+  { id: "hook", render: Slide1 },
+  { id: "problem", render: Slide2 },
+  { id: "what", render: Slide3 },
+  { id: "economy", render: Slide4 },
+  { id: "feed", render: Slide5 },
+  { id: "creation", render: Slide6 },
+  { id: "analytics", render: Slide7 },
+  { id: "security", render: Slide8 },
+  { id: "offline", render: Slide9 },
+  { id: "users", render: Slide10 },
+  { id: "vision", render: Slide11 },
 ];
 
 function PitchDeck() {
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(1);
   const containerRef = useRef<HTMLDivElement>(null);
-
   const total = SLIDES.length;
 
   const go = useCallback(
@@ -422,129 +890,97 @@ function PitchDeck() {
     [index, total],
   );
 
+  const toggleFullscreen = useCallback(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    if (!document.fullscreenElement) el.requestFullscreen?.();
+    else document.exitFullscreen?.();
+  }, []);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") {
-        e.preventDefault();
-        go(index + 1);
-      } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
-        e.preventDefault();
-        go(index - 1);
-      } else if (e.key === "Home") {
-        go(0);
-      } else if (e.key === "End") {
-        go(total - 1);
-      } else if (e.key.toLowerCase() === "f") {
-        toggleFullscreen();
-      }
+      if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") { e.preventDefault(); go(index + 1); }
+      else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); go(index - 1); }
+      else if (e.key === "Home") go(0);
+      else if (e.key === "End") go(total - 1);
+      else if (e.key.toLowerCase() === "f") toggleFullscreen();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [go, index, total]);
-
-  const toggleFullscreen = () => {
-    const el = containerRef.current;
-    if (!el) return;
-    if (!document.fullscreenElement) {
-      el.requestFullscreen?.();
-    } else {
-      document.exitFullscreen?.();
-    }
-  };
+  }, [go, index, total, toggleFullscreen]);
 
   const Current = useMemo(() => SLIDES[index].render, [index]);
+  const progress = ((index + 1) / total) * 100;
 
   return (
     <div
       ref={containerRef}
-      className="relative min-h-screen w-full overflow-hidden"
-      style={{
-        background: `radial-gradient(1200px 600px at 15% 10%, rgba(233,79,55,0.15), transparent 60%), radial-gradient(900px 500px at 85% 90%, rgba(61,163,93,0.12), transparent 60%), ${PALETTE.bg}`,
-        color: PALETTE.ink,
-      }}
+      className="relative h-screen w-screen overflow-hidden"
+      style={{ background: C.greenDeep, fontFamily: SANS }}
     >
-      {/* subtle grid texture */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.06]"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(247,244,236,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(247,244,236,0.5) 1px, transparent 1px)",
-          backgroundSize: "80px 80px",
-        }}
-      />
-
-      {/* slide viewport — 16:9 area */}
-      <div className="relative mx-auto flex h-screen w-full max-w-[1600px] items-center justify-center">
-        <div className="relative h-[min(85vh,900px)] w-[min(95vw,1600px)] overflow-hidden rounded-3xl border" style={{ borderColor: PALETTE.line, background: "rgba(11,16,32,0.55)", backdropFilter: "blur(6px)" }}>
-          <AnimatePresence mode="wait" custom={direction}>
-            <motion.div
-              key={SLIDES[index].id}
-              custom={direction}
-              initial={{ opacity: 0, x: direction * 60 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -direction * 60 }}
-              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute inset-0"
-            >
-              <motion.div initial="hidden" animate="show" className="h-full w-full">
-                <Current />
-              </motion.div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      </div>
-
-      {/* chrome */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-between px-8 py-5 text-xs uppercase tracking-[0.25em]" style={{ color: PALETTE.inkSoft }}>
-        <span>CampusVerify · Pitch Deck</span>
-        <span>{String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}</span>
-      </div>
-
-      <div className="pointer-events-auto absolute inset-x-0 bottom-0 flex items-center justify-between px-8 py-5">
-        <button
-          onClick={() => go(index - 1)}
-          disabled={index === 0}
-          className="flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition hover:bg-white/5 disabled:opacity-30"
-          style={{ borderColor: PALETTE.line, color: PALETTE.ink }}
+      {/* full viewport slide */}
+      <AnimatePresence mode="wait" custom={direction}>
+        <motion.div
+          key={SLIDES[index].id}
+          custom={direction}
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -16 }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          className="absolute inset-0"
         >
-          <ArrowLeft className="h-4 w-4" /> Prev
-        </button>
+          <motion.div initial="hidden" animate="show" variants={fadeIn} className="h-full w-full">
+            <Current />
+          </motion.div>
+        </motion.div>
+      </AnimatePresence>
 
-        {/* progress dots */}
-        <div className="flex items-center gap-2">
-          {SLIDES.map((s, i) => (
-            <button
-              key={s.id}
-              onClick={() => go(i)}
-              className="h-1.5 rounded-full transition-all"
-              style={{
-                width: i === index ? 28 : 8,
-                background: i === index ? PALETTE.gold : "rgba(247,244,236,0.25)",
-              }}
-              aria-label={`Go to slide ${i + 1}`}
-            />
-          ))}
-        </div>
+      {/* slide counter */}
+      <div
+        className="pointer-events-none absolute right-8 top-7 z-20 text-xs font-bold uppercase tracking-[0.3em]"
+        style={{ color: index % 2 === 0 ? C.cream : C.green, mixBlendMode: "difference", opacity: 0.85 }}
+      >
+        {String(index + 1).padStart(2, "0")} <span style={{ opacity: 0.5 }}>/ {String(total).padStart(2, "0")}</span>
+      </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={toggleFullscreen}
-            className="flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition hover:bg-white/5"
-            style={{ borderColor: PALETTE.line, color: PALETTE.ink }}
-            title="Fullscreen (F)"
-          >
-            <Maximize2 className="h-4 w-4" />
-          </button>
-          <button
-            onClick={() => go(index + 1)}
-            disabled={index === total - 1}
-            className="flex items-center gap-2 rounded-full px-4 py-2 text-sm transition disabled:opacity-30"
-            style={{ background: PALETTE.primary, color: PALETTE.ink }}
-          >
-            Next <ArrowRight className="h-4 w-4" />
-          </button>
-        </div>
+      {/* prev / next buttons */}
+      <button
+        onClick={() => go(index - 1)}
+        disabled={index === 0}
+        aria-label="Previous slide"
+        className="absolute left-6 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border backdrop-blur-md transition hover:scale-105 disabled:opacity-20"
+        style={{ borderColor: "rgba(245,240,232,0.4)", background: "rgba(13,31,21,0.4)", color: C.cream }}
+      >
+        <ArrowLeft className="h-5 w-5" />
+      </button>
+      <button
+        onClick={() => go(index + 1)}
+        disabled={index === total - 1}
+        aria-label="Next slide"
+        className="absolute right-6 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full transition hover:scale-105 disabled:opacity-20"
+        style={{ background: C.lime, color: C.green }}
+      >
+        <ArrowRight className="h-5 w-5" />
+      </button>
+
+      {/* fullscreen */}
+      <button
+        onClick={toggleFullscreen}
+        aria-label="Fullscreen"
+        className="absolute right-8 bottom-8 z-20 flex h-10 w-10 items-center justify-center rounded-full border backdrop-blur-md transition hover:scale-105"
+        style={{ borderColor: "rgba(245,240,232,0.4)", background: "rgba(13,31,21,0.4)", color: C.cream }}
+      >
+        <Maximize2 className="h-4 w-4" />
+      </button>
+
+      {/* progress bar */}
+      <div className="absolute inset-x-0 bottom-0 z-20 h-1" style={{ background: "rgba(245,240,232,0.12)" }}>
+        <motion.div
+          className="h-full"
+          style={{ background: C.lime, boxShadow: `0 0 12px ${C.lime}` }}
+          animate={{ width: `${progress}%` }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        />
       </div>
     </div>
   );
