@@ -632,7 +632,8 @@ function AnalyzePage() {
           ) : view === "overview" ? (
             <OverviewView survey={survey} filtered={filtered} hiddenQs={hiddenQs} />
           ) : view === "questions" ? (
-            <QuestionsView survey={survey} filtered={filtered} hiddenQs={hiddenQs} setHiddenQs={setHiddenQs} />
+            <QuestionsView survey={survey} filtered={filtered} hiddenQs={hiddenQs} setHiddenQs={setHiddenQs}
+              onExportPDF={exportQuestionPDF} onExportCSV={exportQuestionCSV} />
           ) : view === "compare" ? (
             isPremium
               ? <CompareView survey={survey} filtered={filtered} profileMap={profileMap} />
