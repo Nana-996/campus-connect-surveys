@@ -27,7 +27,7 @@ import {
   resolveFlag,
 } from "@/lib/admin.functions";
 import {
-  listLecturers,
+  listLecturersForStaff,
   createLecturer,
   updateLecturer,
   deleteLecturer,
