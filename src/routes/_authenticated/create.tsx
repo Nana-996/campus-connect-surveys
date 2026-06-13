@@ -157,6 +157,7 @@ function Create() {
           respondent_bonus: tier === "pro" ? respondentBonus : 0,
           min_response_seconds: Math.max(0, Math.min(600, parseInt(minResponseSeconds, 10) || 15)),
           allow_general_respondents: isGeneral ? true : allowGeneral,
+          ...(lecturerId ? { lecturer_id: lecturerId, is_evaluation: true, course_code: courseCode.trim() || null } : {}),
           ...(expiresIso ? { expires_at: expiresIso } : {}),
         })
         .select("id")
