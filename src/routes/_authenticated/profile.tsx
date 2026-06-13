@@ -9,7 +9,6 @@ import { ShieldCheck, Sparkles, Clock, AlertTriangle, Globe2, Lock } from "lucid
 import { DAILY_EARN_CAP, WEEKLY_EARN_CAP, EARNED_EXPIRY_DAYS } from "@/lib/credits";
 import { ageLabel } from "@/lib/interests";
 import { IndexBackfill } from "@/components/IndexBackfill";
-import { SupportCard } from "@/components/SupportHelp";
 import { toast } from "sonner";
 import { safeErrorMessage } from "@/lib/safe-error";
 
