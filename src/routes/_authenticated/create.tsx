@@ -59,7 +59,22 @@ const loadDraft = (): Partial<Draft> => {
 function Create() {
   const { user, profile, refreshProfile } = useAuth();
   const navigate = useNavigate();
+  const search = Route.useSearch();
   const isGeneral = profile?.user_type === "general";
+  const lecturerId = search.lecturer ?? null;
+  const [lecturerName, setLecturerName] = useState<string | null>(null);
+  const [courseCode, setCourseCode] = useState<string>(search.course ?? "");
+  useEffect(() => {
+    if (!lecturerId) { setLecturerName(null); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("lecturers")
+        .select("full_name, department")
+        .eq("id", lecturerId)
+        .maybeSingle();
+      if (data) setLecturerName(data.full_name);
+    })();
+  }, [lecturerId]);
   const d = loadDraft();
   const [tier, setTier] = useState<Tier>(d.tier ?? "pro");
   const [title, setTitle] = useState(d.title ?? "");
