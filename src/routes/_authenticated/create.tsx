@@ -22,8 +22,14 @@ type Question = {
   options?: string[];
 };
 
+type CreateSearch = { lecturer?: string; course?: string };
+
 export const Route = createFileRoute("/_authenticated/create")({
   component: Create,
+  validateSearch: (s: Record<string, unknown>): CreateSearch => ({
+    lecturer: typeof s.lecturer === "string" ? s.lecturer : undefined,
+    course: typeof s.course === "string" ? s.course : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Create a survey — CampusVerify" },
@@ -53,7 +59,22 @@ const loadDraft = (): Partial<Draft> => {
 function Create() {
   const { user, profile, refreshProfile } = useAuth();
   const navigate = useNavigate();
+  const search = Route.useSearch();
   const isGeneral = profile?.user_type === "general";
+  const lecturerId = search.lecturer ?? null;
+  const [lecturerName, setLecturerName] = useState<string | null>(null);
+  const [courseCode, setCourseCode] = useState<string>(search.course ?? "");
+  useEffect(() => {
+    if (!lecturerId) { setLecturerName(null); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("lecturers")
+        .select("full_name, department")
+        .eq("id", lecturerId)
+        .maybeSingle();
+      if (data) setLecturerName(data.full_name);
+    })();
+  }, [lecturerId]);
   const d = loadDraft();
   const [tier, setTier] = useState<Tier>(d.tier ?? "pro");
   const [title, setTitle] = useState(d.title ?? "");
@@ -136,6 +157,7 @@ function Create() {
           respondent_bonus: tier === "pro" ? respondentBonus : 0,
           min_response_seconds: Math.max(0, Math.min(600, parseInt(minResponseSeconds, 10) || 15)),
           allow_general_respondents: isGeneral ? true : allowGeneral,
+          ...(lecturerId ? { lecturer_id: lecturerId, is_evaluation: true, course_code: courseCode.trim() || null } : {}),
           ...(expiresIso ? { expires_at: expiresIso } : {}),
         })
         .select("id")
@@ -166,6 +188,21 @@ function Create() {
         <span className="text-muted-foreground">·</span>
         <span className="text-muted-foreground">earn more by answering surveys</span>
       </p>
+
+      {lecturerId && (
+        <div className="mt-4 rounded-2xl border-2 border-primary/40 bg-primary/5 p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">Lecturer evaluation</p>
+          <p className="mt-1 text-sm">
+            This survey will be linked to{" "}
+            <strong>{lecturerName ?? "the selected lecturer"}</strong> and tagged as an official
+            evaluation. Standard credit cost still applies because you chose the custom builder.
+          </p>
+          <div className="mt-3 max-w-xs">
+            <Label htmlFor="course-code" className="text-xs">Course code (optional)</Label>
+            <Input id="course-code" value={courseCode} onChange={(e) => setCourseCode(e.target.value)} placeholder="CSCD403" />
+          </div>
+        </div>
+      )}
 
       <form onSubmit={submit} className="mt-8 space-y-6">
         {/* Tier selector */}

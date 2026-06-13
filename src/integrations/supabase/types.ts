@@ -104,6 +104,42 @@ export type Database = {
         }
         Relationships: []
       }
+      lecturers: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          department: string | null
+          email: string | null
+          full_name: string
+          id: string
+          title: string | null
+          university_domain: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          department?: string | null
+          email?: string | null
+          full_name: string
+          id?: string
+          title?: string | null
+          university_domain: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          department?: string | null
+          email?: string | null
+          full_name?: string
+          id?: string
+          title?: string | null
+          university_domain?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payment_transactions: {
         Row: {
           amount_minor: number
@@ -492,12 +528,15 @@ export type Database = {
         Row: {
           allow_general_respondents: boolean
           boosted_until: string | null
+          course_code: string | null
           created_at: string
           creator_id: string
           description: string
           expires_at: string
           id: string
           is_active: boolean
+          is_evaluation: boolean
+          lecturer_id: string | null
           min_response_seconds: number
           paid_cost: number
           questions: Json
@@ -516,12 +555,15 @@ export type Database = {
         Insert: {
           allow_general_respondents?: boolean
           boosted_until?: string | null
+          course_code?: string | null
           created_at?: string
           creator_id: string
           description?: string
           expires_at?: string
           id?: string
           is_active?: boolean
+          is_evaluation?: boolean
+          lecturer_id?: string | null
           min_response_seconds?: number
           paid_cost?: number
           questions?: Json
@@ -540,12 +582,15 @@ export type Database = {
         Update: {
           allow_general_respondents?: boolean
           boosted_until?: string | null
+          course_code?: string | null
           created_at?: string
           creator_id?: string
           description?: string
           expires_at?: string
           id?: string
           is_active?: boolean
+          is_evaluation?: boolean
+          lecturer_id?: string | null
           min_response_seconds?: number
           paid_cost?: number
           questions?: Json
@@ -561,7 +606,15 @@ export type Database = {
           title?: string
           university_domain?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "surveys_lecturer_id_fkey"
+            columns: ["lecturer_id"]
+            isOneToOne: false
+            referencedRelation: "lecturers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -681,6 +734,19 @@ export type Database = {
         Returns: boolean
       }
       is_academic_domain: { Args: { _domain: string }; Returns: boolean }
+      list_lecturer_evaluations: {
+        Args: { _lecturer_id: string }
+        Returns: {
+          course_code: string
+          created_at: string
+          expires_at: string
+          is_active: boolean
+          response_count: number
+          response_goal: number
+          survey_id: string
+          title: string
+        }[]
+      }
       list_university_surveys: {
         Args: never
         Returns: {

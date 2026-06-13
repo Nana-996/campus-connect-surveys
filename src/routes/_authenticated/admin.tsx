@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { ShieldAlert, Check, Trash2, Power, UserPlus, UserMinus, Flag, FlagOff, Plus } from "lucide-react";
+import { ShieldAlert, Check, Trash2, Power, UserPlus, UserMinus, Flag, FlagOff, Plus, GraduationCap, BarChart3, ClipboardList } from "lucide-react";
 import {
   getAdminMetrics,
   listAdminUsers,
@@ -26,6 +26,14 @@ import {
   listOpenFlags,
   resolveFlag,
 } from "@/lib/admin.functions";
+import {
+  listLecturers,
+  createLecturer,
+  updateLecturer,
+  deleteLecturer,
+  createStandardEvaluation,
+  listLecturerEvaluations,
+} from "@/lib/lecturers.functions";
 import { Briefcase } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -71,12 +79,14 @@ function Admin() {
         <TabsList className="flex flex-wrap">
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="surveys">Surveys</TabsTrigger>
+          <TabsTrigger value="evaluations">Lecturer evals</TabsTrigger>
           <TabsTrigger value="flags">Flags</TabsTrigger>
           <TabsTrigger value="domains">Blocked domains</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="mt-4"><UsersPanel /></TabsContent>
         <TabsContent value="surveys" className="mt-4"><SurveysPanel /></TabsContent>
+        <TabsContent value="evaluations" className="mt-4"><EvaluationsPanel /></TabsContent>
         <TabsContent value="flags" className="mt-4"><FlagsPanel /></TabsContent>
         <TabsContent value="domains" className="mt-4"><DomainsPanel /></TabsContent>
       </Tabs>
@@ -348,5 +358,241 @@ function DomainsPanel() {
         {domains.length === 0 && <li className="px-4 py-6 text-center text-sm text-muted-foreground">No blocked domains.</li>}
       </ul>
     </div>
+  );
+}
+
+// ---------------- Lecturer evaluations ----------------
+type Lecturer = {
+  id: string;
+  full_name: string;
+  department: string | null;
+  title: string | null;
+  email: string | null;
+  university_domain: string;
+};
+
+function EvaluationsPanel() {
+  const qc = useQueryClient();
+  const fetchLecturers = useServerFn(listLecturers);
+  const { data: lecturers = [], isLoading } = useQuery({
+    queryKey: ["admin", "lecturers"],
+    queryFn: () => fetchLecturers(),
+  });
+
+  const refresh = () => qc.invalidateQueries({ queryKey: ["admin", "lecturers"] });
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-2xl border border-foreground/15 bg-card p-5">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">About this tab</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Add the lecturers in your faculty, then issue an official end-of-semester evaluation. The
+          standard form asks five rating questions plus two open-comment questions. Results are
+          private to admins and managers of the lecturer's campus.
+        </p>
+      </div>
+
+      <LecturerForm onDone={refresh} />
+
+      {isLoading ? (
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      ) : lecturers.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-foreground/20 bg-card p-8 text-center text-sm text-muted-foreground">
+          <GraduationCap className="mx-auto h-6 w-6 text-muted-foreground" />
+          <p className="mt-2">No lecturers yet. Add one above to start running evaluations.</p>
+        </div>
+      ) : (
+        <ul className="space-y-3">
+          {lecturers.map((l: Lecturer) => (
+            <LecturerRow key={l.id} lecturer={l} onChanged={refresh} />
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function LecturerForm({ onDone, initial, onCancel }: {
+  onDone: () => void;
+  initial?: Lecturer;
+  onCancel?: () => void;
+}) {
+  const create = useServerFn(createLecturer);
+  const update = useServerFn(updateLecturer);
+  const [fullName, setFullName] = useState(initial?.full_name ?? "");
+  const [department, setDepartment] = useState(initial?.department ?? "");
+  const [title, setTitle] = useState(initial?.title ?? "");
+  const [email, setEmail] = useState(initial?.email ?? "");
+  const [busy, setBusy] = useState(false);
+
+  const editing = !!initial;
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!fullName.trim()) return;
+    setBusy(true);
+    try {
+      if (editing) {
+        await update({ data: { id: initial!.id, full_name: fullName, department, title, email } });
+        toast.success("Lecturer updated");
+      } else {
+        await create({ data: { full_name: fullName, department, title, email } });
+        toast.success("Lecturer added");
+        setFullName(""); setDepartment(""); setTitle(""); setEmail("");
+      }
+      onDone();
+      onCancel?.();
+    } catch (err: any) {
+      toast.error(err.message ?? "Failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <form onSubmit={submit} className="rounded-2xl border border-foreground/15 bg-card p-5">
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        {editing ? "Edit lecturer" : "Add a lecturer"}
+      </p>
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <div>
+          <Label htmlFor="lec-name" className="text-xs">Full name *</Label>
+          <Input id="lec-name" required value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Dr. Ama Boateng" />
+        </div>
+        <div>
+          <Label htmlFor="lec-dept" className="text-xs">Department</Label>
+          <Input id="lec-dept" value={department} onChange={(e) => setDepartment(e.target.value)} placeholder="Computer Science" />
+        </div>
+        <div>
+          <Label htmlFor="lec-title" className="text-xs">Title</Label>
+          <Input id="lec-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Senior Lecturer" />
+        </div>
+        <div>
+          <Label htmlFor="lec-email" className="text-xs">Email (optional)</Label>
+          <Input id="lec-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="lecturer@university.edu.gh" />
+        </div>
+      </div>
+      <div className="mt-4 flex gap-2">
+        <Button type="submit" disabled={busy} className="rounded-full">
+          {editing ? "Save" : <><Plus className="mr-1 h-4 w-4" /> Add lecturer</>}
+        </Button>
+        {onCancel && (
+          <Button type="button" variant="ghost" onClick={onCancel} className="rounded-full">Cancel</Button>
+        )}
+      </div>
+    </form>
+  );
+}
+
+function LecturerRow({ lecturer, onChanged }: { lecturer: Lecturer; onChanged: () => void }) {
+  const [editing, setEditing] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const remove = useServerFn(deleteLecturer);
+  const startStandard = useServerFn(createStandardEvaluation);
+
+  if (editing) {
+    return (
+      <li>
+        <LecturerForm initial={lecturer} onDone={onChanged} onCancel={() => setEditing(false)} />
+      </li>
+    );
+  }
+
+  return (
+    <li className="rounded-2xl border border-foreground/15 bg-card">
+      <div className="flex flex-wrap items-center gap-3 p-4">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <GraduationCap className="h-5 w-5" />
+        </div>
+        <div className="flex-1 min-w-[200px]">
+          <p className="font-serif text-lg leading-tight">
+            {lecturer.title ? `${lecturer.title} ` : ""}
+            {lecturer.full_name}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {lecturer.department || "No department"}
+            {lecturer.email ? ` · ${lecturer.email}` : ""}
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            size="sm"
+            className="rounded-full"
+            onClick={async () => {
+              const course = prompt("Course code (optional, e.g. CSCD403):", "") ?? "";
+              if (!confirm(`Issue a standard evaluation for ${lecturer.full_name}${course ? " (" + course + ")" : ""}? It will appear in students' feeds for 30 days.`)) return;
+              try {
+                const r = await startStandard({ data: { lecturer_id: lecturer.id, course_code: course || null } });
+                toast.success("Evaluation published");
+                onChanged();
+                setExpanded(true);
+                // Optional: open the survey in a new tab
+                window.open(`/survey/${r.id}/analyze`, "_blank");
+              } catch (e: any) {
+                toast.error(e.message ?? "Failed to publish");
+              }
+            }}
+          >
+            <ClipboardList className="mr-1 h-3 w-3" /> Standard form
+          </Button>
+          <Link
+            to="/create"
+            search={{ lecturer: lecturer.id } as any}
+            className="inline-flex"
+          >
+            <Button size="sm" variant="outline" className="rounded-full">Custom</Button>
+          </Link>
+          <Button size="sm" variant="outline" onClick={() => setExpanded((v) => !v)}>
+            <BarChart3 className="h-3 w-3" />
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => setEditing(true)}>Edit</Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={async () => {
+              if (!confirm(`Remove ${lecturer.full_name}? Past evaluations stay in the system.`)) return;
+              await remove({ data: { id: lecturer.id } });
+              toast.success("Removed");
+              onChanged();
+            }}
+          >
+            <Trash2 className="h-3 w-3" />
+          </Button>
+        </div>
+      </div>
+      {expanded && <LecturerEvaluationsList lecturerId={lecturer.id} />}
+    </li>
+  );
+}
+
+function LecturerEvaluationsList({ lecturerId }: { lecturerId: string }) {
+  const fetchEvals = useServerFn(listLecturerEvaluations);
+  const { data = [], isLoading } = useQuery({
+    queryKey: ["admin", "lecturer-evals", lecturerId],
+    queryFn: () => fetchEvals({ data: { lecturer_id: lecturerId } }),
+  });
+
+  if (isLoading) return <p className="px-4 pb-4 text-xs text-muted-foreground">Loading…</p>;
+  if (data.length === 0) {
+    return <p className="px-4 pb-4 text-xs text-muted-foreground">No evaluations yet.</p>;
+  }
+  return (
+    <ul className="border-t border-foreground/10">
+      {data.map((e: any) => (
+        <li key={e.survey_id} className="flex flex-wrap items-center gap-3 border-t border-foreground/5 px-4 py-2 text-xs first:border-t-0">
+          <div className="flex-1 min-w-[180px]">
+            <p className="font-medium">{e.title}</p>
+            <p className="text-[10px] text-muted-foreground">
+              {e.course_code ? `${e.course_code} · ` : ""}
+              {e.response_count}/{e.response_goal} responses
+              {e.is_active ? "" : " · ended"}
+            </p>
+          </div>
+          <Link to="/survey/$id/analyze" params={{ id: e.survey_id }}>
+            <Button size="sm" variant="outline" className="rounded-full">Open results</Button>
+          </Link>
+        </li>
+      ))}
+    </ul>
   );
 }
