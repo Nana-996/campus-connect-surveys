@@ -93,7 +93,8 @@ function ReportBuilderPage() {
       }
     })();
     return () => { active = false; };
-  }, [id, user, fetchOwnerResults]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, user?.id]);
 
   const qMap = useMemo(() => {
     const m: Record<string, Question> = {};
