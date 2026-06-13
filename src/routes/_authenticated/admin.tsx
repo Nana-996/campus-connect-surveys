@@ -27,7 +27,7 @@ import {
   resolveFlag,
 } from "@/lib/admin.functions";
 import {
-  listLecturers,
+  listLecturersForStaff,
   createLecturer,
   updateLecturer,
   deleteLecturer,
@@ -373,7 +373,7 @@ type Lecturer = {
 
 function EvaluationsPanel() {
   const qc = useQueryClient();
-  const fetchLecturers = useServerFn(listLecturers);
+  const fetchLecturers = useServerFn(listLecturersForStaff);
   const { data: lecturers = [], isLoading } = useQuery({
     queryKey: ["admin", "lecturers"],
     queryFn: () => fetchLecturers(),

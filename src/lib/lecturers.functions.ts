@@ -36,21 +36,38 @@ const requireSchoolStaff = createMiddleware({ type: "function" })
 
 function fail(e: any, label: string): never {
   console.error(`[lecturers:${label}]`, e);
-  throw new Error(e?.message ?? "Operation failed");
+  throw new Error("Operation failed");
 }
 
 const Trim = (max: number) =>
   z.string().transform((s) => s.trim()).pipe(z.string().min(1).max(max));
 
 // ---------- Directory listing (any signed-in user, scoped via RLS) ----------
+// `email` is excluded — column-level GRANT prevents general students from
+// reading lecturer emails. Staff get the email via listLecturersForStaff.
 export const listLecturers = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("lecturers")
-      .select("id, full_name, department, title, email, university_domain, created_at")
+      .select("id, full_name, department, title, university_domain, created_at")
       .order("full_name", { ascending: true });
     if (error) fail(error, "list");
+    return (data ?? []).map((r) => ({ ...r, email: null as string | null }));
+  });
+
+// ---------- Directory listing including email (admin/manager only) ----------
+export const listLecturersForStaff = createServerFn({ method: "GET" })
+  .middleware([requireSchoolStaff])
+  .handler(async ({ context }) => {
+    const base = supabaseAdmin
+      .from("lecturers")
+      .select("id, full_name, department, title, email, university_domain, created_at")
+      .order("full_name", { ascending: true });
+    const { data, error } = context.isAdmin
+      ? await base
+      : await base.eq("university_domain", context.universityDomain);
+    if (error) fail(error, "list-staff");
     return data ?? [];
   });
 
