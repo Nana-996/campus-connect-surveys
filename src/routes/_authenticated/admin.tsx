@@ -79,12 +79,14 @@ function Admin() {
         <TabsList className="flex flex-wrap">
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="surveys">Surveys</TabsTrigger>
+          <TabsTrigger value="evaluations">Lecturer evals</TabsTrigger>
           <TabsTrigger value="flags">Flags</TabsTrigger>
           <TabsTrigger value="domains">Blocked domains</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="mt-4"><UsersPanel /></TabsContent>
         <TabsContent value="surveys" className="mt-4"><SurveysPanel /></TabsContent>
+        <TabsContent value="evaluations" className="mt-4"><EvaluationsPanel /></TabsContent>
         <TabsContent value="flags" className="mt-4"><FlagsPanel /></TabsContent>
         <TabsContent value="domains" className="mt-4"><DomainsPanel /></TabsContent>
       </Tabs>
