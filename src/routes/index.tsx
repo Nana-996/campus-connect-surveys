@@ -1,7 +1,28 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, BarChart3, Coins, Sparkles, ArrowUpRight, GraduationCap, Globe2, Send, Inbox, Trophy } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetClose,
+} from "@/components/ui/sheet";
+import {
+  ShieldCheck,
+  BarChart3,
+  Coins,
+  Sparkles,
+  ArrowUpRight,
+  GraduationCap,
+  Globe2,
+  Send,
+  Inbox,
+  Trophy,
+  Menu,
+} from "lucide-react";
+
 
 export const Route = createFileRoute("/")({
   component: Landing,
