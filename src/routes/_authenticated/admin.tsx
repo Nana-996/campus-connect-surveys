@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { ShieldAlert, Check, Trash2, Power, UserPlus, UserMinus, Flag, FlagOff, Plus } from "lucide-react";
+import { ShieldAlert, Check, Trash2, Power, UserPlus, UserMinus, Flag, FlagOff, Plus, GraduationCap, BarChart3, ClipboardList } from "lucide-react";
 import {
   getAdminMetrics,
   listAdminUsers,
@@ -26,6 +26,14 @@ import {
   listOpenFlags,
   resolveFlag,
 } from "@/lib/admin.functions";
+import {
+  listLecturers,
+  createLecturer,
+  updateLecturer,
+  deleteLecturer,
+  createStandardEvaluation,
+  listLecturerEvaluations,
+} from "@/lib/lecturers.functions";
 import { Briefcase } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
