@@ -1,9 +1,18 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "@tanstack/react-router";
 import { WifiOff, CloudUpload, Check } from "lucide-react";
 import { onQueueChange, syncQueuedResponses } from "@/lib/offline-sync";
 import { queueCount } from "@/lib/offline-store";
 
+function isSurveyAnswerPage(pathname: string): boolean {
+  // Only show offline indicator when the user is actively taking a survey
+  return /^\/survey\/[^/]+$/.test(pathname);
+}
+
 export function OfflineIndicator() {
+  const location = useLocation();
+  const onSurveyPage = isSurveyAnswerPage(location.pathname);
+
   const [online, setOnline] = useState<boolean>(() =>
     typeof navigator === "undefined" ? true : navigator.onLine,
   );
@@ -37,6 +46,7 @@ export function OfflineIndicator() {
     return () => { active = false; off(); clearInterval(iv); };
   }, []);
 
+  if (!onSurveyPage) return null;
   if (online && pending === 0 && !justSynced) return null;
 
   const label = !online
