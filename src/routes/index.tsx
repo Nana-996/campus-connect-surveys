@@ -139,7 +139,7 @@ function Landing() {
           <div className="mt-8 grid gap-4 sm:grid-cols-4">
             <Step n="01" icon={<GraduationCap />} title="Verify">Sign up with your university email. Students get 10 free credits; general accounts get 5.</Step>
             <Step n="02" icon={<Send />} title="Publish">Pick a tier (Basic, Targeted, Boosted, Pro), write questions, hit publish.</Step>
-            <Step n="03" icon={<Inbox />} title="Earn">Answer surveys in your feed to earn credits — fund your own research without spending a cedi.</Step>
+            <Step n="03" icon={<Inbox />} title="Earn">Answer surveys in your feed to earn credits — fund your own research at no cost.</Step>
             <Step n="04" icon={<Trophy />} title="Export">Watch responses land in real time. Export clean data when you're ready.</Step>
           </div>
         </section>
