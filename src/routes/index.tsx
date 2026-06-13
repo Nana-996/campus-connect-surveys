@@ -43,7 +43,7 @@ function Landing() {
         <Link to="/" className="font-serif text-3xl text-primary">CampusVerify</Link>
         <nav className="hidden items-center gap-6 text-xs font-semibold uppercase tracking-wider text-muted-foreground sm:flex">
           <a href="#how-it-works" className="hover:text-foreground">How it works</a>
-          <Link to="/about" className="hover:text-foreground">About</Link>
+          <a href="#about" className="hover:text-foreground">About</a>
           <a href="#faq" className="hover:text-foreground">FAQ</a>
         </nav>
         <div className="flex items-center gap-2">
