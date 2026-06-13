@@ -686,14 +686,33 @@ function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs }: {
       {survey.questions.map((q, qi) => {
         const hidden = hiddenQs.has(q.id);
         if (q.type === "text") {
-          const answered = filtered.filter((r) => String(r.answers?.[q.id] ?? "").trim()).length;
+          const answers = filtered
+            .map((r) => ({ id: r.id, text: String(r.answers?.[q.id] ?? "").trim(), at: r.created_at }))
+            .filter((a) => a.text.length > 0);
           return (
             <div key={q.id} className={`rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper ${hidden ? "opacity-50" : ""}`}>
               <Header q={q} qi={qi} hidden={hidden} toggle={() => toggle(q.id)} />
-              {!hidden && <p className="mt-2 text-sm text-muted-foreground">
-                Free-text question — {answered} of {filtered.length} answered.
-                Individual answers are kept private and visible only on the raw data view.
-              </p>}
+              {!hidden && (
+                <div className="mt-3 space-y-2">
+                  <p className="text-xs text-muted-foreground">
+                    Free-text question — {answers.length} of {filtered.length} answered. Responses are shown anonymously (no respondent identity).
+                  </p>
+                  {answers.length === 0 ? (
+                    <p className="rounded-xl border border-dashed border-foreground/15 p-4 text-center text-xs text-muted-foreground">No text responses yet.</p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {answers.map((a, idx) => (
+                        <li key={a.id} className="rounded-xl border border-foreground/10 bg-background p-3 text-sm">
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                            Anonymous #{idx + 1} · {new Date(a.at).toLocaleDateString()}
+                          </p>
+                          <p className="mt-1 whitespace-pre-wrap break-words">{a.text}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
             </div>
           );
         }
