@@ -586,12 +586,19 @@ function AnalyzePage() {
           <div className="rounded-3xl border border-foreground/15 bg-card p-4 shadow-paper">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Export</p>
             <div className="mt-2 flex flex-col gap-2">
+              <Link
+                to="/survey/$id/report"
+                params={{ id }}
+                className="inline-flex h-8 items-center justify-center gap-1 rounded-full bg-foreground px-3 text-xs font-semibold text-background hover:bg-foreground/90"
+              >
+                <FileText className="mr-1 h-3.5 w-3.5" /> Build Report
+              </Link>
               <Button size="sm" variant="outline" onClick={exportCSV} className="rounded-full">
                 <Download className="mr-1 h-3.5 w-3.5" /> CSV (raw)
               </Button>
               <Button size="sm" variant="outline" onClick={exportPDF} className="rounded-full">
                 {!isPremium && <Lock className="mr-1 h-3 w-3" />}
-                <FileText className="mr-1 h-3.5 w-3.5" /> PDF report
+                <FileText className="mr-1 h-3.5 w-3.5" /> Quick PDF
               </Button>
               <Button size="sm" variant="outline" onClick={saveCurrentView} className="rounded-full">
                 {!isPremium && <Lock className="mr-1 h-3 w-3" />}
