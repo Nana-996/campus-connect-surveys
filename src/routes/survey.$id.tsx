@@ -258,7 +258,8 @@ function SurveyPage() {
       }
     })();
     return () => { active = false; };
-  }, [id, user, survey, fetchOwnerResults]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, user?.id, survey?.id]);
 
   const setChartType = async (questionId: string, type: ChartType) => {
     setChartTypes((m) => ({ ...m, [questionId]: type }));
