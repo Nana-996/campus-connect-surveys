@@ -64,6 +64,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      { rel: "preconnect", href: "https://vwrhclqxuabltajcbmno.supabase.co", crossOrigin: "anonymous" },
+      { rel: "dns-prefetch", href: "https://vwrhclqxuabltajcbmno.supabase.co" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Work+Sans:wght@400;500;600;700;800&display=swap" },
       { rel: "stylesheet", href: appCss },
     ],
