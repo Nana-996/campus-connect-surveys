@@ -81,7 +81,89 @@ function Profile() {
       )}
 
 
-      {/* Wallet bento */}
+      {/* Personal info & edit name */}
+      <section className="mt-8 rounded-3xl border border-foreground/15 bg-card p-6 shadow-paper">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="font-serif text-2xl leading-tight">Personal info</h2>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-secondary-foreground">
+            <Lock className="h-3 w-3" /> Private to you
+          </span>
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Only you can see this information. Your email is never shown publicly or to survey owners.
+        </p>
+
+        <form
+          className="mt-5 grid gap-4 sm:grid-cols-2"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            const trimmed = name.trim();
+            if (!trimmed) {
+              toast.error("Name cannot be empty");
+              return;
+            }
+            if (trimmed.length > 80) {
+              toast.error("Name must be 80 characters or fewer");
+              return;
+            }
+            if (trimmed === profile.full_name) return;
+            setSavingName(true);
+            const { error } = await supabase
+              .from("profiles")
+              .update({ full_name: trimmed })
+              .eq("id", profile.id);
+            setSavingName(false);
+            if (error) {
+              toast.error(error.message || "Could not update your name");
+              return;
+            }
+            toast.success("Name updated");
+            await refreshProfile();
+          }}
+        >
+          <div className="sm:col-span-2">
+            <Label htmlFor="profile-name" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              Full name
+            </Label>
+            <div className="mt-1 flex gap-2">
+              <Input
+                id="profile-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                maxLength={80}
+                placeholder="Your name"
+                autoComplete="name"
+              />
+              <Button type="submit" disabled={savingName || name.trim() === (profile.full_name ?? "")}>
+                {savingName ? "Saving…" : "Save"}
+              </Button>
+            </div>
+          </div>
+
+          <ReadOnlyField label="Email" value={user?.email ?? "—"} />
+          <ReadOnlyField label="Account type" value={isGeneral ? "General" : "Student"} />
+          {!isGeneral ? (
+            <>
+              <ReadOnlyField label="University" value={profile.university_name || "—"} />
+              <ReadOnlyField label="Verified domain" value={profile.university_domain || "—"} />
+              <ReadOnlyField label="Department" value={profile.department || "—"} />
+              <ReadOnlyField label="Year" value={profile.year || "—"} />
+              <ReadOnlyField label="Index number" value={(profile as any).index_number || "—"} />
+            </>
+          ) : (
+            <>
+              <ReadOnlyField label="Country" value={profile.country || "—"} />
+              <ReadOnlyField label="Age range" value={profile.age_range ? ageLabel(profile.age_range) : "—"} />
+            </>
+          )}
+        </form>
+
+        <p className="mt-4 text-[11px] text-muted-foreground">
+          University, account type, and credits are locked for fairness and can't be edited here.
+        </p>
+      </section>
+
+
       <div className="mt-8 grid gap-4 sm:grid-cols-6">
         {/* Credits - hero */}
         <div className="sm:col-span-4 rounded-3xl bg-primary p-7 text-primary-foreground shadow-paper">
