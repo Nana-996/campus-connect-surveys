@@ -185,7 +185,7 @@ function SignupPage() {
             </button>
             <button
               type="button"
-              onClick={() => setUserType("general")}
+              onClick={() => { setUserType("general"); setEmailError(null); }}
               className={`rounded-2xl border-2 p-4 text-left transition ${
                 userType === "general"
                   ? "border-primary bg-primary text-primary-foreground"
