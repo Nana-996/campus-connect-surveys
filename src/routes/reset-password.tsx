@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { GraduationCap, Globe2 } from "lucide-react";
 
 const searchSchema = z.object({ as: z.enum(["student", "general"]).optional() });
+const initialRecoveryHref = typeof window !== "undefined" ? window.location.href : "";
 
 export const Route = createFileRoute("/reset-password")({
   validateSearch: searchSchema,
@@ -59,7 +60,12 @@ function ResetPasswordPage() {
     };
 
     const validateLink = async () => {
-      const url = new URL(window.location.href);
+      const currentUrl = new URL(window.location.href);
+      const initialUrl = initialRecoveryHref ? new URL(initialRecoveryHref) : currentUrl;
+      const url =
+        initialUrl.hash || initialUrl.searchParams.has("code") || initialUrl.searchParams.has("token_hash")
+          ? initialUrl
+          : currentUrl;
       const hash = new URLSearchParams(url.hash.replace(/^#/, ""));
 
       console.log("[reset-password] incoming", {
