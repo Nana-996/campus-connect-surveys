@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { z } from "zod";
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { recoveryClient } from "@/lib/recovery-client";
 import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/PasswordInput";
 import { Label } from "@/components/ui/label";
@@ -34,10 +35,9 @@ function ResetPasswordPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Supabase auto-processes recovery links (PKCE ?code= and implicit
-  // #access_token=...) via detectSessionInUrl. We listen for the resulting
-  // session/event, and only fall back to a manual exchange when auto-detection
-  // didn't fire (e.g. token_hash style links).
+  // Recovery links must be handled before the app-wide auth client consumes
+  // and clears URL tokens. The dedicated recovery client has URL auto-detection
+  // disabled, so this page controls the validation flow explicitly.
   useEffect(() => {
     let cancelled = false;
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -76,15 +76,6 @@ function ResetPasswordPage() {
         return;
       }
 
-      // If a session already exists (e.g. detectSessionInUrl auto-ran), accept it.
-      const { data: existing } = await supabase.auth.getSession();
-      if (existing.session) {
-        if (cancelled) return;
-        setReady(true);
-        cleanUrl();
-        return;
-      }
-
       const code = url.searchParams.get("code") ?? hash.get("code");
       const tokenHash = url.searchParams.get("token_hash") ?? hash.get("token_hash");
       const type = (url.searchParams.get("type") ?? hash.get("type") ?? "recovery") as EmailOtpType;
@@ -94,21 +85,28 @@ function ResetPasswordPage() {
       try {
         if (accessToken && refreshToken) {
           // Implicit flow (preferred — works cross-device, no code_verifier needed).
-          const { error: sessionErr } = await supabase.auth.setSession({
+          const { error: sessionErr } = await recoveryClient.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
           });
           if (sessionErr) throw sessionErr;
+          await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
         } else if (tokenHash) {
-          const { error: otpErr } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
+          const { data: otpData, error: otpErr } = await recoveryClient.auth.verifyOtp({ token_hash: tokenHash, type });
           if (otpErr) throw otpErr;
+          if (otpData.session) await supabase.auth.setSession(otpData.session);
         } else if (code) {
-          const { error: exErr } = await supabase.auth.exchangeCodeForSession(code);
+          const { data: exData, error: exErr } = await supabase.auth.exchangeCodeForSession(code);
           if (exErr) throw exErr;
+          if (!exData.session) throw new Error("Reset link could not create a session. Please request a new link.");
         } else {
-          throw new Error(
-            "This reset link is missing its token. This usually means the link was already used, has expired, or was opened from a different browser than the one used to request it. Please request a new link below.",
-          );
+          // The app-wide auth client may have already processed and removed a
+          // valid recovery token. Give that async save/event a short window.
+          await new Promise((resolve) => setTimeout(resolve, 450));
+          const { data: existing } = await supabase.auth.getSession();
+          if (!existing.session) {
+            throw new Error("This reset link is missing its token. Please request a new link below and open the latest email only once.");
+          }
         }
         if (cancelled) return;
         setReady(true);
