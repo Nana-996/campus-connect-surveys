@@ -117,3 +117,14 @@
   html, body { overflow-x: hidden; }
   body { max-width: 100vw; }
 }
+
+/* Globally hide the Lovable badge */
+#lovable-badge {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}

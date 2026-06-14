@@ -5,9 +5,13 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { VitePWA } from "vite-plugin-pwa";
 
+const isVercel = process.env.VERCEL === "1" || process.env.VERCEL_ENV !== undefined;
+
 export default defineConfig({
   tanstackStart: {
-    server: { entry: "server" },
+    server: isVercel
+      ? { preset: "vercel" }
+      : { entry: "server" },
   },
   vite: {
     plugins: [
