@@ -49,17 +49,23 @@ function ResetPasswordPage() {
       }
     });
 
-    const cleanUrl = (url: URL) => {
-      url.searchParams.delete("code");
-      url.searchParams.delete("token_hash");
-      url.searchParams.delete("type");
-      url.hash = "";
-      window.history.replaceState({}, "", url.pathname + (url.search || ""));
+    const cleanUrl = () => {
+      const u = new URL(window.location.href);
+      u.searchParams.delete("code");
+      u.searchParams.delete("token_hash");
+      u.searchParams.delete("type");
+      u.hash = "";
+      window.history.replaceState({}, "", u.pathname + (u.search || ""));
     };
 
     const validateLink = async () => {
       const url = new URL(window.location.href);
       const hash = new URLSearchParams(url.hash.replace(/^#/, ""));
+
+      console.log("[reset-password] incoming", {
+        search: url.search,
+        hash: url.hash,
+      });
 
       // Surface error returns from the email link (e.g. expired, otp_invalid).
       const errParam = url.searchParams.get("error_description") ?? hash.get("error_description")
@@ -70,13 +76,12 @@ function ResetPasswordPage() {
         return;
       }
 
-      // Let Supabase's detectSessionInUrl run first.
-      await new Promise((r) => setTimeout(r, 100));
+      // If a session already exists (e.g. detectSessionInUrl auto-ran), accept it.
       const { data: existing } = await supabase.auth.getSession();
       if (existing.session) {
         if (cancelled) return;
         setReady(true);
-        cleanUrl(url);
+        cleanUrl();
         return;
       }
 
@@ -87,21 +92,27 @@ function ResetPasswordPage() {
       const refreshToken = hash.get("refresh_token");
 
       try {
-        if (code) {
-          const { error: exErr } = await supabase.auth.exchangeCodeForSession(code);
-          if (exErr) throw exErr;
+        if (accessToken && refreshToken) {
+          // Implicit flow (preferred — works cross-device, no code_verifier needed).
+          const { error: sessionErr } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+          if (sessionErr) throw sessionErr;
         } else if (tokenHash) {
           const { error: otpErr } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
           if (otpErr) throw otpErr;
-        } else if (accessToken && refreshToken) {
-          const { error: sessionErr } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
-          if (sessionErr) throw sessionErr;
+        } else if (code) {
+          const { error: exErr } = await supabase.auth.exchangeCodeForSession(code);
+          if (exErr) throw exErr;
         } else {
-          throw new Error("This page expects a reset link from your email. Request a new one.");
+          throw new Error(
+            "This reset link is missing its token. This usually means the link was already used, has expired, or was opened from a different browser than the one used to request it. Please request a new link below.",
+          );
         }
         if (cancelled) return;
         setReady(true);
-        cleanUrl(url);
+        cleanUrl();
       } catch (err: any) {
         console.error("[reset-password] validate failed", err);
         if (!cancelled) setError(err?.message ?? "Reset link is invalid or has expired. Request a new one.");
