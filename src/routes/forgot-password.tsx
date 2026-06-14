@@ -35,7 +35,7 @@ function ForgotPasswordPage() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      const { error } = await recoveryClient.auth.resetPasswordForEmail(email.trim(), {
         redirectTo: `${window.location.origin}/reset-password?as=${tab}`,
       });
       if (error) throw error;
