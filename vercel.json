@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "bun run build",
-  "outputDirectory": "dist",
+  "outputDirectory": ".tanstack/start/client",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
