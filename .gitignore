@@ -30,3 +30,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment files (contain SUPABASE_SERVICE_ROLE_KEY and other secrets — never commit)
+.env
+.env.*
+!.env.example
