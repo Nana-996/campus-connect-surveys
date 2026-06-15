@@ -1,5 +1,5 @@
 {
-  "version": 2,
-  "buildCommand": "npm run build",
+  "installCommand": "bun install",
+  "buildCommand": "bun run vercel-build",
   "framework": null
 }
