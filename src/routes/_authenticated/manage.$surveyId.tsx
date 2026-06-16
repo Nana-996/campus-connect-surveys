@@ -155,21 +155,34 @@ function ManageSurveyPage() {
         <ArrowLeft className="h-3 w-3" /> All surveys
       </Link>
 
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Survey tracking</p>
-          <h1 className="mt-1 font-serif text-4xl leading-[0.95]">
-            {responded.length} of {filtered.length} <em className="text-primary">responded.</em>
-          </h1>
-          <p className="mt-1 text-xs text-muted-foreground">Answer content stays confidential — this view only shows who has and hasn't completed the survey.</p>
-        </div>
-        <Input
-          placeholder="Search name, index, department…"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          className="h-10 w-full max-w-xs rounded-xl"
-        />
+      <div>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Survey tracking</p>
+        <h1 className="mt-1 font-serif text-4xl leading-[0.95]">
+          {responded.length} of {filtered.length} <em className="text-primary">responded.</em>
+        </h1>
+        <p className="mt-1 text-xs text-muted-foreground">Answer content stays confidential — this view only shows who has and hasn't completed the survey.</p>
       </div>
+
+      <FilterBar
+        search={q}
+        onSearchChange={setQ}
+        searchPlaceholder="Search name, index, department…"
+        sort={sort}
+        onSortChange={setSort}
+        sortOptions={[
+          { value: "name", label: "Name (A–Z)" },
+          { value: "index", label: "Index number" },
+          { value: "responded-newest", label: "Responded (newest)" },
+          { value: "responded-oldest", label: "Responded (oldest)" },
+        ]}
+        filters={[
+          { key: "dept", label: "Dept", value: dept, onChange: setDept, options: deptOptions },
+          { key: "year", label: "Year", value: year, onChange: setYear, options: yearOptions },
+        ]}
+        totalCount={rows.length}
+        filteredCount={filtered.length}
+        onClear={() => { setQ(""); setDept("all"); setYear("all"); }}
+      />
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Loading students…</p>
