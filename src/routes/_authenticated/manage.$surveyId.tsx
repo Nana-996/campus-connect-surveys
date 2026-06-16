@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download, CheckCircle2, Circle } from "lucide-react";
 import { getMyManagerScope, getSurveyTracking, getSurveyResponsesForManager, getSurveyQuestionsForManager } from "@/lib/manager.functions";
 import { MessageSquare } from "lucide-react";
+import { FilterBar } from "@/components/FilterBar";
 
 export const Route = createFileRoute("/_authenticated/manage/$surveyId")({
   component: ManageSurveyPage,
