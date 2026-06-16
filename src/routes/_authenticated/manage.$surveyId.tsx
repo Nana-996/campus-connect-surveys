@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download, CheckCircle2, Circle } from "lucide-react";
 import { getMyManagerScope, getSurveyTracking, getSurveyResponsesForManager, getSurveyQuestionsForManager } from "@/lib/manager.functions";
 import { MessageSquare } from "lucide-react";
+import { FilterBar } from "@/components/FilterBar";
 
 export const Route = createFileRoute("/_authenticated/manage/$surveyId")({
   component: ManageSurveyPage,
@@ -60,16 +61,67 @@ function ManageSurveyPage() {
   const questions = surveyMeta?.questions ?? [];
 
   const [q, setQ] = useState("");
+  const [dept, setDept] = useState("all");
+  const [year, setYear] = useState("all");
+  const [sort, setSort] = useState("name");
+
+  const deptOptions = useMemo(() => {
+    const c = new Map<string, number>();
+    rows.forEach((r) => {
+      const k = r.department ?? "—";
+      c.set(k, (c.get(k) ?? 0) + 1);
+    });
+    return [
+      { value: "all", label: "All departments", count: rows.length },
+      ...Array.from(c.entries()).sort().map(([v, count]) => ({ value: v, label: v, count })),
+    ];
+  }, [rows]);
+
+  const yearOptions = useMemo(() => {
+    const c = new Map<string, number>();
+    rows.forEach((r) => {
+      const k = r.year ?? "—";
+      c.set(k, (c.get(k) ?? 0) + 1);
+    });
+    return [
+      { value: "all", label: "All years", count: rows.length },
+      ...Array.from(c.entries()).sort().map(([v, count]) => ({ value: v, label: v, count })),
+    ];
+  }, [rows]);
+
   const filtered = useMemo(() => {
     const t = q.trim().toLowerCase();
-    if (!t) return rows;
-    return rows.filter(
-      (r) =>
+    let list = rows.filter((r) => {
+      if (t && !(
         r.full_name?.toLowerCase().includes(t) ||
         (r.index_number ?? "").toLowerCase().includes(t) ||
-        (r.department ?? "").toLowerCase().includes(t),
-    );
-  }, [rows, q]);
+        (r.department ?? "").toLowerCase().includes(t)
+      )) return false;
+      if (dept !== "all" && (r.department ?? "—") !== dept) return false;
+      if (year !== "all" && (r.year ?? "—") !== year) return false;
+      return true;
+    });
+    const sorted = [...list];
+    switch (sort) {
+      case "name":
+        sorted.sort((a, b) => (a.full_name ?? "").localeCompare(b.full_name ?? ""));
+        break;
+      case "index":
+        sorted.sort((a, b) => (a.index_number ?? "").localeCompare(b.index_number ?? ""));
+        break;
+      case "responded-newest":
+        sorted.sort((a, b) => (+new Date(b.responded_at ?? 0)) - (+new Date(a.responded_at ?? 0)));
+        break;
+      case "responded-oldest":
+        sorted.sort((a, b) => {
+          const av = a.responded_at ? +new Date(a.responded_at) : Infinity;
+          const bv = b.responded_at ? +new Date(b.responded_at) : Infinity;
+          return av - bv;
+        });
+        break;
+    }
+    return sorted;
+  }, [rows, q, dept, year, sort]);
   const responded = filtered.filter((r) => r.responded_at);
   const pending = filtered.filter((r) => !r.responded_at);
 
@@ -103,21 +155,34 @@ function ManageSurveyPage() {
         <ArrowLeft className="h-3 w-3" /> All surveys
       </Link>
 
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Survey tracking</p>
-          <h1 className="mt-1 font-serif text-4xl leading-[0.95]">
-            {responded.length} of {filtered.length} <em className="text-primary">responded.</em>
-          </h1>
-          <p className="mt-1 text-xs text-muted-foreground">Answer content stays confidential — this view only shows who has and hasn't completed the survey.</p>
-        </div>
-        <Input
-          placeholder="Search name, index, department…"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          className="h-10 w-full max-w-xs rounded-xl"
-        />
+      <div>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Survey tracking</p>
+        <h1 className="mt-1 font-serif text-4xl leading-[0.95]">
+          {responded.length} of {filtered.length} <em className="text-primary">responded.</em>
+        </h1>
+        <p className="mt-1 text-xs text-muted-foreground">Answer content stays confidential — this view only shows who has and hasn't completed the survey.</p>
       </div>
+
+      <FilterBar
+        search={q}
+        onSearchChange={setQ}
+        searchPlaceholder="Search name, index, department…"
+        sort={sort}
+        onSortChange={setSort}
+        sortOptions={[
+          { value: "name", label: "Name (A–Z)" },
+          { value: "index", label: "Index number" },
+          { value: "responded-newest", label: "Responded (newest)" },
+          { value: "responded-oldest", label: "Responded (oldest)" },
+        ]}
+        filters={[
+          { key: "dept", label: "Dept", value: dept, onChange: setDept, options: deptOptions },
+          { key: "year", label: "Year", value: year, onChange: setYear, options: yearOptions },
+        ]}
+        totalCount={rows.length}
+        filteredCount={filtered.length}
+        onClear={() => { setQ(""); setDept("all"); setYear("all"); }}
+      />
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Loading students…</p>

@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { FilterBar } from "@/components/FilterBar";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -112,6 +113,10 @@ function UsersPanel() {
   const setRole = useServerFn(setUserAdminRole);
   const setMgrRole = useServerFn(setUserManagerRole);
   const [search, setSearch] = useState("");
+  const [userType, setUserType] = useState("all");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [sort, setSort] = useState("newest");
   const { data: users = [] } = useQuery({
     queryKey: ["admin", "users", search],
     queryFn: () => fetchUsers({ data: { search: search || undefined } }),
@@ -119,12 +124,104 @@ function UsersPanel() {
 
   const refresh = () => qc.invalidateQueries({ queryKey: ["admin"] });
 
+  const typeOptions = useMemo(() => {
+    const counts = new Map<string, number>();
+    users.forEach((u: any) => counts.set(u.user_type ?? "—", (counts.get(u.user_type ?? "—") ?? 0) + 1));
+    return [
+      { value: "all", label: "All types", count: users.length },
+      ...Array.from(counts.entries()).map(([v, c]) => ({ value: v, label: v, count: c })),
+    ];
+  }, [users]);
+
+  const filtered = useMemo(() => {
+    let list = users as any[];
+    if (userType !== "all") list = list.filter((u) => (u.user_type ?? "—") === userType);
+    if (roleFilter !== "all") {
+      list = list.filter((u) =>
+        roleFilter === "none"
+          ? !u.roles?.length
+          : u.roles?.includes(roleFilter),
+      );
+    }
+    if (statusFilter === "flagged") list = list.filter((u) => u.is_flagged);
+    if (statusFilter === "clean") list = list.filter((u) => !u.is_flagged);
+
+    const sorted = [...list];
+    switch (sort) {
+      case "newest":
+        sorted.sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at));
+        break;
+      case "oldest":
+        sorted.sort((a, b) => +new Date(a.created_at) - +new Date(b.created_at));
+        break;
+      case "name":
+        sorted.sort((a, b) => (a.full_name ?? "").localeCompare(b.full_name ?? ""));
+        break;
+      case "credits-desc":
+        sorted.sort((a, b) => (b.earned_credits ?? 0) - (a.earned_credits ?? 0));
+        break;
+      case "credits-asc":
+        sorted.sort((a, b) => (a.earned_credits ?? 0) - (b.earned_credits ?? 0));
+        break;
+      case "university":
+        sorted.sort((a, b) => (a.university_name ?? "").localeCompare(b.university_name ?? ""));
+        break;
+    }
+    return sorted;
+  }, [users, userType, roleFilter, statusFilter, sort]);
+
   return (
     <div>
       <PromoteAdminByEmail onDone={refresh} />
-      <div className="mb-3 flex gap-2">
-        <Input placeholder="Search name, university, domain…" value={search} onChange={(e) => setSearch(e.target.value)} className="h-10 rounded-xl" />
-      </div>
+      <FilterBar
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search name, university, domain…"
+        sort={sort}
+        onSortChange={setSort}
+        sortOptions={[
+          { value: "newest", label: "Newest first" },
+          { value: "oldest", label: "Oldest first" },
+          { value: "name", label: "Name (A–Z)" },
+          { value: "university", label: "University (A–Z)" },
+          { value: "credits-desc", label: "Credits (high → low)" },
+          { value: "credits-asc", label: "Credits (low → high)" },
+        ]}
+        filters={[
+          { key: "type", label: "Type", value: userType, onChange: setUserType, options: typeOptions },
+          {
+            key: "role",
+            label: "Role",
+            value: roleFilter,
+            onChange: setRoleFilter,
+            options: [
+              { value: "all", label: "All roles" },
+              { value: "admin", label: "Admins" },
+              { value: "manager", label: "Managers" },
+              { value: "none", label: "No role" },
+            ],
+          },
+          {
+            key: "status",
+            label: "Status",
+            value: statusFilter,
+            onChange: setStatusFilter,
+            options: [
+              { value: "all", label: "All" },
+              { value: "flagged", label: "Flagged" },
+              { value: "clean", label: "Not flagged" },
+            ],
+          },
+        ]}
+        totalCount={users.length}
+        filteredCount={filtered.length}
+        onClear={() => {
+          setSearch("");
+          setUserType("all");
+          setRoleFilter("all");
+          setStatusFilter("all");
+        }}
+      />
       <div className="overflow-x-auto rounded-2xl border border-foreground/15 bg-card">
         <table className="w-full text-xs">
           <thead className="bg-secondary text-left uppercase tracking-wider">
@@ -138,7 +235,7 @@ function UsersPanel() {
             </tr>
           </thead>
           <tbody>
-            {users.map((u: any) => (
+            {filtered.map((u: any) => (
               <tr key={u.id} className="border-t border-foreground/10">
                 <td className="px-3 py-2">
                   <div className="font-medium">{u.full_name || "—"}</div>
@@ -192,8 +289,8 @@ function UsersPanel() {
                 </td>
               </tr>
             ))}
-            {users.length === 0 && (
-              <tr><td colSpan={6} className="px-3 py-6 text-center text-muted-foreground">No users.</td></tr>
+            {filtered.length === 0 && (
+              <tr><td colSpan={6} className="px-3 py-6 text-center text-muted-foreground">No users match your filters.</td></tr>
             )}
           </tbody>
         </table>
