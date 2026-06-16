@@ -61,16 +61,67 @@ function ManageSurveyPage() {
   const questions = surveyMeta?.questions ?? [];
 
   const [q, setQ] = useState("");
+  const [dept, setDept] = useState("all");
+  const [year, setYear] = useState("all");
+  const [sort, setSort] = useState("name");
+
+  const deptOptions = useMemo(() => {
+    const c = new Map<string, number>();
+    rows.forEach((r) => {
+      const k = r.department ?? "—";
+      c.set(k, (c.get(k) ?? 0) + 1);
+    });
+    return [
+      { value: "all", label: "All departments", count: rows.length },
+      ...Array.from(c.entries()).sort().map(([v, count]) => ({ value: v, label: v, count })),
+    ];
+  }, [rows]);
+
+  const yearOptions = useMemo(() => {
+    const c = new Map<string, number>();
+    rows.forEach((r) => {
+      const k = r.year ?? "—";
+      c.set(k, (c.get(k) ?? 0) + 1);
+    });
+    return [
+      { value: "all", label: "All years", count: rows.length },
+      ...Array.from(c.entries()).sort().map(([v, count]) => ({ value: v, label: v, count })),
+    ];
+  }, [rows]);
+
   const filtered = useMemo(() => {
     const t = q.trim().toLowerCase();
-    if (!t) return rows;
-    return rows.filter(
-      (r) =>
+    let list = rows.filter((r) => {
+      if (t && !(
         r.full_name?.toLowerCase().includes(t) ||
         (r.index_number ?? "").toLowerCase().includes(t) ||
-        (r.department ?? "").toLowerCase().includes(t),
-    );
-  }, [rows, q]);
+        (r.department ?? "").toLowerCase().includes(t)
+      )) return false;
+      if (dept !== "all" && (r.department ?? "—") !== dept) return false;
+      if (year !== "all" && (r.year ?? "—") !== year) return false;
+      return true;
+    });
+    const sorted = [...list];
+    switch (sort) {
+      case "name":
+        sorted.sort((a, b) => (a.full_name ?? "").localeCompare(b.full_name ?? ""));
+        break;
+      case "index":
+        sorted.sort((a, b) => (a.index_number ?? "").localeCompare(b.index_number ?? ""));
+        break;
+      case "responded-newest":
+        sorted.sort((a, b) => (+new Date(b.responded_at ?? 0)) - (+new Date(a.responded_at ?? 0)));
+        break;
+      case "responded-oldest":
+        sorted.sort((a, b) => {
+          const av = a.responded_at ? +new Date(a.responded_at) : Infinity;
+          const bv = b.responded_at ? +new Date(b.responded_at) : Infinity;
+          return av - bv;
+        });
+        break;
+    }
+    return sorted;
+  }, [rows, q, dept, year, sort]);
   const responded = filtered.filter((r) => r.responded_at);
   const pending = filtered.filter((r) => !r.responded_at);
 
