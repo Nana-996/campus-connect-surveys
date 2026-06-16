@@ -5,14 +5,13 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { VitePWA } from "vite-plugin-pwa";
 
-const isVercel = process.env.VERCEL === "1" || process.env.VERCEL_ENV !== undefined;
+const isVercel = !!process.env.VERCEL;
 
 export default defineConfig({
-  tanstackStart: {
-    server: isVercel
-      ? { preset: "vercel" }
-      : { entry: "server" },
-  },
+  // On Vercel, switch Nitro to the vercel preset so the build emits
+  // .vercel/output/ (Build Output API v3). In the Lovable sandbox, leave
+  // it undefined so the default Cloudflare preset keeps working.
+  ...(isVercel ? { nitro: { preset: "vercel" } } : {}),
   vite: {
     plugins: [
       VitePWA({
@@ -42,7 +41,6 @@ export default defineConfig({
           globPatterns: ["**/*.{js,css,html,svg,png,ico,woff2}"],
           runtimeCaching: [
             {
-              // HTML navigations — NetworkFirst so updates ship fast.
               urlPattern: ({ request }) => request.mode === "navigate",
               handler: "NetworkFirst",
               options: {
@@ -52,13 +50,11 @@ export default defineConfig({
               },
             },
             {
-              // Google fonts stylesheet
               urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
               handler: "StaleWhileRevalidate",
               options: { cacheName: "google-fonts-css" },
             },
             {
-              // Google font files
               urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
               handler: "CacheFirst",
               options: {
