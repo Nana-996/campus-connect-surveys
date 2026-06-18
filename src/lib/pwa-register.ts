@@ -10,19 +10,6 @@ function shouldRefuse(): boolean {
   } catch {
     return true;
   }
-  const host = window.location.hostname;
-  if (
-    host.startsWith("id-preview--") ||
-    host.startsWith("preview--") ||
-    host === "lovableproject.com" ||
-    host.endsWith(".lovableproject.com") ||
-    host === "lovableproject-dev.com" ||
-    host.endsWith(".lovableproject-dev.com") ||
-    host === "beta.lovable.dev" ||
-    host.endsWith(".beta.lovable.dev")
-  ) {
-    return true;
-  }
   if (new URLSearchParams(window.location.search).has("sw") && new URLSearchParams(window.location.search).get("sw") === "off") {
     return true;
   }

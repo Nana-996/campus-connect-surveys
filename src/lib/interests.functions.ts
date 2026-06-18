@@ -52,20 +52,25 @@ export const normalizeInterestTagAI = createServerFn({ method: "POST" })
       return { tag: lower, confidence: 1, source: "exact" as const };
     }
 
-    const apiKey = process.env.LOVABLE_API_KEY;
-    if (!apiKey) {
+    // Generic OpenAI-compatible chat completions endpoint.
+    // Set AI_GATEWAY_URL (e.g. https://api.openai.com/v1) + AI_API_KEY,
+    // and optionally AI_MODEL, in your host's environment.
+    const apiKey = process.env.AI_API_KEY;
+    const baseUrl = process.env.AI_GATEWAY_URL;
+    const model = process.env.AI_MODEL || "gpt-4o-mini";
+    if (!apiKey || !baseUrl) {
       return { tag: "other" as const, confidence: 0, source: "fallback" as const };
     }
 
     try {
-      const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      const res = await fetch(`${baseUrl.replace(/\/$/, "")}/chat/completions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash-lite",
+          model,
           response_format: { type: "json_object" },
           messages: [
             { role: "system", content: SYSTEM_PROMPT },

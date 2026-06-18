@@ -25,9 +25,9 @@ export const Route = createFileRoute("/auth")({
       { name: "description", content: "Log in to CampusVerify as a verified student or general user to access your survey feed, credits, and responses." },
       { property: "og:title", content: "Log in — CampusVerify" },
       { property: "og:description", content: "Sign in to CampusVerify to access your campus or public survey feed and earned credits." },
-      { property: "og:url", content: "https://campus-spotlight-verify.lovable.app/auth" },
+      { property: "og:url", content: "https://your-domain.com/auth" },
     ],
-    links: [{ rel: "canonical", href: "https://campus-spotlight-verify.lovable.app/auth" }],
+    links: [{ rel: "canonical", href: "https://your-domain.com/auth" }],
   }),
 });
 

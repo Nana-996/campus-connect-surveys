@@ -1080,7 +1080,7 @@ const Slide11 = () => {
   const ctas = [
     { icon: Handshake, t: "Partner with us", d: "Bring CampusVerify to your university." },
     { icon: DollarSign, t: "Invest", d: "Help us scale across West Africa." },
-    { icon: Rocket, t: "Try it", d: "campus-spotlight-verify.lovable.app" },
+    { icon: Rocket, t: "Try it", d: "your-domain.com" },
   ];
   return (
     <SlideShell bg="green">

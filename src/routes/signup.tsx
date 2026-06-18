@@ -23,9 +23,9 @@ export const Route = createFileRoute("/signup")({
       { name: "description", content: "Sign up for CampusVerify as a verified student or general user. Get free credits and start running or answering surveys today." },
       { property: "og:title", content: "Create account — CampusVerify" },
       { property: "og:description", content: "Join CampusVerify — pick a Student or General account, claim free credits, and start running real surveys." },
-      { property: "og:url", content: "https://campus-spotlight-verify.lovable.app/signup" },
+      { property: "og:url", content: "https://your-domain.com/signup" },
     ],
-    links: [{ rel: "canonical", href: "https://campus-spotlight-verify.lovable.app/signup" }],
+    links: [{ rel: "canonical", href: "https://your-domain.com/signup" }],
   }),
 });
 

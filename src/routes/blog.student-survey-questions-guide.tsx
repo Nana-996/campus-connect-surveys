@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
-const URL = "https://campus-spotlight-verify.lovable.app/blog/student-survey-questions-guide";
+const URL = "https://your-domain.com/blog/student-survey-questions-guide";
 const TITLE = "Survey Questions for Students: 80+ Examples & Topics";
 const DESC =
   "A practical guide to the best survey questions for university students — 80+ examples across academics, wellbeing, campus life, and research, plus the topics that get the most responses.";
