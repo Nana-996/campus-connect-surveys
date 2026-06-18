@@ -10,13 +10,14 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import {
-  ShieldCheck,
+  BadgeCheck,
   BarChart3,
-  Coins,
-  Sparkles,
+  Scale,
+  NotebookPen,
+  BookOpen,
   ArrowUpRight,
   GraduationCap,
-  Globe2,
+  MessageCircleQuestion,
   Send,
   Inbox,
   Trophy,
