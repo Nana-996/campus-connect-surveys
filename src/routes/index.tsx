@@ -268,7 +268,7 @@ function Landing() {
 
         {/* Final CTA */}
         <section className="mt-20 rounded-3xl bg-primary p-10 text-center text-primary-foreground shadow-paper">
-          <Globe2 className="mx-auto h-8 w-8" />
+          <MessageCircleQuestion className="mx-auto h-8 w-8" />
           <h2 className="mt-3 font-serif text-4xl sm:text-5xl leading-[0.95]">Ready to ask <em>better questions?</em></h2>
           <p className="mx-auto mt-3 max-w-md text-sm opacity-80">
             Sign up in under a minute. Start with free credits. Publish your first survey today.
