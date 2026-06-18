@@ -189,13 +189,13 @@ function Landing() {
 
         {/* feature row */}
         <section className="mt-4 grid gap-4 sm:grid-cols-3">
-          <Tile icon={<ShieldCheck />} title="Verified-only" tone="card">
+          <Tile icon={<BadgeCheck />} title="Verified-only" tone="card">
             Sign in with your university email. Surveys never leave campus unless you say so.
           </Tile>
-          <Tile icon={<Coins />} title="Fair credit economy" tone="accent">
+          <Tile icon={<Scale />} title="Fair credit economy" tone="accent">
             Earn 1 by answering. Spend to publish. Everyone gives, everyone gets.
           </Tile>
-          <Tile icon={<Sparkles />} title="Built for thesis season" tone="card">
+          <Tile icon={<NotebookPen />} title="Built for thesis season" tone="card">
             Clean export, no setup. Hit publish, watch responses land.
           </Tile>
         </section>
