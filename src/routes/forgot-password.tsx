@@ -18,7 +18,7 @@ export const Route = createFileRoute("/forgot-password")({
       { title: "Reset your password — CampusVerify" },
       { name: "description", content: "Request a password reset link for your CampusVerify account." },
     ],
-    links: [{ rel: "canonical", href: "https://campus-spotlight-verify.lovable.app/forgot-password" }],
+    links: [{ rel: "canonical", href: "https://your-domain.com/forgot-password" }],
   }),
 });
 

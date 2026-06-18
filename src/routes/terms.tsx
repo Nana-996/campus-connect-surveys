@@ -8,9 +8,9 @@ export const Route = createFileRoute("/terms")({
       { name: "description", content: "The rules and agreements that govern your use of CampusVerify." },
       { property: "og:title", content: "Terms of Service — CampusVerify" },
       { property: "og:description", content: "The rules and agreements that govern your use of CampusVerify." },
-      { property: "og:url", content: "https://campus-spotlight-verify.lovable.app/terms" },
+      { property: "og:url", content: "https://your-domain.com/terms" },
     ],
-    links: [{ rel: "canonical", href: "https://campus-spotlight-verify.lovable.app/terms" }],
+    links: [{ rel: "canonical", href: "https://your-domain.com/terms" }],
   }),
 });
 

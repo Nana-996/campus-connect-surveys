@@ -33,7 +33,7 @@ export const Route = createFileRoute("/about")({
       },
     ],
     links: [
-      { rel: "canonical", href: "https://campus-spotlight-verify.lovable.app/about" },
+      { rel: "canonical", href: "https://your-domain.com/about" },
     ],
   }),
 });

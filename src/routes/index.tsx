@@ -33,9 +33,9 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Run surveys with verified students from your campus or the wider public. Free to use — earn credits by answering surveys, spend them to publish your own." },
       { property: "og:title", content: "CampusVerify — Surveys for verified students" },
       { property: "og:description", content: "A credit-powered survey feed for verified university students. Publish in seconds, get real answers from your campus." },
-      { property: "og:url", content: "https://campus-spotlight-verify.lovable.app/" },
+      { property: "og:url", content: "https://your-domain.com/" },
     ],
-    links: [{ rel: "canonical", href: "https://campus-spotlight-verify.lovable.app/" }],
+    links: [{ rel: "canonical", href: "https://your-domain.com/" }],
     scripts: [
       {
         type: "application/ld+json",
