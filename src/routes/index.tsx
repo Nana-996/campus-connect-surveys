@@ -10,13 +10,14 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import {
-  ShieldCheck,
+  BadgeCheck,
   BarChart3,
-  Coins,
-  Sparkles,
+  Scale,
+  NotebookPen,
+  BookOpen,
   ArrowUpRight,
   GraduationCap,
-  Globe2,
+  MessageCircleQuestion,
   Send,
   Inbox,
   Trophy,
@@ -134,7 +135,7 @@ function Landing() {
         <section className="grid gap-4 sm:grid-cols-6 sm:grid-rows-[auto_auto]">
           <div className="sm:col-span-4 sm:row-span-2 rounded-3xl border border-foreground/15 bg-card p-8 sm:p-12 shadow-paper">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-highlight px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-highlight-foreground">
-              <Sparkles className="h-3 w-3" /> for curious students
+              <BookOpen className="h-3 w-3" /> for curious students
             </span>
             <h1 className="mt-5 font-serif text-5xl leading-[0.95] tracking-tight sm:text-7xl">
               Real research,<br />
@@ -188,13 +189,13 @@ function Landing() {
 
         {/* feature row */}
         <section className="mt-4 grid gap-4 sm:grid-cols-3">
-          <Tile icon={<ShieldCheck />} title="Verified-only" tone="card">
+          <Tile icon={<BadgeCheck />} title="Verified-only" tone="card">
             Sign in with your university email. Surveys never leave campus unless you say so.
           </Tile>
-          <Tile icon={<Coins />} title="Fair credit economy" tone="accent">
+          <Tile icon={<Scale />} title="Fair credit economy" tone="accent">
             Earn 1 by answering. Spend to publish. Everyone gives, everyone gets.
           </Tile>
-          <Tile icon={<Sparkles />} title="Built for thesis season" tone="card">
+          <Tile icon={<NotebookPen />} title="Built for thesis season" tone="card">
             Clean export, no setup. Hit publish, watch responses land.
           </Tile>
         </section>
@@ -267,7 +268,7 @@ function Landing() {
 
         {/* Final CTA */}
         <section className="mt-20 rounded-3xl bg-primary p-10 text-center text-primary-foreground shadow-paper">
-          <Globe2 className="mx-auto h-8 w-8" />
+          <MessageCircleQuestion className="mx-auto h-8 w-8" />
           <h2 className="mt-3 font-serif text-4xl sm:text-5xl leading-[0.95]">Ready to ask <em>better questions?</em></h2>
           <p className="mx-auto mt-3 max-w-md text-sm opacity-80">
             Sign up in under a minute. Start with free credits. Publish your first survey today.
