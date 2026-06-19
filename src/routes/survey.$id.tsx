@@ -45,7 +45,7 @@ const CHART_TYPES: { value: ChartType; label: string }[] = [
 ];
 const PALETTE = ["var(--primary)", "var(--highlight)", "var(--accent)", "#7c9a6b", "#c98a4b", "#4a6b52", "#b8c47a"];
 
-type Question = { id: string; type: "text" | "choice" | "rating"; text: string; options?: string[] };
+type Question = { id: string; type: "text" | "choice" | "rating"; text: string; options?: string[]; required?: boolean };
 type Survey = {
   id: string;
   creator_id: string;
@@ -277,7 +277,10 @@ function SurveyPage() {
     if (new Date(survey.expires_at) <= new Date()) { toast.error("This survey has closed."); return; }
     if (survey.response_count >= survey.response_goal) { toast.error("This survey has reached its response goal."); return; }
     for (const q of survey.questions) {
-      if (!answers[q.id] || answers[q.id].toString().trim() === "") { toast.error("Please answer all questions."); return; }
+      const isRequired = q.required ?? true;
+      if (isRequired && (!answers[q.id] || answers[q.id].toString().trim() === "")) {
+        toast.error("Please answer all required questions."); return;
+      }
     }
     const duration = Date.now() - startedAt;
     if (duration < 15000) {
@@ -690,9 +693,16 @@ function SurveyPage() {
           </div>
         ) : (
           <form onSubmit={submit} className="mt-6 space-y-3">
-            {survey.questions.map((q, i) => (
+            {survey.questions.map((q, i) => {
+              const isRequired = q.required ?? true;
+              return (
               <div key={q.id} className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
-                <Label className="font-serif text-2xl leading-tight">{i + 1}. {q.text}</Label>
+                <Label className="font-serif text-2xl leading-tight">
+                  {i + 1}. {q.text}
+                  {isRequired
+                    ? <span className="ml-1 text-destructive" aria-label="required">*</span>
+                    : <span className="ml-2 align-middle rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Optional</span>}
+                </Label>
                 <div className="mt-2">
                   {q.type === "text" && (
                     <Textarea value={answers[q.id] ?? ""} onChange={(e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value }))} />
@@ -732,7 +742,8 @@ function SurveyPage() {
                   )}
                 </div>
               </div>
-            ))}
+              );
+            })}
             <Button type="submit" size="lg" className="h-14 w-full rounded-full bg-primary text-base" disabled={submitting}>
               {submitting ? "Submitting…" : "Submit & earn 1 credit →"}
             </Button>
