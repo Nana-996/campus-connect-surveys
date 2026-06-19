@@ -20,6 +20,7 @@ type Question = {
   type: "text" | "choice" | "rating";
   text: string;
   options?: string[];
+  required?: boolean;
 };
 
 type CreateSearch = { lecturer?: string; course?: string };
@@ -93,7 +94,7 @@ function Create() {
   const [minResponseSeconds, setMinResponseSeconds] = useState<string>(d.minResponseSeconds ?? "15");
   const [questions, setQuestions] = useState<Question[]>(
     d.questions && d.questions.length > 0 ? d.questions :
-    [{ id: crypto.randomUUID(), type: "text", text: "" }]
+    [{ id: crypto.randomUUID(), type: "text", text: "", required: true }]
   );
   const [submitting, setSubmitting] = useState(false);
 
@@ -112,7 +113,7 @@ function Create() {
 
   const addQ = (type: Question["type"]) =>
     setQuestions((q) => [...q, {
-      id: crypto.randomUUID(), type, text: "",
+      id: crypto.randomUUID(), type, text: "", required: true,
       options: type === "choice" ? ["", ""] : undefined,
     }]);
   const removeQ = (id: string) => setQuestions((q) => q.filter((x) => x.id !== id));
