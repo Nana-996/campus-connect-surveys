@@ -445,7 +445,7 @@ function Create() {
             <div key={q.id} className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 space-y-3">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-semibold text-primary">Q{i + 1}</span>
                     <Select value={q.type} onValueChange={(v: any) =>
                       updateQ(q.id, { type: v, options: v === "choice" ? ["", ""] : undefined })}>
@@ -456,6 +456,22 @@ function Create() {
                         <SelectItem value="rating">Rating (1-5)</SelectItem>
                       </SelectContent>
                     </Select>
+                    <label
+                      className={`ml-auto inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition ${
+                        (q.required ?? true)
+                          ? "border-primary/40 bg-primary/10 text-primary"
+                          : "border-foreground/15 bg-background text-muted-foreground hover:border-foreground/30"
+                      }`}
+                      title="Required questions must be answered before submit"
+                    >
+                      <input
+                        type="checkbox"
+                        className="h-3 w-3 accent-primary"
+                        checked={q.required ?? true}
+                        onChange={(e) => updateQ(q.id, { required: e.target.checked })}
+                      />
+                      {(q.required ?? true) ? "Required" : "Optional"}
+                    </label>
                   </div>
                   <Input value={q.text} onChange={(e) => updateQ(q.id, { text: e.target.value })} placeholder="Question text" />
                   {q.type === "text" && (
