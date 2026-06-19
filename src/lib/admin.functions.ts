@@ -6,12 +6,14 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 const requireAdmin = createMiddleware({ type: "function" })
   .middleware([requireSupabaseAuth])
   .server(async ({ next, context }) => {
-    const { data, error } = await supabaseAdmin
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", context.userId)
-      .eq("role", "admin")
-      .maybeSingle();
+    // Use the authenticated client + has_role() so the gate works even
+    // when SUPABASE_SERVICE_ROLE_KEY isn't configured on the host. The
+    // privileged operations below still need the service role, but at
+    // least the user gets a clear, accurate failure instead of "not admin".
+    const { data, error } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin" as any,
+    });
     if (error || !data) throw new Error("Forbidden: admin only");
     return next();
   });
