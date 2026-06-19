@@ -742,7 +742,8 @@ function SurveyPage() {
                   )}
                 </div>
               </div>
-            ))}
+              );
+            })}
             <Button type="submit" size="lg" className="h-14 w-full rounded-full bg-primary text-base" disabled={submitting}>
               {submitting ? "Submitting…" : "Submit & earn 1 credit →"}
             </Button>
