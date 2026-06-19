@@ -51,11 +51,19 @@ function Admin() {
 
   if (isLoading) return <p className="text-sm text-muted-foreground">Loading…</p>;
   if (error) {
+    const msg = (error as any)?.message ?? "";
+    const isForbidden = /forbidden|admin only/i.test(msg);
     return (
       <div className="rounded-3xl border border-foreground/15 bg-card p-8 text-center">
         <ShieldAlert className="mx-auto h-8 w-8 text-destructive" />
-        <p className="mt-3 font-serif text-3xl">Admins only.</p>
-        <p className="mt-1 text-sm text-muted-foreground">Your account doesn't have the admin role.</p>
+        <p className="mt-3 font-serif text-3xl">
+          {isForbidden ? "Admins only." : "Couldn't load admin."}
+        </p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {isForbidden
+            ? "Your account doesn't have the admin role on this deployment."
+            : msg || "Unknown error."}
+        </p>
       </div>
     );
   }
