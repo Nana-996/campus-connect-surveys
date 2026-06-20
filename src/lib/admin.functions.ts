@@ -159,8 +159,11 @@ export const listAdminSurveys = createServerFn({ method: "GET" })
 export const setSurveyActive = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
   .inputValidator((d: unknown) => z.object({ surveyId: z.string().uuid(), active: z.boolean() }).parse(d))
-  .handler(async ({ data }) => {
-    const { error } = await supabaseAdmin.from("surveys").update({ is_active: data.active }).eq("id", data.surveyId);
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.rpc("admin_set_survey_active" as any, {
+      _survey_id: data.surveyId,
+      _active: data.active,
+    });
     if (error) genericError(error);
     return { ok: true };
   });
@@ -168,10 +171,8 @@ export const setSurveyActive = createServerFn({ method: "POST" })
 export const deleteSurvey = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
   .inputValidator((d: unknown) => z.object({ surveyId: z.string().uuid() }).parse(d))
-  .handler(async ({ data }) => {
-    await supabaseAdmin.from("survey_responses").delete().eq("survey_id", data.surveyId);
-    await supabaseAdmin.from("survey_visualizations").delete().eq("survey_id", data.surveyId);
-    const { error } = await supabaseAdmin.from("surveys").delete().eq("id", data.surveyId);
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.rpc("admin_delete_survey" as any, { _survey_id: data.surveyId });
     if (error) genericError(error);
     return { ok: true };
   });
@@ -179,8 +180,8 @@ export const deleteSurvey = createServerFn({ method: "POST" })
 // ---------- Disposable domains ----------
 export const listDisposableDomains = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
-  .handler(async () => {
-    const { data, error } = await supabaseAdmin.from("disposable_domains").select("domain, created_at").order("created_at", { ascending: false });
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase.rpc("admin_list_disposable_domains" as any);
     if (error) genericError(error);
     return data ?? [];
   });
@@ -190,20 +191,17 @@ export const addDisposableDomain = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z.object({ domain: z.string().min(3).max(253).regex(/^[a-z0-9.-]+\.[a-z]{2,}$/i) }).parse(d),
   )
-  .handler(async ({ data }) => {
-    const { error } = await supabaseAdmin.from("disposable_domains").insert({ domain: data.domain.toLowerCase() });
-    if (error) {
-      if (error.message?.includes("duplicate")) throw new Error("Domain already blocked");
-      genericError(error);
-    }
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.rpc("admin_add_disposable_domain" as any, { _domain: data.domain.toLowerCase() });
+    if (error) genericError(error);
     return { ok: true };
   });
 
 export const removeDisposableDomain = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
   .inputValidator((d: unknown) => z.object({ domain: z.string() }).parse(d))
-  .handler(async ({ data }) => {
-    const { error } = await supabaseAdmin.from("disposable_domains").delete().eq("domain", data.domain.toLowerCase());
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.rpc("admin_remove_disposable_domain" as any, { _domain: data.domain.toLowerCase() });
     if (error) genericError(error);
     return { ok: true };
   });
@@ -211,8 +209,8 @@ export const removeDisposableDomain = createServerFn({ method: "POST" })
 // ---------- Flags ----------
 export const listOpenFlags = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
-  .handler(async () => {
-    const { data, error } = await supabaseAdmin.from("review_flags").select("*").eq("resolved", false).order("created_at", { ascending: false });
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase.rpc("admin_list_open_flags" as any);
     if (error) genericError(error);
     return data ?? [];
   });
@@ -220,15 +218,15 @@ export const listOpenFlags = createServerFn({ method: "GET" })
 export const resolveFlag = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
-  .handler(async ({ data }) => {
-    const { error } = await supabaseAdmin.from("review_flags").update({ resolved: true }).eq("id", data.id);
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.rpc("admin_resolve_flag" as any, { _id: data.id });
     if (error) genericError(error);
     return { ok: true };
   });
 
 export const checkAdminExists = createServerFn({ method: "GET" })
-  .handler(async () => {
-    const { data, error } = await supabaseAdmin.rpc("admin_exists");
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase.rpc("admin_exists");
     if (error) genericError(error);
     return { exists: !!data };
   });
