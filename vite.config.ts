@@ -8,7 +8,11 @@ import { VitePWA } from "vite-plugin-pwa";
 
 // Default to Vercel for production builds. Override with NITRO_PRESET
 // (e.g. "node-server", "bun", "cloudflare-module") for other hosts.
-const nitroPreset = process.env.NITRO_PRESET || "vercel";
+// In dev we leave the preset unset so Nitro uses its standard dev server
+// (the "vercel" preset emulates Vercel routing which breaks the Lovable
+// preview proxy).
+const nitroPreset =
+  process.env.NITRO_PRESET || (process.env.NODE_ENV === "production" ? "vercel" : undefined);
 
 export default defineConfig({
   server: { port: 8080 },
@@ -17,7 +21,7 @@ export default defineConfig({
     tailwindcss(),
     tanstackStart(),
     viteReact(),
-    nitro({ preset: nitroPreset }),
+    nitro(nitroPreset ? { preset: nitroPreset } : {}),
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: null, // we register from src/lib/pwa-register.ts under guards
