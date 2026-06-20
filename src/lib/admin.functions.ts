@@ -81,25 +81,13 @@ export const grantCreditsToUser = createServerFn({ method: "POST" })
     }).parse(d),
   )
   .handler(async ({ data, context }) => {
-    const { data: profile, error: e1 } = await supabaseAdmin
-      .from("profiles")
-      .select("earned_credits")
-      .eq("id", data.userId)
-      .single();
-    if (e1 || !profile) throw new Error("User not found");
-    const next = Math.max(0, (profile as any).earned_credits + data.amount);
-    const patch: Record<string, number> = { earned_credits: next };
-    const { error: e2 } = await supabaseAdmin.from("profiles").update(patch as any).eq("id", data.userId);
-    if (e2) genericError(e2);
-    const { error: e3 } = await supabaseAdmin.from("credit_ledger").insert({
-      user_id: data.userId,
-      wallet: data.wallet,
-      delta: data.amount,
-      reason: `admin:${data.reason}:by:${context.userId}`,
-      expires_at: data.amount > 0 ? new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString() : null,
+    const { data: result, error } = await context.supabase.rpc("admin_grant_credits" as any, {
+      _target_user_id: data.userId,
+      _amount: data.amount,
+      _reason: data.reason,
     });
-    if (e3) genericError(e3);
-    return { ok: true, balance: next };
+    if (error) genericError(error);
+    return result as { ok: true; balance: number };
   });
 
 export const setUserFlag = createServerFn({ method: "POST" })
@@ -107,11 +95,12 @@ export const setUserFlag = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z.object({ userId: z.string().uuid(), flagged: z.boolean(), reason: z.string().max(200).optional() }).parse(d),
   )
-  .handler(async ({ data }) => {
-    const { error } = await supabaseAdmin
-      .from("profiles")
-      .update({ is_flagged: data.flagged, flag_reason: data.flagged ? data.reason ?? "admin" : null })
-      .eq("id", data.userId);
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.rpc("admin_set_user_flag" as any, {
+      _target_user_id: data.userId,
+      _flagged: data.flagged,
+      _reason: data.reason ?? null,
+    });
     if (error) genericError(error);
     return { ok: true };
   });
@@ -121,25 +110,13 @@ export const setUserAdminRole = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z.object({ userId: z.string().uuid(), grant: z.boolean() }).parse(d),
   )
-  .handler(async ({ data }) => {
-    if (!data.grant) {
-      const { data: admins, error: countErr } = await supabaseAdmin
-        .from("user_roles")
-        .select("user_id")
-        .eq("role", "admin");
-      if (countErr) genericError(countErr);
-      const adminIds = new Set((admins ?? []).map((a: any) => a.user_id));
-      if (adminIds.size <= 1 && adminIds.has(data.userId)) {
-        throw new Error("Cannot revoke the last admin");
-      }
-    }
-    if (data.grant) {
-      const { error } = await supabaseAdmin.from("user_roles").insert({ user_id: data.userId, role: "admin" }).select();
-      if (error) genericError(error);
-    } else {
-      const { error } = await supabaseAdmin.from("user_roles").delete().eq("user_id", data.userId).eq("role", "admin");
-      if (error) genericError(error);
-    }
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.rpc("admin_set_user_role" as any, {
+      _target_user_id: data.userId,
+      _role: "admin",
+      _grant: data.grant,
+    });
+    if (error) genericError(error);
     return { ok: true };
   });
 
