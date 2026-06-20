@@ -8,6 +8,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { Analytics } from "@vercel/analytics/react";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/lib/auth";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
@@ -132,6 +133,7 @@ function RootComponent() {
         <Outlet />
         <OfflineIndicator />
         <Toaster />
+        <Analytics />
       </AuthProvider>
     </QueryClientProvider>
   );
