@@ -1,4 +1,5 @@
 import { createServerFn, createMiddleware } from "@tanstack/react-start";
+import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -225,8 +226,14 @@ export const resolveFlag = createServerFn({ method: "POST" })
   });
 
 export const checkAdminExists = createServerFn({ method: "GET" })
-  .handler(async ({ context }) => {
-    const { data, error } = await context.supabase.rpc("admin_exists");
+  .handler(async () => {
+    const url = process.env.SUPABASE_URL;
+    const key = process.env.SUPABASE_PUBLISHABLE_KEY;
+    if (!url || !key) throw new Error("Database configuration is missing");
+    const client = createClient(url, key, {
+      auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+    });
+    const { data, error } = await client.rpc("admin_exists");
     if (error) genericError(error);
     return { exists: !!data };
   });
