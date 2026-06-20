@@ -1,7 +1,6 @@
 import { createServerFn, createMiddleware } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const requireAdmin = createMiddleware({ type: "function" })
   .middleware([requireSupabaseAuth])
@@ -41,17 +40,7 @@ function genericError(e: any): never {
 export const bootstrapFirstAdmin = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data: existing } = await supabaseAdmin
-      .from("user_roles")
-      .select("id")
-      .eq("role", "admin")
-      .limit(1);
-    if (existing && existing.length > 0) {
-      throw new Error("An admin already exists");
-    }
-    const { error } = await supabaseAdmin
-      .from("user_roles")
-      .insert({ user_id: context.userId, role: "admin" });
+    const { error } = await context.supabase.rpc("bootstrap_first_admin");
     if (error) genericError(error);
     return { ok: true };
   });
@@ -59,23 +48,12 @@ export const bootstrapFirstAdmin = createServerFn({ method: "POST" })
 // ---------- Metrics ----------
 export const getAdminMetrics = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
-  .handler(async () => {
-    const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    const [users, surveys, activeSurveys, respTotal, resp24, openFlags] = await Promise.all([
-      supabaseAdmin.from("profiles").select("id", { count: "exact", head: true }),
-      supabaseAdmin.from("surveys").select("id", { count: "exact", head: true }),
-      supabaseAdmin.from("surveys").select("id", { count: "exact", head: true }).eq("is_active", true),
-      supabaseAdmin.from("survey_responses").select("id", { count: "exact", head: true }),
-      supabaseAdmin.from("survey_responses").select("id", { count: "exact", head: true }).gte("created_at", since24h),
-      supabaseAdmin.from("review_flags").select("id", { count: "exact", head: true }).eq("resolved", false),
-    ]);
-    return {
-      users: users.count ?? 0,
-      surveys: surveys.count ?? 0,
-      activeSurveys: activeSurveys.count ?? 0,
-      responses: respTotal.count ?? 0,
-      responses24h: resp24.count ?? 0,
-      openFlags: openFlags.count ?? 0,
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase.rpc("admin_dashboard_metrics" as any);
+    if (error) genericError(error);
+    return data as {
+      users: number; surveys: number; activeSurveys: number;
+      responses: number; responses24h: number; openFlags: number;
     };
   });
 
@@ -85,27 +63,11 @@ export const listAdminUsers = createServerFn({ method: "GET" })
   .inputValidator((d: { search?: string } | undefined) =>
     z.object({ search: z.string().max(120).regex(/^[^(),.%_]*$/).optional() }).parse(d ?? {}),
   )
-  .handler(async ({ data }) => {
-    let q = supabaseAdmin
-      .from("profiles")
-      .select("id, full_name, university_name, university_domain, user_type, earned_credits, is_flagged, flag_reason, created_at")
-      .order("created_at", { ascending: false })
-      .limit(200);
-    if (data.search) {
-      const safe = data.search.replace(/[(),.%_]/g, "");
-      q = q.or(`full_name.ilike.%${safe}%,university_domain.ilike.%${safe}%,university_name.ilike.%${safe}%`);
-    }
-    const { data: rows, error } = await q;
+  .handler(async ({ data, context }) => {
+    const safe = data.search?.replace(/[(),.%_]/g, "") || undefined;
+    const { data: rows, error } = await context.supabase.rpc("admin_list_users" as any, { _search: safe });
     if (error) genericError(error);
-    const ids = (rows ?? []).map((r) => r.id);
-    const { data: roles } = await supabaseAdmin.from("user_roles").select("user_id, role").in("user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]);
-    const roleMap = new Map<string, string[]>();
-    (roles ?? []).forEach((r: any) => {
-      const a = roleMap.get(r.user_id) ?? [];
-      a.push(r.role);
-      roleMap.set(r.user_id, a);
-    });
-    return (rows ?? []).map((r) => ({ ...r, roles: roleMap.get(r.id) ?? [] }));
+    return rows ?? [];
   });
 
 export const grantCreditsToUser = createServerFn({ method: "POST" })
