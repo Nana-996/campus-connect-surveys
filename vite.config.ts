@@ -6,17 +6,15 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import { nitro } from "nitro/vite";
 import { VitePWA } from "vite-plugin-pwa";
 
-// Default to Vercel for production builds. Override with NITRO_PRESET
-// (e.g. "node-server", "bun", "cloudflare-module") for other hosts.
-// In dev we leave the preset unset so Nitro uses its standard dev server
-// (the "vercel" preset emulates Vercel routing which breaks the Lovable
-// preview proxy).
-const nitroPreset =
-  process.env.NITRO_PRESET || (process.env.NODE_ENV === "production" ? "vercel" : undefined);
+export default defineConfig(({ command }) => {
+  // Default to Vercel only for real builds. Dev previews must not inherit a
+  // production NODE_ENV/NITRO_PRESET because Vercel route emulation returns
+  // plain "Not Found" inside the Lovable preview frame.
+  const nitroPreset = command === "build" ? process.env.NITRO_PRESET || "vercel" : undefined;
 
-export default defineConfig({
-  server: { port: 8080 },
-  plugins: [
+  return {
+    server: { host: "0.0.0.0", port: 8080 },
+    plugins: [
     tsConfigPaths(),
     tailwindcss(),
     tanstackStart(),
@@ -74,5 +72,6 @@ export default defineConfig({
         ],
       },
     }),
-  ],
+    ],
+  };
 });
