@@ -125,25 +125,10 @@ export const grantAdminByEmail = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z.object({ email: z.string().email().max(254) }).parse(d),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const email = data.email.trim().toLowerCase();
-    // Find the user by email via the Admin API.
-    let userId: string | null = null;
-    let page = 1;
-    while (page <= 20 && !userId) {
-      const { data: list, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 200 });
-      if (error) genericError(error);
-      const match = list.users.find((u) => (u.email ?? "").toLowerCase() === email);
-      if (match) { userId = match.id; break; }
-      if (list.users.length < 200) break;
-      page += 1;
-    }
-    if (!userId) throw new Error("No user with that email has signed up yet");
-    // Idempotent: ignore unique-constraint conflict.
-    const { error: insErr } = await supabaseAdmin
-      .from("user_roles")
-      .upsert({ user_id: userId, role: "admin" }, { onConflict: "user_id,role" });
-    if (insErr) genericError(insErr);
+    const { data: userId, error } = await context.supabase.rpc("admin_grant_admin_by_email" as any, { _email: email });
+    if (error) genericError(error);
     return { ok: true, userId };
   });
 
@@ -152,26 +137,21 @@ export const setUserManagerRole = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z.object({ userId: z.string().uuid(), grant: z.boolean() }).parse(d),
   )
-  .handler(async ({ data }) => {
-    if (data.grant) {
-      const { error } = await supabaseAdmin.from("user_roles").insert({ user_id: data.userId, role: "manager" as any }).select();
-      if (error) genericError(error);
-    } else {
-      const { error } = await supabaseAdmin.from("user_roles").delete().eq("user_id", data.userId).eq("role", "manager" as any);
-      if (error) genericError(error);
-    }
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.rpc("admin_set_user_role" as any, {
+      _target_user_id: data.userId,
+      _role: "manager",
+      _grant: data.grant,
+    });
+    if (error) genericError(error);
     return { ok: true };
   });
 
 // ---------- Surveys ----------
 export const listAdminSurveys = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
-  .handler(async () => {
-    const { data, error } = await supabaseAdmin
-      .from("surveys")
-      .select("id, title, creator_id, university_domain, tier, is_active, response_count, response_goal, created_at, expires_at, allow_general_respondents")
-      .order("created_at", { ascending: false })
-      .limit(200);
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase.rpc("admin_list_surveys" as any);
     if (error) genericError(error);
     return data ?? [];
   });
