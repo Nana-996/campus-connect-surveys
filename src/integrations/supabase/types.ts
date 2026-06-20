@@ -680,8 +680,96 @@ export type Database = {
       }
     }
     Functions: {
+      admin_add_disposable_domain: {
+        Args: { _domain: string }
+        Returns: boolean
+      }
+      admin_dashboard_metrics: { Args: never; Returns: Json }
+      admin_delete_survey: { Args: { _survey_id: string }; Returns: boolean }
       admin_exists: { Args: never; Returns: boolean }
+      admin_grant_admin_by_email: { Args: { _email: string }; Returns: string }
+      admin_grant_credits: {
+        Args: { _amount: number; _reason?: string; _target_user_id: string }
+        Returns: Json
+      }
+      admin_list_disposable_domains: {
+        Args: never
+        Returns: {
+          created_at: string
+          domain: string
+        }[]
+      }
+      admin_list_open_flags: {
+        Args: never
+        Returns: {
+          created_at: string
+          details: Json
+          id: string
+          resolved: boolean
+          type: string
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "review_flags"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      admin_list_surveys: {
+        Args: never
+        Returns: {
+          allow_general_respondents: boolean
+          created_at: string
+          creator_id: string
+          expires_at: string
+          id: string
+          is_active: boolean
+          response_count: number
+          response_goal: number
+          tier: string
+          title: string
+          university_domain: string
+        }[]
+      }
+      admin_list_users: {
+        Args: { _search?: string }
+        Returns: {
+          created_at: string
+          earned_credits: number
+          flag_reason: string
+          full_name: string
+          id: string
+          is_flagged: boolean
+          roles: Database["public"]["Enums"]["app_role"][]
+          university_domain: string
+          university_name: string
+          user_type: string
+        }[]
+      }
+      admin_remove_disposable_domain: {
+        Args: { _domain: string }
+        Returns: boolean
+      }
+      admin_resolve_flag: { Args: { _id: string }; Returns: boolean }
+      admin_set_survey_active: {
+        Args: { _active: boolean; _survey_id: string }
+        Returns: boolean
+      }
+      admin_set_user_flag: {
+        Args: { _flagged: boolean; _reason?: string; _target_user_id: string }
+        Returns: boolean
+      }
+      admin_set_user_role: {
+        Args: {
+          _grant: boolean
+          _role: Database["public"]["Enums"]["app_role"]
+          _target_user_id: string
+        }
+        Returns: boolean
+      }
       begin_survey_response: { Args: { _survey_id: string }; Returns: string }
+      bootstrap_first_admin: { Args: never; Returns: boolean }
       current_age_range: { Args: never; Returns: string }
       current_country: { Args: never; Returns: string }
       current_department: { Args: never; Returns: string }
@@ -760,6 +848,7 @@ export type Database = {
           title: string
         }[]
       }
+      require_admin_user: { Args: never; Returns: string }
       update_my_student_info: {
         Args: { _department: string; _index_number: string }
         Returns: undefined
