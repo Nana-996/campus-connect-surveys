@@ -11,17 +11,21 @@ export const getMyManagerScope = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
-    const [{ data: profile }, { data: roles }] = await Promise.all([
+    const [{ data: profile }, { data: roles }, { data: grants }] = await Promise.all([
       supabase.from("profiles").select("university_domain, university_name").eq("id", userId).maybeSingle(),
       supabase.from("user_roles").select("role").eq("user_id", userId),
+      supabase.from("survey_tracking_access").select("survey_id").eq("faculty_user_id", userId).limit(1),
     ]);
     const roleNames = (roles ?? []).map((r: any) => r.role);
-    const isAdmin = roleNames.includes("admin");
+    const { data: emailAdmin } = await supabase.rpc("current_user_matches_admin_email" as any);
+    const isAdmin = roleNames.includes("admin") || !!emailAdmin;
     const isManager = roleNames.includes("manager");
+    const hasTrackingGrant = (grants ?? []).length > 0;
     return {
       isAdmin,
       isManager,
-      canAccess: isAdmin || isManager,
+      hasTrackingGrant,
+      canAccess: isAdmin || isManager || hasTrackingGrant,
       university_domain: profile?.university_domain ?? null,
       university_name: profile?.university_name ?? null,
     };
@@ -77,12 +81,11 @@ export const getSurveyQuestionsForManager = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ surveyId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    const { data: row, error } = await context.supabase
-      .from("surveys")
-      .select("id,title,questions")
-      .eq("id", data.surveyId)
-      .maybeSingle();
+    const { data: rows, error } = await context.supabase.rpc("get_survey_questions_for_tracker" as any, {
+      _survey_id: data.surveyId,
+    });
     if (error) fail(error, "get_survey_questions_for_manager");
+    const row = Array.isArray(rows) ? rows[0] : rows;
     return row as { id: string; title: string; questions: Array<{ id: string; text: string; type: string; options?: string[] }> } | null;
   });
 
