@@ -189,7 +189,7 @@ function ManageSurveyPage() {
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Loading students…</p>
       ) : (
-        <Tabs defaultValue="responses">
+        <Tabs defaultValue={canSeeAnswers ? "responses" : "responded"}>
           <TabsList>
             {canSeeAnswers && (
               <TabsTrigger value="responses">
