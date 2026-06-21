@@ -489,6 +489,38 @@ export type Database = {
           },
         ]
       }
+      survey_tracking_access: {
+        Row: {
+          created_at: string
+          faculty_user_id: string
+          granted_by: string | null
+          id: string
+          survey_id: string
+        }
+        Insert: {
+          created_at?: string
+          faculty_user_id: string
+          granted_by?: string | null
+          id?: string
+          survey_id: string
+        }
+        Update: {
+          created_at?: string
+          faculty_user_id?: string
+          granted_by?: string | null
+          id?: string
+          survey_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_tracking_access_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       survey_visualizations: {
         Row: {
           chart_type: string
@@ -692,6 +724,14 @@ export type Database = {
         Args: { _amount: number; _reason?: string; _target_user_id: string }
         Returns: Json
       }
+      admin_grant_survey_tracking_access_by_email: {
+        Args: { _email: string; _survey_id: string }
+        Returns: {
+          email: string
+          full_name: string
+          user_id: string
+        }[]
+      }
       admin_list_disposable_domains: {
         Args: never
         Returns: {
@@ -716,19 +756,33 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      admin_list_survey_tracking_access: {
+        Args: { _survey_id: string }
+        Returns: {
+          created_at: string
+          email: string
+          full_name: string
+          university_domain: string
+          user_id: string
+        }[]
+      }
       admin_list_surveys: {
         Args: never
         Returns: {
           allow_general_respondents: boolean
           created_at: string
           creator_id: string
+          creator_name: string
           expires_at: string
           id: string
           is_active: boolean
           response_count: number
           response_goal: number
+          target_department: string
+          target_year: string
           tier: string
           title: string
+          tracking_grants: number
           university_domain: string
         }[]
       }
@@ -752,6 +806,10 @@ export type Database = {
         Returns: boolean
       }
       admin_resolve_flag: { Args: { _id: string }; Returns: boolean }
+      admin_revoke_survey_tracking_access: {
+        Args: { _faculty_user_id: string; _survey_id: string }
+        Returns: boolean
+      }
       admin_set_survey_active: {
         Args: { _active: boolean; _survey_id: string }
         Returns: boolean
@@ -775,6 +833,7 @@ export type Database = {
       current_department: { Args: never; Returns: string }
       current_interests: { Args: never; Returns: string[] }
       current_university_domain: { Args: never; Returns: string }
+      current_user_matches_admin_email: { Args: never; Returns: boolean }
       current_year: { Args: never; Returns: string }
       expire_earned_credits: { Args: never; Returns: undefined }
       get_poll_results: {
