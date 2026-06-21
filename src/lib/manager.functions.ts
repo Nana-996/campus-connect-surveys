@@ -14,7 +14,7 @@ export const getMyManagerScope = createServerFn({ method: "GET" })
     const [{ data: profile }, { data: roles }, { data: grants }] = await Promise.all([
       supabase.from("profiles").select("university_domain, university_name").eq("id", userId).maybeSingle(),
       supabase.from("user_roles").select("role").eq("user_id", userId),
-      supabase.from("survey_tracking_access").select("survey_id").eq("faculty_user_id", userId).limit(1),
+      supabase.from("survey_tracking_access" as any).select("survey_id").eq("faculty_user_id", userId).limit(1),
     ]);
     const roleNames = (roles ?? []).map((r: any) => r.role);
     const { data: emailAdmin } = await supabase.rpc("current_user_matches_admin_email" as any);
