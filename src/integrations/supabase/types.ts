@@ -828,6 +828,10 @@ export type Database = {
       }
       begin_survey_response: { Args: { _survey_id: string }; Returns: string }
       bootstrap_first_admin: { Args: never; Returns: boolean }
+      can_track_survey: {
+        Args: { _survey_id: string; _user_id?: string }
+        Returns: boolean
+      }
       current_age_range: { Args: never; Returns: string }
       current_country: { Args: never; Returns: string }
       current_department: { Args: never; Returns: string }
@@ -844,6 +848,14 @@ export type Database = {
         }[]
       }
       get_shared_dashboard: { Args: { _token: string }; Returns: Json }
+      get_survey_questions_for_tracker: {
+        Args: { _survey_id: string }
+        Returns: {
+          id: string
+          questions: Json
+          title: string
+        }[]
+      }
       get_survey_responses_for_manager: {
         Args: { _survey_id: string }
         Returns: {
