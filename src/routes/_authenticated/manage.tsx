@@ -36,7 +36,7 @@ function ManagePage() {
       <div className="rounded-3xl border border-foreground/15 bg-card p-8 text-center">
         <ShieldAlert className="mx-auto h-8 w-8 text-destructive" />
         <p className="mt-3 font-serif text-3xl">Managers only.</p>
-        <p className="mt-1 text-sm text-muted-foreground">Ask the platform owner to grant you faculty access.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Ask the platform owner to grant faculty or survey tracking access.</p>
       </div>
     );
   }
@@ -49,7 +49,7 @@ function ManagePage() {
           {scope.university_name ?? "Your university"} <em className="text-primary">tracking.</em>
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          See which students in your university responded to each survey. Answer content is confidential.
+          See who has responded, who is pending, and progress by department or year for surveys you can track.
         </p>
       </div>
 
@@ -57,7 +57,7 @@ function ManagePage() {
       <ul className="space-y-3 md:hidden">
         {surveys.length === 0 && (
           <li className="rounded-2xl border border-foreground/15 bg-card p-6 text-center text-muted-foreground">
-            No surveys in your university yet.
+            No surveys available to track yet.
           </li>
         )}
         {surveys.map((s) => (
@@ -114,7 +114,7 @@ function ManagePage() {
               </tr>
             ))}
             {surveys.length === 0 && (
-              <tr><td colSpan={5} className="px-4 py-10 text-center text-muted-foreground">No surveys in your university yet.</td></tr>
+              <tr><td colSpan={5} className="px-4 py-10 text-center text-muted-foreground">No surveys available to track yet.</td></tr>
             )}
           </tbody>
         </table>
