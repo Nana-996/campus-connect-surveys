@@ -415,6 +415,53 @@ function SurveysPanel() {
   );
 }
 
+function SurveyTrackingAccessButton({ surveyId }: { surveyId: string }) {
+  const listAccess = useServerFn(listSurveyTrackingAccess);
+  const revokeAccess = useServerFn(revokeSurveyTrackingAccess);
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const { data: grants = [], isLoading } = useQuery({
+    queryKey: ["admin", "survey-tracking-access", surveyId],
+    queryFn: () => listAccess({ data: { surveyId } }),
+    enabled: open,
+  });
+
+  if (!open) {
+    return <Button size="sm" variant="outline" onClick={() => setOpen(true)}><UserMinus className="h-3 w-3" /></Button>;
+  }
+
+  return (
+    <div className="w-72 rounded-2xl border border-foreground/15 bg-background p-3 text-left shadow-sm">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Faculty access</p>
+        <Button size="sm" variant="ghost" onClick={() => setOpen(false)}>Close</Button>
+      </div>
+      {isLoading ? (
+        <p className="text-xs text-muted-foreground">Loading…</p>
+      ) : grants.length === 0 ? (
+        <p className="text-xs text-muted-foreground">No faculty assigned.</p>
+      ) : (
+        <ul className="space-y-2">
+          {grants.map((g: any) => (
+            <li key={g.user_id} className="flex items-center justify-between gap-2 text-xs">
+              <div className="min-w-0">
+                <p className="truncate font-medium">{g.full_name || g.email}</p>
+                <p className="truncate text-[10px] text-muted-foreground">{g.email}</p>
+              </div>
+              <Button size="sm" variant="outline" onClick={async () => {
+                await revokeAccess({ data: { surveyId, facultyUserId: g.user_id } });
+                toast.success("Tracking access revoked");
+                qc.invalidateQueries({ queryKey: ["admin", "survey-tracking-access", surveyId] });
+                qc.invalidateQueries({ queryKey: ["admin", "surveys"] });
+              }}><Trash2 className="h-3 w-3" /></Button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 // ---------------- Flags ----------------
 function FlagsPanel() {
   const qc = useQueryClient();
