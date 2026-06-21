@@ -49,7 +49,7 @@ function ManageSurveyPage() {
   const { data: responses = [] } = useQuery({
     queryKey: ["mgr", "responses", surveyId],
     queryFn: () => fetchResponses({ data: { surveyId } }),
-    enabled: !!scope?.canAccess,
+    enabled: !!scope?.isAdmin || !!scope?.isManager,
     retry: false,
   });
   const { data: surveyMeta } = useQuery({
@@ -147,7 +147,9 @@ function ManageSurveyPage() {
     URL.revokeObjectURL(url);
   };
 
-  if (!scope?.canAccess) return <p className="text-sm text-muted-foreground">Managers only.</p>;
+  const canSeeAnswers = !!scope?.isAdmin || !!scope?.isManager;
+
+  if (!scope?.canAccess) return <p className="text-sm text-muted-foreground">Tracking access required.</p>;
 
   return (
     <div className="space-y-6">
@@ -160,7 +162,7 @@ function ManageSurveyPage() {
         <h1 className="mt-1 font-serif text-4xl leading-[0.95]">
           {responded.length} of {filtered.length} <em className="text-primary">responded.</em>
         </h1>
-        <p className="mt-1 text-xs text-muted-foreground">Answer content stays confidential — this view only shows who has and hasn't completed the survey.</p>
+        <p className="mt-1 text-xs text-muted-foreground">Track responders, pending students, departments, and years for this survey.</p>
       </div>
 
       <FilterBar
@@ -187,11 +189,13 @@ function ManageSurveyPage() {
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Loading students…</p>
       ) : (
-        <Tabs defaultValue="responses">
+        <Tabs defaultValue={canSeeAnswers ? "responses" : "responded"}>
           <TabsList>
-            <TabsTrigger value="responses">
-              <MessageSquare className="mr-1 h-3 w-3" /> Responses · {responses.length}
-            </TabsTrigger>
+            {canSeeAnswers && (
+              <TabsTrigger value="responses">
+                <MessageSquare className="mr-1 h-3 w-3" /> Responses · {responses.length}
+              </TabsTrigger>
+            )}
             <TabsTrigger value="responded">
               <CheckCircle2 className="mr-1 h-3 w-3" /> Responded · {responded.length}
             </TabsTrigger>
@@ -199,45 +203,47 @@ function ManageSurveyPage() {
               <Circle className="mr-1 h-3 w-3" /> Pending · {pending.length}
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="responses" className="mt-4">
-            <ResponsesList responses={responses} questions={questions} />
-            <div className="mt-3 flex justify-end">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  const header = ["respondent", "type", "index_number", "department", "year", "submitted_at", ...questions.map((q) => q.text)];
-                  const lines = [header.join(",")].concat(
-                    responses.map((r) =>
-                      [
-                        r.respondent_label,
-                        r.user_type ?? "",
-                        r.index_number ?? "",
-                        r.department ?? "",
-                        r.year ?? "",
-                        r.created_at,
-                        ...questions.map((q) => r.answers?.[q.id] ?? ""),
-                      ]
-                        .map((v) => {
-                          const s = String(v ?? "").replace(/"/g, '""');
-                          return /[",\n]/.test(s) ? `"${s}"` : s;
-                        })
-                        .join(","),
-                    ),
-                  );
-                  const blob = new Blob([lines.join("\n")], { type: "text/csv" });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement("a");
-                  a.href = url;
-                  a.download = `responses-${surveyId.slice(0, 8)}.csv`;
-                  a.click();
-                  URL.revokeObjectURL(url);
-                }}
-              >
-                <Download className="mr-1 h-3 w-3" /> Export responses CSV
-              </Button>
-            </div>
-          </TabsContent>
+          {canSeeAnswers && (
+            <TabsContent value="responses" className="mt-4">
+              <ResponsesList responses={responses} questions={questions} />
+              <div className="mt-3 flex justify-end">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    const header = ["respondent", "type", "index_number", "department", "year", "submitted_at", ...questions.map((q) => q.text)];
+                    const lines = [header.join(",")].concat(
+                      responses.map((r) =>
+                        [
+                          r.respondent_label,
+                          r.user_type ?? "",
+                          r.index_number ?? "",
+                          r.department ?? "",
+                          r.year ?? "",
+                          r.created_at,
+                          ...questions.map((q) => r.answers?.[q.id] ?? ""),
+                        ]
+                          .map((v) => {
+                            const s = String(v ?? "").replace(/"/g, '""');
+                            return /[",\n]/.test(s) ? `"${s}"` : s;
+                          })
+                          .join(","),
+                      ),
+                    );
+                    const blob = new Blob([lines.join("\n")], { type: "text/csv" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `responses-${surveyId.slice(0, 8)}.csv`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                >
+                  <Download className="mr-1 h-3 w-3" /> Export responses CSV
+                </Button>
+              </div>
+            </TabsContent>
+          )}
           <TabsContent value="responded" className="mt-4">
             <StudentTable rows={responded} showRespondedAt />
             <div className="mt-3 flex justify-end">

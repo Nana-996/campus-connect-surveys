@@ -21,6 +21,9 @@ import {
   listAdminSurveys,
   setSurveyActive,
   deleteSurvey,
+  grantSurveyTrackingAccess,
+  revokeSurveyTrackingAccess,
+  listSurveyTrackingAccess,
   listDisposableDomains,
   addDisposableDomain,
   removeDisposableDomain,
@@ -277,9 +280,9 @@ function UsersPanel() {
                     }}>
                       {u.is_flagged ? <FlagOff className="h-3 w-3" /> : <Flag className="h-3 w-3" />}
                     </Button>
-                    <Button size="sm" variant="outline" title={u.roles?.includes("manager") ? "Revoke manager" : "Make faculty manager"} onClick={async () => {
+                    <Button size="sm" variant="outline" title={u.roles?.includes("manager") ? "Revoke faculty manager" : "Make faculty manager"} onClick={async () => {
                       const isMgr = u.roles?.includes("manager");
-                      if (!confirm(isMgr ? "Revoke manager role?" : `Grant manager role to ${u.full_name || u.id}? They will see who in ${u.university_domain} has responded to each survey.`)) return;
+                      if (!confirm(isMgr ? "Revoke faculty manager role?" : `Grant faculty manager role to ${u.full_name || u.id}? They will track every survey for ${u.university_domain}.`)) return;
                       await setMgrRole({ data: { userId: u.id, grant: !isMgr } });
                       toast.success("Manager role updated"); refresh();
                     }}>
@@ -345,6 +348,7 @@ function SurveysPanel() {
   const fetchSurveys = useServerFn(listAdminSurveys);
   const setActive = useServerFn(setSurveyActive);
   const remove = useServerFn(deleteSurvey);
+  const grantTracking = useServerFn(grantSurveyTrackingAccess);
   const { data: surveys = [] } = useQuery({ queryKey: ["admin", "surveys"], queryFn: () => fetchSurveys() });
   const refresh = () => qc.invalidateQueries({ queryKey: ["admin", "surveys"] });
 
@@ -357,6 +361,7 @@ function SurveysPanel() {
             <th className="px-3 py-2">Tier</th>
             <th className="px-3 py-2">University</th>
             <th className="px-3 py-2">Responses</th>
+              <th className="px-3 py-2">Faculty</th>
             <th className="px-3 py-2">Status</th>
             <th className="px-3 py-2 text-right">Actions</th>
           </tr>
@@ -364,13 +369,32 @@ function SurveysPanel() {
         <tbody>
           {surveys.map((s: any) => (
             <tr key={s.id} className="border-t border-foreground/10">
-              <td className="px-3 py-2">{s.title}</td>
+              <td className="px-3 py-2">
+                <div className="font-medium">{s.title}</div>
+                <div className="text-[10px] text-muted-foreground">{s.creator_name}</div>
+              </td>
               <td className="px-3 py-2 capitalize">{s.tier}</td>
-              <td className="px-3 py-2">{s.allow_general_respondents ? "Open" : s.university_domain}</td>
+              <td className="px-3 py-2">
+                <div>{s.allow_general_respondents ? "Open" : s.university_domain}</div>
+                {(s.target_department || s.target_year) && (
+                  <div className="text-[10px] text-muted-foreground">{[s.target_department, s.target_year].filter(Boolean).join(" · ")}</div>
+                )}
+              </td>
               <td className="px-3 py-2">{s.response_count}/{s.response_goal}</td>
+              <td className="px-3 py-2">{s.tracking_grants ?? 0}</td>
               <td className="px-3 py-2">{s.is_active ? <Badge>Active</Badge> : <Badge variant="secondary">Inactive</Badge>}</td>
               <td className="px-3 py-2">
-                <div className="flex justify-end gap-1">
+                <div className="flex flex-wrap justify-end gap-1">
+                  <Link to="/manage/$surveyId" params={{ surveyId: s.id }}>
+                    <Button size="sm" variant="outline"><BarChart3 className="h-3 w-3" /></Button>
+                  </Link>
+                  <Button size="sm" variant="outline" onClick={async () => {
+                    const email = prompt("Faculty member email:", "");
+                    if (!email) return;
+                    await grantTracking({ data: { surveyId: s.id, email } });
+                    toast.success("Tracking access granted"); refresh();
+                  }}><Briefcase className="h-3 w-3" /></Button>
+                  <SurveyTrackingAccessButton surveyId={s.id} />
                   <Button size="sm" variant="outline" onClick={async () => {
                     await setActive({ data: { surveyId: s.id, active: !s.is_active } });
                     toast.success(s.is_active ? "Deactivated" : "Activated"); refresh();
@@ -384,9 +408,56 @@ function SurveysPanel() {
               </td>
             </tr>
           ))}
-          {surveys.length === 0 && <tr><td colSpan={6} className="px-3 py-6 text-center text-muted-foreground">No surveys.</td></tr>}
+          {surveys.length === 0 && <tr><td colSpan={7} className="px-3 py-6 text-center text-muted-foreground">No surveys.</td></tr>}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+function SurveyTrackingAccessButton({ surveyId }: { surveyId: string }) {
+  const listAccess = useServerFn(listSurveyTrackingAccess);
+  const revokeAccess = useServerFn(revokeSurveyTrackingAccess);
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const { data: grants = [], isLoading } = useQuery({
+    queryKey: ["admin", "survey-tracking-access", surveyId],
+    queryFn: () => listAccess({ data: { surveyId } }),
+    enabled: open,
+  });
+
+  if (!open) {
+    return <Button size="sm" variant="outline" onClick={() => setOpen(true)}><UserMinus className="h-3 w-3" /></Button>;
+  }
+
+  return (
+    <div className="w-72 rounded-2xl border border-foreground/15 bg-background p-3 text-left shadow-sm">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Faculty access</p>
+        <Button size="sm" variant="ghost" onClick={() => setOpen(false)}>Close</Button>
+      </div>
+      {isLoading ? (
+        <p className="text-xs text-muted-foreground">Loading…</p>
+      ) : grants.length === 0 ? (
+        <p className="text-xs text-muted-foreground">No faculty assigned.</p>
+      ) : (
+        <ul className="space-y-2">
+          {grants.map((g: any) => (
+            <li key={g.user_id} className="flex items-center justify-between gap-2 text-xs">
+              <div className="min-w-0">
+                <p className="truncate font-medium">{g.full_name || g.email}</p>
+                <p className="truncate text-[10px] text-muted-foreground">{g.email}</p>
+              </div>
+              <Button size="sm" variant="outline" onClick={async () => {
+                await revokeAccess({ data: { surveyId, facultyUserId: g.user_id } });
+                toast.success("Tracking access revoked");
+                qc.invalidateQueries({ queryKey: ["admin", "survey-tracking-access", surveyId] });
+                qc.invalidateQueries({ queryKey: ["admin", "surveys"] });
+              }}><Trash2 className="h-3 w-3" /></Button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
