@@ -10,24 +10,38 @@ function fail(e: any, label: string): never {
 export const getMyManagerScope = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabase, userId } = context;
-    const [{ data: profile }, { data: roles }, { data: grants }] = await Promise.all([
-      supabase.from("profiles").select("university_domain, university_name").eq("id", userId).maybeSingle(),
-      supabase.from("user_roles").select("role").eq("user_id", userId),
-      supabase.from("survey_tracking_access" as any).select("survey_id").eq("faculty_user_id", userId).limit(1),
-    ]);
-    const roleNames = (roles ?? []).map((r: any) => r.role);
-    const { data: emailAdmin } = await supabase.rpc("current_user_matches_admin_email" as any);
-    const isAdmin = roleNames.includes("admin") || !!emailAdmin;
-    const isManager = roleNames.includes("manager");
-    const hasTrackingGrant = (grants ?? []).length > 0;
-    return {
-      isAdmin,
-      isManager,
-      hasTrackingGrant,
-      canAccess: isAdmin || isManager || hasTrackingGrant,
-      university_domain: profile?.university_domain ?? null,
-      university_name: profile?.university_name ?? null,
+    const { data, error } = await context.supabase.rpc("get_my_manager_scope" as any);
+    if (error) fail(error, "get_my_manager_scope");
+    return data as {
+      isAdmin: boolean;
+      isManager: boolean;
+      hasTrackingGrant: boolean;
+      canAccess: boolean;
+      university_domain: string | null;
+      university_name: string | null;
+    };
+  });
+
+export const getSurveyTrackingScope = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ surveyId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: scope, error } = await context.supabase.rpc("get_survey_tracking_scope" as any, {
+      _survey_id: data.surveyId,
+    });
+    if (error) fail(error, "get_survey_tracking_scope");
+    return scope as {
+      surveyId: string;
+      title: string;
+      creatorName: string;
+      universityDomain: string;
+      responseCount: number;
+      responseGoal: number;
+      isAdmin: boolean;
+      isManager: boolean;
+      hasTrackingGrant: boolean;
+      canTrack: boolean;
+      canSeeAnswers: boolean;
     };
   });
 
