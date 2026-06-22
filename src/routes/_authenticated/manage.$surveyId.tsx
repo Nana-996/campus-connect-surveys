@@ -377,8 +377,11 @@ function CategoryList({ title, stats }: { title: string; stats: CategoryStat[] }
           <details key={`${title}-${stat.label}`} className="group px-4 py-3">
             <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-3 text-sm">
               <span className="font-semibold">{stat.label}</span>
-              <span className="text-xs text-muted-foreground">
-                {stat.responded}/{stat.total} recorded · {stat.pending} pending
+              <span className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                <span>{stat.responded}/{stat.total} recorded</span>
+                <span className={stat.pending > 0 ? "rounded-full bg-destructive/10 px-2 py-0.5 font-semibold text-destructive" : "rounded-full bg-primary/10 px-2 py-0.5 font-semibold text-primary"}>
+                  {stat.pending > 0 ? `${stat.pending} missing` : "Complete"}
+                </span>
               </span>
             </summary>
             <div className="mt-3 max-h-56 overflow-auto rounded-xl bg-secondary/45 p-3">
