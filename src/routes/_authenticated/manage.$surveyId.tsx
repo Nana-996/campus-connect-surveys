@@ -3,11 +3,9 @@ import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Download, CheckCircle2, Circle } from "lucide-react";
-import { getMyManagerScope, getSurveyTracking, getSurveyResponsesForManager, getSurveyQuestionsForManager } from "@/lib/manager.functions";
-import { MessageSquare } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Circle, Download, Layers, MessageSquare } from "lucide-react";
+import { getSurveyTracking, getSurveyResponsesForManager, getSurveyQuestionsForManager, getSurveyTrackingScope } from "@/lib/manager.functions";
 import { FilterBar } from "@/components/FilterBar";
 
 export const Route = createFileRoute("/_authenticated/manage/$surveyId")({
@@ -33,29 +31,41 @@ type Row = {
   responded_at: string | null;
 };
 
+type CategoryStat = {
+  label: string;
+  total: number;
+  responded: number;
+  pending: number;
+  rows: Row[];
+};
+
 function ManageSurveyPage() {
   const { surveyId } = Route.useParams();
-  const fetchScope = useServerFn(getMyManagerScope);
+  const fetchScope = useServerFn(getSurveyTrackingScope);
   const fetchTracking = useServerFn(getSurveyTracking);
   const fetchResponses = useServerFn(getSurveyResponsesForManager);
   const fetchQuestions = useServerFn(getSurveyQuestionsForManager);
-  const { data: scope } = useQuery({ queryKey: ["mgr", "scope"], queryFn: () => fetchScope(), retry: false });
+  const { data: scope, isLoading: scopeLoading } = useQuery({
+    queryKey: ["mgr", "tracking-scope", surveyId],
+    queryFn: () => fetchScope({ data: { surveyId } }),
+    retry: false,
+  });
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["mgr", "tracking", surveyId],
     queryFn: () => fetchTracking({ data: { surveyId } }),
-    enabled: !!scope?.canAccess,
+    enabled: !!scope?.canTrack,
     retry: false,
   });
   const { data: responses = [] } = useQuery({
     queryKey: ["mgr", "responses", surveyId],
     queryFn: () => fetchResponses({ data: { surveyId } }),
-    enabled: !!scope?.isAdmin || !!scope?.isManager,
+    enabled: !!scope?.canSeeAnswers,
     retry: false,
   });
   const { data: surveyMeta } = useQuery({
     queryKey: ["mgr", "questions", surveyId],
     queryFn: () => fetchQuestions({ data: { surveyId } }),
-    enabled: !!scope?.canAccess,
+    enabled: !!scope?.canTrack,
     retry: false,
   });
   const questions = surveyMeta?.questions ?? [];
@@ -124,6 +134,7 @@ function ManageSurveyPage() {
   }, [rows, q, dept, year, sort]);
   const responded = filtered.filter((r) => r.responded_at);
   const pending = filtered.filter((r) => !r.responded_at);
+  const categoryStats = useMemo(() => buildCategoryStats(filtered), [filtered]);
 
   const downloadCsv = (subset: Row[], label: string) => {
     const header = ["full_name", "index_number", "department", "year", "responded_at"];
@@ -147,9 +158,10 @@ function ManageSurveyPage() {
     URL.revokeObjectURL(url);
   };
 
-  const canSeeAnswers = !!scope?.isAdmin || !!scope?.isManager;
+  const canSeeAnswers = !!scope?.canSeeAnswers;
 
-  if (!scope?.canAccess) return <p className="text-sm text-muted-foreground">Tracking access required.</p>;
+  if (scopeLoading) return <p className="text-sm text-muted-foreground">Loading tracking access…</p>;
+  if (!scope?.canTrack) return <p className="text-sm text-muted-foreground">Tracking access required.</p>;
 
   return (
     <div className="space-y-6">
@@ -162,7 +174,7 @@ function ManageSurveyPage() {
         <h1 className="mt-1 font-serif text-4xl leading-[0.95]">
           {responded.length} of {filtered.length} <em className="text-primary">responded.</em>
         </h1>
-        <p className="mt-1 text-xs text-muted-foreground">Track responders, pending students, departments, and years for this survey.</p>
+        <p className="mt-1 text-xs text-muted-foreground">{scope.title} · {scope.creatorName}</p>
       </div>
 
       <FilterBar
@@ -189,8 +201,11 @@ function ManageSurveyPage() {
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Loading students…</p>
       ) : (
-        <Tabs defaultValue={canSeeAnswers ? "responses" : "responded"}>
+        <Tabs defaultValue="categories">
           <TabsList>
+            <TabsTrigger value="categories">
+              <Layers className="mr-1 h-3 w-3" /> Categories · {categoryStats.departments.length + categoryStats.years.length}
+            </TabsTrigger>
             {canSeeAnswers && (
               <TabsTrigger value="responses">
                 <MessageSquare className="mr-1 h-3 w-3" /> Responses · {responses.length}
@@ -203,6 +218,9 @@ function ManageSurveyPage() {
               <Circle className="mr-1 h-3 w-3" /> Pending · {pending.length}
             </TabsTrigger>
           </TabsList>
+          <TabsContent value="categories" className="mt-4">
+            <CategoryBreakdown departments={categoryStats.departments} years={categoryStats.years} />
+          </TabsContent>
           {canSeeAnswers && (
             <TabsContent value="responses" className="mt-4">
               <ResponsesList responses={responses} questions={questions} />
@@ -318,6 +336,68 @@ function ResponsesList({
           </div>
         </details>
       ))}
+    </div>
+  );
+}
+
+function buildCategoryStats(rows: Row[]): { departments: CategoryStat[]; years: CategoryStat[] } {
+  const collect = (key: "department" | "year") => {
+    const groups = new Map<string, Row[]>();
+    rows.forEach((row) => {
+      const label = row[key] || "Unspecified";
+      groups.set(label, [...(groups.get(label) ?? []), row]);
+    });
+    return Array.from(groups.entries())
+      .map(([label, groupRows]) => {
+        const responded = groupRows.filter((row) => row.responded_at).length;
+        return { label, total: groupRows.length, responded, pending: groupRows.length - responded, rows: groupRows };
+      })
+      .sort((a, b) => b.pending - a.pending || a.label.localeCompare(b.label));
+  };
+  return { departments: collect("department"), years: collect("year") };
+}
+
+function CategoryBreakdown({ departments, years }: { departments: CategoryStat[]; years: CategoryStat[] }) {
+  return (
+    <div className="grid gap-4 lg:grid-cols-2">
+      <CategoryList title="Departments" stats={departments} />
+      <CategoryList title="Years" stats={years} />
+    </div>
+  );
+}
+
+function CategoryList({ title, stats }: { title: string; stats: CategoryStat[] }) {
+  return (
+    <div className="rounded-2xl border border-foreground/15 bg-card">
+      <div className="border-b border-foreground/10 px-4 py-3">
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</p>
+      </div>
+      <div className="divide-y divide-foreground/10">
+        {stats.map((stat) => (
+          <details key={`${title}-${stat.label}`} className="group px-4 py-3">
+            <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-3 text-sm">
+              <span className="font-semibold">{stat.label}</span>
+              <span className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                <span>{stat.responded}/{stat.total} recorded</span>
+                <span className={stat.pending > 0 ? "rounded-full bg-destructive/10 px-2 py-0.5 font-semibold text-destructive" : "rounded-full bg-primary/10 px-2 py-0.5 font-semibold text-primary"}>
+                  {stat.pending > 0 ? `${stat.pending} missing` : "Complete"}
+                </span>
+              </span>
+            </summary>
+            <div className="mt-3 max-h-56 overflow-auto rounded-xl bg-secondary/45 p-3">
+              {stat.rows.map((row) => (
+                <div key={`${title}-${stat.label}-${row.student_id}`} className="flex flex-wrap items-center justify-between gap-2 py-1 text-xs">
+                  <span className="font-mono">{row.index_number || "No index"}</span>
+                  <span className={row.responded_at ? "text-primary" : "text-muted-foreground"}>
+                    {row.responded_at ? "Recorded" : "Pending"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </details>
+        ))}
+        {stats.length === 0 && <p className="px-4 py-8 text-center text-sm text-muted-foreground">No category data.</p>}
+      </div>
     </div>
   );
 }

@@ -10,7 +10,9 @@ export default defineConfig(({ command }) => {
   // Default to Vercel only for real builds. Dev previews must not inherit a
   // production NODE_ENV/NITRO_PRESET because Vercel route emulation returns
   // plain "Not Found" inside the Lovable preview frame.
-  const nitroPreset = command === "build" ? process.env.NITRO_PRESET || "vercel" : undefined;
+  const nitroPreset = command === "build"
+    ? process.env.NITRO_PRESET || (process.env.VERCEL ? "vercel" : undefined)
+    : undefined;
   const pwaPlugin = command === "build" ? VitePWA({
     registerType: "autoUpdate",
     injectRegister: null, // we register from src/lib/pwa-register.ts under guards
