@@ -340,6 +340,65 @@ function ResponsesList({
   );
 }
 
+function buildCategoryStats(rows: Row[]): { departments: CategoryStat[]; years: CategoryStat[] } {
+  const collect = (key: "department" | "year") => {
+    const groups = new Map<string, Row[]>();
+    rows.forEach((row) => {
+      const label = row[key] || "Unspecified";
+      groups.set(label, [...(groups.get(label) ?? []), row]);
+    });
+    return Array.from(groups.entries())
+      .map(([label, groupRows]) => {
+        const responded = groupRows.filter((row) => row.responded_at).length;
+        return { label, total: groupRows.length, responded, pending: groupRows.length - responded, rows: groupRows };
+      })
+      .sort((a, b) => b.pending - a.pending || a.label.localeCompare(b.label));
+  };
+  return { departments: collect("department"), years: collect("year") };
+}
+
+function CategoryBreakdown({ departments, years }: { departments: CategoryStat[]; years: CategoryStat[] }) {
+  return (
+    <div className="grid gap-4 lg:grid-cols-2">
+      <CategoryList title="Departments" stats={departments} />
+      <CategoryList title="Years" stats={years} />
+    </div>
+  );
+}
+
+function CategoryList({ title, stats }: { title: string; stats: CategoryStat[] }) {
+  return (
+    <div className="rounded-2xl border border-foreground/15 bg-card">
+      <div className="border-b border-foreground/10 px-4 py-3">
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</p>
+      </div>
+      <div className="divide-y divide-foreground/10">
+        {stats.map((stat) => (
+          <details key={`${title}-${stat.label}`} className="group px-4 py-3">
+            <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-3 text-sm">
+              <span className="font-semibold">{stat.label}</span>
+              <span className="text-xs text-muted-foreground">
+                {stat.responded}/{stat.total} recorded · {stat.pending} pending
+              </span>
+            </summary>
+            <div className="mt-3 max-h-56 overflow-auto rounded-xl bg-secondary/45 p-3">
+              {stat.rows.map((row) => (
+                <div key={`${title}-${stat.label}-${row.student_id}`} className="flex flex-wrap items-center justify-between gap-2 py-1 text-xs">
+                  <span className="font-mono">{row.index_number || "No index"}</span>
+                  <span className={row.responded_at ? "text-primary" : "text-muted-foreground"}>
+                    {row.responded_at ? "Recorded" : "Pending"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </details>
+        ))}
+        {stats.length === 0 && <p className="px-4 py-8 text-center text-sm text-muted-foreground">No category data.</p>}
+      </div>
+    </div>
+  );
+}
+
 
 function StudentTable({ rows, showRespondedAt }: { rows: Row[]; showRespondedAt?: boolean }) {
   return (
