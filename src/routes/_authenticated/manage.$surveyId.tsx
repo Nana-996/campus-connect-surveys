@@ -3,11 +3,9 @@ import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Download, CheckCircle2, Circle } from "lucide-react";
-import { getMyManagerScope, getSurveyTracking, getSurveyResponsesForManager, getSurveyQuestionsForManager } from "@/lib/manager.functions";
-import { MessageSquare } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Circle, Download, Layers, MessageSquare } from "lucide-react";
+import { getSurveyTracking, getSurveyResponsesForManager, getSurveyQuestionsForManager, getSurveyTrackingScope } from "@/lib/manager.functions";
 import { FilterBar } from "@/components/FilterBar";
 
 export const Route = createFileRoute("/_authenticated/manage/$surveyId")({
@@ -33,29 +31,41 @@ type Row = {
   responded_at: string | null;
 };
 
+type CategoryStat = {
+  label: string;
+  total: number;
+  responded: number;
+  pending: number;
+  rows: Row[];
+};
+
 function ManageSurveyPage() {
   const { surveyId } = Route.useParams();
-  const fetchScope = useServerFn(getMyManagerScope);
+  const fetchScope = useServerFn(getSurveyTrackingScope);
   const fetchTracking = useServerFn(getSurveyTracking);
   const fetchResponses = useServerFn(getSurveyResponsesForManager);
   const fetchQuestions = useServerFn(getSurveyQuestionsForManager);
-  const { data: scope } = useQuery({ queryKey: ["mgr", "scope"], queryFn: () => fetchScope(), retry: false });
+  const { data: scope, isLoading: scopeLoading } = useQuery({
+    queryKey: ["mgr", "tracking-scope", surveyId],
+    queryFn: () => fetchScope({ data: { surveyId } }),
+    retry: false,
+  });
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["mgr", "tracking", surveyId],
     queryFn: () => fetchTracking({ data: { surveyId } }),
-    enabled: !!scope?.canAccess,
+    enabled: !!scope?.canTrack,
     retry: false,
   });
   const { data: responses = [] } = useQuery({
     queryKey: ["mgr", "responses", surveyId],
     queryFn: () => fetchResponses({ data: { surveyId } }),
-    enabled: !!scope?.isAdmin || !!scope?.isManager,
+    enabled: !!scope?.canSeeAnswers,
     retry: false,
   });
   const { data: surveyMeta } = useQuery({
     queryKey: ["mgr", "questions", surveyId],
     queryFn: () => fetchQuestions({ data: { surveyId } }),
-    enabled: !!scope?.canAccess,
+    enabled: !!scope?.canTrack,
     retry: false,
   });
   const questions = surveyMeta?.questions ?? [];
@@ -124,6 +134,7 @@ function ManageSurveyPage() {
   }, [rows, q, dept, year, sort]);
   const responded = filtered.filter((r) => r.responded_at);
   const pending = filtered.filter((r) => !r.responded_at);
+  const categoryStats = useMemo(() => buildCategoryStats(filtered), [filtered]);
 
   const downloadCsv = (subset: Row[], label: string) => {
     const header = ["full_name", "index_number", "department", "year", "responded_at"];
@@ -147,9 +158,10 @@ function ManageSurveyPage() {
     URL.revokeObjectURL(url);
   };
 
-  const canSeeAnswers = !!scope?.isAdmin || !!scope?.isManager;
+  const canSeeAnswers = !!scope?.canSeeAnswers;
 
-  if (!scope?.canAccess) return <p className="text-sm text-muted-foreground">Tracking access required.</p>;
+  if (scopeLoading) return <p className="text-sm text-muted-foreground">Loading tracking access…</p>;
+  if (!scope?.canTrack) return <p className="text-sm text-muted-foreground">Tracking access required.</p>;
 
   return (
     <div className="space-y-6">
@@ -162,7 +174,7 @@ function ManageSurveyPage() {
         <h1 className="mt-1 font-serif text-4xl leading-[0.95]">
           {responded.length} of {filtered.length} <em className="text-primary">responded.</em>
         </h1>
-        <p className="mt-1 text-xs text-muted-foreground">Track responders, pending students, departments, and years for this survey.</p>
+        <p className="mt-1 text-xs text-muted-foreground">{scope.title} · {scope.creatorName}</p>
       </div>
 
       <FilterBar
@@ -189,8 +201,11 @@ function ManageSurveyPage() {
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Loading students…</p>
       ) : (
-        <Tabs defaultValue={canSeeAnswers ? "responses" : "responded"}>
+        <Tabs defaultValue="categories">
           <TabsList>
+            <TabsTrigger value="categories">
+              <Layers className="mr-1 h-3 w-3" /> Categories · {categoryStats.departments.length + categoryStats.years.length}
+            </TabsTrigger>
             {canSeeAnswers && (
               <TabsTrigger value="responses">
                 <MessageSquare className="mr-1 h-3 w-3" /> Responses · {responses.length}
@@ -203,6 +218,9 @@ function ManageSurveyPage() {
               <Circle className="mr-1 h-3 w-3" /> Pending · {pending.length}
             </TabsTrigger>
           </TabsList>
+          <TabsContent value="categories" className="mt-4">
+            <CategoryBreakdown departments={categoryStats.departments} years={categoryStats.years} />
+          </TabsContent>
           {canSeeAnswers && (
             <TabsContent value="responses" className="mt-4">
               <ResponsesList responses={responses} questions={questions} />
