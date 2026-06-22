@@ -13,6 +13,7 @@ import { AuthProvider } from "@/lib/auth";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { registerPwa } from "@/lib/pwa-register";
 import { installAutoSync } from "@/lib/offline-sync";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 import appCss from "../styles.css?url";
 
@@ -132,6 +133,7 @@ function RootComponent() {
         <Outlet />
         <OfflineIndicator />
         <Toaster />
+        <SpeedInsights />
       </AuthProvider>
     </QueryClientProvider>
   );
