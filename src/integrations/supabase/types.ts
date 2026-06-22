@@ -840,6 +840,7 @@ export type Database = {
       current_user_matches_admin_email: { Args: never; Returns: boolean }
       current_year: { Args: never; Returns: string }
       expire_earned_credits: { Args: never; Returns: undefined }
+      get_my_manager_scope: { Args: never; Returns: Json }
       get_poll_results: {
         Args: { _poll_id: string }
         Returns: {
@@ -874,6 +875,7 @@ export type Database = {
         }[]
       }
       get_survey_share_card: { Args: { _survey_id: string }; Returns: Json }
+      get_survey_tracking_scope: { Args: { _survey_id: string }; Returns: Json }
       get_university_survey_tracking: {
         Args: { _survey_id: string }
         Returns: {
