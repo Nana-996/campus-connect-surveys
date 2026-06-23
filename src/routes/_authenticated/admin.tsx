@@ -292,6 +292,14 @@ function UsersPanel() {
                     }}>
                       <Briefcase className="h-3 w-3" />
                     </Button>
+                    <Button size="sm" variant="outline" title={u.roles?.includes("faculty") ? "Revoke faculty role" : "Grant faculty role"} onClick={async () => {
+                      const isFac = u.roles?.includes("faculty");
+                      if (!confirm(isFac ? "Revoke faculty role? They will lose access to their Faculty dashboard." : `Grant faculty role to ${u.full_name || u.id}? They can curate their own student watchlist.`)) return;
+                      await setFacRole({ data: { userId: u.id, grant: !isFac } });
+                      toast.success("Faculty role updated"); refresh();
+                    }}>
+                      <GraduationCap className="h-3 w-3" />
+                    </Button>
                     <Button size="sm" variant="outline" onClick={async () => {
                       const isAdmin = u.roles?.includes("admin");
                       if (!confirm(isAdmin ? "Revoke admin role?" : "Grant admin role?")) return;
