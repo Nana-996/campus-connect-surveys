@@ -125,6 +125,7 @@ function UsersPanel() {
   const setRole = useServerFn(setUserAdminRole);
   const setMgrRole = useServerFn(setUserManagerRole);
   const setFacRole = useServerFn(setUserFacultyRole);
+  const [search, setSearch] = useState("");
   const [userType, setUserType] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
