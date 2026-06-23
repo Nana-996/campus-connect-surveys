@@ -17,6 +17,7 @@ import {
   setUserFlag,
   setUserAdminRole,
   setUserManagerRole,
+  setUserFacultyRole,
   grantAdminByEmail,
   listAdminSurveys,
   setSurveyActive,
@@ -123,6 +124,7 @@ function UsersPanel() {
   const flag = useServerFn(setUserFlag);
   const setRole = useServerFn(setUserAdminRole);
   const setMgrRole = useServerFn(setUserManagerRole);
+  const setFacRole = useServerFn(setUserFacultyRole);
   const [search, setSearch] = useState("");
   const [userType, setUserType] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
@@ -209,6 +211,7 @@ function UsersPanel() {
               { value: "all", label: "All roles" },
               { value: "admin", label: "Admins" },
               { value: "manager", label: "Managers" },
+              { value: "faculty", label: "Faculty" },
               { value: "none", label: "No role" },
             ],
           },
@@ -261,7 +264,8 @@ function UsersPanel() {
                 <td className="px-3 py-2">
                   {u.is_flagged && <Badge variant="destructive" className="mr-1">Flagged</Badge>}
                   {u.roles?.includes("admin") && <Badge className="mr-1">Admin</Badge>}
-                  {u.roles?.includes("manager") && <Badge variant="secondary">Manager</Badge>}
+                  {u.roles?.includes("manager") && <Badge variant="secondary" className="mr-1">Manager</Badge>}
+                  {u.roles?.includes("faculty") && <Badge variant="secondary">Faculty</Badge>}
                 </td>
                 <td className="px-3 py-2">
                   <div className="flex flex-wrap justify-end gap-1">
@@ -287,6 +291,14 @@ function UsersPanel() {
                       toast.success("Manager role updated"); refresh();
                     }}>
                       <Briefcase className="h-3 w-3" />
+                    </Button>
+                    <Button size="sm" variant="outline" title={u.roles?.includes("faculty") ? "Revoke faculty role" : "Grant faculty role"} onClick={async () => {
+                      const isFac = u.roles?.includes("faculty");
+                      if (!confirm(isFac ? "Revoke faculty role? They will lose access to their Faculty dashboard." : `Grant faculty role to ${u.full_name || u.id}? They can curate their own student watchlist.`)) return;
+                      await setFacRole({ data: { userId: u.id, grant: !isFac } });
+                      toast.success("Faculty role updated"); refresh();
+                    }}>
+                      <GraduationCap className="h-3 w-3" />
                     </Button>
                     <Button size="sm" variant="outline" onClick={async () => {
                       const isAdmin = u.roles?.includes("admin");

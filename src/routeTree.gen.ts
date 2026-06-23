@@ -31,6 +31,7 @@ import { Route as AuthenticatedPollsRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedMySurveysRouteImport } from './routes/_authenticated/my-surveys'
 import { Route as AuthenticatedManageRouteImport } from './routes/_authenticated/manage'
 import { Route as AuthenticatedFeedRouteImport } from './routes/_authenticated/feed'
+import { Route as AuthenticatedFacultyRouteImport } from './routes/_authenticated/faculty'
 import { Route as AuthenticatedCreateRouteImport } from './routes/_authenticated/create'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedManageSurveyIdRouteImport } from './routes/_authenticated/manage.$surveyId'
@@ -147,6 +148,11 @@ const AuthenticatedFeedRoute = AuthenticatedFeedRouteImport.update({
   path: '/feed',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedFacultyRoute = AuthenticatedFacultyRouteImport.update({
+  id: '/faculty',
+  path: '/faculty',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedCreateRoute = AuthenticatedCreateRouteImport.update({
   id: '/create',
   path: '/create',
@@ -192,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/create': typeof AuthenticatedCreateRoute
+  '/faculty': typeof AuthenticatedFacultyRoute
   '/feed': typeof AuthenticatedFeedRoute
   '/manage': typeof AuthenticatedManageRouteWithChildren
   '/my-surveys': typeof AuthenticatedMySurveysRoute
@@ -220,6 +227,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/create': typeof AuthenticatedCreateRoute
+  '/faculty': typeof AuthenticatedFacultyRoute
   '/feed': typeof AuthenticatedFeedRoute
   '/manage': typeof AuthenticatedManageRouteWithChildren
   '/my-surveys': typeof AuthenticatedMySurveysRoute
@@ -250,6 +258,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/create': typeof AuthenticatedCreateRoute
+  '/_authenticated/faculty': typeof AuthenticatedFacultyRoute
   '/_authenticated/feed': typeof AuthenticatedFeedRoute
   '/_authenticated/manage': typeof AuthenticatedManageRouteWithChildren
   '/_authenticated/my-surveys': typeof AuthenticatedMySurveysRoute
@@ -280,6 +289,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin'
     | '/create'
+    | '/faculty'
     | '/feed'
     | '/manage'
     | '/my-surveys'
@@ -308,6 +318,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin'
     | '/create'
+    | '/faculty'
     | '/feed'
     | '/manage'
     | '/my-surveys'
@@ -337,6 +348,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/_authenticated/admin'
     | '/_authenticated/create'
+    | '/_authenticated/faculty'
     | '/_authenticated/feed'
     | '/_authenticated/manage'
     | '/_authenticated/my-surveys'
@@ -526,6 +538,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFeedRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/faculty': {
+      id: '/_authenticated/faculty'
+      path: '/faculty'
+      fullPath: '/faculty'
+      preLoaderRoute: typeof AuthenticatedFacultyRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/create': {
       id: '/_authenticated/create'
       path: '/create'
@@ -578,6 +597,7 @@ const AuthenticatedManageRouteWithChildren =
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedCreateRoute: typeof AuthenticatedCreateRoute
+  AuthenticatedFacultyRoute: typeof AuthenticatedFacultyRoute
   AuthenticatedFeedRoute: typeof AuthenticatedFeedRoute
   AuthenticatedManageRoute: typeof AuthenticatedManageRouteWithChildren
   AuthenticatedMySurveysRoute: typeof AuthenticatedMySurveysRoute
@@ -590,6 +610,7 @@ interface AuthenticatedRouteChildren {
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedCreateRoute: AuthenticatedCreateRoute,
+  AuthenticatedFacultyRoute: AuthenticatedFacultyRoute,
   AuthenticatedFeedRoute: AuthenticatedFeedRoute,
   AuthenticatedManageRoute: AuthenticatedManageRouteWithChildren,
   AuthenticatedMySurveysRoute: AuthenticatedMySurveysRoute,
