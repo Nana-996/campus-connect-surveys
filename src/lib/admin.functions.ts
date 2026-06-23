@@ -153,6 +153,21 @@ export const setUserManagerRole = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const setUserFacultyRole = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .inputValidator((d: unknown) =>
+    z.object({ userId: z.string().uuid(), grant: z.boolean() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.rpc("admin_set_user_role" as any, {
+      _target_user_id: data.userId,
+      _role: "faculty",
+      _grant: data.grant,
+    });
+    if (error) genericError(error);
+    return { ok: true };
+  });
+
 // ---------- Surveys ----------
 export const listAdminSurveys = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
