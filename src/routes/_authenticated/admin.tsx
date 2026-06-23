@@ -17,6 +17,7 @@ import {
   setUserFlag,
   setUserAdminRole,
   setUserManagerRole,
+  setUserFacultyRole,
   grantAdminByEmail,
   listAdminSurveys,
   setSurveyActive,
