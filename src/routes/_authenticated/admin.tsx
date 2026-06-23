@@ -211,6 +211,7 @@ function UsersPanel() {
               { value: "all", label: "All roles" },
               { value: "admin", label: "Admins" },
               { value: "manager", label: "Managers" },
+              { value: "faculty", label: "Faculty" },
               { value: "none", label: "No role" },
             ],
           },
