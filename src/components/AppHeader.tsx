@@ -63,7 +63,8 @@ export function AppHeader() {
         <NavItem to="/polls" icon={<BarChart3 className="h-5 w-5" />} label="Polls" />
         <NavItem to="/create" icon={<PlusCircle className="h-5 w-5" />} label="Create" />
         <NavItem to="/my-surveys" icon={<FolderOpen className="h-5 w-5" />} label="Mine" />
-        {showFaculty && <NavItem to="/manage" icon={<Briefcase className="h-5 w-5" />} label="Faculty" />}
+        {showManager && <NavItem to="/manage" icon={<Briefcase className="h-5 w-5" />} label="Manage" />}
+        {isFaculty && <NavItem to="/faculty" icon={<GraduationCap className="h-5 w-5" />} label="Faculty" />}
         {isAdmin && <NavItem to="/admin" icon={<Shield className="h-5 w-5" />} label="Admin" />}
         <NavItem to="/profile" icon={<User className="h-5 w-5" />} label="Profile" />
       </nav>
