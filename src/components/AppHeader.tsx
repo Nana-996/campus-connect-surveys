@@ -3,22 +3,31 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Coins, Home, PlusCircle, FolderOpen, User, LogOut, BarChart3, Briefcase, Shield } from "lucide-react";
+import { Coins, Home, PlusCircle, FolderOpen, User, LogOut, BarChart3, Briefcase, Shield, GraduationCap } from "lucide-react";
 import { getMyManagerScope } from "@/lib/manager.functions";
+import { getMyFacultyScope } from "@/lib/faculty.functions";
 
 export function AppHeader() {
   const { profile, signOut } = useAuth();
   const navigate = useNavigate();
   const earnedCredits = profile?.earned_credits ?? 0;
   const fetchScope = useServerFn(getMyManagerScope);
+  const fetchFacultyScope = useServerFn(getMyFacultyScope);
   const { data: scope } = useQuery({
     queryKey: ["mgr", "scope"],
     queryFn: () => fetchScope(),
     retry: false,
     staleTime: 60_000,
   });
-  const showFaculty = !!scope?.canAccess;
+  const { data: facScope } = useQuery({
+    queryKey: ["faculty", "scope"],
+    queryFn: () => fetchFacultyScope(),
+    retry: false,
+    staleTime: 60_000,
+  });
+  const showManager = !!scope?.canAccess;
   const isAdmin = !!scope?.isAdmin;
+  const isFaculty = !!facScope?.isFaculty;
 
   return (
     <header className="sticky top-0 z-40 border-b border-foreground/15 bg-background/85 backdrop-blur">
