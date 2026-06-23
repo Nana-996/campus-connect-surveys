@@ -89,6 +89,24 @@ export type Database = {
         }
         Relationships: []
       }
+      faculty_student_watchlist: {
+        Row: {
+          added_at: string
+          faculty_user_id: string
+          student_user_id: string
+        }
+        Insert: {
+          added_at?: string
+          faculty_user_id: string
+          student_user_id: string
+        }
+        Update: {
+          added_at?: string
+          faculty_user_id?: string
+          student_user_id?: string
+        }
+        Relationships: []
+      }
       interest_tags: {
         Row: {
           id: string
@@ -840,6 +858,57 @@ export type Database = {
       current_user_matches_admin_email: { Args: never; Returns: boolean }
       current_year: { Args: never; Returns: string }
       expire_earned_credits: { Args: never; Returns: undefined }
+      faculty_add_to_watchlist: {
+        Args: { _student_user_id: string }
+        Returns: boolean
+      }
+      faculty_get_student_detail: {
+        Args: { _student_user_id: string }
+        Returns: {
+          created_at: string
+          creator_name: string
+          duration_ms: number
+          expires_at: string
+          is_active: boolean
+          quality_score: number
+          responded: boolean
+          responded_at: string
+          survey_id: string
+          target_department: string
+          target_year: string
+          title: string
+        }[]
+      }
+      faculty_list_watchlist: {
+        Args: never
+        Returns: {
+          added_at: string
+          department: string
+          full_name: string
+          index_number: string
+          last_activity: string
+          student_id: string
+          surveys_available: number
+          surveys_pending: number
+          surveys_responded: number
+          year: string
+        }[]
+      }
+      faculty_remove_from_watchlist: {
+        Args: { _student_user_id: string }
+        Returns: boolean
+      }
+      faculty_search_student_by_index: {
+        Args: { _index_number: string }
+        Returns: {
+          already_on_watchlist: boolean
+          department: string
+          full_name: string
+          index_number: string
+          student_id: string
+          year: string
+        }[]
+      }
       get_my_manager_scope: { Args: never; Returns: Json }
       get_poll_results: {
         Args: { _poll_id: string }
