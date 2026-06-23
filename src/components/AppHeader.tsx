@@ -73,7 +73,8 @@ export function AppHeader() {
         <DesktopLink to="/polls">Polls</DesktopLink>
         <DesktopLink to="/create">Create survey</DesktopLink>
         <DesktopLink to="/my-surveys">My surveys</DesktopLink>
-        {showFaculty && <DesktopLink to="/manage">Faculty</DesktopLink>}
+        {showManager && <DesktopLink to="/manage">Manage</DesktopLink>}
+        {isFaculty && <DesktopLink to="/faculty">Faculty</DesktopLink>}
         {isAdmin && <DesktopLink to="/admin">Admin</DesktopLink>}
         <DesktopLink to="/profile">Profile</DesktopLink>
       </nav>
