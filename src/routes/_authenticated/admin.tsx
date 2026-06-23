@@ -264,7 +264,8 @@ function UsersPanel() {
                 <td className="px-3 py-2">
                   {u.is_flagged && <Badge variant="destructive" className="mr-1">Flagged</Badge>}
                   {u.roles?.includes("admin") && <Badge className="mr-1">Admin</Badge>}
-                  {u.roles?.includes("manager") && <Badge variant="secondary">Manager</Badge>}
+                  {u.roles?.includes("manager") && <Badge variant="secondary" className="mr-1">Manager</Badge>}
+                  {u.roles?.includes("faculty") && <Badge variant="secondary">Faculty</Badge>}
                 </td>
                 <td className="px-3 py-2">
                   <div className="flex flex-wrap justify-end gap-1">
