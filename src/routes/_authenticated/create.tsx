@@ -189,10 +189,17 @@ function Create() {
         Ask <em className="text-primary">{isGeneral ? "the public." : "campus."}</em>
       </h1>
       <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-card px-3 py-1 text-xs font-semibold">
-        <span className="font-bold text-primary">{profile?.earned_credits ?? 0} credits</span>
+        <span className="font-bold text-primary">{spendable} credits</span>
         <span className="text-muted-foreground">·</span>
-        <span className="text-muted-foreground">earn more by answering surveys</span>
+        {isGeneral ? (
+          <a href="/buy-credits" className="text-muted-foreground hover:text-primary underline-offset-2 hover:underline">
+            buy more credits
+          </a>
+        ) : (
+          <span className="text-muted-foreground">earn more by answering surveys</span>
+        )}
       </p>
+
 
       {lecturerId && (
         <div className="mt-4 rounded-2xl border-2 border-primary/40 bg-primary/5 p-4">
