@@ -552,13 +552,19 @@ function Create() {
 
         {!canAffordTotal && (
           <p className="text-center text-xs font-medium text-destructive">
-            Need {totalCost - (profile?.earned_credits ?? 0)} more credit{(totalCost - (profile?.earned_credits ?? 0)) === 1 ? "" : "s"} — answer surveys to earn them.
+            Need {totalCost - spendable} more credit{(totalCost - spendable) === 1 ? "" : "s"} —{" "}
+            {isGeneral ? (
+              <a href="/buy-credits" className="underline">buy more credits</a>
+            ) : (
+              "answer surveys to earn them."
+            )}
           </p>
         )}
         <Button type="submit" size="lg" disabled={submitting || !canAffordTotal}
           className="h-14 w-full rounded-full bg-primary text-base">
           {submitting ? "Publishing…" : `Publish ${selected.label} · ${totalCost} credit${totalCost === 1 ? "" : "s"} →`}
         </Button>
+
 
       </form>
     </div>
