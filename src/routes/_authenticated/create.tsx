@@ -248,7 +248,7 @@ function Create() {
                     <span className="font-serif text-2xl">{T.label}</span>
                   </div>
                   <p className="mt-0.5 text-[11px] opacity-80">{T.tagline}</p>
-                  <p className="mt-3 text-xs font-bold">{T.cost} credits</p>
+                  <p className="mt-3 text-xs font-bold">{isGeneral ? T.cost * 2 : T.cost} credits</p>
                   <ul className="mt-2 space-y-0.5 text-[11px] opacity-80">
                     {T.features.slice(0, 2).map((f) => <li key={f}>· {f}</li>)}
                   </ul>
