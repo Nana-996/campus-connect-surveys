@@ -43,18 +43,42 @@ export const DAILY_EARN_CAP = 3;
 export const WEEKLY_EARN_CAP = 20;
 export const EARNED_EXPIRY_DAYS = 30;
 
+/** General users pay 2× credits per tier — students keep base cost. */
+export const GENERAL_TIER_MULTIPLIER = 2;
+
+export function tierCost(tier: Tier, userType: UserType | undefined): number {
+  const base = TIERS[tier].cost;
+  return userType === "general" ? base * GENERAL_TIER_MULTIPLIER : base;
+}
+
+export function spendableCredits(
+  userType: UserType | undefined,
+  earned: number,
+  paid: number,
+): number {
+  return userType === "general" ? paid : earned;
+}
+
 export function canAfford(
   tier: Tier,
   earned: number,
+  userType: UserType | undefined = "student",
+  paid = 0,
 ): { ok: boolean; reason?: string; shortReason?: string } {
-  const t = TIERS[tier];
-  if (earned < t.cost) {
-    const need = t.cost - earned;
+  const cost = tierCost(tier, userType);
+  const have = spendableCredits(userType, earned, paid);
+  if (have < cost) {
+    const need = cost - have;
+    const where =
+      userType === "general"
+        ? "buy more credits to publish."
+        : "answer surveys in your feed to earn them.";
     return {
       ok: false,
       shortReason: `Need ${need} more credit${need === 1 ? "" : "s"}`,
-      reason: `Need ${need} more credit${need === 1 ? "" : "s"} — answer surveys in your feed to earn them.`,
+      reason: `Need ${need} more credit${need === 1 ? "" : "s"} — ${where}`,
     };
   }
   return { ok: true };
 }
+
