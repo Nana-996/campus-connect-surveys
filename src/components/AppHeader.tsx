@@ -46,13 +46,14 @@ export function AppHeader() {
         </Link>
         <div className="flex shrink-0 items-center gap-2">
           <Link
-            to="/feed"
+            to={creditsLink}
             className="flex items-center gap-1 rounded-full bg-accent px-2.5 py-1.5 text-xs font-semibold text-accent-foreground hover:opacity-90"
-            title="Answer surveys in your feed to earn more credits"
+            title={creditsTitle}
           >
             <Coins className="h-3.5 w-3.5" />
-            <span className="whitespace-nowrap">{earnedCredits}</span>
+            <span className="whitespace-nowrap">{creditsShown}</span>
           </Link>
+
           <Button
             variant="ghost"
             size="icon"
