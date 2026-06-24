@@ -10,6 +10,7 @@ export type Profile = {
   department: string;
   year: string;
   earned_credits: number;
+  paid_credits: number;
   is_flagged?: boolean;
   flag_reason?: string | null;
   user_type?: "student" | "general";
@@ -18,6 +19,7 @@ export type Profile = {
   interests?: string[];
   interests_raw?: string[];
 };
+
 
 type AuthCtx = {
   user: User | null;
