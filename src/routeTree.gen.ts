@@ -33,6 +33,7 @@ import { Route as AuthenticatedManageRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedFeedRouteImport } from './routes/_authenticated/feed'
 import { Route as AuthenticatedFacultyRouteImport } from './routes/_authenticated/faculty'
 import { Route as AuthenticatedCreateRouteImport } from './routes/_authenticated/create'
+import { Route as AuthenticatedBuyCreditsRouteImport } from './routes/_authenticated/buy-credits'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedManageSurveyIdRouteImport } from './routes/_authenticated/manage.$surveyId'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
@@ -159,6 +160,11 @@ const AuthenticatedCreateRoute = AuthenticatedCreateRouteImport.update({
   path: '/create',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedBuyCreditsRoute = AuthenticatedBuyCreditsRouteImport.update({
+  id: '/buy-credits',
+  path: '/buy-credits',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -204,6 +210,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/buy-credits': typeof AuthenticatedBuyCreditsRoute
   '/create': typeof AuthenticatedCreateRoute
   '/faculty': typeof AuthenticatedFacultyRoute
   '/feed': typeof AuthenticatedFeedRoute
@@ -234,6 +241,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/buy-credits': typeof AuthenticatedBuyCreditsRoute
   '/create': typeof AuthenticatedCreateRoute
   '/faculty': typeof AuthenticatedFacultyRoute
   '/feed': typeof AuthenticatedFeedRoute
@@ -266,6 +274,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/buy-credits': typeof AuthenticatedBuyCreditsRoute
   '/_authenticated/create': typeof AuthenticatedCreateRoute
   '/_authenticated/faculty': typeof AuthenticatedFacultyRoute
   '/_authenticated/feed': typeof AuthenticatedFeedRoute
@@ -298,6 +307,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/admin'
+    | '/buy-credits'
     | '/create'
     | '/faculty'
     | '/feed'
@@ -328,6 +338,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/admin'
+    | '/buy-credits'
     | '/create'
     | '/faculty'
     | '/feed'
@@ -359,6 +370,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/_authenticated/admin'
+    | '/_authenticated/buy-credits'
     | '/_authenticated/create'
     | '/_authenticated/faculty'
     | '/_authenticated/feed'
@@ -566,6 +578,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCreateRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/buy-credits': {
+      id: '/_authenticated/buy-credits'
+      path: '/buy-credits'
+      fullPath: '/buy-credits'
+      preLoaderRoute: typeof AuthenticatedBuyCreditsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -617,6 +636,7 @@ const AuthenticatedManageRouteWithChildren =
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedBuyCreditsRoute: typeof AuthenticatedBuyCreditsRoute
   AuthenticatedCreateRoute: typeof AuthenticatedCreateRoute
   AuthenticatedFacultyRoute: typeof AuthenticatedFacultyRoute
   AuthenticatedFeedRoute: typeof AuthenticatedFeedRoute
@@ -630,6 +650,7 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedBuyCreditsRoute: AuthenticatedBuyCreditsRoute,
   AuthenticatedCreateRoute: AuthenticatedCreateRoute,
   AuthenticatedFacultyRoute: AuthenticatedFacultyRoute,
   AuthenticatedFeedRoute: AuthenticatedFeedRoute,
