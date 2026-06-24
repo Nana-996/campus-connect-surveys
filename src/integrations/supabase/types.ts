@@ -956,6 +956,18 @@ export type Database = {
           year: string
         }[]
       }
+      grant_purchased_credits: {
+        Args: {
+          _amount_minor: number
+          _credits: number
+          _currency: string
+          _pack_label: string
+          _payload: Json
+          _reference: string
+          _user_id: string
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

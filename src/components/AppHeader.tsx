@@ -10,7 +10,12 @@ import { getMyFacultyScope } from "@/lib/faculty.functions";
 export function AppHeader() {
   const { profile, signOut } = useAuth();
   const navigate = useNavigate();
-  const earnedCredits = profile?.earned_credits ?? 0;
+  const isGeneral = profile?.user_type === "general";
+  const creditsShown = isGeneral ? (profile?.paid_credits ?? 0) : (profile?.earned_credits ?? 0);
+  const creditsLink = isGeneral ? "/buy-credits" : "/feed";
+  const creditsTitle = isGeneral
+    ? "Buy more credits to publish surveys"
+    : "Answer surveys in your feed to earn more credits";
   const fetchScope = useServerFn(getMyManagerScope);
   const fetchFacultyScope = useServerFn(getMyFacultyScope);
   const { data: scope } = useQuery({
@@ -29,6 +34,7 @@ export function AppHeader() {
   const isAdmin = !!scope?.isAdmin;
   const isFaculty = !!facScope?.isFaculty;
 
+
   return (
     <header className="sticky top-0 z-40 border-b border-foreground/15 bg-background/85 backdrop-blur">
       <div className="mx-auto grid h-16 max-w-5xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 sm:px-5">
@@ -40,13 +46,14 @@ export function AppHeader() {
         </Link>
         <div className="flex shrink-0 items-center gap-2">
           <Link
-            to="/feed"
+            to={creditsLink}
             className="flex items-center gap-1 rounded-full bg-accent px-2.5 py-1.5 text-xs font-semibold text-accent-foreground hover:opacity-90"
-            title="Answer surveys in your feed to earn more credits"
+            title={creditsTitle}
           >
             <Coins className="h-3.5 w-3.5" />
-            <span className="whitespace-nowrap">{earnedCredits}</span>
+            <span className="whitespace-nowrap">{creditsShown}</span>
           </Link>
+
           <Button
             variant="ghost"
             size="icon"

@@ -123,17 +123,21 @@ function Create() {
   const tierMax = TIERS[tier].responseGoal;
   const goalNum = responseGoal ? Math.max(1, Math.min(tierMax, parseInt(responseGoal, 10) || tierMax)) : tierMax;
   const bonusTotal = tier === "pro" ? respondentBonus * goalNum : 0;
-  const totalCost = TIERS[tier].cost + bonusTotal;
-  const canAffordTotal = (profile?.earned_credits ?? 0) >= totalCost;
+  const baseTierCost = isGeneral ? TIERS[tier].cost * 2 : TIERS[tier].cost;
+  const totalCost = baseTierCost + bonusTotal;
+  const spendable = isGeneral ? (profile?.paid_credits ?? 0) : (profile?.earned_credits ?? 0);
+  const canAffordTotal = spendable >= totalCost;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!profile) return;
     if (!canAffordTotal) {
-      const need = totalCost - profile.earned_credits;
-      toast.error(`Need ${need} more credit${need === 1 ? "" : "s"} — answer surveys to earn them.`);
+      const need = totalCost - spendable;
+      const where = isGeneral ? "buy more credits to publish." : "answer surveys to earn them.";
+      toast.error(`Need ${need} more credit${need === 1 ? "" : "s"} — ${where}`);
       return;
     }
+
     if (questions.length === 0 || questions.some((q) => !q.text.trim())) {
       toast.error("Each question needs text."); return;
     }
@@ -185,10 +189,17 @@ function Create() {
         Ask <em className="text-primary">{isGeneral ? "the public." : "campus."}</em>
       </h1>
       <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-card px-3 py-1 text-xs font-semibold">
-        <span className="font-bold text-primary">{profile?.earned_credits ?? 0} credits</span>
+        <span className="font-bold text-primary">{spendable} credits</span>
         <span className="text-muted-foreground">·</span>
-        <span className="text-muted-foreground">earn more by answering surveys</span>
+        {isGeneral ? (
+          <a href="/buy-credits" className="text-muted-foreground hover:text-primary underline-offset-2 hover:underline">
+            buy more credits
+          </a>
+        ) : (
+          <span className="text-muted-foreground">earn more by answering surveys</span>
+        )}
       </p>
+
 
       {lecturerId && (
         <div className="mt-4 rounded-2xl border-2 border-primary/40 bg-primary/5 p-4">
@@ -237,7 +248,7 @@ function Create() {
                     <span className="font-serif text-2xl">{T.label}</span>
                   </div>
                   <p className="mt-0.5 text-[11px] opacity-80">{T.tagline}</p>
-                  <p className="mt-3 text-xs font-bold">{T.cost} credits</p>
+                  <p className="mt-3 text-xs font-bold">{isGeneral ? T.cost * 2 : T.cost} credits</p>
                   <ul className="mt-2 space-y-0.5 text-[11px] opacity-80">
                     {T.features.slice(0, 2).map((f) => <li key={f}>· {f}</li>)}
                   </ul>
@@ -541,13 +552,19 @@ function Create() {
 
         {!canAffordTotal && (
           <p className="text-center text-xs font-medium text-destructive">
-            Need {totalCost - (profile?.earned_credits ?? 0)} more credit{(totalCost - (profile?.earned_credits ?? 0)) === 1 ? "" : "s"} — answer surveys to earn them.
+            Need {totalCost - spendable} more credit{(totalCost - spendable) === 1 ? "" : "s"} —{" "}
+            {isGeneral ? (
+              <a href="/buy-credits" className="underline">buy more credits</a>
+            ) : (
+              "answer surveys to earn them."
+            )}
           </p>
         )}
         <Button type="submit" size="lg" disabled={submitting || !canAffordTotal}
           className="h-14 w-full rounded-full bg-primary text-base">
           {submitting ? "Publishing…" : `Publish ${selected.label} · ${totalCost} credit${totalCost === 1 ? "" : "s"} →`}
         </Button>
+
 
       </form>
     </div>

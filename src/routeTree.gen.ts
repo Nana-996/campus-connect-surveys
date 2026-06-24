@@ -33,8 +33,10 @@ import { Route as AuthenticatedManageRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedFeedRouteImport } from './routes/_authenticated/feed'
 import { Route as AuthenticatedFacultyRouteImport } from './routes/_authenticated/faculty'
 import { Route as AuthenticatedCreateRouteImport } from './routes/_authenticated/create'
+import { Route as AuthenticatedBuyCreditsRouteImport } from './routes/_authenticated/buy-credits'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedManageSurveyIdRouteImport } from './routes/_authenticated/manage.$surveyId'
+import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as AuthenticatedSurveyIdReportRouteImport } from './routes/_authenticated/survey.$id.report'
 import { Route as AuthenticatedSurveyIdAnalyzeRouteImport } from './routes/_authenticated/survey.$id.analyze'
 
@@ -158,6 +160,11 @@ const AuthenticatedCreateRoute = AuthenticatedCreateRouteImport.update({
   path: '/create',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedBuyCreditsRoute = AuthenticatedBuyCreditsRouteImport.update({
+  id: '/buy-credits',
+  path: '/buy-credits',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -168,6 +175,12 @@ const AuthenticatedManageSurveyIdRoute =
     id: '/$surveyId',
     path: '/$surveyId',
     getParentRoute: () => AuthenticatedManageRoute,
+  } as any)
+const ApiPublicPaymentsWebhookRoute =
+  ApiPublicPaymentsWebhookRouteImport.update({
+    id: '/api/public/payments/webhook',
+    path: '/api/public/payments/webhook',
+    getParentRoute: () => rootRouteImport,
   } as any)
 const AuthenticatedSurveyIdReportRoute =
   AuthenticatedSurveyIdReportRouteImport.update({
@@ -197,6 +210,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/buy-credits': typeof AuthenticatedBuyCreditsRoute
   '/create': typeof AuthenticatedCreateRoute
   '/faculty': typeof AuthenticatedFacultyRoute
   '/feed': typeof AuthenticatedFeedRoute
@@ -210,6 +224,7 @@ export interface FileRoutesByFullPath {
   '/manage/$surveyId': typeof AuthenticatedManageSurveyIdRoute
   '/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
   '/survey/$id/report': typeof AuthenticatedSurveyIdReportRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -226,6 +241,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/buy-credits': typeof AuthenticatedBuyCreditsRoute
   '/create': typeof AuthenticatedCreateRoute
   '/faculty': typeof AuthenticatedFacultyRoute
   '/feed': typeof AuthenticatedFeedRoute
@@ -239,6 +255,7 @@ export interface FileRoutesByTo {
   '/manage/$surveyId': typeof AuthenticatedManageSurveyIdRoute
   '/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
   '/survey/$id/report': typeof AuthenticatedSurveyIdReportRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -257,6 +274,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/buy-credits': typeof AuthenticatedBuyCreditsRoute
   '/_authenticated/create': typeof AuthenticatedCreateRoute
   '/_authenticated/faculty': typeof AuthenticatedFacultyRoute
   '/_authenticated/feed': typeof AuthenticatedFeedRoute
@@ -270,6 +288,7 @@ export interface FileRoutesById {
   '/_authenticated/manage/$surveyId': typeof AuthenticatedManageSurveyIdRoute
   '/_authenticated/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
   '/_authenticated/survey/$id/report': typeof AuthenticatedSurveyIdReportRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -288,6 +307,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/admin'
+    | '/buy-credits'
     | '/create'
     | '/faculty'
     | '/feed'
@@ -301,6 +321,7 @@ export interface FileRouteTypes {
     | '/manage/$surveyId'
     | '/survey/$id/analyze'
     | '/survey/$id/report'
+    | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -317,6 +338,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/admin'
+    | '/buy-credits'
     | '/create'
     | '/faculty'
     | '/feed'
@@ -330,6 +352,7 @@ export interface FileRouteTypes {
     | '/manage/$surveyId'
     | '/survey/$id/analyze'
     | '/survey/$id/report'
+    | '/api/public/payments/webhook'
   id:
     | '__root__'
     | '/'
@@ -347,6 +370,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/_authenticated/admin'
+    | '/_authenticated/buy-credits'
     | '/_authenticated/create'
     | '/_authenticated/faculty'
     | '/_authenticated/feed'
@@ -360,6 +384,7 @@ export interface FileRouteTypes {
     | '/_authenticated/manage/$surveyId'
     | '/_authenticated/survey/$id/analyze'
     | '/_authenticated/survey/$id/report'
+    | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -380,6 +405,7 @@ export interface RootRouteChildren {
   BlogStudentSurveyQuestionsGuideRoute: typeof BlogStudentSurveyQuestionsGuideRoute
   RTokenRoute: typeof RTokenRoute
   SurveyIdRoute: typeof SurveyIdRoute
+  ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -552,6 +578,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCreateRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/buy-credits': {
+      id: '/_authenticated/buy-credits'
+      path: '/buy-credits'
+      fullPath: '/buy-credits'
+      preLoaderRoute: typeof AuthenticatedBuyCreditsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -565,6 +598,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/manage/$surveyId'
       preLoaderRoute: typeof AuthenticatedManageSurveyIdRouteImport
       parentRoute: typeof AuthenticatedManageRoute
+    }
+    '/api/public/payments/webhook': {
+      id: '/api/public/payments/webhook'
+      path: '/api/public/payments/webhook'
+      fullPath: '/api/public/payments/webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/survey/$id/report': {
       id: '/_authenticated/survey/$id/report'
@@ -596,6 +636,7 @@ const AuthenticatedManageRouteWithChildren =
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedBuyCreditsRoute: typeof AuthenticatedBuyCreditsRoute
   AuthenticatedCreateRoute: typeof AuthenticatedCreateRoute
   AuthenticatedFacultyRoute: typeof AuthenticatedFacultyRoute
   AuthenticatedFeedRoute: typeof AuthenticatedFeedRoute
@@ -609,6 +650,7 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedBuyCreditsRoute: AuthenticatedBuyCreditsRoute,
   AuthenticatedCreateRoute: AuthenticatedCreateRoute,
   AuthenticatedFacultyRoute: AuthenticatedFacultyRoute,
   AuthenticatedFeedRoute: AuthenticatedFeedRoute,
@@ -642,6 +684,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogStudentSurveyQuestionsGuideRoute: BlogStudentSurveyQuestionsGuideRoute,
   RTokenRoute: RTokenRoute,
   SurveyIdRoute: SurveyIdRoute,
+  ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
