@@ -123,17 +123,21 @@ function Create() {
   const tierMax = TIERS[tier].responseGoal;
   const goalNum = responseGoal ? Math.max(1, Math.min(tierMax, parseInt(responseGoal, 10) || tierMax)) : tierMax;
   const bonusTotal = tier === "pro" ? respondentBonus * goalNum : 0;
-  const totalCost = TIERS[tier].cost + bonusTotal;
-  const canAffordTotal = (profile?.earned_credits ?? 0) >= totalCost;
+  const baseTierCost = isGeneral ? TIERS[tier].cost * 2 : TIERS[tier].cost;
+  const totalCost = baseTierCost + bonusTotal;
+  const spendable = isGeneral ? (profile?.paid_credits ?? 0) : (profile?.earned_credits ?? 0);
+  const canAffordTotal = spendable >= totalCost;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!profile) return;
     if (!canAffordTotal) {
-      const need = totalCost - profile.earned_credits;
-      toast.error(`Need ${need} more credit${need === 1 ? "" : "s"} — answer surveys to earn them.`);
+      const need = totalCost - spendable;
+      const where = isGeneral ? "buy more credits to publish." : "answer surveys to earn them.";
+      toast.error(`Need ${need} more credit${need === 1 ? "" : "s"} — ${where}`);
       return;
     }
+
     if (questions.length === 0 || questions.some((q) => !q.text.trim())) {
       toast.error("Each question needs text."); return;
     }
