@@ -46,9 +46,11 @@ const fallbackProfileFor = (authUser: User): Profile => {
     department: userType === "student" ? metadata.department ?? "" : "",
     year: userType === "student" ? metadata.year ?? "" : "",
     earned_credits: userType === "student" ? 10 : 5,
+    paid_credits: 0,
     user_type: userType,
   };
 };
+
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
