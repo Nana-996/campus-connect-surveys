@@ -171,6 +171,8 @@ export type Database = {
           provider: string
           provider_payload: Json
           reference: string
+          refunded_at: string | null
+          refunded_credits: number
           status: string
           updated_at: string
           user_id: string
@@ -187,6 +189,8 @@ export type Database = {
           provider?: string
           provider_payload?: Json
           reference: string
+          refunded_at?: string | null
+          refunded_credits?: number
           status?: string
           updated_at?: string
           user_id: string
@@ -203,6 +207,8 @@ export type Database = {
           provider?: string
           provider_payload?: Json
           reference?: string
+          refunded_at?: string | null
+          refunded_credits?: number
           status?: string
           updated_at?: string
           user_id?: string
@@ -1001,6 +1007,15 @@ export type Database = {
           response_goal: number
           title: string
         }[]
+      }
+      refund_purchased_credits: {
+        Args: {
+          _amount_minor: number
+          _payload: Json
+          _reference: string
+          _refund_reference: string
+        }
+        Returns: boolean
       }
       require_admin_user: { Args: never; Returns: string }
       update_my_student_info: {
