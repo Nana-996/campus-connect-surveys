@@ -5,7 +5,12 @@ import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, CheckCircle2, Circle, Download, Layers, MessageSquare } from "lucide-react";
-import { getSurveyTracking, getSurveyResponsesForManager, getSurveyQuestionsForManager, getSurveyTrackingScope } from "@/lib/manager.functions";
+import {
+  getSurveyTracking,
+  getSurveyResponsesForManager,
+  getSurveyQuestionsForManager,
+  getSurveyTrackingScope,
+} from "@/lib/manager.functions";
 import { FilterBar } from "@/components/FilterBar";
 
 export const Route = createFileRoute("/_authenticated/manage/$surveyId")({
@@ -15,7 +20,9 @@ export const Route = createFileRoute("/_authenticated/manage/$surveyId")({
     return (
       <div className="rounded-3xl border border-foreground/15 bg-card p-8 text-center">
         <p className="font-serif text-2xl">Cannot load tracking</p>
-        <p className="mt-2 text-sm text-muted-foreground">Something went wrong loading this survey. Please try again or contact support.</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Something went wrong loading this survey. Please try again or contact support.
+        </p>
       </div>
     );
   },
@@ -83,7 +90,9 @@ function ManageSurveyPage() {
     });
     return [
       { value: "all", label: "All departments", count: rows.length },
-      ...Array.from(c.entries()).sort().map(([v, count]) => ({ value: v, label: v, count })),
+      ...Array.from(c.entries())
+        .sort()
+        .map(([v, count]) => ({ value: v, label: v, count })),
     ];
   }, [rows]);
 
@@ -95,18 +104,24 @@ function ManageSurveyPage() {
     });
     return [
       { value: "all", label: "All years", count: rows.length },
-      ...Array.from(c.entries()).sort().map(([v, count]) => ({ value: v, label: v, count })),
+      ...Array.from(c.entries())
+        .sort()
+        .map(([v, count]) => ({ value: v, label: v, count })),
     ];
   }, [rows]);
 
   const filtered = useMemo(() => {
     const t = q.trim().toLowerCase();
     let list = rows.filter((r) => {
-      if (t && !(
-        r.full_name?.toLowerCase().includes(t) ||
-        (r.index_number ?? "").toLowerCase().includes(t) ||
-        (r.department ?? "").toLowerCase().includes(t)
-      )) return false;
+      if (
+        t &&
+        !(
+          r.full_name?.toLowerCase().includes(t) ||
+          (r.index_number ?? "").toLowerCase().includes(t) ||
+          (r.department ?? "").toLowerCase().includes(t)
+        )
+      )
+        return false;
       if (dept !== "all" && (r.department ?? "—") !== dept) return false;
       if (year !== "all" && (r.year ?? "—") !== year) return false;
       return true;
@@ -120,7 +135,7 @@ function ManageSurveyPage() {
         sorted.sort((a, b) => (a.index_number ?? "").localeCompare(b.index_number ?? ""));
         break;
       case "responded-newest":
-        sorted.sort((a, b) => (+new Date(b.responded_at ?? 0)) - (+new Date(a.responded_at ?? 0)));
+        sorted.sort((a, b) => +new Date(b.responded_at ?? 0) - +new Date(a.responded_at ?? 0));
         break;
       case "responded-oldest":
         sorted.sort((a, b) => {
@@ -160,21 +175,30 @@ function ManageSurveyPage() {
 
   const canSeeAnswers = !!scope?.canSeeAnswers;
 
-  if (scopeLoading) return <p className="text-sm text-muted-foreground">Loading tracking access…</p>;
-  if (!scope?.canTrack) return <p className="text-sm text-muted-foreground">Tracking access required.</p>;
+  if (scopeLoading)
+    return <p className="text-sm text-muted-foreground">Loading tracking access…</p>;
+  if (!scope?.canTrack)
+    return <p className="text-sm text-muted-foreground">Tracking access required.</p>;
 
   return (
     <div className="space-y-6">
-      <Link to="/manage" className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground">
+      <Link
+        to="/manage"
+        className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground"
+      >
         <ArrowLeft className="h-3 w-3" /> All surveys
       </Link>
 
       <div>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Survey tracking</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+          Survey tracking
+        </p>
         <h1 className="mt-1 font-serif text-4xl leading-[0.95]">
           {responded.length} of {filtered.length} <em className="text-primary">responded.</em>
         </h1>
-        <p className="mt-1 text-xs text-muted-foreground">{scope.title} · {scope.creatorName}</p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          {scope.title} · {scope.creatorName}
+        </p>
       </div>
 
       <FilterBar
@@ -195,7 +219,11 @@ function ManageSurveyPage() {
         ]}
         totalCount={rows.length}
         filteredCount={filtered.length}
-        onClear={() => { setQ(""); setDept("all"); setYear("all"); }}
+        onClear={() => {
+          setQ("");
+          setDept("all");
+          setYear("all");
+        }}
       />
 
       {isLoading ? (
@@ -204,7 +232,8 @@ function ManageSurveyPage() {
         <Tabs defaultValue="categories">
           <TabsList>
             <TabsTrigger value="categories">
-              <Layers className="mr-1 h-3 w-3" /> Categories · {categoryStats.departments.length + categoryStats.years.length}
+              <Layers className="mr-1 h-3 w-3" /> Categories ·{" "}
+              {categoryStats.departments.length + categoryStats.years.length}
             </TabsTrigger>
             {canSeeAnswers && (
               <TabsTrigger value="responses">
@@ -219,7 +248,10 @@ function ManageSurveyPage() {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="categories" className="mt-4">
-            <CategoryBreakdown departments={categoryStats.departments} years={categoryStats.years} />
+            <CategoryBreakdown
+              departments={categoryStats.departments}
+              years={categoryStats.years}
+            />
           </TabsContent>
           {canSeeAnswers && (
             <TabsContent value="responses" className="mt-4">
@@ -229,7 +261,15 @@ function ManageSurveyPage() {
                   size="sm"
                   variant="outline"
                   onClick={() => {
-                    const header = ["respondent", "type", "index_number", "department", "year", "submitted_at", ...questions.map((q) => q.text)];
+                    const header = [
+                      "respondent",
+                      "type",
+                      "index_number",
+                      "department",
+                      "year",
+                      "submitted_at",
+                      ...questions.map((q) => q.text),
+                    ];
                     const lines = [header.join(",")].concat(
                       responses.map((r) =>
                         [
@@ -265,7 +305,11 @@ function ManageSurveyPage() {
           <TabsContent value="responded" className="mt-4">
             <StudentTable rows={responded} showRespondedAt />
             <div className="mt-3 flex justify-end">
-              <Button size="sm" variant="outline" onClick={() => downloadCsv(responded, "responded")}>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => downloadCsv(responded, "responded")}
+              >
                 <Download className="mr-1 h-3 w-3" /> Export CSV
               </Button>
             </div>
@@ -305,32 +349,53 @@ function ResponsesList({
   questions: Array<{ id: string; text: string; type: string }>;
 }) {
   if (responses.length === 0) {
-    return <p className="rounded-2xl border border-foreground/15 bg-card p-6 text-center text-sm text-muted-foreground">No responses yet.</p>;
+    return (
+      <p className="rounded-2xl border border-foreground/15 bg-card p-6 text-center text-sm text-muted-foreground">
+        No responses yet.
+      </p>
+    );
   }
   return (
     <div className="space-y-3">
       {responses.map((r) => (
-        <details key={r.response_id} className="group rounded-2xl border border-foreground/15 bg-card p-4 open:shadow-sm">
+        <details
+          key={r.response_id}
+          className="group rounded-2xl border border-foreground/15 bg-card p-4 open:shadow-sm"
+        >
           <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-2 text-sm">
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-semibold">{r.respondent_label}</span>
               {r.is_identified ? (
                 <>
-                  {r.index_number && <span className="rounded-full bg-secondary px-2 py-0.5 font-mono text-[10px]">{r.index_number}</span>}
-                  {r.department && <span className="text-xs text-muted-foreground">{r.department}</span>}
+                  {r.index_number && (
+                    <span className="rounded-full bg-secondary px-2 py-0.5 font-mono text-[10px]">
+                      {r.index_number}
+                    </span>
+                  )}
+                  {r.department && (
+                    <span className="text-xs text-muted-foreground">{r.department}</span>
+                  )}
                   {r.year && <span className="text-xs text-muted-foreground">· {r.year}</span>}
                 </>
               ) : (
-                <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">Anonymous</span>
+                <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Anonymous
+                </span>
               )}
             </div>
-            <span className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString()}</span>
+            <span className="text-xs text-muted-foreground">
+              {new Date(r.created_at).toLocaleString()}
+            </span>
           </summary>
           <div className="mt-4 space-y-3 border-t border-foreground/10 pt-3">
             {questions.map((q) => (
               <div key={q.id}>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{q.text}</p>
-                <p className="mt-0.5 whitespace-pre-wrap text-sm">{r.answers?.[q.id] || <span className="text-muted-foreground">—</span>}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  {q.text}
+                </p>
+                <p className="mt-0.5 whitespace-pre-wrap text-sm">
+                  {r.answers?.[q.id] || <span className="text-muted-foreground">—</span>}
+                </p>
               </div>
             ))}
           </div>
@@ -350,14 +415,26 @@ function buildCategoryStats(rows: Row[]): { departments: CategoryStat[]; years: 
     return Array.from(groups.entries())
       .map(([label, groupRows]) => {
         const responded = groupRows.filter((row) => row.responded_at).length;
-        return { label, total: groupRows.length, responded, pending: groupRows.length - responded, rows: groupRows };
+        return {
+          label,
+          total: groupRows.length,
+          responded,
+          pending: groupRows.length - responded,
+          rows: groupRows,
+        };
       })
       .sort((a, b) => b.pending - a.pending || a.label.localeCompare(b.label));
   };
   return { departments: collect("department"), years: collect("year") };
 }
 
-function CategoryBreakdown({ departments, years }: { departments: CategoryStat[]; years: CategoryStat[] }) {
+function CategoryBreakdown({
+  departments,
+  years,
+}: {
+  departments: CategoryStat[];
+  years: CategoryStat[];
+}) {
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       <CategoryList title="Departments" stats={departments} />
@@ -370,7 +447,9 @@ function CategoryList({ title, stats }: { title: string; stats: CategoryStat[] }
   return (
     <div className="rounded-2xl border border-foreground/15 bg-card">
       <div className="border-b border-foreground/10 px-4 py-3">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          {title}
+        </p>
       </div>
       <div className="divide-y divide-foreground/10">
         {stats.map((stat) => (
@@ -378,15 +457,26 @@ function CategoryList({ title, stats }: { title: string; stats: CategoryStat[] }
             <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-3 text-sm">
               <span className="font-semibold">{stat.label}</span>
               <span className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                <span>{stat.responded}/{stat.total} recorded</span>
-                <span className={stat.pending > 0 ? "rounded-full bg-destructive/10 px-2 py-0.5 font-semibold text-destructive" : "rounded-full bg-primary/10 px-2 py-0.5 font-semibold text-primary"}>
+                <span>
+                  {stat.responded}/{stat.total} recorded
+                </span>
+                <span
+                  className={
+                    stat.pending > 0
+                      ? "rounded-full bg-destructive/10 px-2 py-0.5 font-semibold text-destructive"
+                      : "rounded-full bg-primary/10 px-2 py-0.5 font-semibold text-primary"
+                  }
+                >
                   {stat.pending > 0 ? `${stat.pending} missing` : "Complete"}
                 </span>
               </span>
             </summary>
             <div className="mt-3 max-h-56 overflow-auto rounded-xl bg-secondary/45 p-3">
               {stat.rows.map((row) => (
-                <div key={`${title}-${stat.label}-${row.student_id}`} className="flex flex-wrap items-center justify-between gap-2 py-1 text-xs">
+                <div
+                  key={`${title}-${stat.label}-${row.student_id}`}
+                  className="flex flex-wrap items-center justify-between gap-2 py-1 text-xs"
+                >
                   <span className="font-mono">{row.index_number || "No index"}</span>
                   <span className={row.responded_at ? "text-primary" : "text-muted-foreground"}>
                     {row.responded_at ? "Recorded" : "Pending"}
@@ -396,12 +486,13 @@ function CategoryList({ title, stats }: { title: string; stats: CategoryStat[] }
             </div>
           </details>
         ))}
-        {stats.length === 0 && <p className="px-4 py-8 text-center text-sm text-muted-foreground">No category data.</p>}
+        {stats.length === 0 && (
+          <p className="px-4 py-8 text-center text-sm text-muted-foreground">No category data.</p>
+        )}
       </div>
     </div>
   );
 }
-
 
 function StudentTable({ rows, showRespondedAt }: { rows: Row[]; showRespondedAt?: boolean }) {
   return (
@@ -420,7 +511,9 @@ function StudentTable({ rows, showRespondedAt }: { rows: Row[]; showRespondedAt?
           {rows.map((r) => (
             <tr key={r.student_id} className="border-t border-foreground/10">
               <td className="px-4 py-2">{r.full_name || "—"}</td>
-              <td className="px-4 py-2 font-mono text-xs">{r.index_number || <span className="text-muted-foreground">—</span>}</td>
+              <td className="px-4 py-2 font-mono text-xs">
+                {r.index_number || <span className="text-muted-foreground">—</span>}
+              </td>
               <td className="px-4 py-2">{r.department || "—"}</td>
               <td className="px-4 py-2">{r.year || "—"}</td>
               {showRespondedAt && (
@@ -431,7 +524,14 @@ function StudentTable({ rows, showRespondedAt }: { rows: Row[]; showRespondedAt?
             </tr>
           ))}
           {rows.length === 0 && (
-            <tr><td colSpan={showRespondedAt ? 5 : 4} className="px-4 py-8 text-center text-muted-foreground">No students.</td></tr>
+            <tr>
+              <td
+                colSpan={showRespondedAt ? 5 : 4}
+                className="px-4 py-8 text-center text-muted-foreground"
+              >
+                No students.
+              </td>
+            </tr>
           )}
         </tbody>
       </table>

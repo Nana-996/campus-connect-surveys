@@ -41,7 +41,9 @@ function ResetPasswordPage() {
   // disabled, so this page controls the validation flow explicitly.
   useEffect(() => {
     let cancelled = false;
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("[reset-password] auth event", event, !!session);
       if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN" || session) {
         if (cancelled) return;
@@ -63,7 +65,9 @@ function ResetPasswordPage() {
       const currentUrl = new URL(window.location.href);
       const initialUrl = initialRecoveryHref ? new URL(initialRecoveryHref) : currentUrl;
       const url =
-        initialUrl.hash || initialUrl.searchParams.has("code") || initialUrl.searchParams.has("token_hash")
+        initialUrl.hash ||
+        initialUrl.searchParams.has("code") ||
+        initialUrl.searchParams.has("token_hash")
           ? initialUrl
           : currentUrl;
       const hash = new URLSearchParams(url.hash.replace(/^#/, ""));
@@ -74,8 +78,11 @@ function ResetPasswordPage() {
       });
 
       // Surface error returns from the email link (e.g. expired, otp_invalid).
-      const errParam = url.searchParams.get("error_description") ?? hash.get("error_description")
-        ?? url.searchParams.get("error") ?? hash.get("error");
+      const errParam =
+        url.searchParams.get("error_description") ??
+        hash.get("error_description") ??
+        url.searchParams.get("error") ??
+        hash.get("error");
       if (errParam) {
         console.error("[reset-password] link error", errParam);
         if (!cancelled) setError(decodeURIComponent(errParam.replace(/\+/g, " ")));
@@ -96,22 +103,31 @@ function ResetPasswordPage() {
             refresh_token: refreshToken,
           });
           if (sessionErr) throw sessionErr;
-          await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+          await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
         } else if (tokenHash) {
-          const { data: otpData, error: otpErr } = await recoveryClient.auth.verifyOtp({ token_hash: tokenHash, type });
+          const { data: otpData, error: otpErr } = await recoveryClient.auth.verifyOtp({
+            token_hash: tokenHash,
+            type,
+          });
           if (otpErr) throw otpErr;
           if (otpData.session) await supabase.auth.setSession(otpData.session);
         } else if (code) {
           const { data: exData, error: exErr } = await supabase.auth.exchangeCodeForSession(code);
           if (exErr) throw exErr;
-          if (!exData.session) throw new Error("Reset link could not create a session. Please request a new link.");
+          if (!exData.session)
+            throw new Error("Reset link could not create a session. Please request a new link.");
         } else {
           // The app-wide auth client may have already processed and removed a
           // valid recovery token. Give that async save/event a short window.
           await new Promise((resolve) => setTimeout(resolve, 450));
           const { data: existing } = await supabase.auth.getSession();
           if (!existing.session) {
-            throw new Error("This reset link is missing its token. Please request a new link below and open the latest email only once.");
+            throw new Error(
+              "This reset link is missing its token. Please request a new link below and open the latest email only once.",
+            );
           }
         }
         if (cancelled) return;
@@ -119,18 +135,28 @@ function ResetPasswordPage() {
         cleanUrl();
       } catch (err: any) {
         console.error("[reset-password] validate failed", err);
-        if (!cancelled) setError(err?.message ?? "Reset link is invalid or has expired. Request a new one.");
+        if (!cancelled)
+          setError(err?.message ?? "Reset link is invalid or has expired. Request a new one.");
       }
     };
     validateLink();
-    return () => { cancelled = true; subscription.unsubscribe(); };
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (password.length < 6) { setError("Password must be at least 6 characters."); return; }
-    if (password !== confirm) { setError("Passwords don't match."); return; }
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+    if (password !== confirm) {
+      setError("Passwords don't match.");
+      return;
+    }
     setSubmitting(true);
     try {
       const { error } = await supabase.auth.updateUser({ password });
@@ -150,36 +176,65 @@ function ResetPasswordPage() {
         {isStudent ? <GraduationCap className="h-3 w-3" /> : <Globe2 className="h-3 w-3" />}
         {isStudent ? "Student account" : "General account"}
       </span>
-      <h1 className="font-serif text-5xl leading-[0.95]">Set a new <em className="text-primary">password.</em></h1>
+      <h1 className="font-serif text-5xl leading-[0.95]">
+        Set a new <em className="text-primary">password.</em>
+      </h1>
       <p className="mt-3 text-sm text-muted-foreground">
         Choose something you'll remember. You'll be signed in right after.
       </p>
 
       {!ready ? (
-        <p className={`mt-8 rounded-2xl border p-5 text-sm ${error ? "border-destructive/40 bg-destructive/10 text-destructive" : "border-foreground/15 bg-card text-muted-foreground"}`}>
-          {error ?? "Waiting for the reset link to validate…"} {" "}
-          Request a new link from <Link to="/forgot-password" search={{ as: tab }} className="font-semibold underline text-foreground">Forgot password</Link>.
+        <p
+          className={`mt-8 rounded-2xl border p-5 text-sm ${error ? "border-destructive/40 bg-destructive/10 text-destructive" : "border-foreground/15 bg-card text-muted-foreground"}`}
+        >
+          {error ?? "Waiting for the reset link to validate…"} Request a new link from{" "}
+          <Link
+            to="/forgot-password"
+            search={{ as: tab }}
+            className="font-semibold underline text-foreground"
+          >
+            Forgot password
+          </Link>
+          .
         </p>
       ) : (
         <form onSubmit={submit} className="mt-8 space-y-4">
           <div>
-            <Label htmlFor="pw" className="text-xs font-semibold uppercase tracking-wider">New password</Label>
-            <PasswordInput id="pw" required minLength={6} value={password}
+            <Label htmlFor="pw" className="text-xs font-semibold uppercase tracking-wider">
+              New password
+            </Label>
+            <PasswordInput
+              id="pw"
+              required
+              minLength={6}
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card" />
+              className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"
+            />
           </div>
           <div>
-            <Label htmlFor="pw2" className="text-xs font-semibold uppercase tracking-wider">Confirm password</Label>
-            <PasswordInput id="pw2" required minLength={6} value={confirm}
+            <Label htmlFor="pw2" className="text-xs font-semibold uppercase tracking-wider">
+              Confirm password
+            </Label>
+            <PasswordInput
+              id="pw2"
+              required
+              minLength={6}
+              value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
-              className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card" />
+              className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"
+            />
           </div>
           {error && (
             <div className="rounded-2xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
               {error}
             </div>
           )}
-          <Button type="submit" className="h-12 w-full rounded-full bg-primary text-base" disabled={submitting}>
+          <Button
+            type="submit"
+            className="h-12 w-full rounded-full bg-primary text-base"
+            disabled={submitting}
+          >
             {submitting ? "Updating…" : "Update password"}
           </Button>
         </form>

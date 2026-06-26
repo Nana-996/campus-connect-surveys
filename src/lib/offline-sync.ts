@@ -7,9 +7,17 @@ const listeners = new Set<() => void>();
 
 export function onQueueChange(cb: () => void): () => void {
   listeners.add(cb);
-  return () => { listeners.delete(cb); };
+  return () => {
+    listeners.delete(cb);
+  };
 }
-function notify() { listeners.forEach((l) => { try { l(); } catch {} }); }
+function notify() {
+  listeners.forEach((l) => {
+    try {
+      l();
+    } catch {}
+  });
+}
 
 export async function syncQueuedResponses(): Promise<{ synced: number; remaining: number }> {
   if (typeof navigator !== "undefined" && navigator.onLine === false) {
@@ -57,7 +65,9 @@ let installed = false;
 export function installAutoSync(): void {
   if (installed || typeof window === "undefined") return;
   installed = true;
-  const trigger = () => { void syncQueuedResponses(); };
+  const trigger = () => {
+    void syncQueuedResponses();
+  };
   window.addEventListener("online", trigger);
   window.addEventListener("focus", trigger);
   // Initial pass after a short delay (lets auth hydrate).

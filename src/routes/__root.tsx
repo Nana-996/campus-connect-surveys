@@ -14,6 +14,7 @@ import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { registerPwa } from "@/lib/pwa-register";
 import { installAutoSync } from "@/lib/offline-sync";
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import { Analytics } from "@vercel/analytics/react";
 
 import appCss from "../styles.css?url";
 
@@ -23,7 +24,10 @@ function NotFoundComponent() {
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-primary">404</h1>
         <p className="mt-2 text-sm text-muted-foreground">This page doesn't exist.</p>
-        <Link to="/" className="mt-6 inline-flex rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
+        <Link
+          to="/"
+          className="mt-6 inline-flex rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+        >
           Go home
         </Link>
       </div>
@@ -40,9 +44,14 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold">Something went wrong</h1>
-        <p className="mt-2 text-sm text-muted-foreground">We hit an unexpected error. Please try again.</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          We hit an unexpected error. Please try again.
+        </p>
         <button
-          onClick={() => { router.invalidate(); reset(); }}
+          onClick={() => {
+            router.invalidate();
+            reset();
+          }}
           className="mt-4 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
         >
           Try again
@@ -62,13 +71,33 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
       { name: "apple-mobile-web-app-title", content: "CampusVerify" },
       { title: "CampusVerify — Verified student research" },
-      { name: "description", content: "Verified student research. Cache surveys, answer offline, sync when you reconnect." },
+      {
+        name: "description",
+        content:
+          "Verified student research. Cache surveys, answer offline, sync when you reconnect.",
+      },
       { property: "og:title", content: "CampusVerify — Verified student research" },
       { name: "twitter:title", content: "CampusVerify — Verified student research" },
-      { property: "og:description", content: "Run surveys with verified university students. Earn credits by answering, spend to publish — no bots, no randoms." },
-      { name: "twitter:description", content: "Run surveys with verified university students. Earn credits by answering, spend to publish — no bots, no randoms." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/35cdaee2-7de6-46f3-b48e-93dac2861738" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/35cdaee2-7de6-46f3-b48e-93dac2861738" },
+      {
+        property: "og:description",
+        content:
+          "Run surveys with verified university students. Earn credits by answering, spend to publish — no bots, no randoms.",
+      },
+      {
+        name: "twitter:description",
+        content:
+          "Run surveys with verified university students. Earn credits by answering, spend to publish — no bots, no randoms.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/35cdaee2-7de6-46f3-b48e-93dac2861738",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/35cdaee2-7de6-46f3-b48e-93dac2861738",
+      },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "CampusVerify" },
@@ -79,9 +108,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", type: "image/png", sizes: "512x512", href: "/icons/icon-512.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "preconnect", href: "https://vwrhclqxuabltajcbmno.supabase.co", crossOrigin: "anonymous" },
+      {
+        rel: "preconnect",
+        href: "https://vwrhclqxuabltajcbmno.supabase.co",
+        crossOrigin: "anonymous",
+      },
       { rel: "dns-prefetch", href: "https://vwrhclqxuabltajcbmno.supabase.co" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Work+Sans:wght@400;500;600;700;800&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Work+Sans:wght@400;500;600;700;800&display=swap",
+      },
       { rel: "stylesheet", href: appCss },
     ],
     scripts: [
@@ -115,8 +151,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <head><HeadContent /></head>
-      <body>{children}<Scripts /></body>
+      <head>
+        <HeadContent />
+      </head>
+      <body>
+        {children}
+        <Scripts />
+      </body>
     </html>
   );
 }
@@ -134,6 +175,7 @@ function RootComponent() {
         <OfflineIndicator />
         <Toaster />
         <SpeedInsights />
+        <Analytics />
       </AuthProvider>
     </QueryClientProvider>
   );

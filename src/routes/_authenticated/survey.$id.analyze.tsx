@@ -10,14 +10,46 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { safeErrorMessage } from "@/lib/safe-error";
 import {
-  ArrowLeft, BarChart3, Download, FileText, Filter, Layers, Lock,
-  PieChart as PieIcon, Share2, Sparkles, Table as TableIcon, X, Save, Trash2, Copy, Eye,
-  BarChartHorizontal, LineChart as LineIcon, AreaChart as AreaIcon, CircleDashed, Columns3,
-  Search, MessageSquare,
+  ArrowLeft,
+  BarChart3,
+  Download,
+  FileText,
+  Filter,
+  Layers,
+  Lock,
+  PieChart as PieIcon,
+  Share2,
+  Sparkles,
+  Table as TableIcon,
+  X,
+  Save,
+  Trash2,
+  Copy,
+  Eye,
+  BarChartHorizontal,
+  LineChart as LineIcon,
+  AreaChart as AreaIcon,
+  CircleDashed,
+  Columns3,
+  Search,
+  MessageSquare,
 } from "lucide-react";
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
-  PieChart, Pie, Cell, Legend, AreaChart, Area, LineChart, Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+  AreaChart,
+  Area,
+  LineChart,
+  Line,
 } from "recharts";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { analyzeSentiment, classifyResponse } from "@/lib/text-analysis";
@@ -26,15 +58,21 @@ type ChartType = "hbar" | "bar" | "pie" | "donut" | "line" | "area";
 const ALL_CHART_TYPES: ChartType[] = ["hbar", "bar", "pie", "donut", "line", "area"];
 
 function ChartTypeToggle({
-  value, onChange, options = ALL_CHART_TYPES,
-}: { value: ChartType; onChange: (t: ChartType) => void; options?: ChartType[] }) {
+  value,
+  onChange,
+  options = ALL_CHART_TYPES,
+}: {
+  value: ChartType;
+  onChange: (t: ChartType) => void;
+  options?: ChartType[];
+}) {
   const meta: Record<ChartType, { icon: any; label: string }> = {
-    hbar:  { icon: BarChartHorizontal, label: "Horizontal bar" },
-    bar:   { icon: Columns3,           label: "Column" },
-    pie:   { icon: PieIcon,            label: "Pie" },
-    donut: { icon: CircleDashed,       label: "Donut" },
-    line:  { icon: LineIcon,           label: "Line" },
-    area:  { icon: AreaIcon,           label: "Area" },
+    hbar: { icon: BarChartHorizontal, label: "Horizontal bar" },
+    bar: { icon: Columns3, label: "Column" },
+    pie: { icon: PieIcon, label: "Pie" },
+    donut: { icon: CircleDashed, label: "Donut" },
+    line: { icon: LineIcon, label: "Line" },
+    area: { icon: AreaIcon, label: "Area" },
   };
   return (
     <div className="inline-flex items-center gap-0.5 rounded-full border border-foreground/15 bg-background p-0.5">
@@ -50,7 +88,9 @@ function ChartTypeToggle({
             aria-pressed={active}
             onClick={() => onChange(t)}
             className={`grid h-7 w-7 place-items-center rounded-full transition-colors ${
-              active ? "bg-foreground text-background" : "text-muted-foreground hover:bg-accent hover:text-foreground"
+              active
+                ? "bg-foreground text-background"
+                : "text-muted-foreground hover:bg-accent hover:text-foreground"
             }`}
           >
             <Icon className="h-3.5 w-3.5" />
@@ -61,12 +101,24 @@ function ChartTypeToggle({
   );
 }
 
-function QuestionChart({ data, type, height = 224 }: { data: { label: string; count: number }[]; type: ChartType; height?: number }) {
+function QuestionChart({
+  data,
+  type,
+  height = 224,
+}: {
+  data: { label: string; count: number }[];
+  type: ChartType;
+  height?: number;
+}) {
   return (
     <div style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
         {type === "hbar" ? (
-          <BarChart data={data} layout="vertical" margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
+          <BarChart
+            data={data}
+            layout="vertical"
+            margin={{ top: 4, right: 12, left: 0, bottom: 0 }}
+          >
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
             <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
             <YAxis type="category" dataKey="label" tick={{ fontSize: 11 }} width={100} />
@@ -87,7 +139,13 @@ function QuestionChart({ data, type, height = 224 }: { data: { label: string; co
             <XAxis dataKey="label" tick={{ fontSize: 11 }} />
             <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
             <Tooltip />
-            <Line type="monotone" dataKey="count" stroke="var(--primary)" strokeWidth={2} dot={{ r: 3 }} />
+            <Line
+              type="monotone"
+              dataKey="count"
+              stroke="var(--primary)"
+              strokeWidth={2}
+              dot={{ r: 3 }}
+            />
           </LineChart>
         ) : type === "area" ? (
           <AreaChart data={data} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
@@ -95,7 +153,13 @@ function QuestionChart({ data, type, height = 224 }: { data: { label: string; co
             <XAxis dataKey="label" tick={{ fontSize: 11 }} />
             <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
             <Tooltip />
-            <Area type="monotone" dataKey="count" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.25} />
+            <Area
+              type="monotone"
+              dataKey="count"
+              stroke="var(--primary)"
+              fill="var(--primary)"
+              fillOpacity={0.25}
+            />
           </AreaChart>
         ) : (
           <PieChart>
@@ -111,7 +175,9 @@ function QuestionChart({ data, type, height = 224 }: { data: { label: string; co
               innerRadius={type === "donut" ? "50%" : 0}
               paddingAngle={2}
             >
-              {data.map((_, i) => <Cell key={i} fill={PALETTE[i % PALETTE.length]} />)}
+              {data.map((_, i) => (
+                <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
+              ))}
             </Pie>
           </PieChart>
         )}
@@ -120,27 +186,50 @@ function QuestionChart({ data, type, height = 224 }: { data: { label: string; co
   );
 }
 
-
 const PALETTE = ["#4a6b52", "#7c9a6b", "#c98a4b", "#b8c47a", "#8e7a5a", "#6b8e9e", "#a47b4c"];
 const SUPPRESS_THRESHOLD = 5;
 
-type Question = { id: string; type: "text" | "choice" | "rating"; text: string; options?: string[] };
+type Question = {
+  id: string;
+  type: "text" | "choice" | "rating";
+  text: string;
+  options?: string[];
+};
 type Survey = {
-  id: string; creator_id: string; title: string; description: string;
-  questions: Question[]; response_count: number; response_goal: number;
-  expires_at: string; created_at: string; tier: string;
+  id: string;
+  creator_id: string;
+  title: string;
+  description: string;
+  questions: Question[];
+  response_count: number;
+  response_goal: number;
+  expires_at: string;
+  created_at: string;
+  tier: string;
   university_domain: string;
 };
 type Response = {
-  id: string; survey_id: string; respondent_id: string;
-  answers: Record<string, string>; created_at: string; duration_ms: number;
+  id: string;
+  survey_id: string;
+  respondent_id: string;
+  answers: Record<string, string>;
+  created_at: string;
+  duration_ms: number;
 };
 type Profile = {
-  id: string; full_name: string; department: string; year: string;
-  country: string | null; age_range: string | null; university_name: string;
+  id: string;
+  full_name: string;
+  department: string;
+  year: string;
+  country: string | null;
+  age_range: string | null;
+  university_name: string;
 };
 type Filters = {
-  department: string; year: string; country: string; age_range: string;
+  department: string;
+  year: string;
+  country: string;
+  age_range: string;
 };
 
 const EMPTY_FILTERS: Filters = { department: "", year: "", country: "", age_range: "" };
@@ -158,28 +247,43 @@ function AnalyzePage() {
   const [responses, setResponses] = useState<Response[]>([]);
   const [profileMap, setProfileMap] = useState<Record<string, Profile>>({});
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
-  const [view, setView] = useState<"overview" | "questions" | "compare" | "crosstab" | "raw" | "saved">("overview");
+  const [view, setView] = useState<
+    "overview" | "questions" | "compare" | "crosstab" | "raw" | "saved"
+  >("overview");
   const [hiddenQs, setHiddenQs] = useState<Set<string>>(new Set());
   const [savedViews, setSavedViews] = useState<any[]>([]);
   const [shareTokens, setShareTokens] = useState<any[]>([]);
   const [newToken, setNewToken] = useState<string | null>(null);
-  const [upgradePrompt, setUpgradePrompt] = useState<{ open: boolean; feature: string; description?: string }>({ open: false, feature: "" });
-  const promptUpgrade = (feature: string, description?: string) => setUpgradePrompt({ open: true, feature, description });
+  const [upgradePrompt, setUpgradePrompt] = useState<{
+    open: boolean;
+    feature: string;
+    description?: string;
+  }>({ open: false, feature: "" });
+  const promptUpgrade = (feature: string, description?: string) =>
+    setUpgradePrompt({ open: true, feature, description });
 
   useEffect(() => {
-    if (!user) { setLoading(false); return; }
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     let active = true;
     (async () => {
       try {
         const ownerData = await fetchOwnerResults({ data: { surveyId: id } });
         if (!active) return;
-        if (!ownerData.survey) { setLoading(false); return; }
+        if (!ownerData.survey) {
+          setLoading(false);
+          return;
+        }
         setSurvey(ownerData.survey as unknown as Survey);
         const resps = (ownerData.responses as unknown as Response[]) ?? [];
         setResponses(resps);
 
         const map: Record<string, Profile> = {};
-        ((ownerData.profiles as unknown as Profile[]) ?? []).forEach((pr) => { map[pr.id] = pr; });
+        ((ownerData.profiles as unknown as Profile[]) ?? []).forEach((pr) => {
+          map[pr.id] = pr;
+        });
         setProfileMap(map);
         setSavedViews((ownerData.savedViews as any) ?? []);
         setShareTokens((ownerData.shareTokens as any) ?? []);
@@ -190,7 +294,9 @@ function AnalyzePage() {
         if (active) setLoading(false);
       }
     })();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
     // Depend on user?.id (stable string) — not `user` (new object on every Supabase token refresh).
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, user?.id]);
@@ -212,9 +318,14 @@ function AnalyzePage() {
   }, [responses, profileMap, filters]);
 
   const facetValues = useMemo(() => {
-    const set = (k: keyof Profile) => Array.from(new Set(
-      Object.values(profileMap).map((p) => (p?.[k] as string) ?? "").filter(Boolean)
-    )).sort();
+    const set = (k: keyof Profile) =>
+      Array.from(
+        new Set(
+          Object.values(profileMap)
+            .map((p) => (p?.[k] as string) ?? "")
+            .filter(Boolean),
+        ),
+      ).sort();
     return {
       department: set("department"),
       year: set("year"),
@@ -224,7 +335,10 @@ function AnalyzePage() {
   }, [profileMap]);
 
   if (loading) return <p className="text-sm text-muted-foreground">Loading analysis…</p>;
-  if (!survey) return <p className="text-sm text-muted-foreground">Survey not found or you don't have access.</p>;
+  if (!survey)
+    return (
+      <p className="text-sm text-muted-foreground">Survey not found or you don't have access.</p>
+    );
 
   const n = filtered.length;
   const activeFilterChips = (Object.entries(filters) as [keyof Filters, string][])
@@ -242,15 +356,25 @@ function AnalyzePage() {
 
   // --- Saved views & share tokens helpers ---
   const saveCurrentView = async () => {
-    if (!isPremium) return promptUpgrade("Saved views", "Save filter + question selections so you can revisit the exact same report cut later.");
+    if (!isPremium)
+      return promptUpgrade(
+        "Saved views",
+        "Save filter + question selections so you can revisit the exact same report cut later.",
+      );
     const name = prompt("Name this view:");
     if (!name) return;
     const { error } = await supabase.from("survey_report_views" as any).insert({
-      survey_id: id, creator_id: user!.id, name,
+      survey_id: id,
+      creator_id: user!.id,
+      name,
       config: { view, filters, hiddenQs: Array.from(hiddenQs) },
     });
     if (error) return toast.error(safeErrorMessage(error, "Could not save the view."));
-    const { data } = await supabase.from("survey_report_views" as any).select("*").eq("survey_id", id).order("created_at", { ascending: false });
+    const { data } = await supabase
+      .from("survey_report_views" as any)
+      .select("*")
+      .eq("survey_id", id)
+      .order("created_at", { ascending: false });
     setSavedViews((data as any) ?? []);
     toast.success("View saved.");
   };
@@ -261,19 +385,32 @@ function AnalyzePage() {
     toast.success("View applied.");
   };
   const deleteSavedView = async (vid: string) => {
-    await supabase.from("survey_report_views" as any).delete().eq("id", vid);
+    await supabase
+      .from("survey_report_views" as any)
+      .delete()
+      .eq("id", vid);
     setSavedViews((vs) => vs.filter((v) => v.id !== vid));
   };
 
   const createShareLink = async () => {
-    if (!isPremium) return promptUpgrade("Shareable live dashboards", "Mint a read-only public URL that always shows the latest aggregated results — perfect for sharing with stakeholders without giving them account access.");
+    if (!isPremium)
+      return promptUpgrade(
+        "Shareable live dashboards",
+        "Mint a read-only public URL that always shows the latest aggregated results — perfect for sharing with stakeholders without giving them account access.",
+      );
     const token = crypto.randomUUID().replace(/-/g, "");
     const { error } = await supabase.from("survey_share_tokens" as any).insert({
-      survey_id: id, creator_id: user!.id, token,
+      survey_id: id,
+      creator_id: user!.id,
+      token,
       expires_at: new Date(Date.now() + 90 * 86400_000).toISOString(),
     });
     if (error) return toast.error(safeErrorMessage(error, "Could not create share link."));
-    const { data } = await supabase.from("survey_share_tokens" as any).select("*").eq("survey_id", id).order("created_at", { ascending: false });
+    const { data } = await supabase
+      .from("survey_share_tokens" as any)
+      .select("*")
+      .eq("survey_id", id)
+      .order("created_at", { ascending: false });
     setShareTokens((data as any) ?? []);
     setNewToken(token);
     const url = `${window.location.origin}/r/${token}`;
@@ -288,7 +425,10 @@ function AnalyzePage() {
     toast.success("URL copied.");
   };
   const revokeShare = async (tid: string) => {
-    await supabase.from("survey_share_tokens" as any).update({ revoked: true }).eq("id", tid);
+    await supabase
+      .from("survey_share_tokens" as any)
+      .update({ revoked: true })
+      .eq("id", tid);
     setShareTokens((ts) => ts.map((t) => (t.id === tid ? { ...t, revoked: true } : t)));
   };
   const copyShare = (token: string) => {
@@ -299,12 +439,22 @@ function AnalyzePage() {
 
   // --- Exports ---
   const exportCSV = () => {
-    const header = ["submitted_at", "department", "year", "country", "age_range",
-      ...survey.questions.map((q) => `Q: ${q.text.replace(/"/g, '""')}`)];
+    const header = [
+      "submitted_at",
+      "department",
+      "year",
+      "country",
+      "age_range",
+      ...survey.questions.map((q) => `Q: ${q.text.replace(/"/g, '""')}`),
+    ];
     const rows = filtered.map((r) => {
       const p = profileMap[r.respondent_id];
       return [
-        r.created_at, p?.department ?? "", p?.year ?? "", p?.country ?? "", p?.age_range ?? "",
+        r.created_at,
+        p?.department ?? "",
+        p?.year ?? "",
+        p?.country ?? "",
+        p?.age_range ?? "",
         ...survey.questions.map((q) => String(r.answers?.[q.id] ?? "").replace(/"/g, '""')),
       ];
     });
@@ -319,7 +469,9 @@ function AnalyzePage() {
     URL.revokeObjectURL(a.href);
   };
 
-  const captureNodeToPng = async (node: HTMLElement): Promise<{ dataUrl: string; width: number; height: number } | null> => {
+  const captureNodeToPng = async (
+    node: HTMLElement,
+  ): Promise<{ dataUrl: string; width: number; height: number } | null> => {
     try {
       const { default: html2canvas } = await import("html2canvas-pro");
       const canvas = await html2canvas(node, {
@@ -336,76 +488,91 @@ function AnalyzePage() {
   };
 
   const exportPDF = async () => {
-    if (!isPremium) return promptUpgrade("Branded PDF reports", "Generate a polished, presentation-ready PDF report with your university name and CampusVerify footer — ready to email or hand in.");
+    if (!isPremium)
+      return promptUpgrade(
+        "Branded PDF reports",
+        "Generate a polished, presentation-ready PDF report with your university name and CampusVerify footer — ready to email or hand in.",
+      );
     // Ensure charts are mounted in DOM so html2canvas can capture them
     setView("questions");
     await new Promise((r) => setTimeout(r, 400));
     const toastId = toast.loading("Building report…");
     try {
-    const { default: jsPDF } = await import("jspdf");
-    const doc = new jsPDF({ unit: "pt", format: "a4" });
-    const margin = 40;
-    const W = doc.internal.pageSize.getWidth();
-    const H = doc.internal.pageSize.getHeight();
-    let y = margin;
-    const line = (txt: string, size = 11, bold = false) => {
-      doc.setFont("helvetica", bold ? "bold" : "normal");
-      doc.setFontSize(size);
-      const wrapped = doc.splitTextToSize(txt, W - margin * 2);
-      for (const ln of wrapped) {
-        if (y > H - margin - 30) { doc.addPage(); y = margin; }
-        doc.text(ln, margin, y); y += size + 4;
-      }
-    };
-    const ensureSpace = (h: number) => { if (y + h > H - margin - 30) { doc.addPage(); y = margin; } };
-
-    line("CampusVerify · Survey Report", 9);
-    line(survey.title, 20, true);
-    if (survey.description) line(survey.description, 10);
-    line(`Sample size (n) = ${n} of ${responses.length} total responses`, 10, true);
-    if (activeFilterChips.length) line(`Filters: ${activeFilterChips.map((c) => `${c.k}=${c.v}`).join(", ")}`, 10);
-    line(`Generated ${new Date().toLocaleString()}`, 9);
-    y += 10;
-
-    for (let qi = 0; qi < survey.questions.length; qi++) {
-      const q = survey.questions[qi];
-      if (hiddenQs.has(q.id)) continue;
-      y += 6;
-      line(`Q${qi + 1}. ${q.text}`, 12, true);
-
-      if (q.type === "choice" || q.type === "rating") {
-        // Capture chart if present in DOM
-        const node = document.getElementById(`q-card-${q.id}`);
-        if (node) {
-          const cap = await captureNodeToPng(node);
-          if (cap) {
-            const maxW = W - margin * 2;
-            const ratio = cap.height / cap.width;
-            const drawW = Math.min(maxW, 460);
-            const drawH = drawW * ratio;
-            ensureSpace(drawH + 8);
-            doc.addImage(cap.dataUrl, "PNG", margin, y, drawW, drawH);
-            y += drawH + 8;
+      const { default: jsPDF } = await import("jspdf");
+      const doc = new jsPDF({ unit: "pt", format: "a4" });
+      const margin = 40;
+      const W = doc.internal.pageSize.getWidth();
+      const H = doc.internal.pageSize.getHeight();
+      let y = margin;
+      const line = (txt: string, size = 11, bold = false) => {
+        doc.setFont("helvetica", bold ? "bold" : "normal");
+        doc.setFontSize(size);
+        const wrapped = doc.splitTextToSize(txt, W - margin * 2);
+        for (const ln of wrapped) {
+          if (y > H - margin - 30) {
+            doc.addPage();
+            y = margin;
           }
+          doc.text(ln, margin, y);
+          y += size + 4;
         }
-        const data = aggregateQuestion(q, filtered);
-        const total = data.reduce((s, x) => s + x.count, 0) || 1;
-        data.forEach((c) => {
-          const pct = ((c.count / total) * 100).toFixed(1);
-          line(`  • ${c.label}: ${c.count} (${pct}%)`, 10);
-        });
-      } else {
-        const answers = filtered
-          .map((r) => String(r.answers?.[q.id] ?? "").trim())
-          .filter((t) => t.length > 0);
-        line(`  ${answers.length} of ${n} answered · responses shown anonymously`, 10);
-        answers.forEach((t, idx) => {
-          line(`  Anonymous #${idx + 1}: ${t}`, 10);
-        });
+      };
+      const ensureSpace = (h: number) => {
+        if (y + h > H - margin - 30) {
+          doc.addPage();
+          y = margin;
+        }
+      };
+
+      line("CampusVerify · Survey Report", 9);
+      line(survey.title, 20, true);
+      if (survey.description) line(survey.description, 10);
+      line(`Sample size (n) = ${n} of ${responses.length} total responses`, 10, true);
+      if (activeFilterChips.length)
+        line(`Filters: ${activeFilterChips.map((c) => `${c.k}=${c.v}`).join(", ")}`, 10);
+      line(`Generated ${new Date().toLocaleString()}`, 9);
+      y += 10;
+
+      for (let qi = 0; qi < survey.questions.length; qi++) {
+        const q = survey.questions[qi];
+        if (hiddenQs.has(q.id)) continue;
+        y += 6;
+        line(`Q${qi + 1}. ${q.text}`, 12, true);
+
+        if (q.type === "choice" || q.type === "rating") {
+          // Capture chart if present in DOM
+          const node = document.getElementById(`q-card-${q.id}`);
+          if (node) {
+            const cap = await captureNodeToPng(node);
+            if (cap) {
+              const maxW = W - margin * 2;
+              const ratio = cap.height / cap.width;
+              const drawW = Math.min(maxW, 460);
+              const drawH = drawW * ratio;
+              ensureSpace(drawH + 8);
+              doc.addImage(cap.dataUrl, "PNG", margin, y, drawW, drawH);
+              y += drawH + 8;
+            }
+          }
+          const data = aggregateQuestion(q, filtered);
+          const total = data.reduce((s, x) => s + x.count, 0) || 1;
+          data.forEach((c) => {
+            const pct = ((c.count / total) * 100).toFixed(1);
+            line(`  • ${c.label}: ${c.count} (${pct}%)`, 10);
+          });
+        } else {
+          const answers = filtered
+            .map((r) => String(r.answers?.[q.id] ?? "").trim())
+            .filter((t) => t.length > 0);
+          line(`  ${answers.length} of ${n} answered · responses shown anonymously`, 10);
+          answers.forEach((t, idx) => {
+            line(`  Anonymous #${idx + 1}: ${t}`, 10);
+          });
+        }
       }
-    }
       const footer = `Generated on CampusVerify · n=${n} · privacy: groups <5 suppressed`;
-      doc.setFontSize(8); doc.setTextColor(120);
+      doc.setFontSize(8);
+      doc.setTextColor(120);
       doc.text(footer, margin, H - 20);
       doc.save(`${survey.title.replace(/\s+/g, "_")}_report.pdf`);
       toast.success("Report downloaded.", { id: toastId });
@@ -427,14 +594,21 @@ function AnalyzePage() {
       doc.setFontSize(size);
       const wrapped = doc.splitTextToSize(txt, W - margin * 2);
       for (const ln of wrapped) {
-        if (y > H - margin - 30) { doc.addPage(); y = margin; }
-        doc.text(ln, margin, y); y += size + 4;
+        if (y > H - margin - 30) {
+          doc.addPage();
+          y = margin;
+        }
+        doc.text(ln, margin, y);
+        y += size + 4;
       }
     };
     line("CampusVerify · Question Export", 9);
     line(survey.title, 14, true);
     line(`Q${qi + 1}. ${q.text}`, 13, true);
-    line(`n = ${n}${activeFilterChips.length ? ` · filters: ${activeFilterChips.map((c) => `${c.k}=${c.v}`).join(", ")}` : ""}`, 10);
+    line(
+      `n = ${n}${activeFilterChips.length ? ` · filters: ${activeFilterChips.map((c) => `${c.k}=${c.v}`).join(", ")}` : ""}`,
+      10,
+    );
     y += 6;
 
     if (q.type === "choice" || q.type === "rating") {
@@ -446,7 +620,10 @@ function AnalyzePage() {
           const ratio = cap.height / cap.width;
           const drawW = Math.min(maxW, 500);
           const drawH = drawW * ratio;
-          if (y + drawH > H - margin - 30) { doc.addPage(); y = margin; }
+          if (y + drawH > H - margin - 30) {
+            doc.addPage();
+            y = margin;
+          }
           doc.addImage(cap.dataUrl, "PNG", margin, y, drawW, drawH);
           y += drawH + 10;
         }
@@ -468,7 +645,8 @@ function AnalyzePage() {
       });
       if (answers.length === 0) line("No text responses yet.", 10);
     }
-    doc.setFontSize(8); doc.setTextColor(120);
+    doc.setFontSize(8);
+    doc.setTextColor(120);
     doc.text(`Generated on CampusVerify · ${new Date().toLocaleString()}`, margin, H - 20);
     doc.save(`${survey.title.replace(/\s+/g, "_")}_Q${qi + 1}.pdf`);
   };
@@ -479,11 +657,20 @@ function AnalyzePage() {
       const data = aggregateQuestion(q, filtered);
       const total = data.reduce((s, x) => s + x.count, 0) || 1;
       csv = ["option,count,percent"]
-        .concat(data.map((d) => `"${d.label.replace(/"/g, '""')}",${d.count},${((d.count / total) * 100).toFixed(2)}`))
+        .concat(
+          data.map(
+            (d) =>
+              `"${d.label.replace(/"/g, '""')}",${d.count},${((d.count / total) * 100).toFixed(2)}`,
+          ),
+        )
         .join("\n");
     } else {
       const answers = filtered
-        .map((r, i) => ({ idx: i + 1, text: String(r.answers?.[q.id] ?? "").trim(), at: r.created_at }))
+        .map((r, i) => ({
+          idx: i + 1,
+          text: String(r.answers?.[q.id] ?? "").trim(),
+          at: r.created_at,
+        }))
         .filter((a) => a.text.length > 0);
       csv = ["anonymous_id,submitted_at,answer"]
         .concat(answers.map((a) => `${a.idx},${a.at},"${a.text.replace(/"/g, '""')}"`))
@@ -501,24 +688,36 @@ function AnalyzePage() {
 
   return (
     <div>
-      <Link to="/my-surveys" className="mb-4 inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground">
+      <Link
+        to="/my-surveys"
+        className="mb-4 inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
+      >
         <ArrowLeft className="h-3 w-3" /> My surveys
       </Link>
 
       {/* Header */}
       <div className="rounded-3xl border border-foreground/15 bg-card p-7 shadow-paper">
-        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-muted-foreground">Analyze</p>
+        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-muted-foreground">
+          Analyze
+        </p>
         <h1 className="mt-2 font-serif text-4xl leading-[0.95] sm:text-5xl">{survey.title}</h1>
         <div className="mt-4 flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-wider">
-          <span className="rounded-full bg-foreground px-3 py-1 text-background">n = {n}{n !== responses.length && ` of ${responses.length}`}</span>
-          <span className="rounded-full border border-foreground/20 px-3 py-1 text-muted-foreground">tier: {survey.tier}</span>
+          <span className="rounded-full bg-foreground px-3 py-1 text-background">
+            n = {n}
+            {n !== responses.length && ` of ${responses.length}`}
+          </span>
+          <span className="rounded-full border border-foreground/20 px-3 py-1 text-muted-foreground">
+            tier: {survey.tier}
+          </span>
           <span className="inline-flex items-center gap-1 rounded-full bg-highlight px-3 py-1 text-highlight-foreground">
             <Sparkles className="h-3 w-3" /> Full analytics included
           </span>
         </div>
         {activeFilterChips.length > 0 && (
           <div className="mt-4 flex flex-wrap items-center gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Filters:</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+              Filters:
+            </span>
             {activeFilterChips.map((c) => (
               <button
                 key={c.k}
@@ -528,7 +727,10 @@ function AnalyzePage() {
                 {c.k}: {c.v} <X className="h-3 w-3" />
               </button>
             ))}
-            <button onClick={() => setFilters(EMPTY_FILTERS)} className="text-[11px] font-semibold uppercase text-muted-foreground underline">
+            <button
+              onClick={() => setFilters(EMPTY_FILTERS)}
+              className="text-[11px] font-semibold uppercase text-muted-foreground underline"
+            >
               Clear all
             </button>
           </div>
@@ -539,7 +741,9 @@ function AnalyzePage() {
         {/* Sidebar */}
         <aside className="space-y-4">
           <div className="rounded-3xl border border-foreground/15 bg-card p-4 shadow-paper">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Views</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+              Views
+            </p>
             <nav className="mt-2 flex flex-col gap-1">
               {VIEWS.map((v) => {
                 const Icon = v.icon;
@@ -549,7 +753,10 @@ function AnalyzePage() {
                     key={v.key}
                     onClick={() => {
                       if (v.premium && !isPremium) {
-                        promptUpgrade(v.label, `${v.label} is part of the advanced reporting suite.`);
+                        promptUpgrade(
+                          v.label,
+                          `${v.label} is part of the advanced reporting suite.`,
+                        );
                         return;
                       }
                       setView(v.key);
@@ -558,7 +765,10 @@ function AnalyzePage() {
                       active ? "bg-foreground text-background" : "hover:bg-accent"
                     }`}
                   >
-                    <span className="inline-flex items-center gap-2"><Icon className="h-3.5 w-3.5" />{v.label}</span>
+                    <span className="inline-flex items-center gap-2">
+                      <Icon className="h-3.5 w-3.5" />
+                      {v.label}
+                    </span>
                     {v.premium && !isPremium && <Lock className="h-3 w-3 opacity-60" />}
                   </button>
                 );
@@ -573,14 +783,20 @@ function AnalyzePage() {
             <div className="mt-3 space-y-3 text-xs">
               {(["department", "year", "country", "age_range"] as const).map((k) => (
                 <div key={k}>
-                  <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{k.replace("_", " ")}</Label>
+                  <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    {k.replace("_", " ")}
+                  </Label>
                   <select
                     value={filters[k]}
                     onChange={(e) => setFilters((f) => ({ ...f, [k]: e.target.value }))}
                     className="mt-1 w-full rounded-md border border-foreground/20 bg-background px-2 py-1.5 text-xs"
                   >
                     <option value="">All</option>
-                    {facetValues[k].map((v) => <option key={v} value={v}>{v}</option>)}
+                    {facetValues[k].map((v) => (
+                      <option key={v} value={v}>
+                        {v}
+                      </option>
+                    ))}
                   </select>
                 </div>
               ))}
@@ -588,7 +804,9 @@ function AnalyzePage() {
           </div>
 
           <div className="rounded-3xl border border-foreground/15 bg-card p-4 shadow-paper">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Export</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+              Export
+            </p>
             <div className="mt-2 flex flex-col gap-2">
               <Link
                 to="/survey/$id/report"
@@ -604,31 +822,58 @@ function AnalyzePage() {
                 {!isPremium && <Lock className="mr-1 h-3 w-3" />}
                 <FileText className="mr-1 h-3.5 w-3.5" /> Quick PDF
               </Button>
-              <Button size="sm" variant="outline" onClick={saveCurrentView} className="rounded-full">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={saveCurrentView}
+                className="rounded-full"
+              >
                 {!isPremium && <Lock className="mr-1 h-3 w-3" />}
                 <Save className="mr-1 h-3.5 w-3.5" /> Save view
               </Button>
-              <Button size="sm" variant="outline" onClick={createShareLink} className="rounded-full">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={createShareLink}
+                className="rounded-full"
+              >
                 {!isPremium && <Lock className="mr-1 h-3 w-3" />}
                 <Share2 className="mr-1 h-3.5 w-3.5" /> Create share link
               </Button>
             </div>
             {newToken && (
               <div className="mt-3 rounded-2xl border border-primary/30 bg-primary/5 p-3">
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">New link created</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                  New link created
+                </p>
                 <div className="mt-1.5 flex items-center gap-2">
                   <code className="flex-1 truncate rounded-md bg-background px-2 py-1 text-[11px] font-mono text-foreground">
                     {window.location.origin}/r/{newToken}
                   </code>
-                  <Button size="sm" variant="ghost" onClick={copyNewToken} className="h-7 rounded-full px-2">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={copyNewToken}
+                    className="h-7 rounded-full px-2"
+                  >
                     <Copy className="h-3.5 w-3.5" />
                   </Button>
                 </div>
                 <div className="mt-2 flex gap-2">
-                  <Button size="sm" variant="outline" onClick={copyNewToken} className="h-7 flex-1 rounded-full text-xs">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={copyNewToken}
+                    className="h-7 flex-1 rounded-full text-xs"
+                  >
                     Copy URL
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={dismissNewToken} className="h-7 rounded-full text-xs text-muted-foreground">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={dismissNewToken}
+                    className="h-7 rounded-full text-xs text-muted-foreground"
+                  >
                     Dismiss
                   </Button>
                 </div>
@@ -644,32 +889,43 @@ function AnalyzePage() {
           ) : view === "overview" ? (
             <OverviewView survey={survey} filtered={filtered} hiddenQs={hiddenQs} />
           ) : view === "questions" ? (
-            <QuestionsView survey={survey} filtered={filtered} hiddenQs={hiddenQs} setHiddenQs={setHiddenQs}
-              onExportPDF={exportQuestionPDF} onExportCSV={exportQuestionCSV} />
+            <QuestionsView
+              survey={survey}
+              filtered={filtered}
+              hiddenQs={hiddenQs}
+              setHiddenQs={setHiddenQs}
+              onExportPDF={exportQuestionPDF}
+              onExportCSV={exportQuestionCSV}
+            />
           ) : view === "compare" ? (
-            isPremium
-              ? <CompareView survey={survey} filtered={filtered} profileMap={profileMap} />
-              : <PremiumLockCard label="Subgroup comparison" />
+            isPremium ? (
+              <CompareView survey={survey} filtered={filtered} profileMap={profileMap} />
+            ) : (
+              <PremiumLockCard label="Subgroup comparison" />
+            )
           ) : view === "crosstab" ? (
-            isPremium
-              ? <CrossTabView survey={survey} filtered={filtered} />
-              : <PremiumLockCard label="Cross-tab analysis" />
+            isPremium ? (
+              <CrossTabView survey={survey} filtered={filtered} />
+            ) : (
+              <PremiumLockCard label="Cross-tab analysis" />
+            )
           ) : view === "raw" ? (
             <RawDataView survey={survey} filtered={filtered} profileMap={profileMap} />
+          ) : isPremium ? (
+            <SavedViewsPanel
+              saved={savedViews}
+              shareTokens={shareTokens}
+              onApply={applyView}
+              onDelete={deleteSavedView}
+              onRevoke={revokeShare}
+              onCopy={copyShare}
+            />
           ) : (
-            isPremium
-              ? <SavedViewsPanel
-                  saved={savedViews}
-                  shareTokens={shareTokens}
-                  onApply={applyView}
-                  onDelete={deleteSavedView}
-                  onRevoke={revokeShare}
-                  onCopy={copyShare}
-                />
-              : <PremiumLockCard label="Saved views & shareable dashboards" />
+            <PremiumLockCard label="Saved views & shareable dashboards" />
           )}
           <p className="mt-6 text-center text-[11px] text-muted-foreground">
-            Privacy: subgroups with fewer than {SUPPRESS_THRESHOLD} responses are suppressed and shown as "—".
+            Privacy: subgroups with fewer than {SUPPRESS_THRESHOLD} responses are suppressed and
+            shown as "—".
           </p>
         </main>
       </div>
@@ -697,7 +953,9 @@ function EmptyState() {
   return (
     <div className="rounded-3xl border border-dashed border-foreground/25 bg-card p-10 text-center shadow-paper">
       <p className="font-serif text-2xl">No responses yet.</p>
-      <p className="mt-1 text-sm text-muted-foreground">Once people start answering, your insights will appear here.</p>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Once people start answering, your insights will appear here.
+      </p>
     </div>
   );
 }
@@ -716,9 +974,19 @@ function PremiumLockCard({ label }: { label: string }) {
   );
 }
 
-function OverviewView({ survey, filtered, hiddenQs }: { survey: Survey; filtered: Response[]; hiddenQs: Set<string> }) {
+function OverviewView({
+  survey,
+  filtered,
+  hiddenQs,
+}: {
+  survey: Survey;
+  filtered: Response[];
+  hiddenQs: Set<string>;
+}) {
   const total = filtered.length;
-  let answered = 0, slots = 0, durSum = 0;
+  let answered = 0,
+    slots = 0,
+    durSum = 0;
   filtered.forEach((r) => {
     durSum += r.duration_ms ?? 0;
     survey.questions.forEach((q) => {
@@ -734,14 +1002,17 @@ function OverviewView({ survey, filtered, hiddenQs }: { survey: Survey; filtered
     const d = new Date(r.created_at).toISOString().slice(0, 10);
     buckets[d] = (buckets[d] ?? 0) + 1;
   });
-  const timeline = Object.entries(buckets).sort(([a],[b])=>a.localeCompare(b)).map(([date, count]) => ({ date: date.slice(5), count }));
+  const timeline = Object.entries(buckets)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, count]) => ({ date: date.slice(5), count }));
 
-  const top3 = survey.questions.filter((q) => (q.type === "choice" || q.type === "rating") && !hiddenQs.has(q.id)).slice(0, 3);
+  const top3 = survey.questions
+    .filter((q) => (q.type === "choice" || q.type === "rating") && !hiddenQs.has(q.id))
+    .slice(0, 3);
 
   const [timelineType, setTimelineType] = useState<ChartType>("area");
   const [topTypes, setTopTypes] = useState<Record<string, ChartType>>({});
-  const setTopType = (qid: string, t: ChartType) =>
-    setTopTypes((m) => ({ ...m, [qid]: t }));
+  const setTopType = (qid: string, t: ChartType) => setTopTypes((m) => ({ ...m, [qid]: t }));
 
   return (
     <div className="space-y-4">
@@ -753,8 +1024,14 @@ function OverviewView({ survey, filtered, hiddenQs }: { survey: Survey; filtered
 
       <div className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Responses over time</p>
-          <ChartTypeToggle value={timelineType} onChange={setTimelineType} options={["area", "line", "bar"]} />
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+            Responses over time
+          </p>
+          <ChartTypeToggle
+            value={timelineType}
+            onChange={setTimelineType}
+            options={["area", "line", "bar"]}
+          />
         </div>
         <div className="mt-3 h-44">
           <ResponsiveContainer width="100%" height="100%">
@@ -764,7 +1041,13 @@ function OverviewView({ survey, filtered, hiddenQs }: { survey: Survey; filtered
                 <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
                 <Tooltip />
-                <Area type="monotone" dataKey="count" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.25} />
+                <Area
+                  type="monotone"
+                  dataKey="count"
+                  stroke="var(--primary)"
+                  fill="var(--primary)"
+                  fillOpacity={0.25}
+                />
               </AreaChart>
             ) : timelineType === "line" ? (
               <LineChart data={timeline} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
@@ -772,7 +1055,13 @@ function OverviewView({ survey, filtered, hiddenQs }: { survey: Survey; filtered
                 <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
                 <Tooltip />
-                <Line type="monotone" dataKey="count" stroke="var(--primary)" strokeWidth={2} dot={{ r: 3 }} />
+                <Line
+                  type="monotone"
+                  dataKey="count"
+                  stroke="var(--primary)"
+                  strokeWidth={2}
+                  dot={{ r: 3 }}
+                />
               </LineChart>
             ) : (
               <BarChart data={timeline} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
@@ -792,10 +1081,17 @@ function OverviewView({ survey, filtered, hiddenQs }: { survey: Survey; filtered
           const data = aggregateQuestion(q, filtered);
           const t = topTypes[q.id] ?? "bar";
           return (
-            <div key={q.id} className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
+            <div
+              key={q.id}
+              className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper"
+            >
               <div className="flex items-start justify-between gap-2">
                 <p className="font-serif text-lg leading-tight">{q.text}</p>
-                <ChartTypeToggle value={t} onChange={(nt) => setTopType(q.id, nt)} options={["bar", "hbar", "pie", "donut", "line"]} />
+                <ChartTypeToggle
+                  value={t}
+                  onChange={(nt) => setTopType(q.id, nt)}
+                  options={["bar", "hbar", "pie", "donut", "line"]}
+                />
               </div>
               <div className="mt-2">
                 <QuestionChart data={data} type={t} height={160} />
@@ -811,7 +1107,9 @@ function OverviewView({ survey, filtered, hiddenQs }: { survey: Survey; filtered
 function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <div className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
-      <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{label}</p>
+      <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+        {label}
+      </p>
       <p className="mt-1 font-serif text-4xl">{value}</p>
       {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
     </div>
@@ -820,13 +1118,34 @@ function Stat({ label, value, sub }: { label: string; value: string; sub?: strin
 
 type SentimentLabel = "positive" | "neutral" | "negative";
 
-const SENTIMENT_TONE: Record<SentimentLabel, { bar: string; chip: string; dot: string; label: string }> = {
-  positive: { bar: "#16a34a", chip: "bg-emerald-100 text-emerald-800 border-emerald-200", dot: "bg-emerald-500", label: "Positive" },
-  neutral:  { bar: "#737373", chip: "bg-neutral-100 text-neutral-800 border-neutral-200", dot: "bg-neutral-400", label: "Neutral" },
-  negative: { bar: "#dc2626", chip: "bg-rose-100 text-rose-800 border-rose-200", dot: "bg-rose-500", label: "Negative" },
+const SENTIMENT_TONE: Record<
+  SentimentLabel,
+  { bar: string; chip: string; dot: string; label: string }
+> = {
+  positive: {
+    bar: "#16a34a",
+    chip: "bg-emerald-100 text-emerald-800 border-emerald-200",
+    dot: "bg-emerald-500",
+    label: "Positive",
+  },
+  neutral: {
+    bar: "#737373",
+    chip: "bg-neutral-100 text-neutral-800 border-neutral-200",
+    dot: "bg-neutral-400",
+    label: "Neutral",
+  },
+  negative: {
+    bar: "#dc2626",
+    chip: "bg-rose-100 text-rose-800 border-rose-200",
+    dot: "bg-rose-500",
+    label: "Negative",
+  },
 };
 
-function OpenEndedSummary({ question, answers }: {
+function OpenEndedSummary({
+  question,
+  answers,
+}: {
   question: Question;
   answers: { id: string; text: string; at: string }[];
 }) {
@@ -836,13 +1155,18 @@ function OpenEndedSummary({ question, answers }: {
   const [page, setPage] = useState(1);
 
   const classified = useMemo(
-    () => answers.map((a, idx) => ({ ...a, idx, sentiment: classifyResponse(a.text) as SentimentLabel })),
+    () =>
+      answers.map((a, idx) => ({
+        ...a,
+        idx,
+        sentiment: classifyResponse(a.text) as SentimentLabel,
+      })),
     [answers],
   );
   const sentiment = useMemo(() => analyzeSentiment(answers.map((a) => a.text)), [answers]);
   const chartData = [
     { label: "Positive", count: sentiment.positive, fill: SENTIMENT_TONE.positive.bar },
-    { label: "Neutral",  count: sentiment.neutral,  fill: SENTIMENT_TONE.neutral.bar },
+    { label: "Neutral", count: sentiment.neutral, fill: SENTIMENT_TONE.neutral.bar },
     { label: "Negative", count: sentiment.negative, fill: SENTIMENT_TONE.negative.bar },
   ];
 
@@ -869,7 +1193,9 @@ function OpenEndedSummary({ question, answers }: {
   const curPage = Math.min(page, pageCount);
   const pageItems = filteredList.slice((curPage - 1) * PAGE_SIZE, curPage * PAGE_SIZE);
 
-  useEffect(() => { setPage(1); }, [filter, search]);
+  useEffect(() => {
+    setPage(1);
+  }, [filter, search]);
 
   if (answers.length === 0) {
     return (
@@ -888,7 +1214,7 @@ function OpenEndedSummary({ question, answers }: {
             Sentiment · {sentiment.total} response{sentiment.total === 1 ? "" : "s"}
           </p>
           <div className="flex flex-wrap gap-1.5 text-[10px]">
-            {(["positive","neutral","negative"] as SentimentLabel[]).map((s) => (
+            {(["positive", "neutral", "negative"] as SentimentLabel[]).map((s) => (
               <span key={s} className="inline-flex items-center gap-1 text-muted-foreground">
                 <span className={`h-2 w-2 rounded-full ${SENTIMENT_TONE[s].dot}`} />
                 {SENTIMENT_TONE[s].label} {sentiment[s]}%
@@ -904,7 +1230,9 @@ function OpenEndedSummary({ question, answers }: {
               <YAxis tick={{ fontSize: 11 }} unit="%" />
               <Tooltip formatter={(v: number) => `${v}%`} />
               <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-                {chartData.map((d) => <Cell key={d.label} fill={d.fill} />)}
+                {chartData.map((d) => (
+                  <Cell key={d.label} fill={d.fill} />
+                ))}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -919,8 +1247,13 @@ function OpenEndedSummary({ question, answers }: {
           </p>
           <ul className="space-y-2">
             {quotes.map((q) => (
-              <li key={q.sentiment} className="rounded-xl border border-foreground/10 bg-background p-3 text-sm">
-                <span className={`mb-1.5 inline-block rounded-full border px-2 py-0.5 text-[10px] font-semibold ${SENTIMENT_TONE[q.sentiment].chip}`}>
+              <li
+                key={q.sentiment}
+                className="rounded-xl border border-foreground/10 bg-background p-3 text-sm"
+              >
+                <span
+                  className={`mb-1.5 inline-block rounded-full border px-2 py-0.5 text-[10px] font-semibold ${SENTIMENT_TONE[q.sentiment].chip}`}
+                >
                   {SENTIMENT_TONE[q.sentiment].label}
                 </span>
                 <p className="whitespace-pre-wrap break-words italic">"{q.text}"</p>
@@ -957,20 +1290,29 @@ function OpenEndedSummary({ question, answers }: {
               />
             </div>
             <div className="flex flex-wrap gap-1.5">
-              {(["all","positive","neutral","negative"] as const).map((s) => {
+              {(["all", "positive", "neutral", "negative"] as const).map((s) => {
                 const active = filter === s;
                 const label = s === "all" ? "All" : SENTIMENT_TONE[s].label;
-                const count = s === "all" ? classified.length : classified.filter((c) => c.sentiment === s).length;
+                const count =
+                  s === "all"
+                    ? classified.length
+                    : classified.filter((c) => c.sentiment === s).length;
                 return (
                   <button
                     key={s}
                     type="button"
                     onClick={() => setFilter(s)}
                     className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors ${
-                      active ? "bg-foreground text-background border-foreground" : "border-foreground/15 text-muted-foreground hover:bg-accent"
+                      active
+                        ? "bg-foreground text-background border-foreground"
+                        : "border-foreground/15 text-muted-foreground hover:bg-accent"
                     }`}
                   >
-                    {s !== "all" && <span className={`h-1.5 w-1.5 rounded-full ${SENTIMENT_TONE[s as SentimentLabel].dot}`} />}
+                    {s !== "all" && (
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full ${SENTIMENT_TONE[s as SentimentLabel].dot}`}
+                      />
+                    )}
                     {label} <span className="opacity-70">· {count}</span>
                   </button>
                 );
@@ -985,12 +1327,17 @@ function OpenEndedSummary({ question, answers }: {
               </p>
             ) : (
               pageItems.map((a) => (
-                <div key={a.id} className="rounded-xl border border-foreground/10 bg-background p-3 text-sm">
+                <div
+                  key={a.id}
+                  className="rounded-xl border border-foreground/10 bg-background p-3 text-sm"
+                >
                   <div className="mb-1 flex items-center justify-between gap-2">
                     <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                       Anonymous #{a.idx + 1} · {new Date(a.at).toLocaleDateString()}
                     </span>
-                    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${SENTIMENT_TONE[a.sentiment].chip}`}>
+                    <span
+                      className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${SENTIMENT_TONE[a.sentiment].chip}`}
+                    >
                       {SENTIMENT_TONE[a.sentiment].label}
                     </span>
                   </div>
@@ -1003,11 +1350,26 @@ function OpenEndedSummary({ question, answers }: {
           {pageCount > 1 && (
             <div className="mt-4 flex items-center justify-between gap-2 text-xs">
               <span className="text-muted-foreground">
-                Page {curPage} of {pageCount} · {filteredList.length} match{filteredList.length === 1 ? "" : "es"}
+                Page {curPage} of {pageCount} · {filteredList.length} match
+                {filteredList.length === 1 ? "" : "es"}
               </span>
               <div className="flex gap-1">
-                <Button variant="outline" size="sm" disabled={curPage <= 1} onClick={() => setPage(curPage - 1)}>Prev</Button>
-                <Button variant="outline" size="sm" disabled={curPage >= pageCount} onClick={() => setPage(curPage + 1)}>Next</Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={curPage <= 1}
+                  onClick={() => setPage(curPage - 1)}
+                >
+                  Prev
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={curPage >= pageCount}
+                  onClick={() => setPage(curPage + 1)}
+                >
+                  Next
+                </Button>
               </div>
             </div>
           )}
@@ -1017,9 +1379,18 @@ function OpenEndedSummary({ question, answers }: {
   );
 }
 
-
-function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs, onExportPDF, onExportCSV }: {
-  survey: Survey; filtered: Response[]; hiddenQs: Set<string>; setHiddenQs: (s: Set<string>) => void;
+function QuestionsView({
+  survey,
+  filtered,
+  hiddenQs,
+  setHiddenQs,
+  onExportPDF,
+  onExportCSV,
+}: {
+  survey: Survey;
+  filtered: Response[];
+  hiddenQs: Set<string>;
+  setHiddenQs: (s: Set<string>) => void;
   onExportPDF: (q: Question, qi: number) => Promise<void> | void;
   onExportCSV: (q: Question, qi: number) => void;
 }) {
@@ -1027,7 +1398,8 @@ function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs, onExportPDF, o
   const setType = (qid: string, t: ChartType) => setTypes((m) => ({ ...m, [qid]: t }));
   const toggle = (qid: string) => {
     const next = new Set(hiddenQs);
-    if (next.has(qid)) next.delete(qid); else next.add(qid);
+    if (next.has(qid)) next.delete(qid);
+    else next.add(qid);
     setHiddenQs(next);
   };
   const exportButtons = (q: Question, qi: number) => (
@@ -1056,17 +1428,30 @@ function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs, onExportPDF, o
         const hidden = hiddenQs.has(q.id);
         if (q.type === "text") {
           const answers = filtered
-            .map((r) => ({ id: r.id, text: String(r.answers?.[q.id] ?? "").trim(), at: r.created_at }))
+            .map((r) => ({
+              id: r.id,
+              text: String(r.answers?.[q.id] ?? "").trim(),
+              at: r.created_at,
+            }))
             .filter((a) => a.text.length > 0);
           return (
-            <div key={q.id} id={`q-card-${q.id}`} className={`rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper ${hidden ? "opacity-50" : ""}`}>
-              <Header q={q} qi={qi} hidden={hidden} toggle={() => toggle(q.id)}
+            <div
+              key={q.id}
+              id={`q-card-${q.id}`}
+              className={`rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper ${hidden ? "opacity-50" : ""}`}
+            >
+              <Header
+                q={q}
+                qi={qi}
+                hidden={hidden}
+                toggle={() => toggle(q.id)}
                 rightExtra={!hidden ? exportButtons(q, qi) : undefined}
               />
               {!hidden && (
                 <div className="mt-3 space-y-3">
                   <p className="text-xs text-muted-foreground">
-                    Free-text question — {answers.length} of {filtered.length} answered. Responses are shown anonymously.
+                    Free-text question — {answers.length} of {filtered.length} answered. Responses
+                    are shown anonymously.
                   </p>
                   <OpenEndedSummary question={q} answers={answers} />
                 </div>
@@ -1078,14 +1463,25 @@ function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs, onExportPDF, o
         const total = data.reduce((s, x) => s + x.count, 0) || 1;
         const t = types[q.id] ?? "hbar";
         return (
-          <div key={q.id} id={`q-card-${q.id}`} className={`rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper ${hidden ? "opacity-50" : ""}`}>
-            <Header q={q} qi={qi} hidden={hidden} toggle={() => toggle(q.id)} n={filtered.length}
-              rightExtra={!hidden ? (
-                <div className="flex flex-wrap items-center gap-2">
-                  <ChartTypeToggle value={t} onChange={(nt) => setType(q.id, nt)} />
-                  {exportButtons(q, qi)}
-                </div>
-              ) : undefined}
+          <div
+            key={q.id}
+            id={`q-card-${q.id}`}
+            className={`rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper ${hidden ? "opacity-50" : ""}`}
+          >
+            <Header
+              q={q}
+              qi={qi}
+              hidden={hidden}
+              toggle={() => toggle(q.id)}
+              n={filtered.length}
+              rightExtra={
+                !hidden ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <ChartTypeToggle value={t} onChange={(nt) => setType(q.id, nt)} />
+                    {exportButtons(q, qi)}
+                  </div>
+                ) : undefined
+              }
             />
             {!hidden && (
               <div className="mt-3 grid gap-4 sm:grid-cols-[1fr_240px]">
@@ -1094,7 +1490,9 @@ function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs, onExportPDF, o
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-foreground/15 text-left text-[10px] uppercase tracking-wider text-muted-foreground">
-                        <th className="py-1">Option</th><th className="py-1 text-right">n</th><th className="py-1 text-right">%</th>
+                        <th className="py-1">Option</th>
+                        <th className="py-1 text-right">n</th>
+                        <th className="py-1 text-right">%</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1104,7 +1502,9 @@ function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs, onExportPDF, o
                           <tr key={d.label} className="border-b border-foreground/5">
                             <td className="py-1">{d.label}</td>
                             <td className="py-1 text-right font-mono">{d.count}</td>
-                            <td className="py-1 text-right font-mono text-muted-foreground">{pct}%</td>
+                            <td className="py-1 text-right font-mono text-muted-foreground">
+                              {pct}%
+                            </td>
                           </tr>
                         );
                       })}
@@ -1120,17 +1520,36 @@ function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs, onExportPDF, o
   );
 }
 
-
-function Header({ q, qi, hidden, toggle, n, rightExtra }: { q: Question; qi: number; hidden: boolean; toggle: () => void; n?: number; rightExtra?: ReactNode }) {
+function Header({
+  q,
+  qi,
+  hidden,
+  toggle,
+  n,
+  rightExtra,
+}: {
+  q: Question;
+  qi: number;
+  hidden: boolean;
+  toggle: () => void;
+  n?: number;
+  rightExtra?: ReactNode;
+}) {
   return (
     <div className="flex items-start justify-between gap-3">
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Q{qi + 1} · {q.type}{n != null && ` · n=${n}`}</p>
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+          Q{qi + 1} · {q.type}
+          {n != null && ` · n=${n}`}
+        </p>
         <p className="mt-1 font-serif text-xl leading-tight">{q.text}</p>
       </div>
       <div className="flex items-center gap-2">
         {rightExtra}
-        <button onClick={toggle} className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground">
+        <button
+          onClick={toggle}
+          className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground"
+        >
           {hidden ? "Show" : "Hide"}
         </button>
       </div>
@@ -1138,17 +1557,32 @@ function Header({ q, qi, hidden, toggle, n, rightExtra }: { q: Question; qi: num
   );
 }
 
-function CompareView({ survey, filtered, profileMap }: { survey: Survey; filtered: Response[]; profileMap: Record<string, Profile> }) {
+function CompareView({
+  survey,
+  filtered,
+  profileMap,
+}: {
+  survey: Survey;
+  filtered: Response[];
+  profileMap: Record<string, Profile>;
+}) {
   const choiceQs = survey.questions.filter((q) => q.type === "choice" || q.type === "rating");
   const [qid, setQid] = useState(choiceQs[0]?.id ?? "");
   const [dim, setDim] = useState<keyof Profile>("department");
   const [mode, setMode] = useState<"grouped" | "stacked" | "line">("grouped");
 
   const q = choiceQs.find((x) => x.id === qid);
-  if (!q) return <div className="rounded-3xl border border-foreground/15 bg-card p-6 text-sm text-muted-foreground shadow-paper">No comparable questions in this survey.</div>;
+  if (!q)
+    return (
+      <div className="rounded-3xl border border-foreground/15 bg-card p-6 text-sm text-muted-foreground shadow-paper">
+        No comparable questions in this survey.
+      </div>
+    );
 
-  const labels = q.type === "rating" ? ["1","2","3","4","5"] : (q.options ?? []);
-  const groups = Array.from(new Set(filtered.map((r) => profileMap[r.respondent_id]?.[dim] as string).filter(Boolean))).sort();
+  const labels = q.type === "rating" ? ["1", "2", "3", "4", "5"] : (q.options ?? []);
+  const groups = Array.from(
+    new Set(filtered.map((r) => profileMap[r.respondent_id]?.[dim] as string).filter(Boolean)),
+  ).sort();
   const data = labels.map((label) => {
     const row: any = { label };
     groups.forEach((g) => {
@@ -1158,30 +1592,53 @@ function CompareView({ survey, filtered, profileMap }: { survey: Survey; filtere
     });
     return row;
   });
-  const suppressedGroups = groups.filter((g) => filtered.filter((r) => (profileMap[r.respondent_id]?.[dim] as string) === g).length < SUPPRESS_THRESHOLD);
+  const suppressedGroups = groups.filter(
+    (g) =>
+      filtered.filter((r) => (profileMap[r.respondent_id]?.[dim] as string) === g).length <
+      SUPPRESS_THRESHOLD,
+  );
 
   return (
     <div className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
       <div className="flex flex-wrap items-center gap-3">
-        <select value={qid} onChange={(e) => setQid(e.target.value)} className="rounded-md border border-foreground/20 bg-background px-2 py-1.5 text-sm">
-          {choiceQs.map((x) => <option key={x.id} value={x.id}>Q: {x.text.slice(0, 60)}</option>)}
+        <select
+          value={qid}
+          onChange={(e) => setQid(e.target.value)}
+          className="rounded-md border border-foreground/20 bg-background px-2 py-1.5 text-sm"
+        >
+          {choiceQs.map((x) => (
+            <option key={x.id} value={x.id}>
+              Q: {x.text.slice(0, 60)}
+            </option>
+          ))}
         </select>
         <span className="text-xs text-muted-foreground">by</span>
-        <select value={dim} onChange={(e) => setDim(e.target.value as keyof Profile)} className="rounded-md border border-foreground/20 bg-background px-2 py-1.5 text-sm">
+        <select
+          value={dim}
+          onChange={(e) => setDim(e.target.value as keyof Profile)}
+          className="rounded-md border border-foreground/20 bg-background px-2 py-1.5 text-sm"
+        >
           <option value="department">Department</option>
           <option value="year">Year</option>
           <option value="country">Country</option>
           <option value="age_range">Age range</option>
         </select>
         <div className="ml-auto inline-flex items-center gap-0.5 rounded-full border border-foreground/15 bg-background p-0.5">
-          {([
-            { k: "grouped", label: "Grouped" },
-            { k: "stacked", label: "Stacked" },
-            { k: "line",    label: "Line" },
-          ] as const).map((m) => (
-            <button key={m.k} type="button" onClick={() => setMode(m.k)}
+          {(
+            [
+              { k: "grouped", label: "Grouped" },
+              { k: "stacked", label: "Stacked" },
+              { k: "line", label: "Line" },
+            ] as const
+          ).map((m) => (
+            <button
+              key={m.k}
+              type="button"
+              onClick={() => setMode(m.k)}
               className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wider transition-colors ${
-                mode === m.k ? "bg-foreground text-background" : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                mode === m.k
+                  ? "bg-foreground text-background"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
               }`}
             >
               {m.label}
@@ -1199,7 +1656,14 @@ function CompareView({ survey, filtered, profileMap }: { survey: Survey; filtere
               <Tooltip />
               <Legend wrapperStyle={{ fontSize: 11 }} />
               {groups.map((g, i) => (
-                <Line key={g} type="monotone" dataKey={g} stroke={PALETTE[i % PALETTE.length]} strokeWidth={2} dot={{ r: 3 }} />
+                <Line
+                  key={g}
+                  type="monotone"
+                  dataKey={g}
+                  stroke={PALETTE[i % PALETTE.length]}
+                  strokeWidth={2}
+                  dot={{ r: 3 }}
+                />
               ))}
             </LineChart>
           ) : (
@@ -1210,7 +1674,13 @@ function CompareView({ survey, filtered, profileMap }: { survey: Survey; filtere
               <Tooltip />
               <Legend wrapperStyle={{ fontSize: 11 }} />
               {groups.map((g, i) => (
-                <Bar key={g} dataKey={g} stackId={mode === "stacked" ? "s" : undefined} fill={PALETTE[i % PALETTE.length]} radius={[4, 4, 0, 0]} />
+                <Bar
+                  key={g}
+                  dataKey={g}
+                  stackId={mode === "stacked" ? "s" : undefined}
+                  fill={PALETTE[i % PALETTE.length]}
+                  radius={[4, 4, 0, 0]}
+                />
               ))}
             </BarChart>
           )}
@@ -1229,28 +1699,55 @@ function CrossTabView({ survey, filtered }: { survey: Survey; filtered: Response
   const cs = survey.questions.filter((q) => q.type === "choice" || q.type === "rating");
   const [a, setA] = useState(cs[0]?.id ?? "");
   const [b, setB] = useState(cs[1]?.id ?? cs[0]?.id ?? "");
-  if (cs.length < 2) return <div className="rounded-3xl border border-foreground/15 bg-card p-6 text-sm text-muted-foreground shadow-paper">Need at least two choice/rating questions.</div>;
+  if (cs.length < 2)
+    return (
+      <div className="rounded-3xl border border-foreground/15 bg-card p-6 text-sm text-muted-foreground shadow-paper">
+        Need at least two choice/rating questions.
+      </div>
+    );
   const qa = cs.find((x) => x.id === a)!;
   const qb = cs.find((x) => x.id === b)!;
-  const la = qa.type === "rating" ? ["1","2","3","4","5"] : (qa.options ?? []);
-  const lb = qb.type === "rating" ? ["1","2","3","4","5"] : (qb.options ?? []);
+  const la = qa.type === "rating" ? ["1", "2", "3", "4", "5"] : (qa.options ?? []);
+  const lb = qb.type === "rating" ? ["1", "2", "3", "4", "5"] : (qb.options ?? []);
   return (
     <div className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
       <div className="flex flex-wrap items-center gap-3">
-        <select value={a} onChange={(e) => setA(e.target.value)} className="rounded-md border border-foreground/20 bg-background px-2 py-1.5 text-sm">
-          {cs.map((x) => <option key={x.id} value={x.id}>Row: {x.text.slice(0, 50)}</option>)}
+        <select
+          value={a}
+          onChange={(e) => setA(e.target.value)}
+          className="rounded-md border border-foreground/20 bg-background px-2 py-1.5 text-sm"
+        >
+          {cs.map((x) => (
+            <option key={x.id} value={x.id}>
+              Row: {x.text.slice(0, 50)}
+            </option>
+          ))}
         </select>
         <span className="text-xs text-muted-foreground">×</span>
-        <select value={b} onChange={(e) => setB(e.target.value)} className="rounded-md border border-foreground/20 bg-background px-2 py-1.5 text-sm">
-          {cs.map((x) => <option key={x.id} value={x.id}>Col: {x.text.slice(0, 50)}</option>)}
+        <select
+          value={b}
+          onChange={(e) => setB(e.target.value)}
+          className="rounded-md border border-foreground/20 bg-background px-2 py-1.5 text-sm"
+        >
+          {cs.map((x) => (
+            <option key={x.id} value={x.id}>
+              Col: {x.text.slice(0, 50)}
+            </option>
+          ))}
         </select>
       </div>
       <div className="mt-4 overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
             <tr className="border-b border-foreground/20">
-              <th className="p-2 text-left text-[10px] uppercase tracking-wider text-muted-foreground">{qa.text.slice(0, 30)} \ {qb.text.slice(0, 30)}</th>
-              {lb.map((l) => <th key={l} className="p-2 text-right font-semibold">{l}</th>)}
+              <th className="p-2 text-left text-[10px] uppercase tracking-wider text-muted-foreground">
+                {qa.text.slice(0, 30)} \ {qb.text.slice(0, 30)}
+              </th>
+              {lb.map((l) => (
+                <th key={l} className="p-2 text-right font-semibold">
+                  {l}
+                </th>
+              ))}
               <th className="p-2 text-right text-muted-foreground">Total</th>
             </tr>
           </thead>
@@ -1265,7 +1762,11 @@ function CrossTabView({ survey, filtered }: { survey: Survey; filtered: Response
                     const c = rowRows.filter((r) => String(r.answers?.[qb.id]) === cb).length;
                     const safe = safeCount(c);
                     const pct = total ? ((c / total) * 100).toFixed(0) : "0";
-                    return <td key={cb} className="p-2 text-right font-mono">{safe == null ? "—" : `${safe} (${pct}%)`}</td>;
+                    return (
+                      <td key={cb} className="p-2 text-right font-mono">
+                        {safe == null ? "—" : `${safe} (${pct}%)`}
+                      </td>
+                    );
                   })}
                   <td className="p-2 text-right text-muted-foreground">{total}</td>
                 </tr>
@@ -1274,16 +1775,30 @@ function CrossTabView({ survey, filtered }: { survey: Survey; filtered: Response
           </tbody>
         </table>
       </div>
-      <p className="mt-2 text-[11px] text-muted-foreground">Percentages are row %. Cells with n&lt;5 are suppressed.</p>
+      <p className="mt-2 text-[11px] text-muted-foreground">
+        Percentages are row %. Cells with n&lt;5 are suppressed.
+      </p>
     </div>
   );
 }
 
-function RawDataView({ survey, filtered, profileMap }: { survey: Survey; filtered: Response[]; profileMap: Record<string, Profile> }) {
+function RawDataView({
+  survey,
+  filtered,
+  profileMap,
+}: {
+  survey: Survey;
+  filtered: Response[];
+  profileMap: Record<string, Profile>;
+}) {
   return (
     <div className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
-      <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Raw responses · n = {filtered.length}</p>
-      <p className="mt-1 text-xs text-muted-foreground">Respondent identities are hidden. Only de-identified demographic tags are shown.</p>
+      <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+        Raw responses · n = {filtered.length}
+      </p>
+      <p className="mt-1 text-xs text-muted-foreground">
+        Respondent identities are hidden. Only de-identified demographic tags are shown.
+      </p>
       <div className="mt-4 overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
@@ -1291,7 +1806,11 @@ function RawDataView({ survey, filtered, profileMap }: { survey: Survey; filtere
               <th className="p-2">Submitted</th>
               <th className="p-2">Dept</th>
               <th className="p-2">Year</th>
-              {survey.questions.map((q, i) => <th key={q.id} className="p-2">Q{i+1}</th>)}
+              {survey.questions.map((q, i) => (
+                <th key={q.id} className="p-2">
+                  Q{i + 1}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
@@ -1299,10 +1818,16 @@ function RawDataView({ survey, filtered, profileMap }: { survey: Survey; filtere
               const p = profileMap[r.respondent_id];
               return (
                 <tr key={r.id} className="border-b border-foreground/5">
-                  <td className="p-2 text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</td>
+                  <td className="p-2 text-muted-foreground">
+                    {new Date(r.created_at).toLocaleDateString()}
+                  </td>
                   <td className="p-2">{p?.department ?? "—"}</td>
                   <td className="p-2">{p?.year ?? "—"}</td>
-                  {survey.questions.map((q) => <td key={q.id} className="p-2">{String(r.answers?.[q.id] ?? "—").slice(0, 80)}</td>)}
+                  {survey.questions.map((q) => (
+                    <td key={q.id} className="p-2">
+                      {String(r.answers?.[q.id] ?? "—").slice(0, 80)}
+                    </td>
+                  ))}
                 </tr>
               );
             })}
@@ -1313,28 +1838,62 @@ function RawDataView({ survey, filtered, profileMap }: { survey: Survey; filtere
   );
 }
 
-function SavedViewsPanel({ saved, shareTokens, onApply, onDelete, onRevoke, onCopy }: {
-  saved: any[]; shareTokens: any[];
-  onApply: (cfg: any) => void; onDelete: (id: string) => void;
-  onRevoke: (id: string) => void; onCopy: (token: string) => void;
+function SavedViewsPanel({
+  saved,
+  shareTokens,
+  onApply,
+  onDelete,
+  onRevoke,
+  onCopy,
+}: {
+  saved: any[];
+  shareTokens: any[];
+  onApply: (cfg: any) => void;
+  onDelete: (id: string) => void;
+  onRevoke: (id: string) => void;
+  onCopy: (token: string) => void;
 }) {
   return (
     <div className="space-y-4">
       <div className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
-        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Saved views</p>
+        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+          Saved views
+        </p>
         {saved.length === 0 ? (
-          <p className="mt-2 text-sm text-muted-foreground">No saved views yet. Use the "Save view" button in the sidebar to capture the current filter + selection.</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            No saved views yet. Use the "Save view" button in the sidebar to capture the current
+            filter + selection.
+          </p>
         ) : (
           <ul className="mt-3 space-y-2">
             {saved.map((v) => (
-              <li key={v.id} className="flex items-center justify-between gap-2 rounded-xl border border-foreground/10 bg-background p-3">
+              <li
+                key={v.id}
+                className="flex items-center justify-between gap-2 rounded-xl border border-foreground/10 bg-background p-3"
+              >
                 <div>
                   <p className="font-serif text-lg">{v.name}</p>
-                  <p className="text-[11px] text-muted-foreground">Saved {new Date(v.created_at).toLocaleString()}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Saved {new Date(v.created_at).toLocaleString()}
+                  </p>
                 </div>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => onApply(v.config)} className="rounded-full"><Eye className="mr-1 h-3 w-3" /> Apply</Button>
-                  <Button size="sm" variant="outline" onClick={() => onDelete(v.id)} className="rounded-full"><Trash2 className="h-3 w-3" /></Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => onApply(v.config)}
+                    className="rounded-full"
+                  >
+                    <Eye className="mr-1 h-3 w-3" /> Apply
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => onDelete(v.id)}
+                    className="rounded-full"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
                 </div>
               </li>
             ))}
@@ -1343,22 +1902,52 @@ function SavedViewsPanel({ saved, shareTokens, onApply, onDelete, onRevoke, onCo
       </div>
 
       <div className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
-        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Shareable dashboards</p>
+        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+          Shareable dashboards
+        </p>
         {shareTokens.length === 0 ? (
-          <p className="mt-2 text-sm text-muted-foreground">No share links. Use "Share dashboard" in the sidebar to mint one. Shared dashboards show aggregated charts only — no raw answers, no respondent info.</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            No share links. Use "Share dashboard" in the sidebar to mint one. Shared dashboards show
+            aggregated charts only — no raw answers, no respondent info.
+          </p>
         ) : (
           <ul className="mt-3 space-y-2">
             {shareTokens.map((t) => (
-              <li key={t.id} className={`flex items-center justify-between gap-2 rounded-xl border border-foreground/10 bg-background p-3 ${t.revoked ? "opacity-50" : ""}`}>
+              <li
+                key={t.id}
+                className={`flex items-center justify-between gap-2 rounded-xl border border-foreground/10 bg-background p-3 ${t.revoked ? "opacity-50" : ""}`}
+              >
                 <div className="min-w-0">
                   <p className="truncate font-mono text-xs">/r/{t.token.slice(0, 12)}…</p>
                   <p className="text-[11px] text-muted-foreground">
-                    {t.revoked ? "Revoked" : t.expires_at ? `Expires ${new Date(t.expires_at).toLocaleDateString()}` : "No expiry"}
+                    {t.revoked
+                      ? "Revoked"
+                      : t.expires_at
+                        ? `Expires ${new Date(t.expires_at).toLocaleDateString()}`
+                        : "No expiry"}
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  {!t.revoked && <Button size="sm" variant="outline" onClick={() => onCopy(t.token)} className="rounded-full"><Copy className="mr-1 h-3 w-3" /> Copy</Button>}
-                  {!t.revoked && <Button size="sm" variant="outline" onClick={() => onRevoke(t.id)} className="rounded-full"><Trash2 className="h-3 w-3" /></Button>}
+                  {!t.revoked && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => onCopy(t.token)}
+                      className="rounded-full"
+                    >
+                      <Copy className="mr-1 h-3 w-3" /> Copy
+                    </Button>
+                  )}
+                  {!t.revoked && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => onRevoke(t.id)}
+                      className="rounded-full"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  )}
                 </div>
               </li>
             ))}

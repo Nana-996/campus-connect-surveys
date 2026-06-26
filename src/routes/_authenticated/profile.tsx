@@ -34,11 +34,23 @@ function Profile() {
     let active = true;
     (async () => {
       const [resps, led, c] = await Promise.all([
-        supabase.from("survey_responses").select("id, created_at, survey:surveys(title)")
-          .eq("respondent_id", user.id).order("created_at", { ascending: false }).limit(20),
-        supabase.from("credit_ledger").select("*").eq("user_id", user.id)
-          .order("created_at", { ascending: false }).limit(15),
-        supabase.from("earning_caps").select("day_count, week_count").eq("user_id", user.id).maybeSingle(),
+        supabase
+          .from("survey_responses")
+          .select("id, created_at, survey:surveys(title)")
+          .eq("respondent_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(20),
+        supabase
+          .from("credit_ledger")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(15),
+        supabase
+          .from("earning_caps")
+          .select("day_count, week_count")
+          .eq("user_id", user.id)
+          .maybeSingle(),
       ]);
       if (!active) return;
       if (resps.error) console.warn("Profile responses request failed.", resps.error);
@@ -52,7 +64,9 @@ function Profile() {
         .sort((a: any, b: any) => +new Date(a.expires_at) - +new Date(b.expires_at))[0];
       setNextExpiry(earliest?.expires_at ?? null);
     })();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [user?.id]);
 
   if (!profile) return null;
@@ -64,7 +78,10 @@ function Profile() {
         {isGeneral ? "Your account" : "Your card"}
       </p>
       <h1 className="mt-1 font-serif text-5xl leading-[0.95]">
-        Hello, <em className="text-primary">{profile.full_name?.split(" ")[0] || (isGeneral ? "friend" : "student")}.</em>
+        Hello,{" "}
+        <em className="text-primary">
+          {profile.full_name?.split(" ")[0] || (isGeneral ? "friend" : "student")}.
+        </em>
       </h1>
 
       {profile.is_flagged && (
@@ -72,15 +89,16 @@ function Profile() {
           <AlertTriangle className="h-4 w-4 mt-0.5 text-destructive" />
           <div>
             <p className="font-semibold">Your account is under review.</p>
-            <p className="text-muted-foreground">{profile.flag_reason ?? "Unusual activity detected."}</p>
+            <p className="text-muted-foreground">
+              {profile.flag_reason ?? "Unusual activity detected."}
+            </p>
           </div>
         </div>
       )}
 
-      {!isGeneral && !((profile as any).index_number) && (
+      {!isGeneral && !(profile as any).index_number && (
         <IndexBackfill currentDepartment={profile.department || ""} />
       )}
-
 
       {/* Personal info & edit name */}
       <section className="mt-8 rounded-3xl border border-foreground/15 bg-card p-6 shadow-paper">
@@ -123,7 +141,10 @@ function Profile() {
           }}
         >
           <div className="sm:col-span-2">
-            <Label htmlFor="profile-name" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            <Label
+              htmlFor="profile-name"
+              className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground"
+            >
               Full name
             </Label>
             <div className="mt-1 flex gap-2">
@@ -135,7 +156,10 @@ function Profile() {
                 placeholder="Your name"
                 autoComplete="name"
               />
-              <Button type="submit" disabled={savingName || name.trim() === (profile.full_name ?? "")}>
+              <Button
+                type="submit"
+                disabled={savingName || name.trim() === (profile.full_name ?? "")}
+              >
                 {savingName ? "Saving…" : "Save"}
               </Button>
             </div>
@@ -154,7 +178,10 @@ function Profile() {
           ) : (
             <>
               <ReadOnlyField label="Country" value={profile.country || "—"} />
-              <ReadOnlyField label="Age range" value={profile.age_range ? ageLabel(profile.age_range) : "—"} />
+              <ReadOnlyField
+                label="Age range"
+                value={profile.age_range ? ageLabel(profile.age_range) : "—"}
+              />
             </>
           )}
         </form>
@@ -163,7 +190,6 @@ function Profile() {
           University, account type, and credits are locked for fairness and can't be edited here.
         </p>
       </section>
-
 
       <div className="mt-8 grid gap-4 sm:grid-cols-6">
         {/* Credits - hero */}
@@ -174,7 +200,8 @@ function Profile() {
           </div>
           <p className="mt-2 font-serif text-7xl leading-none">{profile.earned_credits}</p>
           <p className="mt-2 text-xs opacity-80">
-            Earn credits by answering surveys — 1 credit per quality response. Spend them to publish your own.
+            Earn credits by answering surveys — 1 credit per quality response. Spend them to publish
+            your own.
           </p>
           <Link to="/feed">
             <Button className="mt-6 rounded-full bg-highlight text-highlight-foreground hover:bg-highlight/90">
@@ -197,13 +224,16 @@ function Profile() {
 
         {/* Caps */}
         <div className="sm:col-span-3 rounded-3xl border border-foreground/15 bg-card p-6 shadow-paper">
-          <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Earning caps</p>
+          <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
+            Earning caps
+          </p>
           <div className="mt-3 space-y-3">
             <CapBar label="Today" value={caps?.day_count ?? 0} max={DAILY_EARN_CAP} />
             <CapBar label="This week" value={caps?.week_count ?? 0} max={WEEKLY_EARN_CAP} />
           </div>
           <p className="mt-3 text-[11px] text-muted-foreground">
-            Earned credits expire in {EARNED_EXPIRY_DAYS} days. Keep answering surveys to keep your balance healthy.
+            Earned credits expire in {EARNED_EXPIRY_DAYS} days. Keep answering surveys to keep your
+            balance healthy.
           </p>
         </div>
 
@@ -217,7 +247,10 @@ function Profile() {
               <h2 className="mt-3 font-serif text-2xl leading-tight">Public surveys only</h2>
               <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
                 <Field label="Country" value={profile.country || "—"} />
-                <Field label="Age range" value={profile.age_range ? ageLabel(profile.age_range) : "—"} />
+                <Field
+                  label="Age range"
+                  value={profile.age_range ? ageLabel(profile.age_range) : "—"}
+                />
               </dl>
             </>
           ) : (
@@ -242,15 +275,21 @@ function Profile() {
       ) : (
         <ul className="mt-4 space-y-1.5">
           {ledger.map((row) => (
-            <li key={row.id} className="flex items-center justify-between rounded-xl border border-foreground/10 bg-card px-4 py-2 text-sm">
+            <li
+              key={row.id}
+              className="flex items-center justify-between rounded-xl border border-foreground/10 bg-card px-4 py-2 text-sm"
+            >
               <div className="flex items-center gap-2">
                 <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent-foreground">
                   credits
                 </span>
                 <span className="text-muted-foreground">{row.reason.replace(/_/g, " ")}</span>
               </div>
-              <span className={`font-mono font-bold ${row.delta > 0 ? "text-primary" : row.delta < 0 ? "text-destructive" : "text-muted-foreground"}`}>
-                {row.delta > 0 ? "+" : ""}{row.delta}
+              <span
+                className={`font-mono font-bold ${row.delta > 0 ? "text-primary" : row.delta < 0 ? "text-destructive" : "text-muted-foreground"}`}
+              >
+                {row.delta > 0 ? "+" : ""}
+                {row.delta}
               </span>
             </li>
           ))}
@@ -263,7 +302,10 @@ function Profile() {
       ) : (
         <ul className="mt-4 space-y-2">
           {responses.map((r) => (
-            <li key={r.id} className="flex items-center justify-between rounded-2xl border border-foreground/15 bg-card p-4">
+            <li
+              key={r.id}
+              className="flex items-center justify-between rounded-2xl border border-foreground/15 bg-card p-4"
+            >
               <div>
                 <p className="font-serif text-xl leading-tight">{r.survey?.title ?? "Survey"}</p>
                 <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
@@ -284,7 +326,9 @@ function CapBar({ label, value, max }: { label: string; value: number; max: numb
     <div>
       <div className="flex items-center justify-between text-xs">
         <span className="font-semibold uppercase tracking-wider">{label}</span>
-        <span className="text-muted-foreground">{value} / {max}</span>
+        <span className="text-muted-foreground">
+          {value} / {max}
+        </span>
       </div>
       <div className="mt-1 h-2 rounded-full bg-secondary overflow-hidden">
         <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
@@ -296,18 +340,23 @@ function CapBar({ label, value, max }: { label: string; value: number; max: numb
 function Field({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{label}</dt>
+      <dt className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+        {label}
+      </dt>
       <dd className="mt-0.5 font-medium">{value}</dd>
     </div>
   );
 }
 
-
 function ReadOnlyField({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{label}</p>
-      <p className="mt-1 rounded-md border border-foreground/10 bg-muted/40 px-3 py-2 text-sm font-medium break-words">{value}</p>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+        {label}
+      </p>
+      <p className="mt-1 rounded-md border border-foreground/10 bg-muted/40 px-3 py-2 text-sm font-medium break-words">
+        {value}
+      </p>
     </div>
   );
 }

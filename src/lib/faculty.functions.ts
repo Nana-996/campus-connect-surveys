@@ -6,7 +6,11 @@ function fail(e: any, label: string): never {
   console.error(`[faculty:${label}]`, e);
   // Preserve actionable error messages from RPCs (e.g. "Forbidden: faculty only")
   const msg = (e?.message as string) || "";
-  if (/forbidden|not authenticated|not found|not a student|only add|on your watchlist|university/i.test(msg)) {
+  if (
+    /forbidden|not authenticated|not found|not a student|only add|on your watchlist|university/i.test(
+      msg,
+    )
+  ) {
     throw new Error(msg);
   }
   throw new Error("Operation failed");
@@ -19,7 +23,11 @@ export const getMyFacultyScope = createServerFn({ method: "GET" })
     const [{ data: isFaculty }, { data: isAdmin }, { data: prof }] = await Promise.all([
       supabase.rpc("has_role", { _user_id: userId, _role: "faculty" as any }),
       supabase.rpc("has_role", { _user_id: userId, _role: "admin" as any }),
-      supabase.from("profiles").select("university_domain, university_name, full_name").eq("id", userId).maybeSingle(),
+      supabase
+        .from("profiles")
+        .select("university_domain, university_name, full_name")
+        .eq("id", userId)
+        .maybeSingle(),
     ]);
     return {
       isFaculty: !!isFaculty,
@@ -36,9 +44,12 @@ export const searchStudentByIndex = createServerFn({ method: "POST" })
     z.object({ indexNumber: z.string().trim().min(1).max(32) }).parse(d),
   )
   .handler(async ({ data, context }) => {
-    const { data: rows, error } = await context.supabase.rpc("faculty_search_student_by_index" as any, {
-      _index_number: data.indexNumber,
-    });
+    const { data: rows, error } = await context.supabase.rpc(
+      "faculty_search_student_by_index" as any,
+      {
+        _index_number: data.indexNumber,
+      },
+    );
     if (error) fail(error, "search");
     return (rows ?? []) as Array<{
       student_id: string;

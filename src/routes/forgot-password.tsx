@@ -16,7 +16,10 @@ export const Route = createFileRoute("/forgot-password")({
   head: () => ({
     meta: [
       { title: "Reset your password — CampusVerify" },
-      { name: "description", content: "Request a password reset link for your CampusVerify account." },
+      {
+        name: "description",
+        content: "Request a password reset link for your CampusVerify account.",
+      },
     ],
     links: [{ rel: "canonical", href: "https://your-domain.com/forgot-password" }],
   }),
@@ -52,10 +55,16 @@ function ForgotPasswordPage() {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-12">
-      <Link to="/auth" search={{ as: tab }} className="mb-6 inline-flex items-center gap-1 text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground">
+      <Link
+        to="/auth"
+        search={{ as: tab }}
+        className="mb-6 inline-flex items-center gap-1 text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground"
+      >
         <ArrowLeft className="h-3 w-3" /> Back to log in
       </Link>
-      <h1 className="font-serif text-5xl leading-[0.95]">Forgot <em className="text-primary">password?</em></h1>
+      <h1 className="font-serif text-5xl leading-[0.95]">
+        Forgot <em className="text-primary">password?</em>
+      </h1>
       <p className="mt-3 text-sm text-muted-foreground">
         Pick your account type, then enter your email. We'll send a secure link.
       </p>
@@ -65,7 +74,9 @@ function ForgotPasswordPage() {
           type="button"
           onClick={() => setTab("student")}
           className={`rounded-2xl border-2 p-3 text-left transition ${
-            isStudent ? "border-primary bg-primary text-primary-foreground" : "border-foreground/15 bg-card"
+            isStudent
+              ? "border-primary bg-primary text-primary-foreground"
+              : "border-foreground/15 bg-card"
           }`}
         >
           <GraduationCap className="h-4 w-4" />
@@ -75,7 +86,9 @@ function ForgotPasswordPage() {
           type="button"
           onClick={() => setTab("general")}
           className={`rounded-2xl border-2 p-3 text-left transition ${
-            !isStudent ? "border-primary bg-primary text-primary-foreground" : "border-foreground/15 bg-card"
+            !isStudent
+              ? "border-primary bg-primary text-primary-foreground"
+              : "border-foreground/15 bg-card"
           }`}
         >
           <Globe2 className="h-4 w-4" />
@@ -87,11 +100,15 @@ function ForgotPasswordPage() {
         <div className="mt-8 rounded-2xl border border-primary/30 bg-primary/5 p-5 text-sm">
           <p className="font-semibold">Check your inbox.</p>
           <p className="mt-1 text-muted-foreground">
-            If a {isStudent ? "student" : "general"} account exists for <strong>{email}</strong>, you'll get a reset link shortly. The link expires in 1 hour.
+            If a {isStudent ? "student" : "general"} account exists for <strong>{email}</strong>,
+            you'll get a reset link shortly. The link expires in 1 hour.
           </p>
           <button
             type="button"
-            onClick={() => { setSent(false); setEmail(""); }}
+            onClick={() => {
+              setSent(false);
+              setEmail("");
+            }}
             className="mt-3 text-xs font-semibold underline"
           >
             Send to a different email
@@ -113,7 +130,11 @@ function ForgotPasswordPage() {
               className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"
             />
           </div>
-          <Button type="submit" className="h-12 w-full rounded-full bg-primary text-base" disabled={submitting}>
+          <Button
+            type="submit"
+            className="h-12 w-full rounded-full bg-primary text-base"
+            disabled={submitting}
+          >
             <Mail className="mr-2 h-4 w-4" />
             {submitting ? "Sending…" : `Send link to ${isStudent ? "Student" : "General"} account`}
           </Button>

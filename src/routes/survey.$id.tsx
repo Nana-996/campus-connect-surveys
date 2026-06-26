@@ -9,7 +9,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { safeErrorMessage } from "@/lib/safe-error";
-import { Download, ArrowLeft, Users, FileText, BarChart3, TrendingUp, Activity, Hash, Lock, ShieldCheck, Share2, Copy, Check, Trash2 } from "lucide-react";
+import {
+  Download,
+  ArrowLeft,
+  Users,
+  FileText,
+  BarChart3,
+  TrendingUp,
+  Activity,
+  Hash,
+  Lock,
+  ShieldCheck,
+  Share2,
+  Copy,
+  Check,
+  Trash2,
+} from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,11 +42,27 @@ import { getOwnerSurveyResults } from "@/lib/survey-owner.functions";
 import { cacheSurvey, getCachedSurvey, enqueueResponse } from "@/lib/offline-store";
 import { syncQueuedResponses } from "@/lib/offline-sync";
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
-  PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, RadarChart, Radar,
-  PolarGrid, PolarAngleAxis, PolarRadiusAxis, Legend,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  RadarChart,
+  Radar,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Legend,
 } from "recharts";
-
 
 type ChartType = "bar" | "pie" | "donut" | "line" | "area" | "radar" | "horizontal";
 const CHART_TYPES: { value: ChartType; label: string }[] = [
@@ -43,9 +74,23 @@ const CHART_TYPES: { value: ChartType; label: string }[] = [
   { value: "area", label: "Area" },
   { value: "radar", label: "Radar" },
 ];
-const PALETTE = ["var(--primary)", "var(--highlight)", "var(--accent)", "#7c9a6b", "#c98a4b", "#4a6b52", "#b8c47a"];
+const PALETTE = [
+  "var(--primary)",
+  "var(--highlight)",
+  "var(--accent)",
+  "#7c9a6b",
+  "#c98a4b",
+  "#4a6b52",
+  "#b8c47a",
+];
 
-type Question = { id: string; type: "text" | "choice" | "rating"; text: string; options?: string[]; required?: boolean };
+type Question = {
+  id: string;
+  type: "text" | "choice" | "rating";
+  text: string;
+  options?: string[];
+  required?: boolean;
+};
 type Survey = {
   id: string;
   creator_id: string;
@@ -76,7 +121,9 @@ export const Route = createFileRoute("/survey/$id")({
     const title = truncTitle ? `${truncTitle} — CampusVerify` : "Take this survey — CampusVerify";
     const rawDesc = s?.description?.trim();
     const desc = rawDesc
-      ? (rawDesc.length > 155 ? `${rawDesc.slice(0, 152)}…` : rawDesc)
+      ? rawDesc.length > 155
+        ? `${rawDesc.slice(0, 152)}…`
+        : rawDesc
       : "Answer a verified CampusVerify survey to earn credits. Log in or create a free account to participate.";
     const url = `https://your-domain.com/survey/${params.id}`;
     return {
@@ -107,11 +154,17 @@ function SurveyPage() {
   const draftKey = `cv:answers:${id}`;
   const [answers, setAnswers] = useState<Record<string, string>>(() => {
     if (typeof window === "undefined") return {};
-    try { return JSON.parse(localStorage.getItem(draftKey) || "{}"); } catch { return {}; }
+    try {
+      return JSON.parse(localStorage.getItem(draftKey) || "{}");
+    } catch {
+      return {};
+    }
   });
   useEffect(() => {
     if (typeof window === "undefined") return;
-    try { localStorage.setItem(draftKey, JSON.stringify(answers)); } catch {}
+    try {
+      localStorage.setItem(draftKey, JSON.stringify(answers));
+    } catch {}
   }, [answers, draftKey]);
   const [submitting, setSubmitting] = useState(false);
   const [startedAt] = useState<number>(() => Date.now());
@@ -127,11 +180,14 @@ function SurveyPage() {
     newBalance: number;
   }>(null);
 
-  const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/survey/${id}` : `/survey/${id}`;
+  const shareUrl =
+    typeof window !== "undefined" ? `${window.location.origin}/survey/${id}` : `/survey/${id}`;
   const handleShare = async () => {
     const shareData = {
       title: survey?.title ? `Take this survey: ${survey.title}` : "Take this survey",
-      text: survey?.description || "Help me out by answering this quick verified survey on CampusVerify.",
+      text:
+        survey?.description ||
+        "Help me out by answering this quick verified survey on CampusVerify.",
       url: shareUrl,
     };
     try {
@@ -139,7 +195,9 @@ function SurveyPage() {
         await (navigator as any).share(shareData);
         return;
       }
-    } catch { /* user cancelled — fall through to copy */ }
+    } catch {
+      /* user cancelled — fall through to copy */
+    }
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
@@ -193,8 +251,15 @@ function SurveyPage() {
           ? await fetchAuthed({ data: { id } })
           : await fetchPublic({ data: { id } });
         if (!active) return;
-        if (!res.survey) { await useCache(); setLoading(false); return; }
-        const surveyData = { ...(res.survey as any), questions: (res.survey as any).questions ?? [] };
+        if (!res.survey) {
+          await useCache();
+          setLoading(false);
+          return;
+        }
+        const surveyData = {
+          ...(res.survey as any),
+          questions: (res.survey as any).questions ?? [],
+        };
         setSurvey(surveyData as Survey);
         setOwnerName(res.ownerName);
         // Persist for offline re-open (only if questions are present).
@@ -219,7 +284,9 @@ function SurveyPage() {
         if (active) setLoading(false);
       }
     })();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, user?.id]);
 
@@ -240,14 +307,21 @@ function SurveyPage() {
           if (!active) return;
           setResponses(ownerData.responses ?? []);
           const map: Record<string, ChartType> = {};
-          (ownerData.visualizations ?? []).forEach((v: any) => { map[v.question_id] = v.chart_type as ChartType; });
+          (ownerData.visualizations ?? []).forEach((v: any) => {
+            map[v.question_id] = v.chart_type as ChartType;
+          });
           setChartTypes(map);
         } catch (err: any) {
           console.error("[survey owner results] load failed", err);
           toast.error(err?.message ?? "Couldn't load responses. Try refreshing.");
         }
       } else {
-        const { data: own } = await supabase.from("survey_responses").select("id").eq("survey_id", id).eq("respondent_id", user.id).maybeSingle();
+        const { data: own } = await supabase
+          .from("survey_responses")
+          .select("id")
+          .eq("survey_id", id)
+          .eq("respondent_id", user.id)
+          .maybeSingle();
         if (!active) return;
         setAlreadyAnswered(!!own);
         // Record server-side start time for credit-quality gating.
@@ -258,33 +332,49 @@ function SurveyPage() {
         }
       }
     })();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, user?.id, survey?.id]);
 
   const setChartType = async (questionId: string, type: ChartType) => {
     setChartTypes((m) => ({ ...m, [questionId]: type }));
-    await supabase.from("survey_visualizations").upsert(
-      { survey_id: id, question_id: questionId, chart_type: type },
-      { onConflict: "survey_id,question_id" },
-    );
+    await supabase
+      .from("survey_visualizations")
+      .upsert(
+        { survey_id: id, question_id: questionId, chart_type: type },
+        { onConflict: "survey_id,question_id" },
+      );
   };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!survey) return;
-    if (!user) { setVerifyOpen(true); return; }
-    if (new Date(survey.expires_at) <= new Date()) { toast.error("This survey has closed."); return; }
-    if (survey.response_count >= survey.response_goal) { toast.error("This survey has reached its response goal."); return; }
+    if (!user) {
+      setVerifyOpen(true);
+      return;
+    }
+    if (new Date(survey.expires_at) <= new Date()) {
+      toast.error("This survey has closed.");
+      return;
+    }
+    if (survey.response_count >= survey.response_goal) {
+      toast.error("This survey has reached its response goal.");
+      return;
+    }
     for (const q of survey.questions) {
       const isRequired = q.required ?? true;
       if (isRequired && (!answers[q.id] || answers[q.id].toString().trim() === "")) {
-        toast.error("Please answer all required questions."); return;
+        toast.error("Please answer all required questions.");
+        return;
       }
     }
     const duration = Date.now() - startedAt;
     if (duration < 15000) {
-      toast.error(`Take your time — at least 15 seconds for quality credit (${Math.floor(duration/1000)}s so far).`);
+      toast.error(
+        `Take your time — at least 15 seconds for quality credit (${Math.floor(duration / 1000)}s so far).`,
+      );
       return;
     }
     setSubmitting(true);
@@ -297,7 +387,9 @@ function SurveyPage() {
           answers,
           duration_ms: duration,
         });
-        try { localStorage.removeItem(draftKey); } catch {}
+        try {
+          localStorage.removeItem(draftKey);
+        } catch {}
         setResult({ delta: 0, reason: "queued_offline", newBalance: 0 });
         toast.success("Saved offline — we'll sync it when you're back online.");
         return;
@@ -309,7 +401,9 @@ function SurveyPage() {
         duration_ms: duration,
       });
       if (error) throw error;
-      try { localStorage.removeItem(draftKey); } catch {}
+      try {
+        localStorage.removeItem(draftKey);
+      } catch {}
 
       // Look up what the response trigger awarded so we can show a clear breakdown
       const [{ data: ledger }, { data: prof }] = await Promise.all([
@@ -337,7 +431,11 @@ function SurveyPage() {
     } catch (err: any) {
       // Network-style failure: save offline instead of losing the answers.
       const msg = String(err?.message ?? err ?? "").toLowerCase();
-      const looksLikeNetwork = msg.includes("network") || msg.includes("fetch") || msg.includes("failed to fetch") || msg.includes("load failed");
+      const looksLikeNetwork =
+        msg.includes("network") ||
+        msg.includes("fetch") ||
+        msg.includes("failed to fetch") ||
+        msg.includes("load failed");
       if (looksLikeNetwork) {
         try {
           await enqueueResponse({
@@ -346,7 +444,9 @@ function SurveyPage() {
             answers,
             duration_ms: duration,
           });
-          try { localStorage.removeItem(draftKey); } catch {}
+          try {
+            localStorage.removeItem(draftKey);
+          } catch {}
           setResult({ delta: 0, reason: "queued_offline", newBalance: 0 });
           toast.success("Connection dropped — saved offline. We'll sync it for you.");
           return;
@@ -358,10 +458,13 @@ function SurveyPage() {
     }
   };
 
-
   const exportCSV = () => {
     if (!survey || !responses) return;
-    const header = ["respondent_id", "submitted_at", ...survey.questions.map((q) => q.text.replace(/"/g, '""'))];
+    const header = [
+      "respondent_id",
+      "submitted_at",
+      ...survey.questions.map((q) => q.text.replace(/"/g, '""')),
+    ];
     const rows = responses.map((r) => [
       r.respondent_id,
       r.created_at,
@@ -392,7 +495,10 @@ function SurveyPage() {
       doc.setFontSize(size);
       const wrapped = doc.splitTextToSize(txt, pageW - margin * 2);
       for (const ln of wrapped) {
-        if (y > pageH - margin) { doc.addPage(); y = margin; }
+        if (y > pageH - margin) {
+          doc.addPage();
+          y = margin;
+        }
         doc.text(ln, margin, y);
         y += size + 4;
       }
@@ -429,12 +535,15 @@ function SurveyPage() {
       const d = new Date(r.created_at).toISOString().slice(0, 10);
       buckets[d] = (buckets[d] ?? 0) + 1;
     });
-    return Object.entries(buckets).sort(([a], [b]) => a.localeCompare(b)).map(([date, count]) => ({ date: date.slice(5), count }));
+    return Object.entries(buckets)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, count]) => ({ date: date.slice(5), count }));
   };
 
   const completionRate = () => {
     if (!responses || !survey || responses.length === 0) return 0;
-    let answered = 0, total = 0;
+    let answered = 0,
+      total = 0;
     responses.forEach((r) => {
       survey.questions.forEach((q) => {
         total += 1;
@@ -471,8 +580,17 @@ function SurveyPage() {
           <PieChart>
             <Tooltip />
             <Legend wrapperStyle={{ fontSize: 11 }} />
-            <Pie data={data} dataKey="count" nameKey="label" outerRadius={70} innerRadius={type === "donut" ? 40 : 0} label={{ fontSize: 10 }}>
-              {data.map((_, i) => (<Cell key={i} fill={PALETTE[i % PALETTE.length]} />))}
+            <Pie
+              data={data}
+              dataKey="count"
+              nameKey="label"
+              outerRadius={70}
+              innerRadius={type === "donut" ? 40 : 0}
+              label={{ fontSize: 10 }}
+            >
+              {data.map((_, i) => (
+                <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
+              ))}
             </Pie>
           </PieChart>
         );
@@ -483,7 +601,13 @@ function SurveyPage() {
             <XAxis dataKey="label" tick={{ fontSize: 11 }} />
             <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
             <Tooltip />
-            <Line type="monotone" dataKey="count" stroke="var(--primary)" strokeWidth={2} dot={{ r: 4 }} />
+            <Line
+              type="monotone"
+              dataKey="count"
+              stroke="var(--primary)"
+              strokeWidth={2}
+              dot={{ r: 4 }}
+            />
           </LineChart>
         );
       case "area":
@@ -493,7 +617,13 @@ function SurveyPage() {
             <XAxis dataKey="label" tick={{ fontSize: 11 }} />
             <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
             <Tooltip />
-            <Area type="monotone" dataKey="count" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.3} />
+            <Area
+              type="monotone"
+              dataKey="count"
+              stroke="var(--primary)"
+              fill="var(--primary)"
+              fillOpacity={0.3}
+            />
           </AreaChart>
         );
       case "radar":
@@ -502,7 +632,12 @@ function SurveyPage() {
             <PolarGrid stroke="var(--border)" />
             <PolarAngleAxis dataKey="label" tick={{ fontSize: 11 }} />
             <PolarRadiusAxis tick={{ fontSize: 10 }} />
-            <Radar dataKey="count" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.4} />
+            <Radar
+              dataKey="count"
+              stroke="var(--primary)"
+              fill="var(--primary)"
+              fillOpacity={0.4}
+            />
             <Tooltip />
           </RadarChart>
         );
@@ -522,32 +657,62 @@ function SurveyPage() {
   const content = (() => {
     if (loading) return <p className="text-sm text-muted-foreground">Loading...</p>;
     if (!survey) return <p className="text-sm text-muted-foreground">Survey not found.</p>;
-    if (result) return <SubmissionResult result={result} onClose={() => navigate({ to: "/feed" })} />;
+    if (result)
+      return <SubmissionResult result={result} onClose={() => navigate({ to: "/feed" })} />;
     return (
       <div>
         {user ? (
-          <Link to="/feed" className="mb-4 inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground">
+          <Link
+            to="/feed"
+            className="mb-4 inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
+          >
             <ArrowLeft className="h-3 w-3" /> Back to feed
           </Link>
         ) : null}
         <div className="rounded-3xl border border-foreground/15 bg-card p-7 shadow-paper">
-          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-muted-foreground">Survey</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-muted-foreground">
+            Survey
+          </p>
           <h1 className="mt-2 font-serif text-4xl leading-[0.95] sm:text-5xl">{survey.title}</h1>
-          {survey.description && <p className="mt-3 max-w-2xl text-base text-muted-foreground">{survey.description}</p>}
-          {ownerName && <p className="mt-3 text-xs text-muted-foreground">By <span className="font-semibold text-foreground">{ownerName}</span></p>}
+          {survey.description && (
+            <p className="mt-3 max-w-2xl text-base text-muted-foreground">{survey.description}</p>
+          )}
+          {ownerName && (
+            <p className="mt-3 text-xs text-muted-foreground">
+              By <span className="font-semibold text-foreground">{ownerName}</span>
+            </p>
+          )}
           <div className="mt-5 flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-wider">
-            <span className="inline-flex items-center gap-1 rounded-full bg-highlight px-3 py-1 text-highlight-foreground"><Users className="h-3 w-3" />{survey.response_count} / {survey.response_goal} responses</span>
-            <span className="rounded-full bg-card border border-foreground/15 px-3 py-1 text-muted-foreground">
-              {new Date(survey.expires_at) <= new Date() ? "Closed" : `Closes ${new Date(survey.expires_at).toLocaleDateString()}`}
+            <span className="inline-flex items-center gap-1 rounded-full bg-highlight px-3 py-1 text-highlight-foreground">
+              <Users className="h-3 w-3" />
+              {survey.response_count} / {survey.response_goal} responses
             </span>
-            {survey.target_department && <span className="rounded-full bg-accent px-3 py-1 text-accent-foreground">{survey.target_department}</span>}
-            {survey.target_year && <span className="rounded-full bg-accent px-3 py-1 text-accent-foreground">{survey.target_year}</span>}
+            <span className="rounded-full bg-card border border-foreground/15 px-3 py-1 text-muted-foreground">
+              {new Date(survey.expires_at) <= new Date()
+                ? "Closed"
+                : `Closes ${new Date(survey.expires_at).toLocaleDateString()}`}
+            </span>
+            {survey.target_department && (
+              <span className="rounded-full bg-accent px-3 py-1 text-accent-foreground">
+                {survey.target_department}
+              </span>
+            )}
+            {survey.target_year && (
+              <span className="rounded-full bg-accent px-3 py-1 text-accent-foreground">
+                {survey.target_year}
+              </span>
+            )}
           </div>
           <div className="mt-6 rounded-2xl border border-foreground/15 bg-background/60 p-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground">Share this survey</p>
-                <p className="mt-1 text-xs text-muted-foreground">Send the link to friends, classmates or your group chat — verified responses earn you data fast.</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground">
+                  Share this survey
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Send the link to friends, classmates or your group chat — verified responses earn
+                  you data fast.
+                </p>
               </div>
               <Button onClick={handleShare} size="sm" className="rounded-full bg-primary">
                 {copied ? <Check className="mr-1 h-4 w-4" /> : <Share2 className="mr-1 h-4 w-4" />}
@@ -574,8 +739,13 @@ function SurveyPage() {
               <Lock className="h-5 w-5" />
             </div>
             <p className="mt-3 font-serif text-3xl">Verify to view the questions</p>
-            <p className="mt-2 text-sm text-muted-foreground">Create a quick account or log in to answer this survey and earn credits.</p>
-            <Button onClick={() => setVerifyOpen(true)} className="mt-5 h-11 rounded-full bg-primary px-6 text-sm font-semibold text-primary-foreground">
+            <p className="mt-2 text-sm text-muted-foreground">
+              Create a quick account or log in to answer this survey and earn credits.
+            </p>
+            <Button
+              onClick={() => setVerifyOpen(true)}
+              className="mt-5 h-11 rounded-full bg-primary px-6 text-sm font-semibold text-primary-foreground"
+            >
               <ShieldCheck className="mr-2 h-4 w-4" /> Verify to continue
             </Button>
           </div>
@@ -584,13 +754,30 @@ function SurveyPage() {
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="font-serif text-3xl">Results</h2>
               <div className="flex gap-2">
-                <Button size="sm" variant="outline" className="rounded-full border-foreground/30" onClick={exportCSV} disabled={!responses?.length}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="rounded-full border-foreground/30"
+                  onClick={exportCSV}
+                  disabled={!responses?.length}
+                >
                   <Download className="mr-1 h-4 w-4" /> CSV
                 </Button>
-                <Button size="sm" variant="outline" className="rounded-full border-foreground/30" onClick={exportPDF} disabled={!responses?.length}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="rounded-full border-foreground/30"
+                  onClick={exportPDF}
+                  disabled={!responses?.length}
+                >
                   <FileText className="mr-1 h-4 w-4" /> PDF
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => setDeleteOpen(true)} className="rounded-full border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setDeleteOpen(true)}
+                  className="rounded-full border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                >
                   <Trash2 className="mr-1 h-4 w-4" /> Delete
                 </Button>
               </div>
@@ -599,32 +786,53 @@ function SurveyPage() {
               <>
                 <div className="mt-4 grid gap-3 sm:grid-cols-3">
                   <div className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
-                    <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground"><Hash className="h-3 w-3" /> Total</div>
+                    <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                      <Hash className="h-3 w-3" /> Total
+                    </div>
                     <p className="mt-1 font-serif text-4xl">{responses.length}</p>
                     <p className="text-xs text-muted-foreground">responses collected</p>
                   </div>
                   <div className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
-                    <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground"><Activity className="h-3 w-3" /> Completion</div>
+                    <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                      <Activity className="h-3 w-3" /> Completion
+                    </div>
                     <p className="mt-1 font-serif text-4xl">{completionRate()}%</p>
                     <p className="text-xs text-muted-foreground">questions answered</p>
                   </div>
                   <div className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
-                    <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground"><TrendingUp className="h-3 w-3" /> Latest</div>
-                    <p className="mt-1 font-serif text-lg leading-tight">{new Date(responses[0].created_at).toLocaleDateString()}</p>
-                    <p className="text-xs text-muted-foreground">{new Date(responses[0].created_at).toLocaleTimeString()}</p>
+                    <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                      <TrendingUp className="h-3 w-3" /> Latest
+                    </div>
+                    <p className="mt-1 font-serif text-lg leading-tight">
+                      {new Date(responses[0].created_at).toLocaleDateString()}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(responses[0].created_at).toLocaleTimeString()}
+                    </p>
                   </div>
                 </div>
 
                 <div className="mt-4 rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
-                  <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground"><TrendingUp className="h-3 w-3" /> Responses over time</div>
+                  <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                    <TrendingUp className="h-3 w-3" /> Responses over time
+                  </div>
                   <div className="mt-3 h-44">
                     <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={timelineData()} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                      <AreaChart
+                        data={timelineData()}
+                        margin={{ top: 8, right: 8, left: -16, bottom: 0 }}
+                      >
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                         <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                         <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
                         <Tooltip />
-                        <Area type="monotone" dataKey="count" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.25} />
+                        <Area
+                          type="monotone"
+                          dataKey="count"
+                          stroke="var(--primary)"
+                          fill="var(--primary)"
+                          fillOpacity={0.25}
+                        />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
@@ -637,14 +845,22 @@ function SurveyPage() {
                     const type = chartTypes[q.id] ?? "bar";
                     const avg = avgRating(q);
                     return (
-                      <div key={q.id} className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
+                      <div
+                        key={q.id}
+                        className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper"
+                      >
                         <div className="flex items-start justify-between gap-2">
                           <div>
                             <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
                               <BarChart3 className="h-3 w-3" /> Q{qi + 1}
                             </div>
                             <p className="mt-1 font-serif text-xl leading-tight">{q.text}</p>
-                            {avg && <p className="mt-1 text-xs text-muted-foreground">Average rating: <span className="font-semibold text-foreground">{avg}</span> / 5</p>}
+                            {avg && (
+                              <p className="mt-1 text-xs text-muted-foreground">
+                                Average rating:{" "}
+                                <span className="font-semibold text-foreground">{avg}</span> / 5
+                              </p>
+                            )}
                           </div>
                           <select
                             aria-label="Select chart type"
@@ -652,7 +868,11 @@ function SurveyPage() {
                             onChange={(e) => setChartType(q.id, e.target.value as ChartType)}
                             className="rounded-full border border-foreground/20 bg-background px-2 py-1 text-[11px] font-semibold uppercase tracking-wider"
                           >
-                            {CHART_TYPES.map((c) => (<option key={c.value} value={c.value}>{c.label}</option>))}
+                            {CHART_TYPES.map((c) => (
+                              <option key={c.value} value={c.value}>
+                                {c.label}
+                              </option>
+                            ))}
                           </select>
                         </div>
                         <div className="mt-3 h-56">
@@ -668,8 +888,13 @@ function SurveyPage() {
                 <h3 className="mt-8 font-serif text-2xl">Individual responses</h3>
                 <div className="mt-3 space-y-3">
                   {responses.map((r, i) => (
-                    <div key={r.id} className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
-                      <p className="text-xs text-muted-foreground">Response #{i + 1} · {new Date(r.created_at).toLocaleString()}</p>
+                    <div
+                      key={r.id}
+                      className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper"
+                    >
+                      <p className="text-xs text-muted-foreground">
+                        Response #{i + 1} · {new Date(r.created_at).toLocaleString()}
+                      </p>
                       <div className="mt-2 space-y-2">
                         {survey.questions.map((q) => (
                           <div key={q.id}>
@@ -689,62 +914,88 @@ function SurveyPage() {
         ) : alreadyAnswered ? (
           <div className="mt-6 rounded-3xl border border-dashed border-foreground/30 bg-card p-8 text-center shadow-paper">
             <p className="font-serif text-3xl text-primary">Already answered.</p>
-            <p className="mt-1 text-sm text-muted-foreground">Thanks for adding your voice — head back to the feed for more.</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Thanks for adding your voice — head back to the feed for more.
+            </p>
           </div>
         ) : (
           <form onSubmit={submit} className="mt-6 space-y-3">
             {survey.questions.map((q, i) => {
               const isRequired = q.required ?? true;
               return (
-              <div key={q.id} className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
-                <Label className="font-serif text-2xl leading-tight">
-                  {i + 1}. {q.text}
-                  {isRequired
-                    ? <span className="ml-1 text-destructive" aria-label="required">*</span>
-                    : <span className="ml-2 align-middle rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Optional</span>}
-                </Label>
-                <div className="mt-2">
-                  {q.type === "text" && (
-                    <Textarea value={answers[q.id] ?? ""} onChange={(e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value }))} />
-                  )}
-                  {q.type === "choice" && (
-                    <div className="space-y-1.5">
-                      {q.options?.map((opt, oi) => (
-                        <label key={oi} className="flex cursor-pointer items-center gap-2 rounded-md border p-2 text-sm hover:bg-secondary">
-                          <input
-                            type="radio"
-                            name={q.id}
-                            value={opt}
-                            checked={answers[q.id] === opt}
-                            onChange={(e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value }))}
-                            className="accent-primary"
-                          />
-                          {opt}
-                        </label>
-                      ))}
-                    </div>
-                  )}
-                  {q.type === "rating" && (
-                    <div className="flex gap-2">
-                      {[1, 2, 3, 4, 5].map((n) => (
-                        <button
-                          key={n}
-                          type="button"
-                          onClick={() => setAnswers((a) => ({ ...a, [q.id]: String(n) }))}
-                          className={`h-10 w-10 rounded-full border text-sm font-semibold ${
-                            answers[q.id] === String(n) ? "bg-primary text-primary-foreground" : "bg-card hover:bg-secondary"
-                          }`}
-                        >
-                          {n}
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                <div
+                  key={q.id}
+                  className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper"
+                >
+                  <Label className="font-serif text-2xl leading-tight">
+                    {i + 1}. {q.text}
+                    {isRequired ? (
+                      <span className="ml-1 text-destructive" aria-label="required">
+                        *
+                      </span>
+                    ) : (
+                      <span className="ml-2 align-middle rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        Optional
+                      </span>
+                    )}
+                  </Label>
+                  <div className="mt-2">
+                    {q.type === "text" && (
+                      <Textarea
+                        value={answers[q.id] ?? ""}
+                        onChange={(e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value }))}
+                      />
+                    )}
+                    {q.type === "choice" && (
+                      <div className="space-y-1.5">
+                        {q.options?.map((opt, oi) => (
+                          <label
+                            key={oi}
+                            className="flex cursor-pointer items-center gap-2 rounded-md border p-2 text-sm hover:bg-secondary"
+                          >
+                            <input
+                              type="radio"
+                              name={q.id}
+                              value={opt}
+                              checked={answers[q.id] === opt}
+                              onChange={(e) =>
+                                setAnswers((a) => ({ ...a, [q.id]: e.target.value }))
+                              }
+                              className="accent-primary"
+                            />
+                            {opt}
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                    {q.type === "rating" && (
+                      <div className="flex gap-2">
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <button
+                            key={n}
+                            type="button"
+                            onClick={() => setAnswers((a) => ({ ...a, [q.id]: String(n) }))}
+                            className={`h-10 w-10 rounded-full border text-sm font-semibold ${
+                              answers[q.id] === String(n)
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-card hover:bg-secondary"
+                            }`}
+                          >
+                            {n}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
               );
             })}
-            <Button type="submit" size="lg" className="h-14 w-full rounded-full bg-primary text-base" disabled={submitting}>
+            <Button
+              type="submit"
+              size="lg"
+              className="h-14 w-full rounded-full bg-primary text-base"
+              disabled={submitting}
+            >
               {submitting ? "Submitting…" : "Submit & earn 1 credit →"}
             </Button>
           </form>
@@ -762,12 +1013,17 @@ function SurveyPage() {
             <AlertDialogHeader>
               <AlertDialogTitle>Delete survey?</AlertDialogTitle>
               <AlertDialogDescription>
-                This will permanently remove <strong>{survey?.title}</strong> and all its responses. This action cannot be undone.
+                This will permanently remove <strong>{survey?.title}</strong> and all its responses.
+                This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete} disabled={deleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              <AlertDialogAction
+                onClick={handleDelete}
+                disabled={deleting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
                 {deleting ? "Deleting…" : "Delete"}
               </AlertDialogAction>
             </AlertDialogFooter>
@@ -784,14 +1040,19 @@ function SurveyPage() {
       ) : (
         <header className="border-b border-foreground/10 bg-background">
           <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4">
-            <Link to="/" className="font-serif text-xl">CampusVerify</Link>
-            <Link to="/auth" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground">Log in</Link>
+            <Link to="/" className="font-serif text-xl">
+              CampusVerify
+            </Link>
+            <Link
+              to="/auth"
+              className="text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground"
+            >
+              Log in
+            </Link>
           </div>
         </header>
       )}
-      <main className="mx-auto max-w-5xl px-5 py-8 sm:py-10">
-        {content}
-      </main>
+      <main className="mx-auto max-w-5xl px-5 py-8 sm:py-10">{content}</main>
     </div>
   );
 }
@@ -820,12 +1081,16 @@ function SubmissionResult({
 
   return (
     <div className="mx-auto max-w-xl">
-      <div className={`rounded-3xl border-2 p-8 shadow-paper text-center ${
-        earned ? "border-primary bg-primary/10" : "border-foreground/20 bg-card"
-      }`}>
-        <div className={`mx-auto flex h-20 w-20 items-center justify-center rounded-full ${
-          earned ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground"
-        }`}>
+      <div
+        className={`rounded-3xl border-2 p-8 shadow-paper text-center ${
+          earned ? "border-primary bg-primary/10" : "border-foreground/20 bg-card"
+        }`}
+      >
+        <div
+          className={`mx-auto flex h-20 w-20 items-center justify-center rounded-full ${
+            earned ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground"
+          }`}
+        >
           {earned ? (
             <span className="font-serif text-3xl leading-none">+{result.delta}</span>
           ) : (
@@ -836,12 +1101,24 @@ function SubmissionResult({
           {earned ? "Credits earned" : "Submitted"}
         </p>
         <h1 className="mt-2 font-serif text-4xl leading-[0.95]">
-          {earned ? <>You earned <em className="text-primary">{result.delta} credit{result.delta === 1 ? "" : "s"}</em>.</> : "Thanks for responding."}
+          {earned ? (
+            <>
+              You earned{" "}
+              <em className="text-primary">
+                {result.delta} credit{result.delta === 1 ? "" : "s"}
+              </em>
+              .
+            </>
+          ) : (
+            "Thanks for responding."
+          )}
         </h1>
         <p className="mt-3 text-sm text-muted-foreground">{reasonLabel}</p>
 
         <div className="mt-6 rounded-2xl border border-foreground/15 bg-background/60 p-4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Your wallet</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            Your wallet
+          </p>
           <p className="mt-1 font-serif text-5xl text-primary">{result.newBalance}</p>
           <p className="text-[11px] text-muted-foreground">total earned credits</p>
         </div>
@@ -866,4 +1143,3 @@ function SubmissionResult({
     </div>
   );
 }
-

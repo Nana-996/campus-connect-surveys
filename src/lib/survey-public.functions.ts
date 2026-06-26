@@ -87,9 +87,7 @@ export function sanitizeEvaluationQuestions(questions: unknown): unknown {
     const cleaned = stripInternalKeys(q as Record<string, any>);
     if (Array.isArray(cleaned.options)) {
       cleaned.options = cleaned.options.map((opt: any) =>
-        opt && typeof opt === "object" && !Array.isArray(opt)
-          ? stripInternalKeys(opt)
-          : opt,
+        opt && typeof opt === "object" && !Array.isArray(opt) ? stripInternalKeys(opt) : opt,
       );
     }
     return cleaned;

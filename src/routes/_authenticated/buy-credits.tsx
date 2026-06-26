@@ -25,7 +25,10 @@ function BuyCredits() {
       toast.success("Payment received — credits will land in your balance shortly.");
       const tick = setInterval(() => refreshProfile(), 2000);
       const stop = setTimeout(() => clearInterval(tick), 20000);
-      return () => { clearInterval(tick); clearTimeout(stop); };
+      return () => {
+        clearInterval(tick);
+        clearTimeout(stop);
+      };
     }
   }, [refreshProfile]);
 
@@ -64,7 +67,9 @@ function BuyCredits() {
     <div>
       <PaymentTestModeBanner />
       <div className="mx-auto max-w-5xl">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Buy credits</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+          Buy credits
+        </p>
         <h1 className="mt-1 font-serif text-5xl leading-[0.95]">
           Stock up to <em className="text-primary">publish.</em>
         </h1>
@@ -75,8 +80,8 @@ function BuyCredits() {
         </p>
 
         <p className="mt-6 max-w-2xl text-sm text-muted-foreground">
-          Credits never expire. Prices show in USD at checkout but your bank converts to GHS automatically —
-          approximate cedi values are shown below at ~12 GHS / USD.
+          Credits never expire. Prices show in USD at checkout but your bank converts to GHS
+          automatically — approximate cedi values are shown below at ~12 GHS / USD.
         </p>
 
         <div className="mt-8 grid gap-5 sm:grid-cols-3">
@@ -105,9 +110,16 @@ function BuyCredits() {
               </div>
 
               <ul className="mt-4 space-y-1.5 text-xs text-muted-foreground">
-                <li className="flex items-start gap-1.5"><Check className="mt-0.5 h-3 w-3 text-primary" /> Never expire</li>
-                <li className="flex items-start gap-1.5"><Check className="mt-0.5 h-3 w-3 text-primary" /> ${(b.usdAmount / b.credits).toFixed(3)} per credit</li>
-                <li className="flex items-start gap-1.5"><Check className="mt-0.5 h-3 w-3 text-primary" /> Instant top-up</li>
+                <li className="flex items-start gap-1.5">
+                  <Check className="mt-0.5 h-3 w-3 text-primary" /> Never expire
+                </li>
+                <li className="flex items-start gap-1.5">
+                  <Check className="mt-0.5 h-3 w-3 text-primary" /> $
+                  {(b.usdAmount / b.credits).toFixed(3)} per credit
+                </li>
+                <li className="flex items-start gap-1.5">
+                  <Check className="mt-0.5 h-3 w-3 text-primary" /> Instant top-up
+                </li>
               </ul>
 
               <Button

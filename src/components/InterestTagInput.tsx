@@ -3,7 +3,10 @@ import { useServerFn } from "@tanstack/react-start";
 import { X, Loader2, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { INTEREST_TAGS, tagLabel } from "@/lib/interests";
 import { normalizeInterestTag, normalizeInterestTagAI } from "@/lib/interests.functions";
@@ -71,12 +74,18 @@ export function InterestTagInput({ value, onChange, placeholder, max = 8 }: Prop
         {value.map((v, i) => {
           const aiMapped = v.raw.toLowerCase().replace(/\s+/g, "_") !== v.tag;
           return (
-            <span key={`${v.raw}-${i}`} className="inline-flex items-center gap-1 rounded-full bg-secondary/60 pl-2 pr-1 py-0.5 text-xs">
+            <span
+              key={`${v.raw}-${i}`}
+              className="inline-flex items-center gap-1 rounded-full bg-secondary/60 pl-2 pr-1 py-0.5 text-xs"
+            >
               <span className="font-semibold">{v.raw}</span>
               {aiMapped && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button type="button" className="inline-flex items-center gap-0.5 rounded-full bg-background/60 px-1.5 text-[10px] font-bold uppercase text-muted-foreground hover:text-foreground">
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-0.5 rounded-full bg-background/60 px-1.5 text-[10px] font-bold uppercase text-muted-foreground hover:text-foreground"
+                    >
                       <Sparkles className="h-2.5 w-2.5" /> {tagLabel(v.tag)}
                     </button>
                   </DropdownMenuTrigger>
@@ -89,7 +98,12 @@ export function InterestTagInput({ value, onChange, placeholder, max = 8 }: Prop
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
-              <button type="button" onClick={() => remove(i)} aria-label="Remove" className="rounded-full p-0.5 hover:bg-foreground/10">
+              <button
+                type="button"
+                onClick={() => remove(i)}
+                aria-label="Remove"
+                className="rounded-full p-0.5 hover:bg-foreground/10"
+              >
                 <X className="h-3 w-3" />
               </button>
             </span>
@@ -101,7 +115,11 @@ export function InterestTagInput({ value, onChange, placeholder, max = 8 }: Prop
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={onKey}
             onBlur={() => draft && add()}
-            placeholder={value.length >= max ? `Up to ${max} tags` : placeholder ?? "Type an interest and press Enter"}
+            placeholder={
+              value.length >= max
+                ? `Up to ${max} tags`
+                : (placeholder ?? "Type an interest and press Enter")
+            }
             disabled={busy || value.length >= max}
             className="h-7 border-0 bg-transparent px-1 text-sm focus-visible:ring-0"
           />
@@ -109,7 +127,8 @@ export function InterestTagInput({ value, onChange, placeholder, max = 8 }: Prop
         </div>
       </div>
       <p className="mt-1.5 px-1 text-[10px] text-muted-foreground">
-        Type anything — we'll match it to a category. Tap the <Sparkles className="inline h-2.5 w-2.5" /> chip to change the match.
+        Type anything — we'll match it to a category. Tap the{" "}
+        <Sparkles className="inline h-2.5 w-2.5" /> chip to change the match.
       </p>
     </div>
   );

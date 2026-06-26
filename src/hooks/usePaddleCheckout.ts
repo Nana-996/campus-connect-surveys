@@ -23,8 +23,7 @@ export function usePaddleCheckout() {
         settings: {
           displayMode: "overlay",
           successUrl:
-            options.successUrl ||
-            `${window.location.origin}/buy-credits?checkout=success`,
+            options.successUrl || `${window.location.origin}/buy-credits?checkout=success`,
           allowLogout: false,
           variant: "one-page",
         },

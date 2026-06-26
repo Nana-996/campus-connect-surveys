@@ -29,9 +29,17 @@ export const Route = createFileRoute("/_authenticated/feed")({
   head: () => ({
     meta: [
       { title: "Your survey feed — CampusVerify" },
-      { name: "description", content: "Browse open surveys matched to your campus, year, and interests. Answer to earn credits on CampusVerify." },
+      {
+        name: "description",
+        content:
+          "Browse open surveys matched to your campus, year, and interests. Answer to earn credits on CampusVerify.",
+      },
       { property: "og:title", content: "Your survey feed — CampusVerify" },
-      { property: "og:description", content: "Browse open surveys matched to your campus, year, and interests. Answer to earn credits on CampusVerify." },
+      {
+        property: "og:description",
+        content:
+          "Browse open surveys matched to your campus, year, and interests. Answer to earn credits on CampusVerify.",
+      },
       { name: "robots", content: "noindex,nofollow" },
     ],
   }),
@@ -88,8 +96,18 @@ function Feed() {
         const peersPromise = isGeneral
           ? Promise.resolve({ data: [], error: null } as any)
           : supabase.from("campus_directory" as any).select("department, year");
-        const [{ data, error }, { data: resps, error: respsError }, { data: peers, error: peersError }] = await Promise.all([
-          supabase.from("surveys").select("*").eq("is_active", true).gt("expires_at", new Date().toISOString()).neq("creator_id", user.id).order("created_at", { ascending: false }),
+        const [
+          { data, error },
+          { data: resps, error: respsError },
+          { data: peers, error: peersError },
+        ] = await Promise.all([
+          supabase
+            .from("surveys")
+            .select("*")
+            .eq("is_active", true)
+            .gt("expires_at", new Date().toISOString())
+            .neq("creator_id", user.id)
+            .order("created_at", { ascending: false }),
           supabase.from("survey_responses").select("survey_id").eq("respondent_id", user.id),
           peersPromise,
         ]);
@@ -97,7 +115,9 @@ function Feed() {
         if (error) console.warn("Survey feed request failed.", error);
         if (respsError) console.warn("Answered-surveys request failed.", respsError);
         if (peersError) console.warn("Campus filters request failed.", peersError);
-        const rows = ((data as unknown as (Survey & { response_goal: number })[]) ?? []).filter((s) => s.response_count < (s.response_goal ?? Infinity));
+        const rows = ((data as unknown as (Survey & { response_goal: number })[]) ?? []).filter(
+          (s) => s.response_count < (s.response_goal ?? Infinity),
+        );
         rows.sort((a, b) => {
           const aB = a.boosted_until && new Date(a.boosted_until) > new Date() ? 1 : 0;
           const bB = b.boosted_until && new Date(b.boosted_until) > new Date() ? 1 : 0;
@@ -106,8 +126,14 @@ function Feed() {
         setSurveys(rows);
         const answeredIds = (resps ?? []).map((r: any) => r.survey_id);
         setAnswered(new Set(answeredIds));
-        setCampusDepts(Array.from(new Set((peers ?? []).map((p: any) => p.department).filter(Boolean))) as string[]);
-        setCampusYears(Array.from(new Set((peers ?? []).map((p: any) => p.year).filter(Boolean))) as string[]);
+        setCampusDepts(
+          Array.from(
+            new Set((peers ?? []).map((p: any) => p.department).filter(Boolean)),
+          ) as string[],
+        );
+        setCampusYears(
+          Array.from(new Set((peers ?? []).map((p: any) => p.year).filter(Boolean))) as string[],
+        );
         setFromCache(false);
         // Persist for offline browsing (cap to 50 to keep storage light).
         void cacheFeed({ user_id: user.id, surveys: rows.slice(0, 50), answered: answeredIds });
@@ -115,24 +141,26 @@ function Feed() {
         if (active) setLoading(false);
       }
     })();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [user?.id, profile?.department, profile?.year, isGeneral]);
 
   // Student cohort options
-  const departments = Array.from(new Set([
-    ...campusDepts,
-    ...surveys.map((s) => s.target_department).filter(Boolean) as string[],
-  ])).sort();
-  const years = Array.from(new Set([
-    ...campusYears,
-    ...surveys.map((s) => s.target_year).filter(Boolean) as string[],
-  ])).sort();
+  const departments = Array.from(
+    new Set([
+      ...campusDepts,
+      ...(surveys.map((s) => s.target_department).filter(Boolean) as string[]),
+    ]),
+  ).sort();
+  const years = Array.from(
+    new Set([...campusYears, ...(surveys.map((s) => s.target_year).filter(Boolean) as string[])]),
+  ).sort();
 
   // General audience options
-  const countries = Array.from(new Set([
-    ...COUNTRIES,
-    ...surveys.map((s) => s.target_country).filter(Boolean) as string[],
-  ]));
+  const countries = Array.from(
+    new Set([...COUNTRIES, ...(surveys.map((s) => s.target_country).filter(Boolean) as string[])]),
+  );
 
   const matchesDept = (s: Survey, dept: string) =>
     dept === "all" || !s.target_department || s.target_department === dept;
@@ -143,7 +171,10 @@ function Feed() {
   const matchesAge = (s: Survey, a: string) =>
     a === "all" || !s.target_age_range || s.target_age_range === a;
   const matchesInterest = (s: Survey, i: string) =>
-    i === "all" || !s.target_interests || s.target_interests.length === 0 || s.target_interests.includes(i);
+    i === "all" ||
+    !s.target_interests ||
+    s.target_interests.length === 0 ||
+    s.target_interests.includes(i);
 
   const visible = surveys.filter((s) => {
     if (isGeneral) {
@@ -165,28 +196,48 @@ function Feed() {
     return true;
   });
 
-  const generalCohortLabel = [profile?.country, profile?.age_range ? ageLabel(profile.age_range) : null].filter(Boolean).join(" / ");
+  const generalCohortLabel = [
+    profile?.country,
+    profile?.age_range ? ageLabel(profile.age_range) : null,
+  ]
+    .filter(Boolean)
+    .join(" / ");
   const studentCohortLabel = [profile?.department, profile?.year].filter(Boolean).join(" / ");
   const cohortLabel = isGeneral ? generalCohortLabel : studentCohortLabel;
   const anyFilterActive = isGeneral
-    ? (countryFilter !== "all" || ageFilter !== "all" || interestFilter !== "all" || scope === "mine")
-    : (deptFilter !== "all" || yearFilter !== "all" || scope === "mine");
+    ? countryFilter !== "all" || ageFilter !== "all" || interestFilter !== "all" || scope === "mine"
+    : deptFilter !== "all" || yearFilter !== "all" || scope === "mine";
 
   return (
     <div>
       <div className="mb-8 flex items-end justify-between gap-4">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">{isGeneral ? "Today's surveys" : "Today on campus"}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+            {isGeneral ? "Today's surveys" : "Today on campus"}
+          </p>
           <h1 className="mt-1 font-serif text-5xl leading-[0.95] sm:text-6xl">
             The <em className="text-primary">feed.</em>
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            {isGeneral
-              ? <>Open to <span className="font-semibold text-foreground">everyone</span>{profile?.country ? <> · {profile.country}</> : null}</>
-              : <>Verified students at <span className="font-semibold text-foreground">{profile?.university_name ?? "your campus"}</span></>}
+            {isGeneral ? (
+              <>
+                Open to <span className="font-semibold text-foreground">everyone</span>
+                {profile?.country ? <> · {profile.country}</> : null}
+              </>
+            ) : (
+              <>
+                Verified students at{" "}
+                <span className="font-semibold text-foreground">
+                  {profile?.university_name ?? "your campus"}
+                </span>
+              </>
+            )}
           </p>
         </div>
-        <Link to="/create" className="hidden sm:inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-wider text-primary-foreground shadow-paper hover:opacity-90">
+        <Link
+          to="/create"
+          className="hidden sm:inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-wider text-primary-foreground shadow-paper hover:opacity-90"
+        >
           New survey <ArrowUpRight className="h-3.5 w-3.5" />
         </Link>
       </div>
@@ -198,14 +249,14 @@ function Feed() {
         </div>
       )}
 
-
       <div className="mb-6 flex flex-wrap items-center gap-2 text-xs">
         <Filter className="h-3.5 w-3.5 text-muted-foreground" />
         <button
           onClick={() => setScope(scope === "mine" ? "all" : "mine")}
           className={`rounded-full border px-3 py-1 font-semibold uppercase tracking-wider transition ${scope === "mine" ? "border-primary bg-primary text-primary-foreground" : "border-foreground/20 bg-card hover:bg-accent"}`}
         >
-          {isGeneral ? "For me" : "My cohort"}{cohortLabel ? ` · ${cohortLabel}` : ""}
+          {isGeneral ? "For me" : "My cohort"}
+          {cohortLabel ? ` · ${cohortLabel}` : ""}
         </button>
 
         {isGeneral ? (
@@ -217,7 +268,11 @@ function Feed() {
               className="rounded-full border border-foreground/20 bg-card px-3 py-1 font-semibold uppercase tracking-wider"
             >
               <option value="all">All countries</option>
-              {countries.map((c) => <option key={c} value={c}>{c}</option>)}
+              {countries.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
             </select>
             <select
               aria-label="Filter by age"
@@ -226,7 +281,11 @@ function Feed() {
               className="rounded-full border border-foreground/20 bg-card px-3 py-1 font-semibold uppercase tracking-wider"
             >
               <option value="all">All ages</option>
-              {AGE_RANGES.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}
+              {AGE_RANGES.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.label}
+                </option>
+              ))}
             </select>
             <select
               aria-label="Filter by interest"
@@ -235,7 +294,11 @@ function Feed() {
               className="rounded-full border border-foreground/20 bg-card px-3 py-1 font-semibold uppercase tracking-wider"
             >
               <option value="all">All interests</option>
-              {INTEREST_TAGS.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
+              {INTEREST_TAGS.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.label}
+                </option>
+              ))}
             </select>
           </>
         ) : (
@@ -247,7 +310,11 @@ function Feed() {
               className="rounded-full border border-foreground/20 bg-card px-3 py-1 font-semibold uppercase tracking-wider"
             >
               <option value="all">All departments</option>
-              {departments.map((d) => <option key={d} value={d}>{d}</option>)}
+              {departments.map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
             </select>
             <select
               aria-label="Filter by year"
@@ -256,7 +323,11 @@ function Feed() {
               className="rounded-full border border-foreground/20 bg-card px-3 py-1 font-semibold uppercase tracking-wider"
             >
               <option value="all">All years</option>
-              {years.map((y) => <option key={y} value={y}>{y}</option>)}
+              {years.map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
             </select>
           </>
         )}
@@ -264,8 +335,11 @@ function Feed() {
         {anyFilterActive && (
           <button
             onClick={() => {
-              setDeptFilter("all"); setYearFilter("all");
-              setCountryFilter("all"); setAgeFilter("all"); setInterestFilter("all");
+              setDeptFilter("all");
+              setYearFilter("all");
+              setCountryFilter("all");
+              setAgeFilter("all");
+              setInterestFilter("all");
               setScope("all");
             }}
             className="text-muted-foreground underline hover:text-foreground"
@@ -303,8 +377,11 @@ function Feed() {
                 {filteredOut && (
                   <button
                     onClick={() => {
-                      setDeptFilter("all"); setYearFilter("all");
-                      setCountryFilter("all"); setAgeFilter("all"); setInterestFilter("all");
+                      setDeptFilter("all");
+                      setYearFilter("all");
+                      setCountryFilter("all");
+                      setAgeFilter("all");
+                      setInterestFilter("all");
                       setScope("all");
                     }}
                     className="inline-flex items-center gap-1 rounded-full border border-foreground/30 bg-background px-5 py-2 text-sm font-semibold"
@@ -312,7 +389,10 @@ function Feed() {
                     Clear filters
                   </button>
                 )}
-                <Link to="/create" className="inline-flex items-center gap-1 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground">
+                <Link
+                  to="/create"
+                  className="inline-flex items-center gap-1 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground"
+                >
                   {filteredOut ? "New survey" : "Start one"} <ArrowUpRight className="h-4 w-4" />
                 </Link>
               </div>
@@ -323,74 +403,85 @@ function Feed() {
         <>
           <h2 className="sr-only">Open surveys</h2>
           <div className="grid auto-rows-[minmax(180px,auto)] grid-cols-2 gap-3 sm:grid-cols-6 sm:gap-4">
-          {visible.map((s, i) => {
-            const tone = TONES[i % TONES.length];
-            // Bento sizing pattern
-            const span =
-              i % 7 === 0 ? "col-span-2 sm:col-span-4 sm:row-span-2"
-              : i % 5 === 0 ? "col-span-2 sm:col-span-3"
-              : i % 3 === 0 ? "col-span-2 sm:col-span-3"
-              : "col-span-2 sm:col-span-2";
-            const isLarge = i % 7 === 0;
-            const isDone = answered.has(s.id);
-            const isBoosted = s.boosted_until && new Date(s.boosted_until) > new Date();
-            const isPro = s.tier === "pro";
-            return (
-              <Link
-                key={s.id}
-                to="/survey/$id"
-                params={{ id: s.id }}
-                className={`group relative flex flex-col justify-between overflow-hidden rounded-3xl border p-5 shadow-paper transition hover:-translate-y-0.5 hover:shadow-lg ${tone} ${span} ${isBoosted ? "border-highlight ring-2 ring-highlight/40" : "border-foreground/15"}`}
-              >
-                <div>
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-70">
-                        №{String(i + 1).padStart(2, "0")}
-                      </span>
-                      {isBoosted && (
-                        <span className="rounded-full bg-highlight px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-highlight-foreground">
-                          {isPro ? "★ Pro" : "↑ Boosted"}
+            {visible.map((s, i) => {
+              const tone = TONES[i % TONES.length];
+              // Bento sizing pattern
+              const span =
+                i % 7 === 0
+                  ? "col-span-2 sm:col-span-4 sm:row-span-2"
+                  : i % 5 === 0
+                    ? "col-span-2 sm:col-span-3"
+                    : i % 3 === 0
+                      ? "col-span-2 sm:col-span-3"
+                      : "col-span-2 sm:col-span-2";
+              const isLarge = i % 7 === 0;
+              const isDone = answered.has(s.id);
+              const isBoosted = s.boosted_until && new Date(s.boosted_until) > new Date();
+              const isPro = s.tier === "pro";
+              return (
+                <Link
+                  key={s.id}
+                  to="/survey/$id"
+                  params={{ id: s.id }}
+                  className={`group relative flex flex-col justify-between overflow-hidden rounded-3xl border p-5 shadow-paper transition hover:-translate-y-0.5 hover:shadow-lg ${tone} ${span} ${isBoosted ? "border-highlight ring-2 ring-highlight/40" : "border-foreground/15"}`}
+                >
+                  <div>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-70">
+                          №{String(i + 1).padStart(2, "0")}
+                        </span>
+                        {isBoosted && (
+                          <span className="rounded-full bg-highlight px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-highlight-foreground">
+                            {isPro ? "★ Pro" : "↑ Boosted"}
+                          </span>
+                        )}
+                      </div>
+                      {isDone && (
+                        <span className="rounded-full bg-background/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+                          ✓ Done
                         </span>
                       )}
                     </div>
-                    {isDone && (
-                      <span className="rounded-full bg-background/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
-                        ✓ Done
-                      </span>
+                    <h3
+                      className={`mt-3 font-serif leading-[1] ${isLarge ? "text-4xl sm:text-6xl" : "text-2xl sm:text-3xl"}`}
+                    >
+                      {s.title}
+                    </h3>
+                    {s.description && isLarge && (
+                      <p className="mt-3 line-clamp-3 max-w-md text-sm opacity-80">
+                        {s.description}
+                      </p>
                     )}
                   </div>
-                  <h3 className={`mt-3 font-serif leading-[1] ${isLarge ? "text-4xl sm:text-6xl" : "text-2xl sm:text-3xl"}`}>
-                    {s.title}
-                  </h3>
-                  {s.description && isLarge && (
-                    <p className="mt-3 line-clamp-3 max-w-md text-sm opacity-80">{s.description}</p>
-                  )}
-                </div>
-                <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-medium uppercase tracking-wider opacity-80">
-                  <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{s.response_count}</span>
-                  <span>·</span>
-                  <span>{s.questions?.length ?? 0} Qs</span>
-                  {(() => {
-                    const bits = [
-                      s.target_department,
-                      s.target_year,
-                      s.target_country,
-                      s.target_age_range ? ageLabel(s.target_age_range) : null,
-                      ...(s.target_interests ?? []).map((id) => tagLabel(id)),
-                    ].filter(Boolean) as string[];
-                    return bits.length > 0 ? (
-                      <span className="inline-flex items-center gap-1">
-                        <Filter className="h-3 w-3" />
-                        {bits.slice(0, 3).join(" · ")}{bits.length > 3 ? ` +${bits.length - 3}` : ""}
-                      </span>
-                    ) : null;
-                  })()}
-                </div>
-                <ArrowUpRight className="absolute right-4 top-4 h-4 w-4 opacity-0 transition group-hover:opacity-70" />
-              </Link>
-            );
-          })}
+                  <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-medium uppercase tracking-wider opacity-80">
+                    <span className="inline-flex items-center gap-1">
+                      <Users className="h-3 w-3" />
+                      {s.response_count}
+                    </span>
+                    <span>·</span>
+                    <span>{s.questions?.length ?? 0} Qs</span>
+                    {(() => {
+                      const bits = [
+                        s.target_department,
+                        s.target_year,
+                        s.target_country,
+                        s.target_age_range ? ageLabel(s.target_age_range) : null,
+                        ...(s.target_interests ?? []).map((id) => tagLabel(id)),
+                      ].filter(Boolean) as string[];
+                      return bits.length > 0 ? (
+                        <span className="inline-flex items-center gap-1">
+                          <Filter className="h-3 w-3" />
+                          {bits.slice(0, 3).join(" · ")}
+                          {bits.length > 3 ? ` +${bits.length - 3}` : ""}
+                        </span>
+                      ) : null;
+                    })()}
+                  </div>
+                  <ArrowUpRight className="absolute right-4 top-4 h-4 w-4 opacity-0 transition group-hover:opacity-70" />
+                </Link>
+              );
+            })}
           </div>
         </>
       )}

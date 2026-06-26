@@ -32,9 +32,7 @@ export const Route = createFileRoute("/about")({
           "How CampusVerify uses academic email verification, row-level security, and a credit economy to deliver trustworthy student surveys.",
       },
     ],
-    links: [
-      { rel: "canonical", href: "https://your-domain.com/about" },
-    ],
+    links: [{ rel: "canonical", href: "https://your-domain.com/about" }],
   }),
 });
 
@@ -107,10 +105,10 @@ function AboutPage() {
             <em className="text-primary">trustworthy research.</em>
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
-            CampusVerify is a final-year project that helps university students run honest,
-            verified surveys without paying for panels. This page documents the problem we
-            tackled, the system we built, and the design decisions we made — at the level of
-            detail an academic evaluator needs.
+            CampusVerify is a final-year project that helps university students run honest, verified
+            surveys without paying for panels. This page documents the problem we tackled, the
+            system we built, and the design decisions we made — at the level of detail an academic
+            evaluator needs.
           </p>
         </section>
 
@@ -118,15 +116,14 @@ function AboutPage() {
         <Section id="problem" eyebrow="The problem" title="Student research is broken in two ways.">
           <p>
             <strong className="text-foreground">Data quality.</strong> Free survey tools allow
-            anyone to respond. A dissertation about engineering students at a Ghanaian
-            university can end up answered by bots, click-farms, or strangers from another
-            continent — invalidating the dataset.
+            anyone to respond. A dissertation about engineering students at a Ghanaian university
+            can end up answered by bots, click-farms, or strangers from another continent —
+            invalidating the dataset.
           </p>
           <p>
             <strong className="text-foreground">Access &amp; cost.</strong> Paid panels are
-            unaffordable for undergraduates, and social-media recruiting depends on the
-            researcher's personal network. Students with smaller networks systematically get
-            less data.
+            unaffordable for undergraduates, and social-media recruiting depends on the researcher's
+            personal network. Students with smaller networks systematically get less data.
           </p>
         </Section>
 
@@ -137,17 +134,17 @@ function AboutPage() {
           title="A credit-powered feed of verified classmates."
         >
           <p>
-            CampusVerify gates participation on a <strong className="text-foreground">verified
-            academic email</strong> (<code>.edu</code>, <code>.edu.gh</code>, <code>.ac.uk</code>,{" "}
-            etc.). The email's domain defines a student's campus, and surveys are scoped to
-            that campus by default. Researchers can also opt-in to a wider public audience for
-            general-interest studies.
+            CampusVerify gates participation on a{" "}
+            <strong className="text-foreground">verified academic email</strong> (<code>.edu</code>,{" "}
+            <code>.edu.gh</code>, <code>.ac.uk</code>, etc.). The email's domain defines a student's
+            campus, and surveys are scoped to that campus by default. Researchers can also opt-in to
+            a wider public audience for general-interest studies.
           </p>
           <p>
             Instead of money, the platform runs on a{" "}
-            <strong className="text-foreground">credit economy</strong>: you earn one credit
-            for each quality response you give, and spend credits to publish your own surveys.
-            This aligns incentives — every researcher is also a respondent.
+            <strong className="text-foreground">credit economy</strong>: you earn one credit for
+            each quality response you give, and spend credits to publish your own surveys. This
+            aligns incentives — every researcher is also a respondent.
           </p>
         </Section>
 
@@ -159,24 +156,24 @@ function AboutPage() {
         >
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <Pillar icon={ShieldCheck} title="Identity verification">
-              Sign-up requires an academic email and confirmation link. We never auto-sign-in;
-              the email must be verified before the account is usable.
+              Sign-up requires an academic email and confirmation link. We never auto-sign-in; the
+              email must be verified before the account is usable.
             </Pillar>
             <Pillar icon={Users} title="Campus scoping">
               Email domain maps to a university. Default audience for any survey is "only your
               campus", protecting both relevance and respondent privacy.
             </Pillar>
             <Pillar icon={Coins} title="Credit economy">
-              Publishing costs credits; answering earns them. This funds the platform without
-              real money and discourages low-effort surveys.
+              Publishing costs credits; answering earns them. This funds the platform without real
+              money and discourages low-effort surveys.
             </Pillar>
             <Pillar icon={Lock} title="Defense-in-depth security">
-              Row-level security on every table, role checks via a security-definer function,
-              and database triggers that protect sensitive columns even from the owner.
+              Row-level security on every table, role checks via a security-definer function, and
+              database triggers that protect sensitive columns even from the owner.
             </Pillar>
             <Pillar icon={Wifi} title="Offline-first">
-              Campus Wi-Fi and mobile data are unreliable. Surveys cache locally so respondents
-              can answer without a connection and sync automatically when back online.
+              Campus Wi-Fi and mobile data are unreliable. Surveys cache locally so respondents can
+              answer without a connection and sync automatically when back online.
             </Pillar>
             <Pillar icon={FileBarChart} title="Report builder">
               Survey owners get a configurable report — cover page, executive summary, per-question
@@ -194,23 +191,23 @@ function AboutPage() {
           <ul className="list-disc space-y-2 pl-6">
             <li>
               <strong className="text-foreground">Frontend:</strong> React 19 + TanStack Start
-              (file-based routing, server functions, SSR) on Vite 7, styled with Tailwind CSS
-              v4 and shadcn/ui primitives.
+              (file-based routing, server functions, SSR) on Vite 7, styled with Tailwind CSS v4 and
+              shadcn/ui primitives.
             </li>
             <li>
-              <strong className="text-foreground">Backend:</strong> Postgres + Supabase Auth
-              for identity. Business logic runs as TanStack server functions secured by an
+              <strong className="text-foreground">Backend:</strong> Postgres + Supabase Auth for
+              identity. Business logic runs as TanStack server functions secured by an
               authentication middleware; webhooks live as server routes.
             </li>
             <li>
-              <strong className="text-foreground">Data layer:</strong> Row-Level Security on
-              every table. A <code>has_role()</code> security-definer function avoids RLS
-              recursion. Triggers protect sensitive columns (credits, user types, survey
-              rules) from direct modification.
+              <strong className="text-foreground">Data layer:</strong> Row-Level Security on every
+              table. A <code>has_role()</code> security-definer function avoids RLS recursion.
+              Triggers protect sensitive columns (credits, user types, survey rules) from direct
+              modification.
             </li>
             <li>
-              <strong className="text-foreground">Offline:</strong> A service worker caches
-              survey payloads; responses queue in IndexedDB and replay on reconnect.
+              <strong className="text-foreground">Offline:</strong> A service worker caches survey
+              payloads; responses queue in IndexedDB and replay on reconnect.
             </li>
             <li>
               <strong className="text-foreground">Hosting:</strong> Edge runtime (Cloudflare
@@ -226,17 +223,17 @@ function AboutPage() {
           title="Trust is enforced in the database, not just the UI."
         >
           <p>
-            Every table in the <code>public</code> schema has RLS enabled. Roles are stored in
-            a separate <code>user_roles</code> table — never on the profile — and checked via
-            <code> has_role(user_id, role)</code>, a <code>SECURITY DEFINER</code> function
-            that prevents privilege-escalation attacks common in naive Supabase apps.
+            Every table in the <code>public</code> schema has RLS enabled. Roles are stored in a
+            separate <code>user_roles</code> table — never on the profile — and checked via
+            <code> has_role(user_id, role)</code>, a <code>SECURITY DEFINER</code> function that
+            prevents privilege-escalation attacks common in naive Supabase apps.
           </p>
           <p>
             Sensitive columns (a user's credit balance, a survey's published flag, a profile's
             verification status) cannot be edited via the API even by the row's owner. Database
-            triggers reject any attempt; only internal server logic can update them. A
-            "speed-trap" trigger flags suspiciously fast responses as fraud, while still
-            honouring genuine offline-sync timing.
+            triggers reject any attempt; only internal server logic can update them. A "speed-trap"
+            trigger flags suspiciously fast responses as fraud, while still honouring genuine
+            offline-sync timing.
           </p>
           <p>
             Realtime broadcasts are restricted to a safe column allow-list so sensitive fields
@@ -260,13 +257,13 @@ function AboutPage() {
               generates route types at build time; broken links fail the build, not production.
             </li>
             <li>
-              <strong className="text-foreground">Semantic design tokens.</strong> No raw
-              colours in components — every shade is a token defined in{" "}
-              <code>src/styles.css</code>, giving consistent light/dark behaviour.
+              <strong className="text-foreground">Semantic design tokens.</strong> No raw colours in
+              components — every shade is a token defined in <code>src/styles.css</code>, giving
+              consistent light/dark behaviour.
             </li>
             <li>
-              <strong className="text-foreground">PWA installable.</strong> The app ships a
-              manifest and icons; students can install it to their home screen.
+              <strong className="text-foreground">PWA installable.</strong> The app ships a manifest
+              and icons; students can install it to their home screen.
             </li>
           </ul>
         </Section>
@@ -279,24 +276,24 @@ function AboutPage() {
         >
           <ol className="list-decimal space-y-2 pl-6">
             <li>
-              <strong className="text-foreground">Create an account</strong> from the home
-              page using any academic email; confirm the verification link.
+              <strong className="text-foreground">Create an account</strong> from the home page
+              using any academic email; confirm the verification link.
             </li>
             <li>
-              <strong className="text-foreground">Open the feed</strong> — it shows surveys
-              scoped to your campus, with credit rewards and remaining slots.
+              <strong className="text-foreground">Open the feed</strong> — it shows surveys scoped
+              to your campus, with credit rewards and remaining slots.
             </li>
             <li>
-              <strong className="text-foreground">Answer one survey</strong> to earn credits
-              and observe the offline indicator (try toggling airplane mode mid-answer).
+              <strong className="text-foreground">Answer one survey</strong> to earn credits and
+              observe the offline indicator (try toggling airplane mode mid-answer).
             </li>
             <li>
-              <strong className="text-foreground">Publish your own survey</strong>; spend
-              credits, then open the Analytics view to see live results.
+              <strong className="text-foreground">Publish your own survey</strong>; spend credits,
+              then open the Analytics view to see live results.
             </li>
             <li>
-              <strong className="text-foreground">Build a report</strong> from the analytics
-              page and export the PDF — this is the artefact a researcher would submit.
+              <strong className="text-foreground">Build a report</strong> from the analytics page
+              and export the PDF — this is the artefact a researcher would submit.
             </li>
           </ol>
         </Section>
@@ -318,7 +315,11 @@ function AboutPage() {
               </Button>
             </Link>
             <Link to="/">
-              <Button size="lg" variant="outline" className="h-12 rounded-full border-foreground/30 px-7">
+              <Button
+                size="lg"
+                variant="outline"
+                className="h-12 rounded-full border-foreground/30 px-7"
+              >
                 Back to home
               </Button>
             </Link>
@@ -327,8 +328,14 @@ function AboutPage() {
       </main>
 
       <footer className="border-t border-foreground/10 py-8 text-center text-xs text-muted-foreground">
-        CampusVerify · An academic project · <Link to="/privacy" className="underline">Privacy</Link>{" "}
-        · <Link to="/terms" className="underline">Terms</Link>
+        CampusVerify · An academic project ·{" "}
+        <Link to="/privacy" className="underline">
+          Privacy
+        </Link>{" "}
+        ·{" "}
+        <Link to="/terms" className="underline">
+          Terms
+        </Link>
       </footer>
     </div>
   );

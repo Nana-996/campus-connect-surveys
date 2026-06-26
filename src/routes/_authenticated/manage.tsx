@@ -12,7 +12,9 @@ export const Route = createFileRoute("/_authenticated/manage")({
     return (
       <div className="rounded-3xl border border-foreground/15 bg-card p-8 text-center">
         <p className="font-serif text-2xl">Something went wrong</p>
-        <p className="mt-2 text-sm text-muted-foreground">We couldn't load this page. Please try again.</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          We couldn't load this page. Please try again.
+        </p>
       </div>
     );
   },
@@ -22,7 +24,11 @@ export const Route = createFileRoute("/_authenticated/manage")({
 function ManagePage() {
   const fetchScope = useServerFn(getMyManagerScope);
   const fetchSurveys = useServerFn(listUniversitySurveys);
-  const { data: scope, isLoading } = useQuery({ queryKey: ["mgr", "scope"], queryFn: () => fetchScope(), retry: false });
+  const { data: scope, isLoading } = useQuery({
+    queryKey: ["mgr", "scope"],
+    queryFn: () => fetchScope(),
+    retry: false,
+  });
   const { data: surveys = [] } = useQuery({
     queryKey: ["mgr", "surveys"],
     queryFn: () => fetchSurveys(),
@@ -36,7 +42,9 @@ function ManagePage() {
       <div className="rounded-3xl border border-foreground/15 bg-card p-8 text-center">
         <ShieldAlert className="mx-auto h-8 w-8 text-destructive" />
         <p className="mt-3 font-serif text-3xl">Managers only.</p>
-        <p className="mt-1 text-sm text-muted-foreground">Ask the platform owner to grant faculty or survey tracking access.</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Ask the platform owner to grant faculty or survey tracking access.
+        </p>
       </div>
     );
   }
@@ -44,12 +52,15 @@ function ManagePage() {
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Faculty dashboard</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+          Faculty dashboard
+        </p>
         <h1 className="mt-1 font-serif text-5xl leading-[0.95]">
           {scope.university_name ?? "Your university"} <em className="text-primary">tracking.</em>
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          See who has responded, who is pending, and progress by department or year for surveys you can track.
+          See who has responded, who is pending, and progress by department or year for surveys you
+          can track.
         </p>
       </div>
 
@@ -65,8 +76,12 @@ function ManagePage() {
             <p className="font-serif text-lg leading-tight">{s.title}</p>
             <p className="mt-0.5 text-xs text-muted-foreground">{s.creator_name}</p>
             <div className="mt-2 flex items-center justify-between text-xs">
-              <span>{s.response_count}/{s.response_goal} responses</span>
-              <span className={s.is_active ? "text-primary font-semibold" : "text-muted-foreground"}>
+              <span>
+                {s.response_count}/{s.response_goal} responses
+              </span>
+              <span
+                className={s.is_active ? "text-primary font-semibold" : "text-muted-foreground"}
+              >
                 {s.is_active ? "Active" : "Inactive"}
               </span>
             </div>
@@ -98,9 +113,15 @@ function ManagePage() {
               <tr key={s.id} className="border-t border-foreground/10">
                 <td className="px-4 py-3 font-medium">{s.title}</td>
                 <td className="px-4 py-3 text-muted-foreground">{s.creator_name}</td>
-                <td className="px-4 py-3">{s.response_count}/{s.response_goal}</td>
                 <td className="px-4 py-3">
-                  {s.is_active ? <span className="text-primary">Active</span> : <span className="text-muted-foreground">Inactive</span>}
+                  {s.response_count}/{s.response_goal}
+                </td>
+                <td className="px-4 py-3">
+                  {s.is_active ? (
+                    <span className="text-primary">Active</span>
+                  ) : (
+                    <span className="text-muted-foreground">Inactive</span>
+                  )}
                 </td>
                 <td className="px-4 py-3 text-right">
                   <Link
@@ -114,7 +135,11 @@ function ManagePage() {
               </tr>
             ))}
             {surveys.length === 0 && (
-              <tr><td colSpan={5} className="px-4 py-10 text-center text-muted-foreground">No surveys available to track yet.</td></tr>
+              <tr>
+                <td colSpan={5} className="px-4 py-10 text-center text-muted-foreground">
+                  No surveys available to track yet.
+                </td>
+              </tr>
             )}
           </tbody>
         </table>

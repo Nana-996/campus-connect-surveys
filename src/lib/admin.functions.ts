@@ -58,8 +58,12 @@ export const getAdminMetrics = createServerFn({ method: "GET" })
     const { data, error } = await context.supabase.rpc("admin_dashboard_metrics" as any);
     if (error) genericError(error);
     return data as {
-      users: number; surveys: number; activeSurveys: number;
-      responses: number; responses24h: number; openFlags: number;
+      users: number;
+      surveys: number;
+      activeSurveys: number;
+      responses: number;
+      responses24h: number;
+      openFlags: number;
     };
   });
 
@@ -67,11 +71,21 @@ export const getAdminMetrics = createServerFn({ method: "GET" })
 export const listAdminUsers = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
   .inputValidator((d: { search?: string } | undefined) =>
-    z.object({ search: z.string().max(120).regex(/^[^(),.%_]*$/).optional() }).parse(d ?? {}),
+    z
+      .object({
+        search: z
+          .string()
+          .max(120)
+          .regex(/^[^(),.%_]*$/)
+          .optional(),
+      })
+      .parse(d ?? {}),
   )
   .handler(async ({ data, context }) => {
     const safe = data.search?.replace(/[(),.%_]/g, "") || undefined;
-    const { data: rows, error } = await context.supabase.rpc("admin_list_users" as any, { _search: safe });
+    const { data: rows, error } = await context.supabase.rpc("admin_list_users" as any, {
+      _search: safe,
+    });
     if (error) genericError(error);
     return rows ?? [];
   });
@@ -79,12 +93,14 @@ export const listAdminUsers = createServerFn({ method: "GET" })
 export const grantCreditsToUser = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
   .inputValidator((d: unknown) =>
-    z.object({
-      userId: z.string().uuid(),
-      wallet: z.literal("earned"),
-      amount: z.number().int().min(-1000).max(1000),
-      reason: z.string().min(1).max(200).default("admin_grant"),
-    }).parse(d),
+    z
+      .object({
+        userId: z.string().uuid(),
+        wallet: z.literal("earned"),
+        amount: z.number().int().min(-1000).max(1000),
+        reason: z.string().min(1).max(200).default("admin_grant"),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     const { data: result, error } = await context.supabase.rpc("admin_grant_credits" as any, {
@@ -99,7 +115,13 @@ export const grantCreditsToUser = createServerFn({ method: "POST" })
 export const setUserFlag = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
   .inputValidator((d: unknown) =>
-    z.object({ userId: z.string().uuid(), flagged: z.boolean(), reason: z.string().max(200).optional() }).parse(d),
+    z
+      .object({
+        userId: z.string().uuid(),
+        flagged: z.boolean(),
+        reason: z.string().max(200).optional(),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.rpc("admin_set_user_flag" as any, {
@@ -128,12 +150,13 @@ export const setUserAdminRole = createServerFn({ method: "POST" })
 
 export const grantAdminByEmail = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator((d: unknown) =>
-    z.object({ email: z.string().email().max(254) }).parse(d),
-  )
+  .inputValidator((d: unknown) => z.object({ email: z.string().email().max(254) }).parse(d))
   .handler(async ({ data, context }) => {
     const email = data.email.trim().toLowerCase();
-    const { data: userId, error } = await context.supabase.rpc("admin_grant_admin_by_email" as any, { _email: email });
+    const { data: userId, error } = await context.supabase.rpc(
+      "admin_grant_admin_by_email" as any,
+      { _email: email },
+    );
     if (error) genericError(error);
     return { ok: true, userId };
   });
@@ -179,7 +202,9 @@ export const listAdminSurveys = createServerFn({ method: "GET" })
 
 export const setSurveyActive = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
-  .inputValidator((d: unknown) => z.object({ surveyId: z.string().uuid(), active: z.boolean() }).parse(d))
+  .inputValidator((d: unknown) =>
+    z.object({ surveyId: z.string().uuid(), active: z.boolean() }).parse(d),
+  )
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.rpc("admin_set_survey_active" as any, {
       _survey_id: data.surveyId,
@@ -193,7 +218,9 @@ export const deleteSurvey = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
   .inputValidator((d: unknown) => z.object({ surveyId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.rpc("admin_delete_survey" as any, { _survey_id: data.surveyId });
+    const { error } = await context.supabase.rpc("admin_delete_survey" as any, {
+      _survey_id: data.surveyId,
+    });
     if (error) genericError(error);
     return { ok: true };
   });
@@ -204,10 +231,13 @@ export const grantSurveyTrackingAccess = createServerFn({ method: "POST" })
     z.object({ surveyId: z.string().uuid(), email: z.string().email().max(254) }).parse(d),
   )
   .handler(async ({ data, context }) => {
-    const { data: row, error } = await context.supabase.rpc("admin_grant_survey_tracking_access_by_email" as any, {
-      _survey_id: data.surveyId,
-      _email: data.email.trim().toLowerCase(),
-    });
+    const { data: row, error } = await context.supabase.rpc(
+      "admin_grant_survey_tracking_access_by_email" as any,
+      {
+        _survey_id: data.surveyId,
+        _email: data.email.trim().toLowerCase(),
+      },
+    );
     if (error) genericError(error);
     return { ok: true, faculty: Array.isArray(row) ? row[0] : row };
   });
@@ -230,9 +260,12 @@ export const listSurveyTrackingAccess = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
   .inputValidator((d: unknown) => z.object({ surveyId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    const { data: rows, error } = await context.supabase.rpc("admin_list_survey_tracking_access" as any, {
-      _survey_id: data.surveyId,
-    });
+    const { data: rows, error } = await context.supabase.rpc(
+      "admin_list_survey_tracking_access" as any,
+      {
+        _survey_id: data.surveyId,
+      },
+    );
     if (error) genericError(error);
     return rows ?? [];
   });
@@ -249,10 +282,20 @@ export const listDisposableDomains = createServerFn({ method: "GET" })
 export const addDisposableDomain = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
   .inputValidator((d: unknown) =>
-    z.object({ domain: z.string().min(3).max(253).regex(/^[a-z0-9.-]+\.[a-z]{2,}$/i) }).parse(d),
+    z
+      .object({
+        domain: z
+          .string()
+          .min(3)
+          .max(253)
+          .regex(/^[a-z0-9.-]+\.[a-z]{2,}$/i),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.rpc("admin_add_disposable_domain" as any, { _domain: data.domain.toLowerCase() });
+    const { error } = await context.supabase.rpc("admin_add_disposable_domain" as any, {
+      _domain: data.domain.toLowerCase(),
+    });
     if (error) genericError(error);
     return { ok: true };
   });
@@ -261,7 +304,9 @@ export const removeDisposableDomain = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
   .inputValidator((d: unknown) => z.object({ domain: z.string() }).parse(d))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.rpc("admin_remove_disposable_domain" as any, { _domain: data.domain.toLowerCase() });
+    const { error } = await context.supabase.rpc("admin_remove_disposable_domain" as any, {
+      _domain: data.domain.toLowerCase(),
+    });
     if (error) genericError(error);
     return { ok: true };
   });
@@ -284,15 +329,14 @@ export const resolveFlag = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-export const checkAdminExists = createServerFn({ method: "GET" })
-  .handler(async () => {
-    const url = process.env.SUPABASE_URL;
-    const key = process.env.SUPABASE_PUBLISHABLE_KEY;
-    if (!url || !key) throw new Error("Database configuration is missing");
-    const client = createClient(url, key, {
-      auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
-    });
-    const { data, error } = await client.rpc("admin_exists");
-    if (error) genericError(error);
-    return { exists: !!data };
+export const checkAdminExists = createServerFn({ method: "GET" }).handler(async () => {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_PUBLISHABLE_KEY;
+  if (!url || !key) throw new Error("Database configuration is missing");
+  const client = createClient(url, key, {
+    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
   });
+  const { data, error } = await client.rpc("admin_exists");
+  if (error) genericError(error);
+  return { exists: !!data };
+});

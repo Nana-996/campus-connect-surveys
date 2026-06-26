@@ -19,7 +19,8 @@ export function IndexBackfill({ currentDepartment }: { currentDepartment: string
         <div className="flex-1">
           <p className="text-sm font-semibold">Add your index / student number</p>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Your faculty managers use this to confirm whether you've responded to surveys. Answer content stays private.
+            Your faculty managers use this to confirm whether you've responded to surveys. Answer
+            content stays private.
           </p>
           <form
             className="mt-3 flex flex-wrap items-end gap-2"
@@ -27,7 +28,9 @@ export function IndexBackfill({ currentDepartment }: { currentDepartment: string
               e.preventDefault();
               setSubmitting(true);
               try {
-                await updateInfo({ data: { index_number: indexNo.trim(), department: dept.trim() || undefined } });
+                await updateInfo({
+                  data: { index_number: indexNo.trim(), department: dept.trim() || undefined },
+                });
                 toast.success("Saved — refresh to see it on your card.");
               } catch (err: any) {
                 toast.error(err.message || "Could not save");
@@ -38,13 +41,27 @@ export function IndexBackfill({ currentDepartment }: { currentDepartment: string
           >
             <div className="flex-1 min-w-[140px]">
               <Label className="text-[10px] uppercase tracking-wider">Index #</Label>
-              <Input value={indexNo} onChange={(e) => setIndexNo(e.target.value)} required maxLength={32} placeholder="e.g. 10876543" className="mt-1 h-9 rounded-lg font-mono" />
+              <Input
+                value={indexNo}
+                onChange={(e) => setIndexNo(e.target.value)}
+                required
+                maxLength={32}
+                placeholder="e.g. 10876543"
+                className="mt-1 h-9 rounded-lg font-mono"
+              />
             </div>
             <div className="flex-1 min-w-[140px]">
               <Label className="text-[10px] uppercase tracking-wider">Department</Label>
-              <Input value={dept} onChange={(e) => setDept(e.target.value)} placeholder="e.g. Pharmacy" className="mt-1 h-9 rounded-lg" />
+              <Input
+                value={dept}
+                onChange={(e) => setDept(e.target.value)}
+                placeholder="e.g. Pharmacy"
+                className="mt-1 h-9 rounded-lg"
+              />
             </div>
-            <Button type="submit" size="sm" disabled={submitting}>{submitting ? "Saving…" : "Save"}</Button>
+            <Button type="submit" size="sm" disabled={submitting}>
+              {submitting ? "Saving…" : "Save"}
+            </Button>
           </form>
         </div>
       </div>

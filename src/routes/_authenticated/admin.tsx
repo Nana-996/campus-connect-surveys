@@ -9,7 +9,20 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { ShieldAlert, Check, Trash2, Power, UserPlus, UserMinus, Flag, FlagOff, Plus, GraduationCap, BarChart3, ClipboardList } from "lucide-react";
+import {
+  ShieldAlert,
+  Check,
+  Trash2,
+  Power,
+  UserPlus,
+  UserMinus,
+  Flag,
+  FlagOff,
+  Plus,
+  GraduationCap,
+  BarChart3,
+  ClipboardList,
+} from "lucide-react";
 import {
   getAdminMetrics,
   listAdminUsers,
@@ -47,7 +60,11 @@ export const Route = createFileRoute("/_authenticated/admin")({
 
 function Admin() {
   const fetchMetrics = useServerFn(getAdminMetrics);
-  const { data: metrics, isLoading, error } = useQuery({
+  const {
+    data: metrics,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["admin", "metrics"],
     queryFn: () => fetchMetrics(),
     retry: false,
@@ -75,8 +92,12 @@ function Admin() {
   return (
     <div className="space-y-8">
       <div>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Admin</p>
-        <h1 className="mt-1 font-serif text-5xl leading-[0.95]">Control <em className="text-primary">center.</em></h1>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+          Admin
+        </p>
+        <h1 className="mt-1 font-serif text-5xl leading-[0.95]">
+          Control <em className="text-primary">center.</em>
+        </h1>
       </div>
 
       {metrics && (
@@ -97,20 +118,42 @@ function Admin() {
           <TabsTrigger value="domains">Blocked domains</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="users" className="mt-4"><UsersPanel /></TabsContent>
-        <TabsContent value="surveys" className="mt-4"><SurveysPanel /></TabsContent>
-        <TabsContent value="evaluations" className="mt-4"><EvaluationsPanel /></TabsContent>
-        <TabsContent value="flags" className="mt-4"><FlagsPanel /></TabsContent>
-        <TabsContent value="domains" className="mt-4"><DomainsPanel /></TabsContent>
+        <TabsContent value="users" className="mt-4">
+          <UsersPanel />
+        </TabsContent>
+        <TabsContent value="surveys" className="mt-4">
+          <SurveysPanel />
+        </TabsContent>
+        <TabsContent value="evaluations" className="mt-4">
+          <EvaluationsPanel />
+        </TabsContent>
+        <TabsContent value="flags" className="mt-4">
+          <FlagsPanel />
+        </TabsContent>
+        <TabsContent value="domains" className="mt-4">
+          <DomainsPanel />
+        </TabsContent>
       </Tabs>
     </div>
   );
 }
 
-function Kpi({ label, value, accent }: { label: string; value: string | number; accent?: boolean }) {
+function Kpi({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: string | number;
+  accent?: boolean;
+}) {
   return (
-    <div className={`rounded-2xl border p-4 ${accent ? "border-destructive/40 bg-destructive/5" : "border-foreground/15 bg-card"}`}>
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
+    <div
+      className={`rounded-2xl border p-4 ${accent ? "border-destructive/40 bg-destructive/5" : "border-foreground/15 bg-card"}`}
+    >
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        {label}
+      </p>
       <p className="mt-1 font-serif text-2xl">{value}</p>
     </div>
   );
@@ -139,7 +182,9 @@ function UsersPanel() {
 
   const typeOptions = useMemo(() => {
     const counts = new Map<string, number>();
-    users.forEach((u: any) => counts.set(u.user_type ?? "—", (counts.get(u.user_type ?? "—") ?? 0) + 1));
+    users.forEach((u: any) =>
+      counts.set(u.user_type ?? "—", (counts.get(u.user_type ?? "—") ?? 0) + 1),
+    );
     return [
       { value: "all", label: "All types", count: users.length },
       ...Array.from(counts.entries()).map(([v, c]) => ({ value: v, label: v, count: c })),
@@ -151,9 +196,7 @@ function UsersPanel() {
     if (userType !== "all") list = list.filter((u) => (u.user_type ?? "—") === userType);
     if (roleFilter !== "all") {
       list = list.filter((u) =>
-        roleFilter === "none"
-          ? !u.roles?.length
-          : u.roles?.includes(roleFilter),
+        roleFilter === "none" ? !u.roles?.length : u.roles?.includes(roleFilter),
       );
     }
     if (statusFilter === "flagged") list = list.filter((u) => u.is_flagged);
@@ -201,7 +244,13 @@ function UsersPanel() {
           { value: "credits-asc", label: "Credits (low → high)" },
         ]}
         filters={[
-          { key: "type", label: "Type", value: userType, onChange: setUserType, options: typeOptions },
+          {
+            key: "type",
+            label: "Type",
+            value: userType,
+            onChange: setUserType,
+            options: typeOptions,
+          },
           {
             key: "role",
             label: "Role",
@@ -253,7 +302,9 @@ function UsersPanel() {
               <tr key={u.id} className="border-t border-foreground/10">
                 <td className="px-3 py-2">
                   <div className="font-medium">{u.full_name || "—"}</div>
-                  <div className="font-mono text-[10px] text-muted-foreground">{u.id.slice(0, 8)}…</div>
+                  <div className="font-mono text-[10px] text-muted-foreground">
+                    {u.id.slice(0, 8)}…
+                  </div>
                 </td>
                 <td className="px-3 py-2 capitalize">{u.user_type}</td>
                 <td className="px-3 py-2">
@@ -262,58 +313,131 @@ function UsersPanel() {
                 </td>
                 <td className="px-3 py-2">{u.earned_credits}</td>
                 <td className="px-3 py-2">
-                  {u.is_flagged && <Badge variant="destructive" className="mr-1">Flagged</Badge>}
+                  {u.is_flagged && (
+                    <Badge variant="destructive" className="mr-1">
+                      Flagged
+                    </Badge>
+                  )}
                   {u.roles?.includes("admin") && <Badge className="mr-1">Admin</Badge>}
-                  {u.roles?.includes("manager") && <Badge variant="secondary" className="mr-1">Manager</Badge>}
+                  {u.roles?.includes("manager") && (
+                    <Badge variant="secondary" className="mr-1">
+                      Manager
+                    </Badge>
+                  )}
                   {u.roles?.includes("faculty") && <Badge variant="secondary">Faculty</Badge>}
                 </td>
                 <td className="px-3 py-2">
                   <div className="flex flex-wrap justify-end gap-1">
-                    <Button size="sm" variant="outline" onClick={async () => {
-                      const v = prompt("Grant earned credits (negative to deduct):", "5");
-                      if (!v) return;
-                      const n = parseInt(v, 10);
-                      if (!Number.isFinite(n)) return;
-                      await grant({ data: { userId: u.id, wallet: "earned", amount: n, reason: "manual" } });
-                      toast.success("Credits updated"); refresh();
-                    }}>Credits</Button>
-                    <Button size="sm" variant="outline" onClick={async () => {
-                      const reason = u.is_flagged ? undefined : prompt("Flag reason:", "abuse") ?? "abuse";
-                      await flag({ data: { userId: u.id, flagged: !u.is_flagged, reason } });
-                      toast.success(u.is_flagged ? "Unflagged" : "Flagged"); refresh();
-                    }}>
-                      {u.is_flagged ? <FlagOff className="h-3 w-3" /> : <Flag className="h-3 w-3" />}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={async () => {
+                        const v = prompt("Grant earned credits (negative to deduct):", "5");
+                        if (!v) return;
+                        const n = parseInt(v, 10);
+                        if (!Number.isFinite(n)) return;
+                        await grant({
+                          data: { userId: u.id, wallet: "earned", amount: n, reason: "manual" },
+                        });
+                        toast.success("Credits updated");
+                        refresh();
+                      }}
+                    >
+                      Credits
                     </Button>
-                    <Button size="sm" variant="outline" title={u.roles?.includes("manager") ? "Revoke faculty manager" : "Make faculty manager"} onClick={async () => {
-                      const isMgr = u.roles?.includes("manager");
-                      if (!confirm(isMgr ? "Revoke faculty manager role?" : `Grant faculty manager role to ${u.full_name || u.id}? They will track every survey for ${u.university_domain}.`)) return;
-                      await setMgrRole({ data: { userId: u.id, grant: !isMgr } });
-                      toast.success("Manager role updated"); refresh();
-                    }}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={async () => {
+                        const reason = u.is_flagged
+                          ? undefined
+                          : (prompt("Flag reason:", "abuse") ?? "abuse");
+                        await flag({ data: { userId: u.id, flagged: !u.is_flagged, reason } });
+                        toast.success(u.is_flagged ? "Unflagged" : "Flagged");
+                        refresh();
+                      }}
+                    >
+                      {u.is_flagged ? (
+                        <FlagOff className="h-3 w-3" />
+                      ) : (
+                        <Flag className="h-3 w-3" />
+                      )}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      title={
+                        u.roles?.includes("manager")
+                          ? "Revoke faculty manager"
+                          : "Make faculty manager"
+                      }
+                      onClick={async () => {
+                        const isMgr = u.roles?.includes("manager");
+                        if (
+                          !confirm(
+                            isMgr
+                              ? "Revoke faculty manager role?"
+                              : `Grant faculty manager role to ${u.full_name || u.id}? They will track every survey for ${u.university_domain}.`,
+                          )
+                        )
+                          return;
+                        await setMgrRole({ data: { userId: u.id, grant: !isMgr } });
+                        toast.success("Manager role updated");
+                        refresh();
+                      }}
+                    >
                       <Briefcase className="h-3 w-3" />
                     </Button>
-                    <Button size="sm" variant="outline" title={u.roles?.includes("faculty") ? "Revoke faculty role" : "Grant faculty role"} onClick={async () => {
-                      const isFac = u.roles?.includes("faculty");
-                      if (!confirm(isFac ? "Revoke faculty role? They will lose access to their Faculty dashboard." : `Grant faculty role to ${u.full_name || u.id}? They can curate their own student watchlist.`)) return;
-                      await setFacRole({ data: { userId: u.id, grant: !isFac } });
-                      toast.success("Faculty role updated"); refresh();
-                    }}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      title={
+                        u.roles?.includes("faculty") ? "Revoke faculty role" : "Grant faculty role"
+                      }
+                      onClick={async () => {
+                        const isFac = u.roles?.includes("faculty");
+                        if (
+                          !confirm(
+                            isFac
+                              ? "Revoke faculty role? They will lose access to their Faculty dashboard."
+                              : `Grant faculty role to ${u.full_name || u.id}? They can curate their own student watchlist.`,
+                          )
+                        )
+                          return;
+                        await setFacRole({ data: { userId: u.id, grant: !isFac } });
+                        toast.success("Faculty role updated");
+                        refresh();
+                      }}
+                    >
                       <GraduationCap className="h-3 w-3" />
                     </Button>
-                    <Button size="sm" variant="outline" onClick={async () => {
-                      const isAdmin = u.roles?.includes("admin");
-                      if (!confirm(isAdmin ? "Revoke admin role?" : "Grant admin role?")) return;
-                      await setRole({ data: { userId: u.id, grant: !isAdmin } });
-                      toast.success("Role updated"); refresh();
-                    }}>
-                      {u.roles?.includes("admin") ? <UserMinus className="h-3 w-3" /> : <UserPlus className="h-3 w-3" />}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={async () => {
+                        const isAdmin = u.roles?.includes("admin");
+                        if (!confirm(isAdmin ? "Revoke admin role?" : "Grant admin role?")) return;
+                        await setRole({ data: { userId: u.id, grant: !isAdmin } });
+                        toast.success("Role updated");
+                        refresh();
+                      }}
+                    >
+                      {u.roles?.includes("admin") ? (
+                        <UserMinus className="h-3 w-3" />
+                      ) : (
+                        <UserPlus className="h-3 w-3" />
+                      )}
                     </Button>
                   </div>
                 </td>
               </tr>
             ))}
             {filtered.length === 0 && (
-              <tr><td colSpan={6} className="px-3 py-6 text-center text-muted-foreground">No users match your filters.</td></tr>
+              <tr>
+                <td colSpan={6} className="px-3 py-6 text-center text-muted-foreground">
+                  No users match your filters.
+                </td>
+              </tr>
             )}
           </tbody>
         </table>
@@ -346,10 +470,24 @@ function PromoteAdminByEmail({ onDone }: { onDone: () => void }) {
       }}
     >
       <div className="flex-1">
-        <Label htmlFor="promote-email" className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Promote user to admin by email</Label>
-        <Input id="promote-email" type="email" placeholder="person@school.edu" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 h-10 rounded-xl" />
+        <Label
+          htmlFor="promote-email"
+          className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground"
+        >
+          Promote user to admin by email
+        </Label>
+        <Input
+          id="promote-email"
+          type="email"
+          placeholder="person@school.edu"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="mt-1 h-10 rounded-xl"
+        />
       </div>
-      <Button type="submit" disabled={busy || !email}><UserPlus className="mr-1 h-3 w-3" /> {busy ? "Promoting…" : "Make admin"}</Button>
+      <Button type="submit" disabled={busy || !email}>
+        <UserPlus className="mr-1 h-3 w-3" /> {busy ? "Promoting…" : "Make admin"}
+      </Button>
     </form>
   );
 }
@@ -361,7 +499,10 @@ function SurveysPanel() {
   const setActive = useServerFn(setSurveyActive);
   const remove = useServerFn(deleteSurvey);
   const grantTracking = useServerFn(grantSurveyTrackingAccess);
-  const { data: surveys = [] } = useQuery({ queryKey: ["admin", "surveys"], queryFn: () => fetchSurveys() });
+  const { data: surveys = [] } = useQuery({
+    queryKey: ["admin", "surveys"],
+    queryFn: () => fetchSurveys(),
+  });
   const refresh = () => qc.invalidateQueries({ queryKey: ["admin", "surveys"] });
 
   return (
@@ -373,7 +514,7 @@ function SurveysPanel() {
             <th className="px-3 py-2">Tier</th>
             <th className="px-3 py-2">University</th>
             <th className="px-3 py-2">Responses</th>
-              <th className="px-3 py-2">Faculty</th>
+            <th className="px-3 py-2">Faculty</th>
             <th className="px-3 py-2">Status</th>
             <th className="px-3 py-2 text-right">Actions</th>
           </tr>
@@ -389,38 +530,73 @@ function SurveysPanel() {
               <td className="px-3 py-2">
                 <div>{s.allow_general_respondents ? "Open" : s.university_domain}</div>
                 {(s.target_department || s.target_year) && (
-                  <div className="text-[10px] text-muted-foreground">{[s.target_department, s.target_year].filter(Boolean).join(" · ")}</div>
+                  <div className="text-[10px] text-muted-foreground">
+                    {[s.target_department, s.target_year].filter(Boolean).join(" · ")}
+                  </div>
                 )}
               </td>
-              <td className="px-3 py-2">{s.response_count}/{s.response_goal}</td>
+              <td className="px-3 py-2">
+                {s.response_count}/{s.response_goal}
+              </td>
               <td className="px-3 py-2">{s.tracking_grants ?? 0}</td>
-              <td className="px-3 py-2">{s.is_active ? <Badge>Active</Badge> : <Badge variant="secondary">Inactive</Badge>}</td>
+              <td className="px-3 py-2">
+                {s.is_active ? <Badge>Active</Badge> : <Badge variant="secondary">Inactive</Badge>}
+              </td>
               <td className="px-3 py-2">
                 <div className="flex flex-wrap justify-end gap-1">
                   <Link to="/manage/$surveyId" params={{ surveyId: s.id }}>
-                    <Button size="sm" variant="outline"><BarChart3 className="h-3 w-3" /></Button>
+                    <Button size="sm" variant="outline">
+                      <BarChart3 className="h-3 w-3" />
+                    </Button>
                   </Link>
-                  <Button size="sm" variant="outline" onClick={async () => {
-                    const email = prompt("Faculty member email:", "");
-                    if (!email) return;
-                    await grantTracking({ data: { surveyId: s.id, email } });
-                    toast.success("Tracking access granted"); refresh();
-                  }}><Briefcase className="h-3 w-3" /></Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={async () => {
+                      const email = prompt("Faculty member email:", "");
+                      if (!email) return;
+                      await grantTracking({ data: { surveyId: s.id, email } });
+                      toast.success("Tracking access granted");
+                      refresh();
+                    }}
+                  >
+                    <Briefcase className="h-3 w-3" />
+                  </Button>
                   <SurveyTrackingAccessButton surveyId={s.id} />
-                  <Button size="sm" variant="outline" onClick={async () => {
-                    await setActive({ data: { surveyId: s.id, active: !s.is_active } });
-                    toast.success(s.is_active ? "Deactivated" : "Activated"); refresh();
-                  }}><Power className="h-3 w-3" /></Button>
-                  <Button size="sm" variant="outline" onClick={async () => {
-                    if (!confirm("Delete this survey and all its responses?")) return;
-                    await remove({ data: { surveyId: s.id } });
-                    toast.success("Deleted"); refresh();
-                  }}><Trash2 className="h-3 w-3" /></Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={async () => {
+                      await setActive({ data: { surveyId: s.id, active: !s.is_active } });
+                      toast.success(s.is_active ? "Deactivated" : "Activated");
+                      refresh();
+                    }}
+                  >
+                    <Power className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={async () => {
+                      if (!confirm("Delete this survey and all its responses?")) return;
+                      await remove({ data: { surveyId: s.id } });
+                      toast.success("Deleted");
+                      refresh();
+                    }}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
                 </div>
               </td>
             </tr>
           ))}
-          {surveys.length === 0 && <tr><td colSpan={7} className="px-3 py-6 text-center text-muted-foreground">No surveys.</td></tr>}
+          {surveys.length === 0 && (
+            <tr>
+              <td colSpan={7} className="px-3 py-6 text-center text-muted-foreground">
+                No surveys.
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>
@@ -439,14 +615,22 @@ function SurveyTrackingAccessButton({ surveyId }: { surveyId: string }) {
   });
 
   if (!open) {
-    return <Button size="sm" variant="outline" onClick={() => setOpen(true)}><UserMinus className="h-3 w-3" /></Button>;
+    return (
+      <Button size="sm" variant="outline" onClick={() => setOpen(true)}>
+        <UserMinus className="h-3 w-3" />
+      </Button>
+    );
   }
 
   return (
     <div className="w-72 rounded-2xl border border-foreground/15 bg-background p-3 text-left shadow-sm">
       <div className="mb-2 flex items-center justify-between gap-2">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Faculty access</p>
-        <Button size="sm" variant="ghost" onClick={() => setOpen(false)}>Close</Button>
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+          Faculty access
+        </p>
+        <Button size="sm" variant="ghost" onClick={() => setOpen(false)}>
+          Close
+        </Button>
       </div>
       {isLoading ? (
         <p className="text-xs text-muted-foreground">Loading…</p>
@@ -460,12 +644,18 @@ function SurveyTrackingAccessButton({ surveyId }: { surveyId: string }) {
                 <p className="truncate font-medium">{g.full_name || g.email}</p>
                 <p className="truncate text-[10px] text-muted-foreground">{g.email}</p>
               </div>
-              <Button size="sm" variant="outline" onClick={async () => {
-                await revokeAccess({ data: { surveyId, facultyUserId: g.user_id } });
-                toast.success("Tracking access revoked");
-                qc.invalidateQueries({ queryKey: ["admin", "survey-tracking-access", surveyId] });
-                qc.invalidateQueries({ queryKey: ["admin", "surveys"] });
-              }}><Trash2 className="h-3 w-3" /></Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={async () => {
+                  await revokeAccess({ data: { surveyId, facultyUserId: g.user_id } });
+                  toast.success("Tracking access revoked");
+                  qc.invalidateQueries({ queryKey: ["admin", "survey-tracking-access", surveyId] });
+                  qc.invalidateQueries({ queryKey: ["admin", "surveys"] });
+                }}
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
             </li>
           ))}
         </ul>
@@ -479,32 +669,50 @@ function FlagsPanel() {
   const qc = useQueryClient();
   const fetchFlags = useServerFn(listOpenFlags);
   const resolve = useServerFn(resolveFlag);
-  const { data: flags = [] } = useQuery({ queryKey: ["admin", "flags"], queryFn: () => fetchFlags() });
+  const { data: flags = [] } = useQuery({
+    queryKey: ["admin", "flags"],
+    queryFn: () => fetchFlags(),
+  });
   if (flags.length === 0)
-    return <div className="rounded-2xl border border-dashed border-foreground/30 bg-card p-8 text-center text-sm text-muted-foreground">No open flags.</div>;
+    return (
+      <div className="rounded-2xl border border-dashed border-foreground/30 bg-card p-8 text-center text-sm text-muted-foreground">
+        No open flags.
+      </div>
+    );
   return (
     <ul className="space-y-3">
       {flags.map((f: any) => (
         <li key={f.id} className="rounded-2xl border border-foreground/15 bg-card p-4">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-destructive">{f.type}</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-destructive">
+                {f.type}
+              </p>
               <p className="mt-1 font-mono text-xs">user: {f.user_id}</p>
-              <pre className="mt-1 overflow-x-auto rounded bg-secondary p-2 text-[11px]">{JSON.stringify(f.details, null, 2)}</pre>
-              <p className="mt-1 text-[11px] text-muted-foreground">{new Date(f.created_at).toLocaleString()}</p>
+              <pre className="mt-1 overflow-x-auto rounded bg-secondary p-2 text-[11px]">
+                {JSON.stringify(f.details, null, 2)}
+              </pre>
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                {new Date(f.created_at).toLocaleString()}
+              </p>
             </div>
-            <Button size="sm" variant="outline" onClick={async () => {
-              await resolve({ data: { id: f.id } });
-              toast.success("Cleared");
-              qc.invalidateQueries({ queryKey: ["admin", "flags"] });
-            }}><Check className="mr-1 h-3 w-3" /> Clear</Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={async () => {
+                await resolve({ data: { id: f.id } });
+                toast.success("Cleared");
+                qc.invalidateQueries({ queryKey: ["admin", "flags"] });
+              }}
+            >
+              <Check className="mr-1 h-3 w-3" /> Clear
+            </Button>
           </div>
         </li>
       ))}
     </ul>
   );
 }
-
 
 // ---------------- Domains ----------------
 function DomainsPanel() {
@@ -513,7 +721,10 @@ function DomainsPanel() {
   const add = useServerFn(addDisposableDomain);
   const remove = useServerFn(removeDisposableDomain);
   const [domain, setDomain] = useState("");
-  const { data: domains = [] } = useQuery({ queryKey: ["admin", "domains"], queryFn: () => fetchDomains() });
+  const { data: domains = [] } = useQuery({
+    queryKey: ["admin", "domains"],
+    queryFn: () => fetchDomains(),
+  });
   const refresh = () => qc.invalidateQueries({ queryKey: ["admin", "domains"] });
 
   return (
@@ -526,24 +737,45 @@ function DomainsPanel() {
           try {
             await add({ data: { domain } });
             toast.success("Domain blocked");
-            setDomain(""); refresh();
-          } catch (err: any) { toast.error(err.message); }
+            setDomain("");
+            refresh();
+          } catch (err: any) {
+            toast.error(err.message);
+          }
         }}
       >
-        <Input placeholder="e.g. mailinator.com" value={domain} onChange={(e) => setDomain(e.target.value)} className="h-10 rounded-xl" />
-        <Button type="submit"><Plus className="mr-1 h-3 w-3" /> Block</Button>
+        <Input
+          placeholder="e.g. mailinator.com"
+          value={domain}
+          onChange={(e) => setDomain(e.target.value)}
+          className="h-10 rounded-xl"
+        />
+        <Button type="submit">
+          <Plus className="mr-1 h-3 w-3" /> Block
+        </Button>
       </form>
       <ul className="divide-y divide-foreground/10 rounded-2xl border border-foreground/15 bg-card">
         {domains.map((d: any) => (
           <li key={d.domain} className="flex items-center justify-between px-4 py-2 text-sm">
             <span className="font-mono">{d.domain}</span>
-            <Button size="sm" variant="outline" onClick={async () => {
-              await remove({ data: { domain: d.domain } });
-              toast.success("Removed"); refresh();
-            }}><Trash2 className="h-3 w-3" /></Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={async () => {
+                await remove({ data: { domain: d.domain } });
+                toast.success("Removed");
+                refresh();
+              }}
+            >
+              <Trash2 className="h-3 w-3" />
+            </Button>
           </li>
         ))}
-        {domains.length === 0 && <li className="px-4 py-6 text-center text-sm text-muted-foreground">No blocked domains.</li>}
+        {domains.length === 0 && (
+          <li className="px-4 py-6 text-center text-sm text-muted-foreground">
+            No blocked domains.
+          </li>
+        )}
       </ul>
     </div>
   );
@@ -572,7 +804,9 @@ function EvaluationsPanel() {
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-foreground/15 bg-card p-5">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">About this tab</p>
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          About this tab
+        </p>
         <p className="mt-1 text-sm text-muted-foreground">
           Add the lecturers in your faculty, then issue an official end-of-semester evaluation. The
           standard form asks five rating questions plus two open-comment questions. Results are
@@ -600,7 +834,11 @@ function EvaluationsPanel() {
   );
 }
 
-function LecturerForm({ onDone, initial, onCancel }: {
+function LecturerForm({
+  onDone,
+  initial,
+  onCancel,
+}: {
   onDone: () => void;
   initial?: Lecturer;
   onCancel?: () => void;
@@ -626,7 +864,10 @@ function LecturerForm({ onDone, initial, onCancel }: {
       } else {
         await create({ data: { full_name: fullName, department, title, email } });
         toast.success("Lecturer added");
-        setFullName(""); setDepartment(""); setTitle(""); setEmail("");
+        setFullName("");
+        setDepartment("");
+        setTitle("");
+        setEmail("");
       }
       onDone();
       onCancel?.();
@@ -644,28 +885,66 @@ function LecturerForm({ onDone, initial, onCancel }: {
       </p>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <div>
-          <Label htmlFor="lec-name" className="text-xs">Full name *</Label>
-          <Input id="lec-name" required value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Dr. Ama Boateng" />
+          <Label htmlFor="lec-name" className="text-xs">
+            Full name *
+          </Label>
+          <Input
+            id="lec-name"
+            required
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            placeholder="Dr. Ama Boateng"
+          />
         </div>
         <div>
-          <Label htmlFor="lec-dept" className="text-xs">Department</Label>
-          <Input id="lec-dept" value={department} onChange={(e) => setDepartment(e.target.value)} placeholder="Computer Science" />
+          <Label htmlFor="lec-dept" className="text-xs">
+            Department
+          </Label>
+          <Input
+            id="lec-dept"
+            value={department}
+            onChange={(e) => setDepartment(e.target.value)}
+            placeholder="Computer Science"
+          />
         </div>
         <div>
-          <Label htmlFor="lec-title" className="text-xs">Title</Label>
-          <Input id="lec-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Senior Lecturer" />
+          <Label htmlFor="lec-title" className="text-xs">
+            Title
+          </Label>
+          <Input
+            id="lec-title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Senior Lecturer"
+          />
         </div>
         <div>
-          <Label htmlFor="lec-email" className="text-xs">Email (optional)</Label>
-          <Input id="lec-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="lecturer@university.edu.gh" />
+          <Label htmlFor="lec-email" className="text-xs">
+            Email (optional)
+          </Label>
+          <Input
+            id="lec-email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="lecturer@university.edu.gh"
+          />
         </div>
       </div>
       <div className="mt-4 flex gap-2">
         <Button type="submit" disabled={busy} className="rounded-full">
-          {editing ? "Save" : <><Plus className="mr-1 h-4 w-4" /> Add lecturer</>}
+          {editing ? (
+            "Save"
+          ) : (
+            <>
+              <Plus className="mr-1 h-4 w-4" /> Add lecturer
+            </>
+          )}
         </Button>
         {onCancel && (
-          <Button type="button" variant="ghost" onClick={onCancel} className="rounded-full">Cancel</Button>
+          <Button type="button" variant="ghost" onClick={onCancel} className="rounded-full">
+            Cancel
+          </Button>
         )}
       </div>
     </form>
@@ -708,9 +987,16 @@ function LecturerRow({ lecturer, onChanged }: { lecturer: Lecturer; onChanged: (
             className="rounded-full"
             onClick={async () => {
               const course = prompt("Course code (optional, e.g. CSCD403):", "") ?? "";
-              if (!confirm(`Issue a standard evaluation for ${lecturer.full_name}${course ? " (" + course + ")" : ""}? It will appear in students' feeds for 30 days.`)) return;
+              if (
+                !confirm(
+                  `Issue a standard evaluation for ${lecturer.full_name}${course ? " (" + course + ")" : ""}? It will appear in students' feeds for 30 days.`,
+                )
+              )
+                return;
               try {
-                const r = await startStandard({ data: { lecturer_id: lecturer.id, course_code: course || null } });
+                const r = await startStandard({
+                  data: { lecturer_id: lecturer.id, course_code: course || null },
+                });
                 toast.success("Evaluation published");
                 onChanged();
                 setExpanded(true);
@@ -723,22 +1009,23 @@ function LecturerRow({ lecturer, onChanged }: { lecturer: Lecturer; onChanged: (
           >
             <ClipboardList className="mr-1 h-3 w-3" /> Standard form
           </Button>
-          <Link
-            to="/create"
-            search={{ lecturer: lecturer.id } as any}
-            className="inline-flex"
-          >
-            <Button size="sm" variant="outline" className="rounded-full">Custom</Button>
+          <Link to="/create" search={{ lecturer: lecturer.id } as any} className="inline-flex">
+            <Button size="sm" variant="outline" className="rounded-full">
+              Custom
+            </Button>
           </Link>
           <Button size="sm" variant="outline" onClick={() => setExpanded((v) => !v)}>
             <BarChart3 className="h-3 w-3" />
           </Button>
-          <Button size="sm" variant="outline" onClick={() => setEditing(true)}>Edit</Button>
+          <Button size="sm" variant="outline" onClick={() => setEditing(true)}>
+            Edit
+          </Button>
           <Button
             size="sm"
             variant="outline"
             onClick={async () => {
-              if (!confirm(`Remove ${lecturer.full_name}? Past evaluations stay in the system.`)) return;
+              if (!confirm(`Remove ${lecturer.full_name}? Past evaluations stay in the system.`))
+                return;
               await remove({ data: { id: lecturer.id } });
               toast.success("Removed");
               onChanged();
@@ -767,7 +1054,10 @@ function LecturerEvaluationsList({ lecturerId }: { lecturerId: string }) {
   return (
     <ul className="border-t border-foreground/10">
       {data.map((e: any) => (
-        <li key={e.survey_id} className="flex flex-wrap items-center gap-3 border-t border-foreground/5 px-4 py-2 text-xs first:border-t-0">
+        <li
+          key={e.survey_id}
+          className="flex flex-wrap items-center gap-3 border-t border-foreground/5 px-4 py-2 text-xs first:border-t-0"
+        >
           <div className="flex-1 min-w-[180px]">
             <p className="font-medium">{e.title}</p>
             <p className="text-[10px] text-muted-foreground">
@@ -777,7 +1067,9 @@ function LecturerEvaluationsList({ lecturerId }: { lecturerId: string }) {
             </p>
           </div>
           <Link to="/survey/$id/analyze" params={{ id: e.survey_id }}>
-            <Button size="sm" variant="outline" className="rounded-full">Open results</Button>
+            <Button size="sm" variant="outline" className="rounded-full">
+              Open results
+            </Button>
           </Link>
         </li>
       ))}

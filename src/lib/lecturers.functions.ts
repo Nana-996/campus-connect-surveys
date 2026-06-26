@@ -40,7 +40,10 @@ function fail(e: any, label: string): never {
 }
 
 const Trim = (max: number) =>
-  z.string().transform((s) => s.trim()).pipe(z.string().min(1).max(max));
+  z
+    .string()
+    .transform((s) => s.trim())
+    .pipe(z.string().min(1).max(max));
 
 // ---------- Directory listing (any signed-in user, scoped via RLS) ----------
 // `email` is excluded — column-level GRANT prevents general students from
@@ -99,7 +102,8 @@ export const createLecturer = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error) {
-      if ((error as any).code === "23505") throw new Error("A lecturer with that name already exists in this department");
+      if ((error as any).code === "23505")
+        throw new Error("A lecturer with that name already exists in this department");
       fail(error, "create");
     }
     return { id: row!.id };
@@ -122,7 +126,10 @@ export const updateLecturer = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     // Scope check
     const { data: existing } = await supabaseAdmin
-      .from("lecturers").select("university_domain").eq("id", data.id).maybeSingle();
+      .from("lecturers")
+      .select("university_domain")
+      .eq("id", data.id)
+      .maybeSingle();
     if (!existing) throw new Error("Lecturer not found");
     if (!context.isAdmin && existing.university_domain !== context.universityDomain) {
       throw new Error("Forbidden");
@@ -146,7 +153,10 @@ export const deleteLecturer = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { data: existing } = await supabaseAdmin
-      .from("lecturers").select("university_domain").eq("id", data.id).maybeSingle();
+      .from("lecturers")
+      .select("university_domain")
+      .eq("id", data.id)
+      .maybeSingle();
     if (!existing) return { ok: true };
     if (!context.isAdmin && existing.university_domain !== context.universityDomain) {
       throw new Error("Forbidden");

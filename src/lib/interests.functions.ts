@@ -3,10 +3,30 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
 const CANONICAL_IDS = [
-  "tech","ai","gaming","science","health","fitness","mental_health","food",
-  "travel","fashion","beauty","music","film","books","sports","finance",
-  "business","politics","education","environment","parenting","relationships",
-  "art","other",
+  "tech",
+  "ai",
+  "gaming",
+  "science",
+  "health",
+  "fitness",
+  "mental_health",
+  "food",
+  "travel",
+  "fashion",
+  "beauty",
+  "music",
+  "film",
+  "books",
+  "sports",
+  "finance",
+  "business",
+  "politics",
+  "education",
+  "environment",
+  "parenting",
+  "relationships",
+  "art",
+  "other",
 ] as const;
 
 const SYSTEM_PROMPT = `You are a tag normalizer. The user supplies one short free-text interest. You MUST map it to exactly ONE id from this fixed list, picking the closest semantic match. Only use "other" when nothing else fits at all.
