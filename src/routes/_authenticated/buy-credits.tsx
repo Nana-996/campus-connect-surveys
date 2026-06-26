@@ -46,12 +46,12 @@ function BuyCredits() {
     );
   }
 
-  const handleBuy = async (priceId: string) => {
+  const handleBuy = async (bundleId: string, priceId: string) => {
     try {
       await openCheckout({
         priceId,
         customerEmail: user?.email,
-        customData: { userId: user!.id },
+        customData: { userId: user!.id, bundleId },
         successUrl: `${window.location.origin}/buy-credits?checkout=success`,
       });
     } catch (e) {
@@ -113,7 +113,7 @@ function BuyCredits() {
               <Button
                 className="mt-6 w-full rounded-full"
                 disabled={loading}
-                onClick={() => handleBuy(b.priceId)}
+                onClick={() => handleBuy(b.id, b.priceId)}
               >
                 {loading ? "Opening…" : `Buy ${b.label}`}
               </Button>
