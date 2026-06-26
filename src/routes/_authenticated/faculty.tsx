@@ -6,7 +6,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Search, UserPlus, UserMinus, Eye, ShieldAlert, X, GraduationCap, CheckCircle2, Clock, ListChecks } from "lucide-react";
+import {
+  Search,
+  UserPlus,
+  UserMinus,
+  Eye,
+  ShieldAlert,
+  X,
+  GraduationCap,
+  CheckCircle2,
+  Clock,
+  ListChecks,
+} from "lucide-react";
 import {
   getMyFacultyScope,
   searchStudentByIndex,
@@ -22,7 +33,11 @@ export const Route = createFileRoute("/_authenticated/faculty")({
 
 function FacultyDashboard() {
   const fetchScope = useServerFn(getMyFacultyScope);
-  const { data: scope, isLoading, error } = useQuery({
+  const {
+    data: scope,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["faculty", "scope"],
     queryFn: () => fetchScope(),
     retry: false,
@@ -36,7 +51,8 @@ function FacultyDashboard() {
         <ShieldAlert className="mx-auto h-8 w-8 text-destructive" />
         <p className="mt-3 font-serif text-3xl">Faculty only.</p>
         <p className="mt-1 text-sm text-muted-foreground">
-          This dashboard is only available to users with the faculty role. Ask an admin to grant you access.
+          This dashboard is only available to users with the faculty role. Ask an admin to grant you
+          access.
         </p>
       </div>
     );
@@ -45,10 +61,16 @@ function FacultyDashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Faculty</p>
-        <h1 className="mt-1 font-serif text-5xl leading-[0.95]">My <em className="text-primary">roster.</em></h1>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+          Faculty
+        </p>
+        <h1 className="mt-1 font-serif text-5xl leading-[0.95]">
+          My <em className="text-primary">roster.</em>
+        </h1>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          Build your personal watchlist of students at <span className="font-semibold">{scope.university_name}</span>. Only students you add appear here.
+          Build your personal watchlist of students at{" "}
+          <span className="font-semibold">{scope.university_name}</span>. Only students you add
+          appear here.
         </p>
       </div>
 
@@ -118,7 +140,10 @@ function SearchAddPanel() {
       {results && results.length > 0 && (
         <div className="mt-4 space-y-2">
           {results.map((r) => (
-            <div key={r.student_id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-foreground/10 bg-background p-3">
+            <div
+              key={r.student_id}
+              className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-foreground/10 bg-background p-3"
+            >
               <div className="min-w-0">
                 <p className="truncate font-medium">{r.full_name || "Unnamed student"}</p>
                 <p className="text-xs text-muted-foreground">
@@ -193,7 +218,9 @@ function RosterPanel() {
                 <tr key={s.student_id} className="border-t border-foreground/10">
                   <td className="px-3 py-2">
                     <div className="font-medium">{s.full_name || "Unnamed"}</div>
-                    <div className="font-mono text-[10px] text-muted-foreground">{s.index_number || "—"}</div>
+                    <div className="font-mono text-[10px] text-muted-foreground">
+                      {s.index_number || "—"}
+                    </div>
                   </td>
                   <td className="px-3 py-2">
                     <div>{s.department || "—"}</div>
@@ -213,18 +240,33 @@ function RosterPanel() {
                     )}
                   </td>
                   <td className="px-3 py-2">
-                    {s.last_activity ? new Date(s.last_activity).toLocaleString() : <span className="text-muted-foreground">Never</span>}
+                    {s.last_activity ? (
+                      new Date(s.last_activity).toLocaleString()
+                    ) : (
+                      <span className="text-muted-foreground">Never</span>
+                    )}
                   </td>
                   <td className="px-3 py-2">
                     <div className="flex justify-end gap-1">
-                      <Button size="sm" variant="outline" onClick={() => setViewing({ id: s.student_id, name: s.full_name || s.index_number || "Student" })}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          setViewing({
+                            id: s.student_id,
+                            name: s.full_name || s.index_number || "Student",
+                          })
+                        }
+                      >
                         <Eye className="h-3 w-3" /> View
                       </Button>
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => {
-                          if (confirm(`Remove ${s.full_name || s.index_number} from your watchlist?`)) {
+                          if (
+                            confirm(`Remove ${s.full_name || s.index_number} from your watchlist?`)
+                          ) {
                             removeMut.mutate(s.student_id);
                           }
                         }}
@@ -240,14 +282,32 @@ function RosterPanel() {
         </div>
       )}
 
-      {viewing && <StudentDetailModal studentId={viewing.id} name={viewing.name} onClose={() => setViewing(null)} />}
+      {viewing && (
+        <StudentDetailModal
+          studentId={viewing.id}
+          name={viewing.name}
+          onClose={() => setViewing(null)}
+        />
+      )}
     </section>
   );
 }
 
-function StudentDetailModal({ studentId, name, onClose }: { studentId: string; name: string; onClose: () => void }) {
+function StudentDetailModal({
+  studentId,
+  name,
+  onClose,
+}: {
+  studentId: string;
+  name: string;
+  onClose: () => void;
+}) {
   const fetchDetail = useServerFn(getStudentDetail);
-  const { data: rows = [], isLoading, error } = useQuery({
+  const {
+    data: rows = [],
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["faculty", "student", studentId],
     queryFn: () => fetchDetail({ data: { studentId } }),
   });
@@ -256,14 +316,19 @@ function StudentDetailModal({ studentId, name, onClose }: { studentId: string; n
   const total = rows.length;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/50 p-0 sm:items-center sm:p-4" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/50 p-0 sm:items-center sm:p-4"
+      onClick={onClose}
+    >
       <div
         className="max-h-[90vh] w-full max-w-3xl overflow-hidden rounded-t-3xl border border-foreground/15 bg-background sm:rounded-3xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3 border-b border-foreground/10 p-4">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Survey activity</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+              Survey activity
+            </p>
             <h3 className="font-serif text-2xl">{name}</h3>
             {total > 0 && (
               <p className="mt-1 text-xs text-muted-foreground">
@@ -280,7 +345,9 @@ function StudentDetailModal({ studentId, name, onClose }: { studentId: string; n
           {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
           {error && <p className="text-sm text-destructive">{(error as any).message}</p>}
           {!isLoading && rows.length === 0 && (
-            <p className="text-sm text-muted-foreground">No surveys match this student's department/year yet.</p>
+            <p className="text-sm text-muted-foreground">
+              No surveys match this student's department/year yet.
+            </p>
           )}
           <ul className="space-y-2">
             {rows.map((r) => (

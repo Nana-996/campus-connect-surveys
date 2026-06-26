@@ -45,9 +45,7 @@ export function SupportCard({
         aria-label="Open CampusVerify support chat on WhatsApp"
       >
         <MessageCircle className="h-5 w-5" />
-        <span className="hidden text-sm font-semibold sm:inline">
-          CampusVerify Support
-        </span>
+        <span className="hidden text-sm font-semibold sm:inline">CampusVerify Support</span>
       </a>
     );
   }
@@ -88,12 +86,10 @@ export function SupportCard({
             <Headphones className="h-6 w-6 text-[#25D366]" />
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="font-serif text-2xl leading-tight">
-              Need help or have feedback?
-            </h3>
+            <h3 className="font-serif text-2xl leading-tight">Need help or have feedback?</h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              Join the CampusVerify student support group on WhatsApp. Get
-              answers from the team and fellow students in minutes.
+              Join the CampusVerify student support group on WhatsApp. Get answers from the team and
+              fellow students in minutes.
             </p>
 
             <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -111,11 +107,8 @@ export function SupportCard({
             </div>
 
             <p className="mt-3 break-all text-xs text-muted-foreground">
-              If the button is blocked on your network, copy this link and open
-              it in WhatsApp directly:{" "}
-              <span className="font-mono text-foreground/80">
-                {WHATSAPP_SUPPORT_URL}
-              </span>
+              If the button is blocked on your network, copy this link and open it in WhatsApp
+              directly: <span className="font-mono text-foreground/80">{WHATSAPP_SUPPORT_URL}</span>
             </p>
           </div>
         </div>

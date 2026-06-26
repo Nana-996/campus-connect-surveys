@@ -1,12 +1,15 @@
 export type Tier = "basic" | "targeted" | "boosted" | "pro";
 
-export const TIERS: Record<Tier, {
-  label: string;
-  tagline: string;
-  cost: number;
-  responseGoal: number;
-  features: string[];
-}> = {
+export const TIERS: Record<
+  Tier,
+  {
+    label: string;
+    tagline: string;
+    cost: number;
+    responseGoal: number;
+    features: string[];
+  }
+> = {
   basic: {
     label: "Basic",
     tagline: "Casual pulse check",
@@ -19,21 +22,36 @@ export const TIERS: Record<Tier, {
     tagline: "Reach a specific cohort",
     cost: 3,
     responseGoal: 200,
-    features: ["Department + year + interest targeting", "Up to 200 responses", "Priority queue", "Live for 30 days"],
+    features: [
+      "Department + year + interest targeting",
+      "Up to 200 responses",
+      "Priority queue",
+      "Live for 30 days",
+    ],
   },
   boosted: {
     label: "Boosted",
     tagline: "Pinned on the feed",
     cost: 8,
     responseGoal: 500,
-    features: ["Pinned 72h on feed", "Cohort highlight badge", "Up to 500 responses", "Priority queue"],
+    features: [
+      "Pinned 72h on feed",
+      "Cohort highlight badge",
+      "Up to 500 responses",
+      "Priority queue",
+    ],
   },
   pro: {
     label: "Pro",
     tagline: "Serious research mode",
     cost: 15,
     responseGoal: 2000,
-    features: ["Top placement for 7 days", "Up to 2,000 responses", "Instant publish", "Analytics & CSV export"],
+    features: [
+      "Top placement for 7 days",
+      "Up to 2,000 responses",
+      "Instant publish",
+      "Analytics & CSV export",
+    ],
   },
 };
 
@@ -81,4 +99,3 @@ export function canAfford(
   }
   return { ok: true };
 }
-

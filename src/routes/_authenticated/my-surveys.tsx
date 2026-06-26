@@ -71,7 +71,6 @@ function MySurveys() {
 
   useEffect(() => {
     if (!user) return;
-    
 
     let active = true;
     (async () => {
@@ -85,18 +84,27 @@ function MySurveys() {
       setSurveys((data as unknown as Survey[]) ?? []);
       setLoading(false);
     })();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [user?.id]);
 
   return (
     <div>
       <div className="mb-8 flex items-end justify-between gap-4">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Your archive</p>
-          <h1 className="mt-1 font-serif text-5xl leading-[0.95]">My <em className="text-primary">surveys.</em></h1>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+            Your archive
+          </p>
+          <h1 className="mt-1 font-serif text-5xl leading-[0.95]">
+            My <em className="text-primary">surveys.</em>
+          </h1>
         </div>
         <Link to="/create">
-          <Button className="rounded-full bg-primary px-5"><ArrowUpRight className="mr-1 h-4 w-4" />New</Button>
+          <Button className="rounded-full bg-primary px-5">
+            <ArrowUpRight className="mr-1 h-4 w-4" />
+            New
+          </Button>
         </Link>
       </div>
 
@@ -105,16 +113,22 @@ function MySurveys() {
       ) : surveys.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-foreground/30 bg-card p-10 text-center shadow-paper">
           <p className="font-serif text-3xl">Nothing published yet.</p>
-          <p className="mt-1 text-sm text-muted-foreground">Your first survey is one credit away.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Your first survey is one credit away.
+          </p>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
           {surveys.map((s, i) => (
-            <div key={s.id} className={`rounded-3xl border border-foreground/15 p-5 shadow-paper ${i % 2 === 0 ? "bg-card" : "bg-accent text-accent-foreground"}`}>
+            <div
+              key={s.id}
+              className={`rounded-3xl border border-foreground/15 p-5 shadow-paper ${i % 2 === 0 ? "bg-card" : "bg-accent text-accent-foreground"}`}
+            >
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-70">
-                    №{String(i + 1).padStart(2, "0")} · {new Date(s.created_at).toLocaleDateString()}
+                    №{String(i + 1).padStart(2, "0")} ·{" "}
+                    {new Date(s.created_at).toLocaleDateString()}
                   </p>
                   <h3 className="mt-2 font-serif text-3xl leading-tight">{s.title}</h3>
                   <p className="mt-1 text-xs opacity-70">{s.questions?.length ?? 0} questions</p>
@@ -125,7 +139,11 @@ function MySurveys() {
               </div>
               <div className="mt-4 flex flex-wrap gap-2">
                 <Link to="/survey/$id" params={{ id: s.id }}>
-                  <Button size="sm" variant="outline" className="rounded-full border-foreground/30 bg-background/40">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="rounded-full border-foreground/30 bg-background/40"
+                  >
                     <Eye className="mr-1 h-3.5 w-3.5" /> View
                   </Button>
                 </Link>
@@ -140,7 +158,11 @@ function MySurveys() {
                   onClick={() => handleShare(s.id)}
                   className="rounded-full border-foreground/30 bg-background/40"
                 >
-                  {sharedId === s.id ? <Check className="mr-1 h-3.5 w-3.5" /> : <Share2 className="mr-1 h-3.5 w-3.5" />}
+                  {sharedId === s.id ? (
+                    <Check className="mr-1 h-3.5 w-3.5" />
+                  ) : (
+                    <Share2 className="mr-1 h-3.5 w-3.5" />
+                  )}
                   {sharedId === s.id ? "Copied" : "Share"}
                 </Button>
                 <Button
@@ -169,17 +191,29 @@ function MySurveys() {
           ))}
         </div>
       )}
-      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+      <AlertDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete survey?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently remove <strong>{deleteTarget?.title}</strong> and all its responses. This action cannot be undone.
+              This will permanently remove <strong>{deleteTarget?.title}</strong> and all its
+              responses. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setDeleteTarget(null)} disabled={deleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} disabled={deleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogCancel onClick={() => setDeleteTarget(null)} disabled={deleting}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
               {deleting ? "Deleting…" : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>

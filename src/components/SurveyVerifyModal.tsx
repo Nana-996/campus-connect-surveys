@@ -154,7 +154,11 @@ export function SurveyVerifyModal({ open, onClose, onVerified, surveyTitle }: Pr
               No email after a minute? Check spam, or{" "}
               <button
                 type="button"
-                onClick={() => { setSignupSent(false); setMode("login"); setPassword(""); }}
+                onClick={() => {
+                  setSignupSent(false);
+                  setMode("login");
+                  setPassword("");
+                }}
                 className="font-semibold text-primary underline"
               >
                 log in instead
@@ -171,79 +175,92 @@ export function SurveyVerifyModal({ open, onClose, onVerified, surveyTitle }: Pr
             </Button>
           </div>
         ) : (
-        <form onSubmit={submit} className="space-y-4 px-6 py-6">
-          <div className="space-y-1.5">
-            <Label htmlFor="verify-email" className="text-xs font-bold uppercase tracking-wider">
-              Email
-            </Label>
-            <Input
-              id="verify-email"
-              type="email"
-              autoComplete="email"
-              inputMode="email"
-              placeholder="you@university.edu"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              maxLength={255}
-              required
-            />
-          </div>
+          <form onSubmit={submit} className="space-y-4 px-6 py-6">
+            <div className="space-y-1.5">
+              <Label htmlFor="verify-email" className="text-xs font-bold uppercase tracking-wider">
+                Email
+              </Label>
+              <Input
+                id="verify-email"
+                type="email"
+                autoComplete="email"
+                inputMode="email"
+                placeholder="you@university.edu"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                maxLength={255}
+                required
+              />
+            </div>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="verify-password" className="text-xs font-bold uppercase tracking-wider">
-              Password
-            </Label>
-            <PasswordInput
-              id="verify-password"
-              autoComplete={mode === "signup" ? "new-password" : "current-password"}
-              placeholder={mode === "signup" ? "Create a password (8+ chars)" : "Your password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              minLength={8}
-              maxLength={72}
-              required
-            />
-          </div>
+            <div className="space-y-1.5">
+              <Label
+                htmlFor="verify-password"
+                className="text-xs font-bold uppercase tracking-wider"
+              >
+                Password
+              </Label>
+              <PasswordInput
+                id="verify-password"
+                autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                placeholder={mode === "signup" ? "Create a password (8+ chars)" : "Your password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                minLength={8}
+                maxLength={72}
+                required
+              />
+            </div>
 
-          {error && (
-            <p className="rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
-              {error}
+            {error && (
+              <p className="rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+                {error}
+              </p>
+            )}
+
+            <Button
+              type="submit"
+              disabled={!canSubmit}
+              className="h-11 w-full rounded-full bg-primary text-base font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+            >
+              {submitting ? (
+                <span className="inline-flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" /> Verifying…
+                </span>
+              ) : (
+                "Continue to Survey"
+              )}
+            </Button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setError(null);
+                setMode((m) => (m === "signup" ? "login" : "signup"));
+              }}
+              className="block w-full text-center text-sm text-muted-foreground transition hover:text-foreground"
+            >
+              {mode === "signup" ? (
+                <>
+                  Already have an account?{" "}
+                  <span className="font-semibold text-primary underline-offset-2 hover:underline">
+                    Log in
+                  </span>
+                </>
+              ) : (
+                <>
+                  New here?{" "}
+                  <span className="font-semibold text-primary underline-offset-2 hover:underline">
+                    Create an account
+                  </span>
+                </>
+              )}
+            </button>
+
+            <p className="pt-1 text-center text-[10px] uppercase tracking-wider text-muted-foreground">
+              Verified responses keep research credible.
             </p>
-          )}
-
-          <Button
-            type="submit"
-            disabled={!canSubmit}
-            className="h-11 w-full rounded-full bg-primary text-base font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-          >
-            {submitting ? (
-              <span className="inline-flex items-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin" /> Verifying…
-              </span>
-            ) : (
-              "Continue to Survey"
-            )}
-          </Button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setError(null);
-              setMode((m) => (m === "signup" ? "login" : "signup"));
-            }}
-            className="block w-full text-center text-sm text-muted-foreground transition hover:text-foreground"
-          >
-            {mode === "signup" ? (
-              <>Already have an account? <span className="font-semibold text-primary underline-offset-2 hover:underline">Log in</span></>
-            ) : (
-              <>New here? <span className="font-semibold text-primary underline-offset-2 hover:underline">Create an account</span></>
-            )}
-          </button>
-
-          <p className="pt-1 text-center text-[10px] uppercase tracking-wider text-muted-foreground">
-            Verified responses keep research credible.
-          </p>
-        </form>
+          </form>
         )}
       </div>
     </div>

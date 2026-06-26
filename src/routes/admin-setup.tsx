@@ -109,8 +109,8 @@ function AdminSetupPage() {
         <Shield className="mx-auto h-8 w-8 text-primary" />
         <p className="mt-3 font-serif text-3xl">Claim admin.</p>
         <p className="mt-2 text-sm text-muted-foreground">
-          No admin exists yet. As the first user, you can claim this role and
-          start managing the platform.
+          No admin exists yet. As the first user, you can claim this role and start managing the
+          platform.
         </p>
         <Button
           className="mt-5 h-11 w-full rounded-full text-base"

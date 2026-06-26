@@ -10,7 +10,10 @@ function shouldRefuse(): boolean {
   } catch {
     return true;
   }
-  if (new URLSearchParams(window.location.search).has("sw") && new URLSearchParams(window.location.search).get("sw") === "off") {
+  if (
+    new URLSearchParams(window.location.search).has("sw") &&
+    new URLSearchParams(window.location.search).get("sw") === "off"
+  ) {
     return true;
   }
   return false;

@@ -56,8 +56,11 @@ export async function getCachedFeed(userId: string): Promise<CachedFeed | undefi
 }
 
 // ---------- Queue ----------
-export async function enqueueResponse(r: Omit<QueuedResponse, "id" | "queued_at" | "attempts">): Promise<QueuedResponse> {
-  const id = (crypto as any)?.randomUUID?.() ?? `q_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+export async function enqueueResponse(
+  r: Omit<QueuedResponse, "id" | "queued_at" | "attempts">,
+): Promise<QueuedResponse> {
+  const id =
+    (crypto as any)?.randomUUID?.() ?? `q_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
   const entry: QueuedResponse = { ...r, id, queued_at: Date.now(), attempts: 0 };
   await set(id, entry, queueStore);
   return entry;

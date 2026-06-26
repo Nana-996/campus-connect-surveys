@@ -43,7 +43,11 @@ export function OfflineIndicator() {
       setTimeout(() => setJustSynced(false), 2500);
     });
     const iv = setInterval(refresh, 8000);
-    return () => { active = false; off(); clearInterval(iv); };
+    return () => {
+      active = false;
+      off();
+      clearInterval(iv);
+    };
   }, []);
 
   if (!onSurveyPage) return null;
@@ -52,14 +56,14 @@ export function OfflineIndicator() {
   const label = !online
     ? "Offline — answers will save locally"
     : pending > 0
-    ? `Syncing ${pending} answer${pending === 1 ? "" : "s"}…`
-    : "All answers synced";
+      ? `Syncing ${pending} answer${pending === 1 ? "" : "s"}…`
+      : "All answers synced";
   const Icon = !online ? WifiOff : pending > 0 ? CloudUpload : Check;
   const tone = !online
     ? "bg-foreground text-background"
     : pending > 0
-    ? "bg-highlight text-highlight-foreground"
-    : "bg-primary text-primary-foreground";
+      ? "bg-highlight text-highlight-foreground"
+      : "bg-primary text-primary-foreground";
 
   return (
     <button

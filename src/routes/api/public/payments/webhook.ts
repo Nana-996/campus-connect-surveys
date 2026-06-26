@@ -83,23 +83,21 @@ async function handlePaymentFailed(data: any, env: PaddleEnv) {
   if (!userId) return;
   const bundle = resolveBundle(data);
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  await supabaseAdmin
-    .from("payment_transactions")
-    .upsert(
-      {
-        user_id: userId,
-        provider: "paddle",
-        reference: `paddle:${env}:${data.id}`,
-        amount_minor: Number(data.details?.totals?.total ?? 0),
-        currency: (data.currencyCode as string) || "USD",
-        credits: bundle?.credits ?? 0,
-        pack_label: bundle?.id ?? null,
-        status: "failed",
-        failure_reason: "payment_failed",
-        provider_payload: { paddle_transaction_id: data.id, env },
-      } as never,
-      { onConflict: "reference" } as never,
-    );
+  await supabaseAdmin.from("payment_transactions").upsert(
+    {
+      user_id: userId,
+      provider: "paddle",
+      reference: `paddle:${env}:${data.id}`,
+      amount_minor: Number(data.details?.totals?.total ?? 0),
+      currency: (data.currencyCode as string) || "USD",
+      credits: bundle?.credits ?? 0,
+      pack_label: bundle?.id ?? null,
+      status: "failed",
+      failure_reason: "payment_failed",
+      provider_payload: { paddle_transaction_id: data.id, env },
+    } as never,
+    { onConflict: "reference" } as never,
+  );
 }
 
 async function handleWebhook(req: Request, env: PaddleEnv) {
@@ -140,4 +138,3 @@ export const Route = createFileRoute("/api/public/payments/webhook")({
     },
   },
 });
-

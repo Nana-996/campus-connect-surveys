@@ -23,9 +23,17 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Log in — CampusVerify" },
-      { name: "description", content: "Log in to CampusVerify as a verified student or general user to access your survey feed, credits, and responses." },
+      {
+        name: "description",
+        content:
+          "Log in to CampusVerify as a verified student or general user to access your survey feed, credits, and responses.",
+      },
       { property: "og:title", content: "Log in — CampusVerify" },
-      { property: "og:description", content: "Sign in to CampusVerify to access your campus or public survey feed and earned credits." },
+      {
+        property: "og:description",
+        content:
+          "Sign in to CampusVerify to access your campus or public survey feed and earned credits.",
+      },
       { property: "og:url", content: "https://your-domain.com/auth" },
     ],
     links: [{ rel: "canonical", href: "https://your-domain.com/auth" }],
@@ -82,9 +90,10 @@ function AuthPage() {
 
       navigate({ to: "/feed" });
     } catch (err: any) {
-      const message = err.message === "Invalid login credentials"
-        ? "Those credentials did not match a verified account. If you just signed up, verify your email first or resend the verification email below."
-        : err.message ?? "Something went wrong";
+      const message =
+        err.message === "Invalid login credentials"
+          ? "Those credentials did not match a verified account. If you just signed up, verify your email first or resend the verification email below."
+          : (err.message ?? "Something went wrong");
       setFormError(message);
       toast.error(message);
     } finally {
@@ -97,10 +106,14 @@ function AuthPage() {
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       <div className="relative hidden flex-col justify-between bg-primary p-12 text-primary-foreground lg:flex">
-        <Link to="/" className="font-serif text-3xl">CampusVerify</Link>
+        <Link to="/" className="font-serif text-3xl">
+          CampusVerify
+        </Link>
         <div>
           <p className="font-serif text-7xl leading-[0.9]">
-            Welcome<br /><em>{isStudent ? "back to campus." : "back."}</em>
+            Welcome
+            <br />
+            <em>{isStudent ? "back to campus." : "back."}</em>
           </p>
           <p className="mt-6 max-w-sm text-sm opacity-80">
             {isStudent
@@ -133,7 +146,10 @@ function AuthPage() {
               type="button"
               role="tab"
               aria-selected={isStudent}
-              onClick={() => { setTab("student"); setFormError(null); }}
+              onClick={() => {
+                setTab("student");
+                setFormError(null);
+              }}
               className={`rounded-2xl border-2 p-3 text-left transition ${
                 isStudent
                   ? "border-primary bg-primary text-primary-foreground"
@@ -148,7 +164,10 @@ function AuthPage() {
               type="button"
               role="tab"
               aria-selected={!isStudent}
-              onClick={() => { setTab("general"); setFormError(null); }}
+              onClick={() => {
+                setTab("general");
+                setFormError(null);
+              }}
               className={`rounded-2xl border-2 p-3 text-left transition ${
                 !isStudent
                   ? "border-primary bg-primary text-primary-foreground"
@@ -171,14 +190,22 @@ function AuthPage() {
                 type="email"
                 required
                 value={email}
-                onChange={(e) => { setEmail(e.target.value); setFormError(null); }}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setFormError(null);
+                }}
                 placeholder={isStudent ? "you@yourschool.edu" : "you@example.com"}
                 className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"
               />
             </div>
             <div>
               <div className="flex items-baseline justify-between">
-                <Label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider">Password</Label>
+                <Label
+                  htmlFor="password"
+                  className="text-xs font-semibold uppercase tracking-wider"
+                >
+                  Password
+                </Label>
                 <Link
                   to="/forgot-password"
                   search={{ as: tab }}
@@ -192,7 +219,10 @@ function AuthPage() {
                 required
                 minLength={6}
                 value={password}
-                onChange={(e) => { setPassword(e.target.value); setFormError(null); }}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setFormError(null);
+                }}
                 className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"
               />
             </div>
@@ -201,7 +231,11 @@ function AuthPage() {
                 {formError}
               </div>
             )}
-            <Button type="submit" className="h-12 w-full rounded-full bg-primary text-base" disabled={submitting}>
+            <Button
+              type="submit"
+              className="h-12 w-full rounded-full bg-primary text-base"
+              disabled={submitting}
+            >
               {submitting ? "Please wait…" : `Log in as ${isStudent ? "Student" : "General"}`}
               <ArrowUpRight className="ml-1 h-4 w-4" />
             </Button>
@@ -237,14 +271,13 @@ function AuthPage() {
 
           <p className="mt-6 text-center text-xs text-muted-foreground">
             New here?{" "}
-            <Link to="/signup" className="font-semibold text-foreground underline">Create an account</Link>
+            <Link to="/signup" className="font-semibold text-foreground underline">
+              Create an account
+            </Link>
           </p>
           <div className="mt-4 text-center text-xs text-muted-foreground">
-            Didn't get the verification email?{" "}
-            <ResendVerification defaultEmail={email} />
+            Didn't get the verification email? <ResendVerification defaultEmail={email} />
           </div>
-
-
         </div>
       </div>
     </div>

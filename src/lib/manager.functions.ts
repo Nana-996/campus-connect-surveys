@@ -51,9 +51,14 @@ export const listUniversitySurveys = createServerFn({ method: "GET" })
     const { data, error } = await context.supabase.rpc("list_university_surveys");
     if (error) fail(error, "list_university_surveys");
     return (data ?? []) as Array<{
-      id: string; title: string; creator_name: string;
-      response_count: number; response_goal: number; is_active: boolean;
-      created_at: string; expires_at: string | null;
+      id: string;
+      title: string;
+      creator_name: string;
+      response_count: number;
+      response_goal: number;
+      is_active: boolean;
+      created_at: string;
+      expires_at: string | null;
     }>;
   });
 
@@ -61,11 +66,17 @@ export const getSurveyTracking = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ surveyId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    const { data: rows, error } = await context.supabase.rpc("get_university_survey_tracking", { _survey_id: data.surveyId });
+    const { data: rows, error } = await context.supabase.rpc("get_university_survey_tracking", {
+      _survey_id: data.surveyId,
+    });
     if (error) fail(error, "get_survey_tracking");
     return (rows ?? []) as Array<{
-      student_id: string; full_name: string; index_number: string | null;
-      department: string | null; year: string | null; responded_at: string | null;
+      student_id: string;
+      full_name: string;
+      index_number: string | null;
+      department: string | null;
+      year: string | null;
+      responded_at: string | null;
     }>;
   });
 
@@ -73,7 +84,9 @@ export const getSurveyResponsesForManager = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ surveyId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    const { data: rows, error } = await context.supabase.rpc("get_survey_responses_for_manager", { _survey_id: data.surveyId });
+    const { data: rows, error } = await context.supabase.rpc("get_survey_responses_for_manager", {
+      _survey_id: data.surveyId,
+    });
     if (error) fail(error, "get_survey_responses_for_manager");
     return (rows ?? []) as Array<{
       response_id: string;
@@ -95,23 +108,36 @@ export const getSurveyQuestionsForManager = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ surveyId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    const { data: rows, error } = await context.supabase.rpc("get_survey_questions_for_tracker" as any, {
-      _survey_id: data.surveyId,
-    });
+    const { data: rows, error } = await context.supabase.rpc(
+      "get_survey_questions_for_tracker" as any,
+      {
+        _survey_id: data.surveyId,
+      },
+    );
     if (error) fail(error, "get_survey_questions_for_manager");
     const row = Array.isArray(rows) ? rows[0] : rows;
-    return row as { id: string; title: string; questions: Array<{ id: string; text: string; type: string; options?: string[] }> } | null;
+    return row as {
+      id: string;
+      title: string;
+      questions: Array<{ id: string; text: string; type: string; options?: string[] }>;
+    } | null;
   });
-
-
 
 export const updateMyStudentInfo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({
-      index_number: z.string().trim().max(32).regex(/^[A-Za-z0-9/_-]{1,32}$/).optional().or(z.literal("")),
-      department: z.string().trim().max(120).optional(),
-    }).parse(d),
+    z
+      .object({
+        index_number: z
+          .string()
+          .trim()
+          .max(32)
+          .regex(/^[A-Za-z0-9/_-]{1,32}$/)
+          .optional()
+          .or(z.literal("")),
+        department: z.string().trim().max(120).optional(),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.rpc("update_my_student_info", {

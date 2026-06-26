@@ -20,7 +20,6 @@ export type Profile = {
   interests_raw?: string[];
 };
 
-
 type AuthCtx = {
   user: User | null;
   session: Session | null;
@@ -41,16 +40,17 @@ const fallbackProfileFor = (authUser: User): Profile => {
   return {
     id: authUser.id,
     full_name: metadata.full_name ?? authUser.email?.split("@")[0] ?? "",
-    university_name: metadata.university_name ?? (userType === "general" ? "General" : `${emailDomain.split(".")[0] || "Campus"} University`),
+    university_name:
+      metadata.university_name ??
+      (userType === "general" ? "General" : `${emailDomain.split(".")[0] || "Campus"} University`),
     university_domain: emailDomain,
-    department: userType === "student" ? metadata.department ?? "" : "",
-    year: userType === "student" ? metadata.year ?? "" : "",
+    department: userType === "student" ? (metadata.department ?? "") : "",
+    year: userType === "student" ? (metadata.year ?? "") : "",
     earned_credits: userType === "student" ? 10 : 5,
     paid_credits: 0,
     user_type: userType,
   };
 };
-
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
@@ -108,7 +108,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setProfile(retry as Profile);
         return;
       }
-      console.warn("Profile creation failed; continuing with a temporary profile.", retryError ?? createError);
+      console.warn(
+        "Profile creation failed; continuing with a temporary profile.",
+        retryError ?? createError,
+      );
       setProfile(fallbackProfileFor(authUser));
       return;
     }
@@ -156,7 +159,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${uid}` },
         (payload) => {
-          setProfile((prev) => (prev ? { ...prev, ...(payload.new as Partial<Profile>) } : (payload.new as Profile)));
+          setProfile((prev) =>
+            prev ? { ...prev, ...(payload.new as Partial<Profile>) } : (payload.new as Profile),
+          );
         },
       )
       .subscribe();

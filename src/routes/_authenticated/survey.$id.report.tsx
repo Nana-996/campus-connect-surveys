@@ -12,19 +12,45 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowUp, ArrowDown, FileDown, Loader2, Sparkles } from "lucide-react";
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
-  PieChart, Pie, Cell, Legend,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
 } from "recharts";
-import { analyzeSentiment, topWords, suggestInterpretation, type Sentiment } from "@/lib/text-analysis";
+import {
+  analyzeSentiment,
+  topWords,
+  suggestInterpretation,
+  type Sentiment,
+} from "@/lib/text-analysis";
 
-type Question = { id: string; type: "text" | "choice" | "rating"; text: string; options?: string[] };
+type Question = {
+  id: string;
+  type: "text" | "choice" | "rating";
+  text: string;
+  options?: string[];
+};
 type Survey = {
-  id: string; creator_id: string; title: string; description: string;
-  questions: Question[]; response_count: number; created_at: string;
+  id: string;
+  creator_id: string;
+  title: string;
+  description: string;
+  questions: Question[];
+  response_count: number;
+  created_at: string;
 };
 type ResponseRow = {
-  id: string; respondent_id: string;
-  answers: Record<string, string>; created_at: string;
+  id: string;
+  respondent_id: string;
+  answers: Record<string, string>;
+  created_at: string;
 };
 
 const PALETTE = ["#4a6b52", "#7c9a6b", "#c98a4b", "#b8c47a", "#8e7a5a", "#6b8e9e", "#a47b4c"];
@@ -50,9 +76,7 @@ function aggregate(q: Question, rows: ResponseRow[]) {
 }
 
 function textAnswersFor(q: Question, rows: ResponseRow[]): string[] {
-  return rows
-    .map((r) => String(r.answers?.[q.id] ?? "").trim())
-    .filter((t) => t.length > 0);
+  return rows.map((r) => String(r.answers?.[q.id] ?? "").trim()).filter((t) => t.length > 0);
 }
 
 function ReportBuilderPage() {
@@ -70,35 +94,50 @@ function ReportBuilderPage() {
   const [sections, setSections] = useState<SectionConfig[]>([]);
 
   useEffect(() => {
-    if (!user) { setLoading(false); return; }
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     let active = true;
     (async () => {
       try {
         const data = await fetchOwnerResults({ data: { surveyId: id } });
         if (!active) return;
-        if (!data.survey) { setLoading(false); return; }
+        if (!data.survey) {
+          setLoading(false);
+          return;
+        }
         const s = data.survey as unknown as Survey;
         const rs = (data.responses as unknown as ResponseRow[]) ?? [];
         setSurvey(s);
         setResponses(rs);
         setReportTitle(`${s.title} — Report`);
         setSummary(autoSummary(s, rs));
-        setSections(s.questions.map((q) => ({
-          qid: q.id, included: true, comment: "", showRawText: false,
-        })));
+        setSections(
+          s.questions.map((q) => ({
+            qid: q.id,
+            included: true,
+            comment: "",
+            showRawText: false,
+          })),
+        );
       } catch (err: any) {
         toast.error(err?.message ?? "Couldn't load report data.");
       } finally {
         if (active) setLoading(false);
       }
     })();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, user?.id]);
 
   const qMap = useMemo(() => {
     const m: Record<string, Question> = {};
-    survey?.questions.forEach((q) => { m[q.id] = q; });
+    survey?.questions.forEach((q) => {
+      m[q.id] = q;
+    });
     return m;
   }, [survey]);
 
@@ -137,7 +176,7 @@ function ReportBuilderPage() {
       ]);
 
       const pageEls = Array.from(
-        reportRef.current.querySelectorAll<HTMLElement>("[data-report-page]")
+        reportRef.current.querySelectorAll<HTMLElement>("[data-report-page]"),
       );
       if (pageEls.length === 0) throw new Error("Nothing to export");
 
@@ -200,23 +239,32 @@ function ReportBuilderPage() {
         {/* Editor sidebar */}
         <aside className="space-y-4">
           <div className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Report Builder</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+              Report Builder
+            </p>
             <h2 className="mt-1 font-serif text-2xl leading-tight">Customize your report</h2>
             <p className="mt-2 text-xs text-muted-foreground">
-              Edit the title, intro, and per-question notes. Toggle sections in or out. Preview updates live.
+              Edit the title, intro, and per-question notes. Toggle sections in or out. Preview
+              updates live.
             </p>
             <Button
               onClick={exportPDF}
               disabled={exporting || includedSections.length === 0}
               className="mt-4 w-full rounded-full"
             >
-              {exporting ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <FileDown className="mr-1 h-4 w-4" />}
+              {exporting ? (
+                <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+              ) : (
+                <FileDown className="mr-1 h-4 w-4" />
+              )}
               {exporting ? "Exporting…" : "Export PDF"}
             </Button>
           </div>
 
           <div className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
-            <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Report title</Label>
+            <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+              Report title
+            </Label>
             <Input
               value={reportTitle}
               onChange={(e) => setReportTitle(e.target.value)}
@@ -242,7 +290,10 @@ function ReportBuilderPage() {
                 const q = qMap[s.qid];
                 if (!q) return null;
                 return (
-                  <li key={s.qid} className="rounded-2xl border border-foreground/10 bg-background p-3">
+                  <li
+                    key={s.qid}
+                    className="rounded-2xl border border-foreground/10 bg-background p-3"
+                  >
                     <div className="flex items-start gap-2">
                       <Checkbox
                         checked={s.included}
@@ -250,10 +301,13 @@ function ReportBuilderPage() {
                         className="mt-0.5"
                       />
                       <div className="min-w-0 flex-1">
-                        <p className="line-clamp-2 text-xs font-medium">Q{idx + 1}. {q.text}</p>
+                        <p className="line-clamp-2 text-xs font-medium">
+                          Q{idx + 1}. {q.text}
+                        </p>
                         <div className="mt-2 flex items-center gap-1">
                           <Button
-                            size="sm" variant="ghost"
+                            size="sm"
+                            variant="ghost"
                             onClick={() => moveSection(idx, -1)}
                             disabled={idx === 0}
                             className="h-6 w-6 rounded-full p-0"
@@ -261,7 +315,8 @@ function ReportBuilderPage() {
                             <ArrowUp className="h-3 w-3" />
                           </Button>
                           <Button
-                            size="sm" variant="ghost"
+                            size="sm"
+                            variant="ghost"
                             onClick={() => moveSection(idx, 1)}
                             disabled={idx === sections.length - 1}
                             className="h-6 w-6 rounded-full p-0"
@@ -341,7 +396,11 @@ function ReportBuilderPage() {
                   sections={appendixSections.map((s) => {
                     const q = qMap[s.qid];
                     const originalIdx = sections.findIndex((x) => x.qid === s.qid);
-                    return { question: q, index: originalIdx + 1, answers: textAnswersFor(q, responses) };
+                    return {
+                      question: q,
+                      index: originalIdx + 1,
+                      answers: textAnswersFor(q, responses),
+                    };
                   })}
                 />
               )}
@@ -382,9 +441,14 @@ function PageFooter({ children }: { children: React.ReactNode }) {
   return (
     <div
       style={{
-        marginTop: 32, paddingTop: 12, borderTop: "1px solid #e5e5e5",
-        fontSize: 10, color: "#777", fontFamily: "sans-serif",
-        display: "flex", justifyContent: "space-between",
+        marginTop: 32,
+        paddingTop: 12,
+        borderTop: "1px solid #e5e5e5",
+        fontSize: 10,
+        color: "#777",
+        fontFamily: "sans-serif",
+        display: "flex",
+        justifyContent: "space-between",
       }}
     >
       {children}
@@ -393,33 +457,76 @@ function PageFooter({ children }: { children: React.ReactNode }) {
 }
 
 function CoverPage({
-  title, description, summary, totalResponses, generatedAt,
+  title,
+  description,
+  summary,
+  totalResponses,
+  generatedAt,
 }: {
-  title: string; description: string; summary: string;
-  totalResponses: number; generatedAt: Date;
+  title: string;
+  description: string;
+  summary: string;
+  totalResponses: number;
+  generatedAt: Date;
 }) {
   return (
     <div data-report-page style={PAGE_STYLE}>
-      <div style={{ fontSize: 11, letterSpacing: "0.25em", textTransform: "uppercase", color: "#888", fontFamily: "sans-serif" }}>
+      <div
+        style={{
+          fontSize: 11,
+          letterSpacing: "0.25em",
+          textTransform: "uppercase",
+          color: "#888",
+          fontFamily: "sans-serif",
+        }}
+      >
         CampusVerify · Survey Report
       </div>
       <div style={{ marginTop: 120 }}>
         <h1 style={{ fontSize: 42, lineHeight: 1.1, margin: 0, fontWeight: 700 }}>{title}</h1>
         {description && (
-          <p style={{ marginTop: 16, fontSize: 16, color: "#444", lineHeight: 1.5 }}>{description}</p>
+          <p style={{ marginTop: 16, fontSize: 16, color: "#444", lineHeight: 1.5 }}>
+            {description}
+          </p>
         )}
       </div>
 
       <div style={{ marginTop: 64 }}>
-        <div style={{ fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "#888", fontFamily: "sans-serif", marginBottom: 8 }}>
+        <div
+          style={{
+            fontSize: 11,
+            letterSpacing: "0.2em",
+            textTransform: "uppercase",
+            color: "#888",
+            fontFamily: "sans-serif",
+            marginBottom: 8,
+          }}
+        >
           Executive summary
         </div>
-        <p style={{ fontSize: 13, lineHeight: 1.6, color: "#222", whiteSpace: "pre-wrap" }}>{summary}</p>
+        <p style={{ fontSize: 13, lineHeight: 1.6, color: "#222", whiteSpace: "pre-wrap" }}>
+          {summary}
+        </p>
       </div>
 
-      <div style={{ marginTop: 48, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, fontFamily: "sans-serif" }}>
+      <div
+        style={{
+          marginTop: 48,
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 24,
+          fontFamily: "sans-serif",
+        }}
+      >
         <Meta label="Total responses" value={String(totalResponses)} />
-        <Meta label="Date generated" value={generatedAt.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })} />
+        <Meta
+          label="Date generated"
+          value={generatedAt.toLocaleDateString(undefined, {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}
+        />
       </div>
 
       <PageFooter>
@@ -433,23 +540,42 @@ function CoverPage({
 function Meta({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div style={{ fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: "#888" }}>{label}</div>
+      <div
+        style={{ fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: "#888" }}
+      >
+        {label}
+      </div>
       <div style={{ marginTop: 4, fontSize: 16, fontWeight: 600, color: "#1a1a1a" }}>{value}</div>
     </div>
   );
 }
 
 function QuestionReportPage({
-  index, question, responses, comment,
+  index,
+  question,
+  responses,
+  comment,
 }: {
-  index: number; question: Question; responses: ResponseRow[];
+  index: number;
+  question: Question;
+  responses: ResponseRow[];
   comment: string;
 }) {
-  const answered = responses.filter((r) => String(r.answers?.[question.id] ?? "").trim() !== "").length;
+  const answered = responses.filter(
+    (r) => String(r.answers?.[question.id] ?? "").trim() !== "",
+  ).length;
 
   return (
     <div data-report-page style={PAGE_STYLE}>
-      <div style={{ fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "#888", fontFamily: "sans-serif" }}>
+      <div
+        style={{
+          fontSize: 11,
+          letterSpacing: "0.2em",
+          textTransform: "uppercase",
+          color: "#888",
+          fontFamily: "sans-serif",
+        }}
+      >
         Question {index} · {labelForType(question.type)}
       </div>
       <h2 style={{ fontSize: 24, lineHeight: 1.25, margin: "8px 0 4px", fontWeight: 700 }}>
@@ -460,17 +586,45 @@ function QuestionReportPage({
       </div>
 
       <div style={{ marginTop: 24 }}>
-        {question.type === "text"
-          ? <TextAnalysisBlock question={question} responses={responses} />
-          : <ChoiceBlock question={question} responses={responses} />}
+        {question.type === "text" ? (
+          <TextAnalysisBlock question={question} responses={responses} />
+        ) : (
+          <ChoiceBlock question={question} responses={responses} />
+        )}
       </div>
 
       {comment && (
-        <div style={{ marginTop: 28, padding: 16, background: "#f7f5f0", borderLeft: "3px solid #4a6b52", fontFamily: "sans-serif" }}>
-          <div style={{ fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: "#666", marginBottom: 6 }}>
+        <div
+          style={{
+            marginTop: 28,
+            padding: 16,
+            background: "#f7f5f0",
+            borderLeft: "3px solid #4a6b52",
+            fontFamily: "sans-serif",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 10,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              color: "#666",
+              marginBottom: 6,
+            }}
+          >
             Commentary
           </div>
-          <p style={{ fontSize: 13, lineHeight: 1.6, color: "#222", margin: 0, whiteSpace: "pre-wrap" }}>{comment}</p>
+          <p
+            style={{
+              fontSize: 13,
+              lineHeight: 1.6,
+              color: "#222",
+              margin: 0,
+              whiteSpace: "pre-wrap",
+            }}
+          >
+            {comment}
+          </p>
         </div>
       )}
 
@@ -499,8 +653,18 @@ function ChoiceBlock({ question, responses }: { question: Question; responses: R
             <PieChart>
               <Tooltip />
               <Legend wrapperStyle={{ fontSize: 12, fontFamily: "sans-serif" }} />
-              <Pie data={data} dataKey="count" nameKey="label" cx="50%" cy="50%" outerRadius={90} paddingAngle={2}>
-                {data.map((_, i) => <Cell key={i} fill={PALETTE[i % PALETTE.length]} />)}
+              <Pie
+                data={data}
+                dataKey="count"
+                nameKey="label"
+                cx="50%"
+                cy="50%"
+                outerRadius={90}
+                paddingAngle={2}
+              >
+                {data.map((_, i) => (
+                  <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
+                ))}
               </Pie>
             </PieChart>
           ) : (
@@ -515,7 +679,15 @@ function ChoiceBlock({ question, responses }: { question: Question; responses: R
         </ResponsiveContainer>
       </div>
 
-      <table style={{ width: "100%", marginTop: 20, borderCollapse: "collapse", fontFamily: "sans-serif", fontSize: 13 }}>
+      <table
+        style={{
+          width: "100%",
+          marginTop: 20,
+          borderCollapse: "collapse",
+          fontFamily: "sans-serif",
+          fontSize: 13,
+        }}
+      >
         <thead>
           <tr style={{ borderBottom: "2px solid #1a1a1a", textAlign: "left" }}>
             <th style={{ padding: "8px 4px" }}>Option</th>
@@ -528,7 +700,9 @@ function ChoiceBlock({ question, responses }: { question: Question; responses: R
             <tr key={d.label} style={{ borderBottom: "1px solid #eee" }}>
               <td style={{ padding: "8px 4px" }}>{d.label}</td>
               <td style={{ padding: "8px 4px", textAlign: "right" }}>{d.count}</td>
-              <td style={{ padding: "8px 4px", textAlign: "right" }}>{((d.count / total) * 100).toFixed(1)}%</td>
+              <td style={{ padding: "8px 4px", textAlign: "right" }}>
+                {((d.count / total) * 100).toFixed(1)}%
+              </td>
             </tr>
           ))}
         </tbody>
@@ -537,13 +711,23 @@ function ChoiceBlock({ question, responses }: { question: Question; responses: R
   );
 }
 
-function TextAnalysisBlock({ question, responses }: { question: Question; responses: ResponseRow[] }) {
+function TextAnalysisBlock({
+  question,
+  responses,
+}: {
+  question: Question;
+  responses: ResponseRow[];
+}) {
   const answers = textAnswersFor(question, responses);
   const sentiment = useMemo(() => analyzeSentiment(answers), [answers]);
   const words = useMemo(() => topWords(answers, 5), [answers]);
 
   if (answers.length === 0) {
-    return <p style={{ fontSize: 13, color: "#888", fontStyle: "italic" }}>No text responses submitted.</p>;
+    return (
+      <p style={{ fontSize: 13, color: "#888", fontStyle: "italic" }}>
+        No text responses submitted.
+      </p>
+    );
   }
 
   const sentimentData = [
@@ -564,26 +748,56 @@ function TextAnalysisBlock({ question, responses }: { question: Question; respon
             <YAxis unit="%" domain={[0, 100]} tick={{ fontSize: 12, fontFamily: "sans-serif" }} />
             <Tooltip formatter={(v: number) => `${v}%`} />
             <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-              {sentimentData.map((d, i) => <Cell key={i} fill={d.fill} />)}
+              {sentimentData.map((d, i) => (
+                <Cell key={i} fill={d.fill} />
+              ))}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
       <p style={{ fontSize: 11, color: "#777", fontFamily: "sans-serif", marginTop: 4 }}>
-        Based on {sentiment.total} response{sentiment.total === 1 ? "" : "s"} analyzed against a built-in keyword list. Indicative, not clinical.
+        Based on {sentiment.total} response{sentiment.total === 1 ? "" : "s"} analyzed against a
+        built-in keyword list. Indicative, not clinical.
       </p>
 
       <div style={{ marginTop: 24 }}>
         <SectionLabel>Top 5 words (stop words excluded)</SectionLabel>
         {words.length === 0 ? (
-          <p style={{ fontSize: 13, color: "#888", fontStyle: "italic", marginTop: 8 }}>No notable terms detected.</p>
+          <p style={{ fontSize: 13, color: "#888", fontStyle: "italic", marginTop: 8 }}>
+            No notable terms detected.
+          </p>
         ) : (
-          <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 6, fontFamily: "sans-serif" }}>
+          <div
+            style={{
+              marginTop: 10,
+              display: "flex",
+              flexDirection: "column",
+              gap: 6,
+              fontFamily: "sans-serif",
+            }}
+          >
             {words.map((w) => (
-              <div key={w.word} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13 }}>
+              <div
+                key={w.word}
+                style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13 }}
+              >
                 <span style={{ width: 110, color: "#222", fontWeight: 600 }}>{w.word}</span>
-                <div style={{ flex: 1, background: "#eee", height: 10, borderRadius: 4, overflow: "hidden" }}>
-                  <div style={{ width: `${(w.count / maxWord) * 100}%`, height: "100%", background: "#4a6b52" }} />
+                <div
+                  style={{
+                    flex: 1,
+                    background: "#eee",
+                    height: 10,
+                    borderRadius: 4,
+                    overflow: "hidden",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: `${(w.count / maxWord) * 100}%`,
+                      height: "100%",
+                      background: "#4a6b52",
+                    }}
+                  />
                 </div>
                 <span style={{ width: 36, textAlign: "right", color: "#555" }}>{w.count}</span>
               </div>
@@ -597,7 +811,15 @@ function TextAnalysisBlock({ question, responses }: { question: Question; respon
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: "#666", fontFamily: "sans-serif" }}>
+    <div
+      style={{
+        fontSize: 10,
+        letterSpacing: "0.2em",
+        textTransform: "uppercase",
+        color: "#666",
+        fontFamily: "sans-serif",
+      }}
+    >
       {children}
     </div>
   );
@@ -606,22 +828,31 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 function ClosingPage({ totalResponses }: { totalResponses: number }) {
   return (
     <div data-report-page style={PAGE_STYLE}>
-      <div style={{ fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "#888", fontFamily: "sans-serif" }}>
+      <div
+        style={{
+          fontSize: 11,
+          letterSpacing: "0.2em",
+          textTransform: "uppercase",
+          color: "#888",
+          fontFamily: "sans-serif",
+        }}
+      >
         Appendix
       </div>
       <h2 style={{ fontSize: 24, lineHeight: 1.25, margin: "8px 0 16px", fontWeight: 700 }}>
         Methodology & Notes
       </h2>
       <p style={{ fontSize: 13, lineHeight: 1.7, color: "#222" }}>
-        This report was auto-generated from {totalResponses} response{totalResponses === 1 ? "" : "s"} collected through
-        the CampusVerify platform. Respondents were verified members of their campus community at the time of submission.
-        All open-ended responses are presented anonymously. Percentages are rounded to one decimal place; totals may not
-        sum to 100% due to rounding.
+        This report was auto-generated from {totalResponses} response
+        {totalResponses === 1 ? "" : "s"} collected through the CampusVerify platform. Respondents
+        were verified members of their campus community at the time of submission. All open-ended
+        responses are presented anonymously. Percentages are rounded to one decimal place; totals
+        may not sum to 100% due to rounding.
       </p>
       <p style={{ fontSize: 13, lineHeight: 1.7, color: "#222", marginTop: 16 }}>
-        Sentiment percentages for open-ended questions are computed locally using a built-in keyword list (no AI services
-        are used). They are indicative signals to guide interpretation, not a substitute for careful reading of the raw
-        text.
+        Sentiment percentages for open-ended questions are computed locally using a built-in keyword
+        list (no AI services are used). They are indicative signals to guide interpretation, not a
+        substitute for careful reading of the raw text.
       </p>
 
       <PageFooter>
@@ -639,19 +870,36 @@ function RawResponsesAppendix({
 }) {
   return (
     <div data-report-page style={PAGE_STYLE}>
-      <div style={{ fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "#888", fontFamily: "sans-serif" }}>
+      <div
+        style={{
+          fontSize: 11,
+          letterSpacing: "0.2em",
+          textTransform: "uppercase",
+          color: "#888",
+          fontFamily: "sans-serif",
+        }}
+      >
         Appendix B
       </div>
       <h2 style={{ fontSize: 24, lineHeight: 1.25, margin: "8px 0 16px", fontWeight: 700 }}>
         Raw open-ended responses
       </h2>
       <p style={{ fontSize: 12, color: "#666", fontFamily: "sans-serif", marginBottom: 20 }}>
-        Verbatim, anonymized responses for the questions opted in below. Included for reference; aggregate analysis above remains the primary summary.
+        Verbatim, anonymized responses for the questions opted in below. Included for reference;
+        aggregate analysis above remains the primary summary.
       </p>
 
       {sections.map((s) => (
         <div key={s.question.id} style={{ marginBottom: 28 }}>
-          <div style={{ fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "#888", fontFamily: "sans-serif" }}>
+          <div
+            style={{
+              fontSize: 11,
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              color: "#888",
+              fontFamily: "sans-serif",
+            }}
+          >
             Question {s.index}
           </div>
           <h3 style={{ fontSize: 16, margin: "4px 0 12px", fontWeight: 700 }}>
@@ -662,11 +910,27 @@ function RawResponsesAppendix({
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {s.answers.map((t, i) => (
-                <div key={i} style={{
-                  padding: 12, background: "#fafaf7", borderLeft: "2px solid #c98a4b",
-                  fontSize: 12.5, lineHeight: 1.55, color: "#222",
-                }}>
-                  <div style={{ fontSize: 9.5, letterSpacing: "0.15em", textTransform: "uppercase", color: "#888", marginBottom: 4, fontFamily: "sans-serif" }}>
+                <div
+                  key={i}
+                  style={{
+                    padding: 12,
+                    background: "#fafaf7",
+                    borderLeft: "2px solid #c98a4b",
+                    fontSize: 12.5,
+                    lineHeight: 1.55,
+                    color: "#222",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 9.5,
+                      letterSpacing: "0.15em",
+                      textTransform: "uppercase",
+                      color: "#888",
+                      marginBottom: 4,
+                      fontFamily: "sans-serif",
+                    }}
+                  >
                     Anonymous #{i + 1}
                   </div>
                   <div style={{ whiteSpace: "pre-wrap" }}>{t}</div>

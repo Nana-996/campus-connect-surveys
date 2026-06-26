@@ -28,7 +28,10 @@ export const Route = createFileRoute("/_authenticated/polls")({
   head: () => ({
     meta: [
       { title: "Polls — CampusVerify" },
-      { name: "description", content: "Quick public polls. Free to post, free to answer. No credits in or out." },
+      {
+        name: "description",
+        content: "Quick public polls. Free to post, free to answer. No credits in or out.",
+      },
       { name: "robots", content: "noindex,nofollow" },
     ],
   }),
@@ -187,11 +190,9 @@ function PollCard({
   onDelete?: () => void;
 }) {
   const total = useMemo(() => results.reduce((s, r) => s + Number(r.count), 0), [results]);
-  const countFor = (answer: string) =>
-    Number(results.find((r) => r.answer === answer)?.count ?? 0);
+  const countFor = (answer: string) => Number(results.find((r) => r.answer === answer)?.count ?? 0);
   const pct = (answer: string) => (total === 0 ? 0 : Math.round((countFor(answer) / total) * 100));
-  const choices =
-    poll.type === "rating" ? ["1", "2", "3", "4", "5"] : (poll.options ?? []);
+  const choices = poll.type === "rating" ? ["1", "2", "3", "4", "5"] : (poll.options ?? []);
 
   return (
     <li className="min-w-0 rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">

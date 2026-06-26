@@ -5,6 +5,7 @@ Turn general (non-student) users into paying customers. They buy credits in Ghan
 ## 1. Payment provider — Paddle
 
 Paddle is the right fit:
+
 - It is a merchant of record, so VAT/tax, fraud, refunds and chargebacks are handled for you — important when you're solo in Ghana selling to a global academic audience.
 - Paddle supports localized pricing: buyers see GHS at checkout while you receive payout in a supported currency (USD/EUR/GBP). I'll set GHS as the display currency on every price.
 - No Stripe/PSP account needed; checkout works as soon as the test environment is provisioned.
@@ -17,12 +18,12 @@ A test (sandbox) environment is created immediately so we can run end-to-end pur
 
 `src/lib/credits.ts` gets a per-tier student vs general cost. The earn-side stays unchanged.
 
-| Tier | Student cost | General cost (2×) | Response goal |
-|------|--------------|-------------------|----------------|
-| Basic | 1 | 2 | 50 |
-| Targeted | 3 | 6 | 200 |
-| Boosted | 8 | 16 | 500 |
-| Pro | 15 | 30 | 2,000 |
+| Tier     | Student cost | General cost (2×) | Response goal |
+| -------- | ------------ | ----------------- | ------------- |
+| Basic    | 1            | 2                 | 50            |
+| Targeted | 3            | 6                 | 200           |
+| Boosted  | 8            | 16                | 500           |
+| Pro      | 15           | 30                | 2,000         |
 
 `canAfford()` and every place that reads `TIERS[t].cost` switches to a helper `tierCost(tier, userType)` so the right number is charged and shown.
 
@@ -30,17 +31,18 @@ A test (sandbox) environment is created immediately so we can run end-to-end pur
 
 Base anchor: **GHS 1 / credit**, with progressive bundle discounts.
 
-| Bundle | Credits | Price | Effective |
-|--------|---------|-------|-----------|
-| Starter | 10 | GHS 9 | 0.90 / cr (10% off) |
-| Plus | 30 | GHS 24 | 0.80 / cr (20% off) |
-| Pro | 100 | GHS 70 | 0.70 / cr (30% off) |
+| Bundle  | Credits | Price  | Effective           |
+| ------- | ------- | ------ | ------------------- |
+| Starter | 10      | GHS 9  | 0.90 / cr (10% off) |
+| Plus    | 30      | GHS 24 | 0.80 / cr (20% off) |
+| Pro     | 100     | GHS 70 | 0.70 / cr (30% off) |
 
 Sanity check against tiers: Starter covers 5 Basic surveys or one Boosted with change. Plus covers one Pro-tier survey. Pro bundle covers ~3 Pro-tier surveys — a comfortable "stock up for a semester" pack.
 
 ## 3. App changes
 
 ### Backend
+
 - **`payment_transactions` table** already exists — reuse it. Add `bundle_id`, `credits_granted`, `paddle_txn_id`, `currency` if any are missing (verified during build).
 - **Webhook route** at `src/routes/api/public/paddle-webhook.ts`:
   - Verify Paddle signature.
@@ -50,6 +52,7 @@ Sanity check against tiers: Starter covers 5 Basic surveys or one Boosted with c
 - **`createCheckoutSession` server function** in `src/lib/payments.functions.ts` (auth-protected): takes a `bundleId`, returns a Paddle checkout URL/transaction token for the current user.
 
 ### Frontend
+
 - **`/buy-credits` route** (under `_authenticated`): shows the three bundles as cards, "Buy" launches Paddle's overlay checkout via `@paddle/paddle-js`. Hidden entirely for students — they see a "You earn credits by answering surveys" panel instead.
 - **AppHeader credit chip** for general users links to `/buy-credits` instead of `/feed`.
 - **Profile page**: replace the "Earn credits — answer surveys" CTA with a "Buy credits" CTA for general users; show purchased vs earned balance breakdown.
@@ -57,6 +60,7 @@ Sanity check against tiers: Starter covers 5 Basic surveys or one Boosted with c
 - **Tier copy** in `src/lib/credits.ts` features stays the same; only the displayed cost changes.
 
 ### Admin
+
 - Admin Users table gets a "Lifetime spend (GHS)" column sourced from `payment_transactions`.
 
 ## 4. Rollout order (build mode)

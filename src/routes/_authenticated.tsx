@@ -17,19 +17,29 @@ function AuthedError({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div className="flex min-h-screen items-center justify-center px-6 text-center">
       <div className="max-w-sm">
-        <p className="font-serif text-3xl">{isAuth ? "Your session expired." : "Something went wrong."}</p>
-        <p className="mt-2 text-sm text-muted-foreground">{isAuth ? "Please log back in to continue." : msg}</p>
+        <p className="font-serif text-3xl">
+          {isAuth ? "Your session expired." : "Something went wrong."}
+        </p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {isAuth ? "Please log back in to continue." : msg}
+        </p>
         <div className="mt-5 flex justify-center gap-2">
           <button
             type="button"
-            onClick={() => { router.invalidate(); reset(); }}
+            onClick={() => {
+              router.invalidate();
+              reset();
+            }}
             className="rounded-full border border-foreground/30 px-5 py-2 text-sm font-semibold"
           >
             Try again
           </button>
           <button
             type="button"
-            onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/auth" }); }}
+            onClick={async () => {
+              await supabase.auth.signOut();
+              navigate({ to: "/auth" });
+            }}
             className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground"
           >
             Log in
@@ -49,7 +59,11 @@ function AuthedLayout() {
   }, [user, loading, navigate]);
 
   if (loading || !user) {
-    return <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">Loading...</div>;
+    return (
+      <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">
+        Loading...
+      </div>
+    );
   }
   if (profileError) {
     return (
@@ -72,7 +86,11 @@ function AuthedLayout() {
     );
   }
   if (!profile) {
-    return <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">Setting up your profile...</div>;
+    return (
+      <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">
+        Setting up your profile...
+      </div>
+    );
   }
 
   return (

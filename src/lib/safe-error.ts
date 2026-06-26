@@ -1,7 +1,10 @@
 // Maps raw errors (Supabase/PostgREST/etc) to safe user-facing messages.
 // Full error is logged to the console for debugging; never shown to users.
 
-export function safeErrorMessage(error: unknown, fallback = "Something went wrong. Please try again."): string {
+export function safeErrorMessage(
+  error: unknown,
+  fallback = "Something went wrong. Please try again.",
+): string {
   if (error) {
     // Always log full details for developers
     // eslint-disable-next-line no-console
@@ -33,7 +36,11 @@ export function safeErrorMessage(error: unknown, fallback = "Something went wron
   if (lower.includes("violates foreign key") || lower.includes("foreign key constraint")) {
     return "That action references something that no longer exists.";
   }
-  if (lower.includes("violates check constraint") || lower.includes("not-null") || lower.includes("null value")) {
+  if (
+    lower.includes("violates check constraint") ||
+    lower.includes("not-null") ||
+    lower.includes("null value")
+  ) {
     return "Some required information is missing or invalid.";
   }
   if (lower.includes("jwt") || lower.includes("invalid token") || lower.includes("expired")) {

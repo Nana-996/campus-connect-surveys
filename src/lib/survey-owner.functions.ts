@@ -10,7 +10,9 @@ const surveyIdSchema = z.object({ surveyId: z.string().uuid() });
 // real user account.
 function pseudonymize(surveyId: string, respondentId: string): string {
   const h = createHash("sha256").update(`${surveyId}:${respondentId}`).digest("hex");
-  return [h.slice(0, 8), h.slice(8, 12), h.slice(12, 16), h.slice(16, 20), h.slice(20, 32)].join("-");
+  return [h.slice(0, 8), h.slice(8, 12), h.slice(12, 16), h.slice(16, 20), h.slice(20, 32)].join(
+    "-",
+  );
 }
 
 export const getOwnerSurveyResults = createServerFn({ method: "GET" })
@@ -57,7 +59,8 @@ export const getOwnerSurveyResults = createServerFn({ method: "GET" })
         .eq("survey_id", data.surveyId)
         .order("created_at", { ascending: false }),
     ]);
-    if (responseError || vizError || savedViewsError || shareTokensError) throw new Error("Could not load survey responses");
+    if (responseError || vizError || savedViewsError || shareTokensError)
+      throw new Error("Could not load survey responses");
 
     // Map real respondent_id -> opaque pseudonym before anything leaves the server.
     // This prevents survey creators from correlating a real user UUID with
