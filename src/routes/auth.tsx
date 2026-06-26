@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ArrowUpRight, Sparkles, GraduationCap, Globe2 } from "lucide-react";
 import { ResendVerification } from "@/components/ResendVerification";
+import { lovable } from "@/integrations/lovable/index";
 
 const searchSchema = z.object({
   mode: z.enum(["login", "signup"]).optional(),
@@ -205,6 +206,35 @@ function AuthPage() {
               <ArrowUpRight className="ml-1 h-4 w-4" />
             </Button>
           </form>
+
+          {!isStudent && (
+            <>
+              <div className="my-5 flex items-center gap-3 text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+                <div className="h-px flex-1 bg-foreground/15" />
+                or
+                <div className="h-px flex-1 bg-foreground/15" />
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-12 w-full rounded-full"
+                onClick={async () => {
+                  const result = await lovable.auth.signInWithOAuth("google", {
+                    redirect_uri: window.location.origin,
+                  });
+                  if (result.error) {
+                    toast.error(result.error.message || "Google sign-in failed");
+                  }
+                }}
+              >
+                Continue with Google
+              </Button>
+              <p className="mt-2 text-center text-[11px] text-muted-foreground">
+                Google sign-in creates a General account.
+              </p>
+            </>
+          )}
+
           <p className="mt-6 text-center text-xs text-muted-foreground">
             New here?{" "}
             <Link to="/signup" className="font-semibold text-foreground underline">Create an account</Link>
@@ -213,6 +243,7 @@ function AuthPage() {
             Didn't get the verification email?{" "}
             <ResendVerification defaultEmail={email} />
           </div>
+
 
         </div>
       </div>
