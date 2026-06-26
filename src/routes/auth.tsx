@@ -120,7 +120,7 @@ function AuthPage() {
             CampusVerify
           </Link>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-highlight px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-highlight-foreground">
-            <Sparkles className="h-3 w-3" /> log in
+            <LogIn className="h-3 w-3" /> log in
           </span>
           <h1 className="mt-4 font-serif text-5xl leading-[0.95]">Hello again.</h1>
           <p className="mt-2 text-sm text-muted-foreground">
