@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/PasswordInput";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ArrowUpRight, Sparkles, GraduationCap, Globe2 } from "lucide-react";
+import { ArrowUpRight, LogIn, GraduationCap, Globe2 } from "lucide-react";
 import { ResendVerification } from "@/components/ResendVerification";
 import { lovable } from "@/integrations/lovable/index";
 
