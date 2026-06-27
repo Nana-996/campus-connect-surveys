@@ -7,11 +7,10 @@ import { nitro } from "nitro/vite";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig(({ command }) => {
-  // Default to Vercel only for real builds. Dev previews must not inherit a
-  // production NODE_ENV/NITRO_PRESET because Vercel route emulation returns
-  // plain "Not Found" inside the Lovable preview frame.
+  // Pick the Nitro preset per host: Vercel for Vercel deploys, Cloudflare
+  // Workers (the Lovable runtime) otherwise. Dev previews leave it unset.
   const nitroPreset = command === "build"
-    ? process.env.NITRO_PRESET || (process.env.VERCEL ? "vercel" : undefined)
+    ? process.env.NITRO_PRESET || (process.env.VERCEL ? "vercel" : "cloudflare_module")
     : undefined;
   const pwaPlugin = command === "build" ? VitePWA({
     registerType: "autoUpdate",
