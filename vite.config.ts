@@ -1,8 +1,18 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { VitePWA } from "vite-plugin-pwa";
 
-export default defineConfig(({ command }) => {
-  const pwaPlugin = command === "build" ? VitePWA({
+const isVercelBuild = process.env.VERCEL === "1" || process.env.VERCEL === "true";
+
+export default defineConfig({
+  nitro: isVercelBuild
+    ? { preset: "vercel" }
+    : {
+        preset: process.env.NITRO_PRESET || "cloudflare-module",
+        output: { dir: "dist", serverDir: "dist/server", publicDir: "dist/client" },
+        cloudflare: { nodeCompat: true, deployConfig: true },
+      },
+  plugins: [
+    VitePWA({
     registerType: "autoUpdate",
     injectRegister: null, // we register from src/lib/pwa-register.ts under guards
     devOptions: { enabled: false },
@@ -53,11 +63,6 @@ export default defineConfig(({ command }) => {
         },
       ],
     },
-  }) : null;
-
-  return {
-    plugins: [
-      ...(pwaPlugin ? [pwaPlugin] : []),
-    ],
-  };
+    }),
+  ],
 });
