@@ -14,7 +14,9 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PitchRouteImport } from './routes/pitch'
 import { Route as GuideRouteImport } from './routes/guide'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
@@ -65,9 +67,19 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RefundPolicyRoute = RefundPolicyRouteImport.update({
+  id: '/refund-policy',
+  path: '/refund-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PitchRoute = PitchRouteImport.update({
@@ -204,7 +216,9 @@ export interface FileRoutesByFullPath {
   '/guide': typeof GuideRoute
   '/index': typeof Char91indexChar93Route
   '/pitch': typeof PitchRoute
+  '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
+  '/refund-policy': typeof RefundPolicyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -235,7 +249,9 @@ export interface FileRoutesByTo {
   '/guide': typeof GuideRoute
   '/index': typeof Char91indexChar93Route
   '/pitch': typeof PitchRoute
+  '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
+  '/refund-policy': typeof RefundPolicyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -268,7 +284,9 @@ export interface FileRoutesById {
   '/guide': typeof GuideRoute
   '/index': typeof Char91indexChar93Route
   '/pitch': typeof PitchRoute
+  '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
+  '/refund-policy': typeof RefundPolicyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -301,7 +319,9 @@ export interface FileRouteTypes {
     | '/guide'
     | '/index'
     | '/pitch'
+    | '/pricing'
     | '/privacy'
+    | '/refund-policy'
     | '/reset-password'
     | '/signup'
     | '/sitemap.xml'
@@ -332,7 +352,9 @@ export interface FileRouteTypes {
     | '/guide'
     | '/index'
     | '/pitch'
+    | '/pricing'
     | '/privacy'
+    | '/refund-policy'
     | '/reset-password'
     | '/signup'
     | '/sitemap.xml'
@@ -364,7 +386,9 @@ export interface FileRouteTypes {
     | '/guide'
     | '/index'
     | '/pitch'
+    | '/pricing'
     | '/privacy'
+    | '/refund-policy'
     | '/reset-password'
     | '/signup'
     | '/sitemap.xml'
@@ -397,7 +421,9 @@ export interface RootRouteChildren {
   GuideRoute: typeof GuideRoute
   Char91indexChar93Route: typeof Char91indexChar93Route
   PitchRoute: typeof PitchRoute
+  PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
+  RefundPolicyRoute: typeof RefundPolicyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -445,11 +471,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/refund-policy': {
+      id: '/refund-policy'
+      path: '/refund-policy'
+      fullPath: '/refund-policy'
+      preLoaderRoute: typeof RefundPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacy': {
       id: '/privacy'
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pitch': {
@@ -676,7 +716,9 @@ const rootRouteChildren: RootRouteChildren = {
   GuideRoute: GuideRoute,
   Char91indexChar93Route: Char91indexChar93Route,
   PitchRoute: PitchRoute,
+  PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
+  RefundPolicyRoute: RefundPolicyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
