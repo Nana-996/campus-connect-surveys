@@ -1,17 +1,7 @@
-import { defineConfig } from "vite";
-import tsConfigPaths from "vite-tsconfig-paths";
-import tailwindcss from "@tailwindcss/vite";
-import viteReact from "@vitejs/plugin-react";
-import { tanstackStart } from "@tanstack/react-start/plugin/vite";
-import { nitro } from "nitro/vite";
+import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig(({ command }) => {
-  // Pick the Nitro preset per host: Vercel for Vercel deploys, Cloudflare
-  // Workers (the Lovable runtime) otherwise. Dev previews leave it unset.
-  const nitroPreset = command === "build"
-    ? process.env.NITRO_PRESET || (process.env.VERCEL ? "vercel" : "cloudflare_module")
-    : undefined;
   const pwaPlugin = command === "build" ? VitePWA({
     registerType: "autoUpdate",
     injectRegister: null, // we register from src/lib/pwa-register.ts under guards
@@ -66,14 +56,8 @@ export default defineConfig(({ command }) => {
   }) : null;
 
   return {
-    server: { host: "0.0.0.0", port: 8080 },
     plugins: [
-      tsConfigPaths(),
-      tailwindcss(),
-      tanstackStart(),
-      viteReact(),
-      nitro(nitroPreset ? { preset: nitroPreset } : {}),
-      pwaPlugin,
+      ...(pwaPlugin ? [pwaPlugin] : []),
     ],
   };
 });
