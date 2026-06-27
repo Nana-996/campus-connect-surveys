@@ -312,8 +312,10 @@ function Landing() {
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Legal</p>
             <ul className="mt-3 space-y-2 text-sm">
+              <li><Link to="/pricing" className="hover:text-primary">Pricing</Link></li>
               <li><Link to="/terms" className="hover:text-primary">Terms of Service</Link></li>
               <li><Link to="/privacy" className="hover:text-primary">Privacy Policy</Link></li>
+              <li><Link to="/refund-policy" className="hover:text-primary">Refund Policy</Link></li>
               <li><Link to="/forgot-password" className="hover:text-primary">Forgot password</Link></li>
             </ul>
           </div>
