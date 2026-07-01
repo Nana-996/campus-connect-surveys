@@ -39,12 +39,14 @@ function SignupPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [universityName, setUniversityName] = useState("");
   const [department, setDepartment] = useState("");
   const [year, setYear] = useState("");
   const [indexNumber, setIndexNumber] = useState("");
   const [country, setCountry] = useState("");
   const [ageRange, setAgeRange] = useState("");
   const [interests, setInterests] = useState<InterestEntry[]>([]);
+
   const [submitting, setSubmitting] = useState(false);
   const [signupNotice, setSignupNotice] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
