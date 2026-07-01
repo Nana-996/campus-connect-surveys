@@ -39,12 +39,14 @@ function SignupPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [universityName, setUniversityName] = useState("");
   const [department, setDepartment] = useState("");
   const [year, setYear] = useState("");
   const [indexNumber, setIndexNumber] = useState("");
   const [country, setCountry] = useState("");
   const [ageRange, setAgeRange] = useState("");
   const [interests, setInterests] = useState<InterestEntry[]>([]);
+
   const [submitting, setSubmitting] = useState(false);
   const [signupNotice, setSignupNotice] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
@@ -83,6 +85,18 @@ function SignupPage() {
       toast.error(message);
       return;
     }
+    if (userType === "student" && !universityName.trim()) {
+      const message = "University name is required for student accounts.";
+      setFormError(message);
+      toast.error(message);
+      return;
+    }
+    if (userType === "student" && !country) {
+      const message = "Country is required for student accounts.";
+      setFormError(message);
+      toast.error(message);
+      return;
+    }
     if (userType === "student" && !department.trim()) {
       const message = "Department is required for student accounts.";
       setFormError(message);
@@ -96,6 +110,7 @@ function SignupPage() {
       return;
     }
     if (userType === "general" && !country) {
+
       const message = "Country is required for general accounts.";
       setFormError(message);
       toast.error(message);
@@ -117,14 +132,16 @@ function SignupPage() {
           data: {
             full_name: fullName,
             user_type: userType,
+            university_name: userType === "student" ? universityName.trim() : "",
             department: userType === "student" ? department : "",
             year: userType === "student" ? year : "",
             index_number: userType === "student" ? indexNumber.trim() : "",
-            country: userType === "general" ? country : "",
+            country: userType === "student" ? country : userType === "general" ? country : "",
             age_range: userType === "general" ? ageRange : "",
             interests: interests.map((i) => i.tag),
             interests_raw: interests.map((i) => i.raw),
           },
+
         },
       });
       if (error) throw error;
@@ -255,6 +272,34 @@ function SignupPage() {
                 className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card" />
             </div>
             {userType === "student" && (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="uni" className="text-xs font-semibold uppercase tracking-wider">University <span className="text-destructive">*</span></Label>
+                  <Input
+                    id="uni"
+                    required
+                    value={universityName}
+                    onChange={(e) => { setUniversityName(e.target.value); setFormError(null); }}
+                    placeholder="e.g. University of Ghana"
+                    maxLength={120}
+                    className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="s-country" className="text-xs font-semibold uppercase tracking-wider">Country <span className="text-destructive">*</span></Label>
+                  <Select value={country} onValueChange={(v) => { setCountry(v); setFormError(null); }}>
+                    <SelectTrigger id="s-country" className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"><SelectValue placeholder="Choose…" /></SelectTrigger>
+                    <SelectContent className="max-h-60">
+                      {COUNTRIES.map((c) => (
+                        <SelectItem key={c} value={c}>{c}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+            {userType === "student" && (
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label htmlFor="dept" className="text-xs font-semibold uppercase tracking-wider">Department <span className="text-destructive">*</span></Label>

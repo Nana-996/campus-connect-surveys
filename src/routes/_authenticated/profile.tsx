@@ -146,11 +146,13 @@ function Profile() {
           {!isGeneral ? (
             <>
               <ReadOnlyField label="University" value={profile.university_name || "—"} />
+              <ReadOnlyField label="Country" value={profile.country || "—"} />
               <ReadOnlyField label="Verified domain" value={profile.university_domain || "—"} />
               <ReadOnlyField label="Department" value={profile.department || "—"} />
               <ReadOnlyField label="Year" value={profile.year || "—"} />
               <ReadOnlyField label="Index number" value={(profile as any).index_number || "—"} />
             </>
+
           ) : (
             <>
               <ReadOnlyField label="Country" value={profile.country || "—"} />
