@@ -274,6 +274,34 @@ function SignupPage() {
             {userType === "student" && (
               <div className="grid grid-cols-2 gap-3">
                 <div>
+                  <Label htmlFor="uni" className="text-xs font-semibold uppercase tracking-wider">University <span className="text-destructive">*</span></Label>
+                  <Input
+                    id="uni"
+                    required
+                    value={universityName}
+                    onChange={(e) => { setUniversityName(e.target.value); setFormError(null); }}
+                    placeholder="e.g. University of Ghana"
+                    maxLength={120}
+                    className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="s-country" className="text-xs font-semibold uppercase tracking-wider">Country <span className="text-destructive">*</span></Label>
+                  <Select value={country} onValueChange={(v) => { setCountry(v); setFormError(null); }}>
+                    <SelectTrigger id="s-country" className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"><SelectValue placeholder="Choose…" /></SelectTrigger>
+                    <SelectContent className="max-h-60">
+                      {COUNTRIES.map((c) => (
+                        <SelectItem key={c} value={c}>{c}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+            {userType === "student" && (
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
                   <Label htmlFor="dept" className="text-xs font-semibold uppercase tracking-wider">Department <span className="text-destructive">*</span></Label>
                   <Input
                     id="dept"
