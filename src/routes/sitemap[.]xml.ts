@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
-const BASE_URL = "https://your-domain.com";
+const BASE_URL = "https://campus-spotlight-verify.lovable.app";
 
 interface SitemapEntry {
   path: string;
