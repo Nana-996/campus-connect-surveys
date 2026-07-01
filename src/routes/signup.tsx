@@ -132,14 +132,16 @@ function SignupPage() {
           data: {
             full_name: fullName,
             user_type: userType,
+            university_name: userType === "student" ? universityName.trim() : "",
             department: userType === "student" ? department : "",
             year: userType === "student" ? year : "",
             index_number: userType === "student" ? indexNumber.trim() : "",
-            country: userType === "general" ? country : "",
+            country: userType === "student" ? country : userType === "general" ? country : "",
             age_range: userType === "general" ? ageRange : "",
             interests: interests.map((i) => i.tag),
             interests_raw: interests.map((i) => i.raw),
           },
+
         },
       });
       if (error) throw error;
