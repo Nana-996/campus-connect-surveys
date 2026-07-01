@@ -85,6 +85,18 @@ function SignupPage() {
       toast.error(message);
       return;
     }
+    if (userType === "student" && !universityName.trim()) {
+      const message = "University name is required for student accounts.";
+      setFormError(message);
+      toast.error(message);
+      return;
+    }
+    if (userType === "student" && !country) {
+      const message = "Country is required for student accounts.";
+      setFormError(message);
+      toast.error(message);
+      return;
+    }
     if (userType === "student" && !department.trim()) {
       const message = "Department is required for student accounts.";
       setFormError(message);
@@ -98,6 +110,7 @@ function SignupPage() {
       return;
     }
     if (userType === "general" && !country) {
+
       const message = "Country is required for general accounts.";
       setFormError(message);
       toast.error(message);
