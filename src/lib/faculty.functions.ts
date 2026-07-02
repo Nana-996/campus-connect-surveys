@@ -61,6 +61,19 @@ export const addToWatchlist = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const setMyFacultyUniversity = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ universityName: z.string().trim().min(2).max(120) }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.rpc("faculty_set_my_university" as any, {
+      _university_name: data.universityName,
+    });
+    if (error) fail(error, "set-university");
+    return { ok: true };
+  });
+
 export const removeFromWatchlist = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ studentId: z.string().uuid() }).parse(d))

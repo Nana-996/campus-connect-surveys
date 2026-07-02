@@ -18,6 +18,7 @@ import {
   setUserAdminRole,
   setUserManagerRole,
   setUserFacultyRole,
+  setUserUniversity,
   grantAdminByEmail,
   listAdminSurveys,
   setSurveyActive,
@@ -125,6 +126,7 @@ function UsersPanel() {
   const setRole = useServerFn(setUserAdminRole);
   const setMgrRole = useServerFn(setUserManagerRole);
   const setFacRole = useServerFn(setUserFacultyRole);
+  const setUni = useServerFn(setUserUniversity);
   const [search, setSearch] = useState("");
   const [userType, setUserType] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
@@ -294,8 +296,27 @@ function UsersPanel() {
                     </Button>
                     <Button size="sm" variant="outline" title={u.roles?.includes("faculty") ? "Revoke faculty role" : "Grant faculty role"} onClick={async () => {
                       const isFac = u.roles?.includes("faculty");
-                      if (!confirm(isFac ? "Revoke faculty role? They will lose access to their Faculty dashboard." : `Grant faculty role to ${u.full_name || u.id}? They can curate their own student watchlist.`)) return;
-                      await setFacRole({ data: { userId: u.id, grant: !isFac } });
+                      if (isFac) {
+                        if (!confirm("Revoke faculty role? They will lose access to their Faculty dashboard.")) return;
+                        await setFacRole({ data: { userId: u.id, grant: false } });
+                        toast.success("Faculty role updated"); refresh();
+                        return;
+                      }
+                      // Granting: ensure a university is set (faculty tracking is university-scoped)
+                      let uni = (u.university_name ?? "").trim();
+                      if (!uni) {
+                        const entered = prompt(`Which university does ${u.full_name || "this user"} belong to? Faculty officers can only track students at their own university.`, "")?.trim();
+                        if (!entered) return;
+                        try {
+                          await setUni({ data: { userId: u.id, universityName: entered } });
+                          uni = entered;
+                        } catch (e: any) {
+                          toast.error(e?.message ?? "Could not set university");
+                          return;
+                        }
+                      }
+                      if (!confirm(`Grant faculty role to ${u.full_name || u.id}? They will be able to track students at ${uni}.`)) return;
+                      await setFacRole({ data: { userId: u.id, grant: true } });
                       toast.success("Faculty role updated"); refresh();
                     }}>
                       <GraduationCap className="h-3 w-3" />
