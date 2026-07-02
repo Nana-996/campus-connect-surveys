@@ -14,6 +14,7 @@ import {
   removeFromWatchlist,
   listWatchlist,
   getStudentDetail,
+  setMyFacultyUniversity,
 } from "@/lib/faculty.functions";
 
 export const Route = createFileRoute("/_authenticated/faculty")({
