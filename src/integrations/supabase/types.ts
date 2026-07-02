@@ -850,6 +850,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      admin_set_user_university: {
+        Args: { _target_user_id: string; _university_name: string }
+        Returns: boolean
+      }
       begin_survey_response: { Args: { _survey_id: string }; Returns: string }
       bootstrap_first_admin: { Args: never; Returns: boolean }
       can_track_survey: {
@@ -914,6 +918,10 @@ export type Database = {
           student_id: string
           year: string
         }[]
+      }
+      faculty_set_my_university: {
+        Args: { _university_name: string }
+        Returns: boolean
       }
       get_my_manager_scope: { Args: never; Returns: Json }
       get_poll_results: {
