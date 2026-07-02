@@ -43,19 +43,76 @@ function FacultyDashboard() {
     );
   }
 
+  const hasUni = !!(scope.university_name && scope.university_name.trim());
+
   return (
     <div className="space-y-8">
       <div>
         <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Faculty</p>
         <h1 className="mt-1 font-serif text-5xl leading-[0.95]">My <em className="text-primary">roster.</em></h1>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          Build your personal watchlist of students at <span className="font-semibold">{scope.university_name}</span>. Only students you add appear here.
+          {hasUni ? (
+            <>Build your personal watchlist of students at <span className="font-semibold">{scope.university_name}</span>. Only students you add appear here.</>
+          ) : (
+            <>Set your university below to start tracking students. Faculty tracking is scoped to a single university.</>
+          )}
         </p>
       </div>
 
-      <SearchAddPanel />
-      <RosterPanel />
+      {hasUni ? (
+        <>
+          <SearchAddPanel />
+          <RosterPanel />
+        </>
+      ) : (
+        <SetUniversityPanel />
+      )}
     </div>
+  );
+}
+
+function SetUniversityPanel() {
+  const qc = useQueryClient();
+  const setUni = useServerFn(setMyFacultyUniversity);
+  const [name, setName] = useState("");
+  const [busy, setBusy] = useState(false);
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const v = name.trim();
+    if (v.length < 2) return;
+    setBusy(true);
+    try {
+      await setUni({ data: { universityName: v } });
+      toast.success("University saved");
+      qc.invalidateQueries({ queryKey: ["faculty", "scope"] });
+    } catch (err: any) {
+      toast.error(err?.message ?? "Could not save university");
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <section className="rounded-3xl border border-foreground/15 bg-card p-6">
+      <div className="flex items-center gap-2">
+        <GraduationCap className="h-5 w-5 text-primary" />
+        <h2 className="font-serif text-2xl">Set your university</h2>
+      </div>
+      <p className="mt-1 text-xs text-muted-foreground">
+        This is the university whose students you will track. Once saved, only an admin can change it.
+      </p>
+      <form onSubmit={onSubmit} className="mt-4 flex flex-col gap-2 sm:flex-row">
+        <Input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="e.g. University of Ghana"
+          className="h-10 rounded-xl"
+          maxLength={120}
+        />
+        <Button type="submit" disabled={busy || name.trim().length < 2}>
+          {busy ? "Saving…" : "Save university"}
+        </Button>
+      </form>
+    </section>
   );
 }
 
