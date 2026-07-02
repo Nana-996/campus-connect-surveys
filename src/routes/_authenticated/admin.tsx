@@ -18,6 +18,7 @@ import {
   setUserAdminRole,
   setUserManagerRole,
   setUserFacultyRole,
+  setUserUniversity,
   grantAdminByEmail,
   listAdminSurveys,
   setSurveyActive,
