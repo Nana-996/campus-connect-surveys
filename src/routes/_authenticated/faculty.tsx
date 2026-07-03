@@ -310,6 +310,11 @@ function RosterPanel() {
             Your watchlist is empty. Search for a student above to add them.
           </p>
         </div>
+      ) : filtered.length === 0 ? (
+        <div className="rounded-3xl border border-dashed border-foreground/20 bg-card p-8 text-center">
+          <p className="text-sm text-muted-foreground">No students match your filters.</p>
+          <Button size="sm" variant="ghost" className="mt-2" onClick={clearAll}>Clear filters</Button>
+        </div>
       ) : (
         <div className="overflow-x-auto rounded-2xl border border-foreground/15 bg-card">
           <table className="w-full text-xs">
