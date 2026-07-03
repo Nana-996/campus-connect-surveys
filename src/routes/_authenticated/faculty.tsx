@@ -329,7 +329,7 @@ function RosterPanel() {
               </tr>
             </thead>
             <tbody>
-              {roster.map((s) => (
+              {filtered.map((s) => (
                 <tr key={s.student_id} className="border-t border-foreground/10">
                   <td className="px-3 py-2">
                     <div className="font-medium">{s.full_name || "Unnamed"}</div>
