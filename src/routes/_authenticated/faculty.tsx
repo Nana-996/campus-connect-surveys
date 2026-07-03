@@ -209,6 +209,8 @@ function RosterPanel() {
     queryFn: () => fetchRoster(),
   });
   const [viewing, setViewing] = useState<{ id: string; name: string } | null>(null);
+  const [filter, setFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "caught_up" | "inactive">("all");
 
   const removeMut = useMutation({
     mutationFn: (studentId: string) => remove({ data: { studentId } }),
@@ -219,11 +221,86 @@ function RosterPanel() {
     onError: (e: any) => toast.error(e.message ?? "Could not remove"),
   });
 
+  const departments = Array.from(new Set(roster.map((s) => s.department).filter(Boolean))) as string[];
+
+  const q = filter.trim().toLowerCase();
+  const filtered = roster.filter((s) => {
+    if (q) {
+      const hay = `${s.full_name ?? ""} ${s.index_number ?? ""} ${s.department ?? ""} ${s.year ?? ""}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    if (statusFilter === "pending" && !(s.surveys_pending > 0)) return false;
+    if (statusFilter === "caught_up" && s.surveys_pending > 0) return false;
+    if (statusFilter === "inactive" && s.last_activity) return false;
+    return true;
+  });
+
+  const pendingTotal = roster.reduce((n, s) => n + (s.surveys_pending > 0 ? 1 : 0), 0);
+  const inactiveTotal = roster.filter((s) => !s.last_activity).length;
+
+  const clearAll = () => {
+    setFilter("");
+    setStatusFilter("all");
+  };
+
   return (
     <section>
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <h2 className="font-serif text-2xl">Watchlist ({roster.length})</h2>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h2 className="font-serif text-2xl">Watchlist ({roster.length})</h2>
+          <p className="text-[11px] text-muted-foreground">
+            {pendingTotal} with pending surveys · {inactiveTotal} never responded
+          </p>
+        </div>
       </div>
+
+      {roster.length > 0 && (
+        <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="relative flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              placeholder="Filter by name, index, department, year…"
+              className="h-10 rounded-xl pl-8"
+              maxLength={80}
+            />
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {(["all", "pending", "caught_up", "inactive"] as const).map((k) => (
+              <Button
+                key={k}
+                size="sm"
+                variant={statusFilter === k ? "default" : "outline"}
+                onClick={() => setStatusFilter(k)}
+              >
+                {k === "all" ? "All" : k === "pending" ? "Pending" : k === "caught_up" ? "Caught up" : "Never responded"}
+              </Button>
+            ))}
+            {(filter || statusFilter !== "all") && (
+              <Button size="sm" variant="ghost" onClick={clearAll}>
+                <X className="h-3 w-3" /> Clear
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {departments.length > 0 && (
+        <div className="mb-3 flex flex-wrap gap-1 text-[10px] text-muted-foreground">
+          <span className="uppercase tracking-wider">Departments:</span>
+          {departments.map((d) => (
+            <button
+              key={d}
+              type="button"
+              onClick={() => setFilter(d)}
+              className="rounded-full border border-foreground/15 px-2 py-0.5 hover:bg-secondary"
+            >
+              {d}
+            </button>
+          ))}
+        </div>
+      )}
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Loading roster…</p>
       ) : roster.length === 0 ? (
