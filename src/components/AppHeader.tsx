@@ -3,7 +3,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Coins, Home, PlusCircle, FolderOpen, User, LogOut, BarChart3, Briefcase, Shield, GraduationCap } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Coins, Home, PlusCircle, FolderOpen, User, LogOut, BarChart3, Briefcase, Shield, GraduationCap, GraduationCap as EarnIcon, Wallet } from "lucide-react";
 import { getMyManagerScope } from "@/lib/manager.functions";
 import { getMyFacultyScope } from "@/lib/faculty.functions";
 
@@ -11,11 +12,10 @@ export function AppHeader() {
   const { profile, signOut } = useAuth();
   const navigate = useNavigate();
   const isGeneral = profile?.user_type === "general";
-  const creditsShown = isGeneral ? (profile?.paid_credits ?? 0) : (profile?.earned_credits ?? 0);
-  const creditsLink = isGeneral ? "/buy-credits" : "/feed";
-  const creditsTitle = isGeneral
-    ? "Buy more credits to publish surveys"
-    : "Answer surveys in your feed to earn more credits";
+  const earned = profile?.earned_credits ?? 0;
+  const paid = profile?.paid_credits ?? 0;
+  const totalCredits = earned + paid;
+
   const fetchScope = useServerFn(getMyManagerScope);
   const fetchFacultyScope = useServerFn(getMyFacultyScope);
   const { data: scope } = useQuery({
