@@ -3,7 +3,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Coins, Home, PlusCircle, FolderOpen, User, LogOut, BarChart3, Briefcase, Shield, GraduationCap } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Coins, Home, PlusCircle, FolderOpen, User, LogOut, BarChart3, Briefcase, Shield, GraduationCap, GraduationCap as EarnIcon, Wallet } from "lucide-react";
 import { getMyManagerScope } from "@/lib/manager.functions";
 import { getMyFacultyScope } from "@/lib/faculty.functions";
 
@@ -11,11 +12,10 @@ export function AppHeader() {
   const { profile, signOut } = useAuth();
   const navigate = useNavigate();
   const isGeneral = profile?.user_type === "general";
-  const creditsShown = isGeneral ? (profile?.paid_credits ?? 0) : (profile?.earned_credits ?? 0);
-  const creditsLink = isGeneral ? "/buy-credits" : "/feed";
-  const creditsTitle = isGeneral
-    ? "Buy more credits to publish surveys"
-    : "Answer surveys in your feed to earn more credits";
+  const earned = profile?.earned_credits ?? 0;
+  const paid = profile?.paid_credits ?? 0;
+  const totalCredits = earned + paid;
+
   const fetchScope = useServerFn(getMyManagerScope);
   const fetchFacultyScope = useServerFn(getMyFacultyScope);
   const { data: scope } = useQuery({
@@ -45,14 +45,59 @@ export function AppHeader() {
           </span>
         </Link>
         <div className="flex shrink-0 items-center gap-2">
-          <Link
-            to={creditsLink}
-            className="flex items-center gap-1 rounded-full bg-accent px-2.5 py-1.5 text-xs font-semibold text-accent-foreground hover:opacity-90"
-            title={creditsTitle}
-          >
-            <Coins className="h-3.5 w-3.5" />
-            <span className="whitespace-nowrap">{creditsShown}</span>
-          </Link>
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className="flex items-center gap-1 rounded-full bg-accent px-2.5 py-1.5 text-xs font-semibold text-accent-foreground hover:opacity-90"
+                title="Your credit balance"
+                aria-label={`Credits: ${totalCredits}`}
+              >
+                <Coins className="h-3.5 w-3.5" />
+                <span className="whitespace-nowrap">{totalCredits}</span>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-64 p-0">
+              <div className="border-b border-foreground/10 p-3">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Credit balance</p>
+                <p className="mt-0.5 font-serif text-2xl">{totalCredits}</p>
+                <p className="text-[11px] text-muted-foreground">Total credits available</p>
+              </div>
+              <div className="divide-y divide-foreground/10 text-sm">
+                <div className="flex items-center justify-between gap-3 p-3">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <EarnIcon className="h-4 w-4 shrink-0 text-primary" />
+                    <div className="min-w-0">
+                      <p className="font-medium">Earned</p>
+                      <p className="text-[11px] text-muted-foreground">From answering surveys</p>
+                    </div>
+                  </div>
+                  <span className="font-semibold tabular-nums">{earned}</span>
+                </div>
+                <div className="flex items-center justify-between gap-3 p-3">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Wallet className="h-4 w-4 shrink-0 text-primary" />
+                    <div className="min-w-0">
+                      <p className="font-medium">Purchased</p>
+                      <p className="text-[11px] text-muted-foreground">From your top-ups</p>
+                    </div>
+                  </div>
+                  <span className="font-semibold tabular-nums">{paid}</span>
+                </div>
+              </div>
+              <div className="flex gap-2 border-t border-foreground/10 p-3">
+                {!isGeneral && (
+                  <Button asChild size="sm" variant="outline" className="flex-1">
+                    <Link to="/feed">Earn more</Link>
+                  </Button>
+                )}
+                <Button asChild size="sm" className="flex-1">
+                  <Link to="/buy-credits">Buy credits</Link>
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
+
 
           <Button
             variant="ghost"
