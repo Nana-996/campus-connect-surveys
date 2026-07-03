@@ -72,6 +72,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "CampusVerify" },
+      { name: "google-site-verification", content: "twYb2lpjnIUB3ZNpWsZmW3TWvdghfNe9sCzkrYEOpqw" },
     ],
     links: [
       ...(import.meta.env.PROD ? [{ rel: "manifest", href: "/manifest.webmanifest" }] : []),
