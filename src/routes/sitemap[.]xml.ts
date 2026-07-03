@@ -30,11 +30,14 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/blog/student-survey-questions-guide", changefreq: "monthly", priority: "0.8" },
         ];
 
-        // Fetch published surveys for dynamic /survey/$id entries
+        // Fetch published surveys for dynamic /survey/$id entries.
+        // Only surveys explicitly opened to the general public are indexed;
+        // campus-scoped surveys must not leak their IDs to crawlers.
         const { data: surveys } = await supabaseAdmin
           .from("surveys")
           .select("id, created_at")
-          .eq("is_active", true);
+          .eq("is_active", true)
+          .eq("allow_general_respondents", true);
 
         if (surveys) {
             for (const s of surveys) {
