@@ -28,6 +28,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SurveyIdRouteImport } from './routes/survey.$id'
 import { Route as RTokenRouteImport } from './routes/r.$token'
 import { Route as BlogStudentSurveyQuestionsGuideRouteImport } from './routes/blog.student-survey-questions-guide'
+import { Route as BlogStudentPerceptionSurveysRouteImport } from './routes/blog.student-perception-surveys'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedPollsRouteImport } from './routes/_authenticated/polls'
 import { Route as AuthenticatedMySurveysRouteImport } from './routes/_authenticated/my-surveys'
@@ -137,6 +138,12 @@ const BlogStudentSurveyQuestionsGuideRoute =
     path: '/blog/student-survey-questions-guide',
     getParentRoute: () => rootRouteImport,
   } as any)
+const BlogStudentPerceptionSurveysRoute =
+  BlogStudentPerceptionSurveysRouteImport.update({
+    id: '/blog/student-perception-surveys',
+    path: '/blog/student-perception-surveys',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -232,6 +239,7 @@ export interface FileRoutesByFullPath {
   '/my-surveys': typeof AuthenticatedMySurveysRoute
   '/polls': typeof AuthenticatedPollsRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/blog/student-perception-surveys': typeof BlogStudentPerceptionSurveysRoute
   '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
   '/r/$token': typeof RTokenRoute
   '/survey/$id': typeof SurveyIdRoute
@@ -265,6 +273,7 @@ export interface FileRoutesByTo {
   '/my-surveys': typeof AuthenticatedMySurveysRoute
   '/polls': typeof AuthenticatedPollsRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/blog/student-perception-surveys': typeof BlogStudentPerceptionSurveysRoute
   '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
   '/r/$token': typeof RTokenRoute
   '/survey/$id': typeof SurveyIdRoute
@@ -300,6 +309,7 @@ export interface FileRoutesById {
   '/_authenticated/my-surveys': typeof AuthenticatedMySurveysRoute
   '/_authenticated/polls': typeof AuthenticatedPollsRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/blog/student-perception-surveys': typeof BlogStudentPerceptionSurveysRoute
   '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
   '/r/$token': typeof RTokenRoute
   '/survey/$id': typeof SurveyIdRoute
@@ -335,6 +345,7 @@ export interface FileRouteTypes {
     | '/my-surveys'
     | '/polls'
     | '/profile'
+    | '/blog/student-perception-surveys'
     | '/blog/student-survey-questions-guide'
     | '/r/$token'
     | '/survey/$id'
@@ -368,6 +379,7 @@ export interface FileRouteTypes {
     | '/my-surveys'
     | '/polls'
     | '/profile'
+    | '/blog/student-perception-surveys'
     | '/blog/student-survey-questions-guide'
     | '/r/$token'
     | '/survey/$id'
@@ -402,6 +414,7 @@ export interface FileRouteTypes {
     | '/_authenticated/my-surveys'
     | '/_authenticated/polls'
     | '/_authenticated/profile'
+    | '/blog/student-perception-surveys'
     | '/blog/student-survey-questions-guide'
     | '/r/$token'
     | '/survey/$id'
@@ -428,6 +441,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
+  BlogStudentPerceptionSurveysRoute: typeof BlogStudentPerceptionSurveysRoute
   BlogStudentSurveyQuestionsGuideRoute: typeof BlogStudentSurveyQuestionsGuideRoute
   RTokenRoute: typeof RTokenRoute
   SurveyIdRoute: typeof SurveyIdRoute
@@ -567,6 +581,13 @@ declare module '@tanstack/react-router' {
       path: '/blog/student-survey-questions-guide'
       fullPath: '/blog/student-survey-questions-guide'
       preLoaderRoute: typeof BlogStudentSurveyQuestionsGuideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/student-perception-surveys': {
+      id: '/blog/student-perception-surveys'
+      path: '/blog/student-perception-surveys'
+      fullPath: '/blog/student-perception-surveys'
+      preLoaderRoute: typeof BlogStudentPerceptionSurveysRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/profile': {
@@ -723,6 +744,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
+  BlogStudentPerceptionSurveysRoute: BlogStudentPerceptionSurveysRoute,
   BlogStudentSurveyQuestionsGuideRoute: BlogStudentSurveyQuestionsGuideRoute,
   RTokenRoute: RTokenRoute,
   SurveyIdRoute: SurveyIdRoute,
