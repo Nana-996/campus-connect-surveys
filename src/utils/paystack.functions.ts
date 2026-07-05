@@ -2,6 +2,11 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { getBundleByBundleId } from "@/lib/credit-bundles";
 
+export const getPaystackTestMode = createServerFn({ method: "GET" }).handler(async () => {
+  const key = process.env.PAYSTACK_SECRET_KEY || "";
+  return { testMode: key.startsWith("sk_test_") };
+});
+
 /**
  * Initialize a Paystack transaction for a credit bundle purchase.
  * Uses the live USD→GHS rate + 5% buffer sent from the client (must be a positive number).
