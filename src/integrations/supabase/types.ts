@@ -215,6 +215,48 @@ export type Database = {
         }
         Relationships: []
       }
+      paystack_purchases: {
+        Row: {
+          amount_ghs_kobo: number
+          amount_usd: number
+          bundle_id: string
+          created_at: string
+          credited_at: string | null
+          credits: number
+          id: string
+          raw: Json | null
+          reference: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount_ghs_kobo: number
+          amount_usd: number
+          bundle_id: string
+          created_at?: string
+          credited_at?: string | null
+          credits: number
+          id?: string
+          raw?: Json | null
+          reference: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount_ghs_kobo?: number
+          amount_usd?: number
+          bundle_id?: string
+          created_at?: string
+          credited_at?: string | null
+          credits?: number
+          id?: string
+          raw?: Json | null
+          reference?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       poll_responses: {
         Row: {
           answer: string
@@ -859,6 +901,10 @@ export type Database = {
       can_track_survey: {
         Args: { _survey_id: string; _user_id?: string }
         Returns: boolean
+      }
+      credit_paystack_purchase: {
+        Args: { _raw: Json; _reference: string }
+        Returns: undefined
       }
       current_age_range: { Args: never; Returns: string }
       current_country: { Args: never; Returns: string }
