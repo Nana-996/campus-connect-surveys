@@ -97,7 +97,7 @@ export const verifyPaystackCheckout = createServerFn({ method: "POST" })
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       await supabaseAdmin
         .from("paystack_purchases")
-        .update({ status: "failed", raw: verified as unknown as Record<string, unknown> })
+        .update({ status: "failed", raw: verified as unknown as never })
         .eq("reference", data.reference);
       return { status: "failed" as const };
     }
