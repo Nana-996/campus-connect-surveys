@@ -1,21 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { verifyWebhook, EventName, type PaddleEnv } from "@/lib/paddle.server";
-import { getBundleByPriceId, CREDIT_BUNDLES } from "@/lib/credit-bundles";
+import { CREDIT_BUNDLES } from "@/lib/credit-bundles";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+// Paddle checkout is no longer used — Paystack handles all top-ups.
+// This webhook stays wired only to gracefully drain any late Paddle retries.
 function resolveBundle(data: any) {
-  // Prefer the bundleId we passed in customData at checkout — most reliable
-  // because transaction events don't always include `price.importMeta`.
   const bundleId = data.customData?.bundleId as string | undefined;
   if (bundleId) {
-    const direct = CREDIT_BUNDLES.find((b) => b.id === bundleId);
-    if (direct) return direct;
-  }
-  const item = data.items?.[0];
-  const priceExternalId = item?.price?.importMeta?.externalId as string | undefined;
-  if (priceExternalId) {
-    return getBundleByPriceId(priceExternalId);
+    return CREDIT_BUNDLES.find((b) => b.id === bundleId);
   }
   return undefined;
 }

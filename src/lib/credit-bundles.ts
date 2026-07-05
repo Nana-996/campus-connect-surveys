@@ -1,50 +1,53 @@
 export type CreditBundle = {
-  id: "starter" | "plus" | "pro";
-  priceId: string;
-  productId: string;
+  id: "free" | "starter" | "plus" | "pro";
   label: string;
   tagline: string;
   credits: number;
-  usdAmount: number; // dollars
-  ghsApprox: number; // approx GHS at ~12 GHS/USD
+  usdAmount: number; // dollars; 0 = free
   badge?: string;
+  features?: string[];
 };
 
 export const CREDIT_BUNDLES: CreditBundle[] = [
   {
+    id: "free",
+    label: "Free",
+    tagline: "Start exploring",
+    credits: 5,
+    usdAmount: 0,
+    features: ["5 free credits on signup", "Try before you buy", "No card required"],
+  },
+  {
     id: "starter",
-    priceId: "credits_starter_onetime",
-    productId: "credits_starter",
     label: "Starter",
-    tagline: "Try it out",
-    credits: 20,
-    usdAmount: 1,
-    ghsApprox: 12,
+    tagline: "Get going",
+    credits: 50,
+    usdAmount: 5,
+    features: ["Never expire", "Instant top-up", "$0.10 per credit"],
   },
   {
     id: "plus",
-    priceId: "credits_plus_onetime",
-    productId: "credits_plus",
     label: "Plus",
     tagline: "Most popular",
-    credits: 60,
-    usdAmount: 2.5,
-    ghsApprox: 30,
+    credits: 120,
+    usdAmount: 10,
     badge: "Most popular",
+    features: ["Never expire", "Instant top-up", "$0.083 per credit"],
   },
   {
     id: "pro",
-    priceId: "credits_pro_onetime",
-    productId: "credits_pro",
     label: "Pro",
     tagline: "Best value",
-    credits: 200,
-    usdAmount: 7,
-    ghsApprox: 84,
+    credits: 300,
+    usdAmount: 20,
     badge: "Best value",
+    features: ["Never expire", "Instant top-up", "$0.067 per credit"],
   },
 ];
 
-export function getBundleByPriceId(priceId: string): CreditBundle | undefined {
-  return CREDIT_BUNDLES.find((b) => b.priceId === priceId);
+/** Paid bundles only (excludes the free tier). */
+export const PAID_BUNDLES = CREDIT_BUNDLES.filter((b) => b.usdAmount > 0);
+
+export function getBundleByBundleId(id: string): CreditBundle | undefined {
+  return CREDIT_BUNDLES.find((b) => b.id === id);
 }

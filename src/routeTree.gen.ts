@@ -39,6 +39,7 @@ import { Route as AuthenticatedCreateRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedBuyCreditsRouteImport } from './routes/_authenticated/buy-credits'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedManageSurveyIdRouteImport } from './routes/_authenticated/manage.$surveyId'
+import { Route as ApiPublicPaystackWebhookRouteImport } from './routes/api/public/paystack/webhook'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as AuthenticatedSurveyIdReportRouteImport } from './routes/_authenticated/survey.$id.report'
 import { Route as AuthenticatedSurveyIdAnalyzeRouteImport } from './routes/_authenticated/survey.$id.analyze'
@@ -195,6 +196,12 @@ const AuthenticatedManageSurveyIdRoute =
     path: '/$surveyId',
     getParentRoute: () => AuthenticatedManageRoute,
   } as any)
+const ApiPublicPaystackWebhookRoute =
+  ApiPublicPaystackWebhookRouteImport.update({
+    id: '/api/public/paystack/webhook',
+    path: '/api/public/paystack/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
@@ -247,6 +254,7 @@ export interface FileRoutesByFullPath {
   '/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
   '/survey/$id/report': typeof AuthenticatedSurveyIdReportRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/public/paystack/webhook': typeof ApiPublicPaystackWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -281,6 +289,7 @@ export interface FileRoutesByTo {
   '/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
   '/survey/$id/report': typeof AuthenticatedSurveyIdReportRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/public/paystack/webhook': typeof ApiPublicPaystackWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -317,6 +326,7 @@ export interface FileRoutesById {
   '/_authenticated/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
   '/_authenticated/survey/$id/report': typeof AuthenticatedSurveyIdReportRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/public/paystack/webhook': typeof ApiPublicPaystackWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -353,6 +363,7 @@ export interface FileRouteTypes {
     | '/survey/$id/analyze'
     | '/survey/$id/report'
     | '/api/public/payments/webhook'
+    | '/api/public/paystack/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -387,6 +398,7 @@ export interface FileRouteTypes {
     | '/survey/$id/analyze'
     | '/survey/$id/report'
     | '/api/public/payments/webhook'
+    | '/api/public/paystack/webhook'
   id:
     | '__root__'
     | '/'
@@ -422,6 +434,7 @@ export interface FileRouteTypes {
     | '/_authenticated/survey/$id/analyze'
     | '/_authenticated/survey/$id/report'
     | '/api/public/payments/webhook'
+    | '/api/public/paystack/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -446,6 +459,7 @@ export interface RootRouteChildren {
   RTokenRoute: typeof RTokenRoute
   SurveyIdRoute: typeof SurveyIdRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
+  ApiPublicPaystackWebhookRoute: typeof ApiPublicPaystackWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -660,6 +674,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedManageSurveyIdRouteImport
       parentRoute: typeof AuthenticatedManageRoute
     }
+    '/api/public/paystack/webhook': {
+      id: '/api/public/paystack/webhook'
+      path: '/api/public/paystack/webhook'
+      fullPath: '/api/public/paystack/webhook'
+      preLoaderRoute: typeof ApiPublicPaystackWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/payments/webhook': {
       id: '/api/public/payments/webhook'
       path: '/api/public/payments/webhook'
@@ -749,6 +770,7 @@ const rootRouteChildren: RootRouteChildren = {
   RTokenRoute: RTokenRoute,
   SurveyIdRoute: SurveyIdRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
+  ApiPublicPaystackWebhookRoute: ApiPublicPaystackWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
