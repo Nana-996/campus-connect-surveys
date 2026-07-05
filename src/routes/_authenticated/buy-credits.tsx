@@ -89,7 +89,9 @@ function BuyCredits() {
 
   return (
     <div>
+      <PaymentTestModeBanner />
       <div className="mx-auto max-w-5xl">
+
         <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Buy credits</p>
         <h1 className="mt-1 font-serif text-5xl leading-[0.95]">
           Stock up to <em className="text-primary">publish.</em>
