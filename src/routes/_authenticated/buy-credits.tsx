@@ -8,6 +8,7 @@ import { CREDIT_BUNDLES, PAID_BUNDLES } from "@/lib/credit-bundles";
 import { useUsdToGhs } from "@/hooks/useForex";
 import { initializePaystackCheckout, verifyPaystackCheckout } from "@/utils/paystack.functions";
 import { Coins, Sparkles, Check } from "lucide-react";
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 export const Route = createFileRoute("/_authenticated/buy-credits")({
   component: BuyCredits,
