@@ -110,7 +110,7 @@ export const verifyPaystackCheckout = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error: creditErr } = await supabaseAdmin.rpc("credit_paystack_purchase", {
       _reference: data.reference,
-      _raw: verified as unknown as Record<string, unknown>,
+      _raw: verified as unknown as never,
     });
     if (creditErr) throw new Error(creditErr.message);
 
