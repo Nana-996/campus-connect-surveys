@@ -139,7 +139,7 @@ function Profile() {
             setSaving(true);
             const { error } = await supabase
               .from("profiles")
-              .update(updates)
+              .update(updates as any)
               .eq("id", profile.id);
             setSaving(false);
             if (error) {
