@@ -26,11 +26,21 @@ function Profile() {
   const [caps, setCaps] = useState<{ day_count: number; week_count: number } | null>(null);
   const [nextExpiry, setNextExpiry] = useState<string | null>(null);
   const [name, setName] = useState(profile?.full_name ?? "");
-  const [savingName, setSavingName] = useState(false);
+  const [department, setDepartment] = useState((profile as any)?.department ?? "");
+  const [year, setYear] = useState((profile as any)?.year ?? "");
+  const [country, setCountry] = useState((profile as any)?.country ?? "");
+  const [indexNumber, setIndexNumber] = useState((profile as any)?.index_number ?? "");
+  const [ageRange, setAgeRange] = useState((profile as any)?.age_range ?? "");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     setName(profile?.full_name ?? "");
-  }, [profile?.full_name]);
+    setDepartment((profile as any)?.department ?? "");
+    setYear((profile as any)?.year ?? "");
+    setCountry((profile as any)?.country ?? "");
+    setIndexNumber((profile as any)?.index_number ?? "");
+    setAgeRange((profile as any)?.age_range ?? "");
+  }, [profile?.id, profile?.full_name, (profile as any)?.department, (profile as any)?.year, (profile as any)?.country, (profile as any)?.index_number, (profile as any)?.age_range]);
 
   useEffect(() => {
     if (!user) return;
