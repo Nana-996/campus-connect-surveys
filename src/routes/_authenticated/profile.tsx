@@ -5,9 +5,12 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { ShieldCheck, Sparkles, Clock, AlertTriangle, Globe2, Lock } from "lucide-react";
 import { DAILY_EARN_CAP, WEEKLY_EARN_CAP, EARNED_EXPIRY_DAYS } from "@/lib/credits";
-import { ageLabel } from "@/lib/interests";
+import { ageLabel, AGE_RANGES, COUNTRIES, YEAR_OPTIONS, DEPARTMENT_SUGGESTIONS } from "@/lib/interests";
 import { IndexBackfill } from "@/components/IndexBackfill";
 import { toast } from "sonner";
 import { safeErrorMessage } from "@/lib/safe-error";
