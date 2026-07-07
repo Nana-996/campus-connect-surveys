@@ -124,7 +124,7 @@ function SignupPage() {
     }
     setSubmitting(true);
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -145,6 +145,14 @@ function SignupPage() {
         },
       });
       if (error) throw error;
+      // Supabase returns a user with empty identities when the email is
+      // already registered (whether confirmed or not) — surface it clearly.
+      if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+        const message = `An account with ${email} already exists. Try logging in, or reset your password if you've forgotten it.`;
+        setFormError(message);
+        toast.error(message);
+        return;
+      }
       setPassword("");
       setSignupNotice(
         `Account created for ${email}. Check your inbox for a verification email — click the link to confirm before signing in.`,
