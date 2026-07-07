@@ -5,9 +5,12 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { ShieldCheck, Sparkles, Clock, AlertTriangle, Globe2, Lock } from "lucide-react";
 import { DAILY_EARN_CAP, WEEKLY_EARN_CAP, EARNED_EXPIRY_DAYS } from "@/lib/credits";
-import { ageLabel } from "@/lib/interests";
+import { ageLabel, AGE_RANGES, COUNTRIES, YEAR_OPTIONS, DEPARTMENT_SUGGESTIONS } from "@/lib/interests";
 import { IndexBackfill } from "@/components/IndexBackfill";
 import { toast } from "sonner";
 import { safeErrorMessage } from "@/lib/safe-error";
@@ -23,11 +26,21 @@ function Profile() {
   const [caps, setCaps] = useState<{ day_count: number; week_count: number } | null>(null);
   const [nextExpiry, setNextExpiry] = useState<string | null>(null);
   const [name, setName] = useState(profile?.full_name ?? "");
-  const [savingName, setSavingName] = useState(false);
+  const [department, setDepartment] = useState((profile as any)?.department ?? "");
+  const [year, setYear] = useState((profile as any)?.year ?? "");
+  const [country, setCountry] = useState((profile as any)?.country ?? "");
+  const [indexNumber, setIndexNumber] = useState((profile as any)?.index_number ?? "");
+  const [ageRange, setAgeRange] = useState((profile as any)?.age_range ?? "");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     setName(profile?.full_name ?? "");
-  }, [profile?.full_name]);
+    setDepartment((profile as any)?.department ?? "");
+    setYear((profile as any)?.year ?? "");
+    setCountry((profile as any)?.country ?? "");
+    setIndexNumber((profile as any)?.index_number ?? "");
+    setAgeRange((profile as any)?.age_range ?? "");
+  }, [profile?.id, profile?.full_name, (profile as any)?.department, (profile as any)?.year, (profile as any)?.country, (profile as any)?.index_number, (profile as any)?.age_range]);
 
   useEffect(() => {
     if (!user) return;
@@ -107,18 +120,33 @@ function Profile() {
               toast.error("Name must be 80 characters or fewer");
               return;
             }
-            if (trimmed === profile.full_name) return;
-            setSavingName(true);
+            const updates: Record<string, any> = { full_name: trimmed };
+            if (!isGeneral) {
+              const dept = department.trim();
+              const idx = indexNumber.trim();
+              if (idx && !/^[A-Za-z0-9/_-]{1,32}$/.test(idx)) {
+                toast.error("Index number: letters, numbers, dash, slash; max 32.");
+                return;
+              }
+              updates.department = dept;
+              updates.year = year || null;
+              updates.country = country || null;
+              updates.index_number = idx || null;
+            } else {
+              updates.country = country || null;
+              updates.age_range = ageRange || null;
+            }
+            setSaving(true);
             const { error } = await supabase
               .from("profiles")
-              .update({ full_name: trimmed })
+              .update(updates as any)
               .eq("id", profile.id);
-            setSavingName(false);
+            setSaving(false);
             if (error) {
-              toast.error(safeErrorMessage(error, "Could not update your name."));
+              toast.error(safeErrorMessage(error, "Could not update your profile."));
               return;
             }
-            toast.success("Name updated");
+            toast.success("Profile updated");
             await refreshProfile();
           }}
         >
@@ -126,43 +154,100 @@ function Profile() {
             <Label htmlFor="profile-name" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
               Full name
             </Label>
-            <div className="mt-1 flex gap-2">
-              <Input
-                id="profile-name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                maxLength={80}
-                placeholder="Your name"
-                autoComplete="name"
-              />
-              <Button type="submit" disabled={savingName || name.trim() === (profile.full_name ?? "")}>
-                {savingName ? "Saving…" : "Save"}
-              </Button>
-            </div>
+            <Input
+              id="profile-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              maxLength={80}
+              placeholder="Your name"
+              autoComplete="name"
+              className="mt-1"
+            />
           </div>
 
           <ReadOnlyField label="Email" value={user?.email ?? "—"} />
           <ReadOnlyField label="Account type" value={isGeneral ? "General" : "Student"} />
+
           {!isGeneral ? (
             <>
               <ReadOnlyField label="University" value={profile.university_name || "—"} />
-              <ReadOnlyField label="Country" value={profile.country || "—"} />
               <ReadOnlyField label="Verified domain" value={profile.university_domain || "—"} />
-              <ReadOnlyField label="Department" value={profile.department || "—"} />
-              <ReadOnlyField label="Year" value={profile.year || "—"} />
-              <ReadOnlyField label="Index number" value={(profile as any).index_number || "—"} />
+              <div>
+                <Label htmlFor="profile-country" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Country</Label>
+                <Select value={country} onValueChange={setCountry}>
+                  <SelectTrigger id="profile-country" className="mt-1"><SelectValue placeholder="Choose…" /></SelectTrigger>
+                  <SelectContent className="max-h-60">
+                    {COUNTRIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="profile-dept" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Department</Label>
+                <Input
+                  id="profile-dept"
+                  list="profile-dept-suggestions"
+                  value={department}
+                  onChange={(e) => setDepartment(e.target.value)}
+                  placeholder="e.g. Pharmacy"
+                  className="mt-1"
+                />
+                <datalist id="profile-dept-suggestions">
+                  {DEPARTMENT_SUGGESTIONS.map((d) => <option key={d} value={d} />)}
+                </datalist>
+              </div>
+              <div>
+                <Label htmlFor="profile-year" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Year</Label>
+                <Select value={year} onValueChange={setYear}>
+                  <SelectTrigger id="profile-year" className="mt-1"><SelectValue placeholder="Year" /></SelectTrigger>
+                  <SelectContent>
+                    {YEAR_OPTIONS.map((y) => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="sm:col-span-2">
+                <Label htmlFor="profile-index" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Index / Student number</Label>
+                <Input
+                  id="profile-index"
+                  value={indexNumber}
+                  onChange={(e) => setIndexNumber(e.target.value)}
+                  maxLength={32}
+                  placeholder="e.g. 10876543 or UG/2024/0123"
+                  className="mt-1 font-mono"
+                />
+              </div>
             </>
-
           ) : (
             <>
-              <ReadOnlyField label="Country" value={profile.country || "—"} />
-              <ReadOnlyField label="Age range" value={profile.age_range ? ageLabel(profile.age_range) : "—"} />
+              <div>
+                <Label htmlFor="profile-country" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Country</Label>
+                <Select value={country} onValueChange={setCountry}>
+                  <SelectTrigger id="profile-country" className="mt-1"><SelectValue placeholder="Choose…" /></SelectTrigger>
+                  <SelectContent className="max-h-60">
+                    {COUNTRIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="profile-age" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Age range</Label>
+                <Select value={ageRange} onValueChange={setAgeRange}>
+                  <SelectTrigger id="profile-age" className="mt-1"><SelectValue placeholder="Choose…" /></SelectTrigger>
+                  <SelectContent>
+                    {AGE_RANGES.map((r) => <SelectItem key={r.id} value={r.id}>{r.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
             </>
           )}
+
+          <div className="sm:col-span-2 flex justify-end">
+            <Button type="submit" disabled={saving}>
+              {saving ? "Saving…" : "Save changes"}
+            </Button>
+          </div>
         </form>
 
         <p className="mt-4 text-[11px] text-muted-foreground">
-          University, account type, and credits are locked for fairness and can't be edited here.
+          University, verified domain, account type, and credits are locked for fairness and can't be edited here.
         </p>
       </section>
 
