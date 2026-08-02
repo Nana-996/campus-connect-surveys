@@ -153,6 +153,11 @@ function SignupPage() {
             department: userType === "student" ? department : "",
             year: userType === "student" ? year : "",
             index_number: userType === "student" ? indexNumber.trim() : "",
+            graduation_date:
+              userType === "student"
+                ? `${gradYear}-${String(GRAD_MONTHS.indexOf(gradMonth) + 1).padStart(2, "0")}-01`
+                : "",
+
             country: userType === "student" ? country : userType === "general" ? country : "",
             age_range: userType === "general" ? ageRange : "",
             interests: interests.map((i) => i.tag),
