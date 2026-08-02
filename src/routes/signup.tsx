@@ -43,6 +43,9 @@ function SignupPage() {
   const [department, setDepartment] = useState("");
   const [year, setYear] = useState("");
   const [indexNumber, setIndexNumber] = useState("");
+  const [gradMonth, setGradMonth] = useState("");
+  const [gradYear, setGradYear] = useState("");
+
   const [country, setCountry] = useState("");
   const [ageRange, setAgeRange] = useState("");
   const [interests, setInterests] = useState<InterestEntry[]>([]);
