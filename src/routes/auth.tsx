@@ -240,10 +240,13 @@ function AuthPage() {
             New here?{" "}
             <Link to="/signup" className="font-semibold text-foreground underline">Create an account</Link>
           </p>
-          <div className="mt-4 text-center text-xs text-muted-foreground">
-            Didn't get the verification email?{" "}
-            <ResendVerification defaultEmail={email} />
-          </div>
+          <p className="mt-2 text-center text-xs text-muted-foreground">
+            Forgot your password?{" "}
+            <Link to="/forgot-password" search={{ as: tab }} className="font-semibold text-foreground underline">
+              Reset it
+            </Link>
+          </p>
+
 
 
         </div>
