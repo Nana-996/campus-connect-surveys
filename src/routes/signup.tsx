@@ -186,7 +186,7 @@ function SignupPage() {
         </div>
         <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.25em] opacity-70">
           <span>vol. 01</span>
-          <span>verified email required</span>
+          <span>university email for students</span>
         </div>
       </div>
 
