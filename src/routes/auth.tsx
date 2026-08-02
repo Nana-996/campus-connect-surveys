@@ -9,7 +9,7 @@ import { PasswordInput } from "@/components/PasswordInput";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ArrowUpRight, LogIn, GraduationCap, Globe2 } from "lucide-react";
-import { ResendVerification } from "@/components/ResendVerification";
+
 import { lovable } from "@/integrations/lovable/index";
 
 const searchSchema = z.object({
@@ -83,8 +83,9 @@ function AuthPage() {
       navigate({ to: "/feed" });
     } catch (err: any) {
       const message = err.message === "Invalid login credentials"
-        ? "Those credentials did not match a verified account. If you just signed up, verify your email first or resend the verification email below."
+        ? "That email and password don't match an account. Check your details, reset your password, or create an account."
         : err.message ?? "Something went wrong";
+
       setFormError(message);
       toast.error(message);
     } finally {
@@ -239,10 +240,13 @@ function AuthPage() {
             New here?{" "}
             <Link to="/signup" className="font-semibold text-foreground underline">Create an account</Link>
           </p>
-          <div className="mt-4 text-center text-xs text-muted-foreground">
-            Didn't get the verification email?{" "}
-            <ResendVerification defaultEmail={email} />
-          </div>
+          <p className="mt-2 text-center text-xs text-muted-foreground">
+            Forgot your password?{" "}
+            <Link to="/forgot-password" search={{ as: tab }} className="font-semibold text-foreground underline">
+              Reset it
+            </Link>
+          </p>
+
 
 
         </div>

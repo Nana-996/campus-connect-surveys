@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { ArrowUpRight, GraduationCap, Globe2 } from "lucide-react";
-import { ResendVerification } from "@/components/ResendVerification";
+
 import { InterestTagInput, type InterestEntry } from "@/components/InterestTagInput";
 import { AGE_RANGES, COUNTRIES, YEAR_OPTIONS, DEPARTMENT_SUGGESTIONS } from "@/lib/interests";
 
@@ -154,11 +154,14 @@ function SignupPage() {
         return;
       }
       setPassword("");
-      setSignupNotice(
-        `Account created for ${email}. Check your inbox for a verification email — click the link to confirm before signing in.`,
-      );
-      toast.success("Verification email sent. Confirm your address to continue.");
-      navigate({ to: "/auth" });
+      if (!data.session) {
+        // Fallback in case a session was not returned with the signup.
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInError) throw signInError;
+      }
+      toast.success("Account created. Welcome to CampusVerify.");
+      navigate({ to: "/feed" });
+
 
     } catch (err: any) {
       const message = err.message ?? "Could not create account";
@@ -183,7 +186,7 @@ function SignupPage() {
         </div>
         <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.25em] opacity-70">
           <span>vol. 01</span>
-          <span>verified email required</span>
+          <span>university email for students</span>
         </div>
       </div>
 
@@ -420,10 +423,6 @@ function SignupPage() {
             Already have an account?{" "}
             <Link to="/auth" className="font-semibold text-foreground underline">Log in</Link>
           </p>
-          <div className="mt-3 text-center text-xs text-muted-foreground">
-            Didn't get the verification email?{" "}
-            <ResendVerification defaultEmail={email} />
-          </div>
         </div>
       </div>
     </div>
