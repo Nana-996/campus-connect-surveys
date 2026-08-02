@@ -1,0 +1,12 @@
+REVOKE EXECUTE ON FUNCTION public.grant_purchased_credits(uuid, integer, text, integer, text, text, jsonb) FROM anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.refund_purchased_credits(text, text, integer, jsonb) FROM anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.credit_paystack_purchase(text, jsonb) FROM anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.expire_earned_credits() FROM anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.require_admin_user() FROM anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.prevent_last_admin_removal() FROM anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.sanitize_profile_on_insert() FROM anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.handle_new_user() FROM anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.handle_new_response() FROM anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.charge_survey_publish_credit() FROM anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.protect_profile_sensitive_columns() FROM anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.protect_survey_sensitive_columns() FROM anon, authenticated;
