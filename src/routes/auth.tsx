@@ -9,7 +9,7 @@ import { PasswordInput } from "@/components/PasswordInput";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ArrowUpRight, LogIn, GraduationCap, Globe2 } from "lucide-react";
-import { ResendVerification } from "@/components/ResendVerification";
+
 import { lovable } from "@/integrations/lovable/index";
 
 const searchSchema = z.object({
