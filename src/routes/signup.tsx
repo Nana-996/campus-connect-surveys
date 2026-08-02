@@ -387,6 +387,35 @@ function SignupPage() {
                 </p>
               </div>
             )}
+            {userType === "student" && (
+              <div>
+                <Label className="text-xs font-semibold uppercase tracking-wider">
+                  Expected graduation <span className="text-destructive">*</span>
+                </Label>
+                <div className="mt-1.5 grid grid-cols-2 gap-3">
+                  <Select value={gradMonth} onValueChange={(v) => { setGradMonth(v); setFormError(null); }}>
+                    <SelectTrigger id="grad-month" className="h-11 rounded-xl border-foreground/25 bg-card">
+                      <SelectValue placeholder="Month" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60">
+                      {GRAD_MONTHS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                  <Select value={gradYear} onValueChange={(v) => { setGradYear(v); setFormError(null); }}>
+                    <SelectTrigger id="grad-year" className="h-11 rounded-xl border-foreground/25 bg-card">
+                      <SelectValue placeholder="Year" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60">
+                      {GRAD_YEARS.map((y) => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  Free student access ends after this date — your account then moves to paid general pricing.
+                </p>
+              </div>
+            )}
+
             {userType === "general" && (
               <div className="grid grid-cols-2 gap-3">
                 <div>
