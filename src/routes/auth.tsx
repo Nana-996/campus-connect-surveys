@@ -83,8 +83,9 @@ function AuthPage() {
       navigate({ to: "/feed" });
     } catch (err: any) {
       const message = err.message === "Invalid login credentials"
-        ? "Those credentials did not match a verified account. If you just signed up, verify your email first or resend the verification email below."
+        ? "That email and password don't match an account. Check your details, reset your password, or create an account."
         : err.message ?? "Something went wrong";
+
       setFormError(message);
       toast.error(message);
     } finally {
