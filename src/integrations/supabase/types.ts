@@ -335,6 +335,7 @@ export type Database = {
           email_hash: string | null
           flag_reason: string | null
           full_name: string
+          graduation_date: string | null
           id: string
           index_number: string | null
           interests: string[]
@@ -355,6 +356,7 @@ export type Database = {
           email_hash?: string | null
           flag_reason?: string | null
           full_name?: string
+          graduation_date?: string | null
           id: string
           index_number?: string | null
           interests?: string[]
@@ -375,6 +377,7 @@ export type Database = {
           email_hash?: string | null
           flag_reason?: string | null
           full_name?: string
+          graduation_date?: string | null
           id?: string
           index_number?: string | null
           interests?: string[]
@@ -1036,6 +1039,7 @@ export type Database = {
         Returns: boolean
       }
       is_academic_domain: { Args: { _domain: string }; Returns: boolean }
+      is_alumni: { Args: { _user_id: string }; Returns: boolean }
       list_lecturer_evaluations: {
         Args: { _lecturer_id: string }
         Returns: {

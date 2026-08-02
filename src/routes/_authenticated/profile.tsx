@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { ShieldCheck, Sparkles, Clock, AlertTriangle, Globe2, Lock } from "lucide-react";
+import { ShieldCheck, Sparkles, Clock, AlertTriangle, Globe2, Lock, GraduationCap } from "lucide-react";
 import { DAILY_EARN_CAP, WEEKLY_EARN_CAP, EARNED_EXPIRY_DAYS } from "@/lib/credits";
 import { ageLabel, AGE_RANGES, COUNTRIES, YEAR_OPTIONS, DEPARTMENT_SUGGESTIONS } from "@/lib/interests";
 import { IndexBackfill } from "@/components/IndexBackfill";
@@ -70,6 +70,12 @@ function Profile() {
 
   if (!profile) return null;
   const isGeneral = profile.user_type === "general";
+  const gradDate = (profile as any).graduation_date as string | null | undefined;
+  const gradLabel = gradDate
+    ? new Date(`${gradDate}T00:00:00`).toLocaleDateString(undefined, { month: "long", year: "numeric" })
+    : "—";
+  const isAlumni = !isGeneral && !!gradDate && new Date(`${gradDate}T00:00:00`) < new Date(Date.now() - 30 * 864e5);
+
 
   return (
     <div>
@@ -89,6 +95,21 @@ function Profile() {
           </div>
         </div>
       )}
+
+      {isAlumni && (
+        <div className="mt-4 flex items-start gap-2 rounded-2xl border border-foreground/20 bg-secondary p-4 text-sm">
+          <GraduationCap className="h-4 w-4 mt-0.5" />
+          <div>
+            <p className="font-semibold">Your student access has ended.</p>
+            <p className="text-muted-foreground">
+              You graduated in {gradLabel}, so this account no longer earns free credits for answering
+              surveys and publishes at general-account pricing using purchased credits.
+            </p>
+            <Link to="/buy-credits" className="mt-2 inline-block font-semibold underline">Buy credits</Link>
+          </div>
+        </div>
+      )}
+
 
       {!isGeneral && !((profile as any).index_number) && (
         <IndexBackfill currentDepartment={profile.department || ""} />
@@ -172,6 +193,8 @@ function Profile() {
             <>
               <ReadOnlyField label="University" value={profile.university_name || "—"} />
               <ReadOnlyField label="Verified domain" value={profile.university_domain || "—"} />
+              <ReadOnlyField label="Expected graduation" value={gradLabel} />
+
               <div>
                 <Label htmlFor="profile-country" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Country</Label>
                 <Select value={country} onValueChange={setCountry}>

@@ -31,6 +31,13 @@ export const Route = createFileRoute("/signup")({
 
 const ACADEMIC_RE = /(^|\.)edu$|\.edu\.[a-z]{2,6}$|\.ac\.[a-z]{2,6}$|\.uni\.[a-z]{2,6}$/i;
 
+const GRAD_MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+const GRAD_YEARS = Array.from({ length: 11 }, (_, i) => String(new Date().getFullYear() + i));
+
+
 function SignupPage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
@@ -43,6 +50,9 @@ function SignupPage() {
   const [department, setDepartment] = useState("");
   const [year, setYear] = useState("");
   const [indexNumber, setIndexNumber] = useState("");
+  const [gradMonth, setGradMonth] = useState("");
+  const [gradYear, setGradYear] = useState("");
+
   const [country, setCountry] = useState("");
   const [ageRange, setAgeRange] = useState("");
   const [interests, setInterests] = useState<InterestEntry[]>([]);
@@ -109,6 +119,13 @@ function SignupPage() {
       toast.error(message);
       return;
     }
+    if (userType === "student" && (!gradMonth || !gradYear)) {
+      const message = "Expected graduation month and year are required for student accounts.";
+      setFormError(message);
+      toast.error(message);
+      return;
+    }
+
     if (userType === "general" && !country) {
 
       const message = "Country is required for general accounts.";
@@ -136,6 +153,11 @@ function SignupPage() {
             department: userType === "student" ? department : "",
             year: userType === "student" ? year : "",
             index_number: userType === "student" ? indexNumber.trim() : "",
+            graduation_date:
+              userType === "student"
+                ? `${gradYear}-${String(GRAD_MONTHS.indexOf(gradMonth) + 1).padStart(2, "0")}-01`
+                : "",
+
             country: userType === "student" ? country : userType === "general" ? country : "",
             age_range: userType === "general" ? ageRange : "",
             interests: interests.map((i) => i.tag),
@@ -365,6 +387,35 @@ function SignupPage() {
                 </p>
               </div>
             )}
+            {userType === "student" && (
+              <div>
+                <Label className="text-xs font-semibold uppercase tracking-wider">
+                  Expected graduation <span className="text-destructive">*</span>
+                </Label>
+                <div className="mt-1.5 grid grid-cols-2 gap-3">
+                  <Select value={gradMonth} onValueChange={(v) => { setGradMonth(v); setFormError(null); }}>
+                    <SelectTrigger id="grad-month" className="h-11 rounded-xl border-foreground/25 bg-card">
+                      <SelectValue placeholder="Month" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60">
+                      {GRAD_MONTHS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                  <Select value={gradYear} onValueChange={(v) => { setGradYear(v); setFormError(null); }}>
+                    <SelectTrigger id="grad-year" className="h-11 rounded-xl border-foreground/25 bg-card">
+                      <SelectValue placeholder="Year" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60">
+                      {GRAD_YEARS.map((y) => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  Free student access ends after this date — your account then moves to paid general pricing.
+                </p>
+              </div>
+            )}
+
             {userType === "general" && (
               <div className="grid grid-cols-2 gap-3">
                 <div>
