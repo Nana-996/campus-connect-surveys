@@ -96,6 +96,21 @@ function Profile() {
         </div>
       )}
 
+      {isAlumni && (
+        <div className="mt-4 flex items-start gap-2 rounded-2xl border border-foreground/20 bg-secondary p-4 text-sm">
+          <GraduationCap className="h-4 w-4 mt-0.5" />
+          <div>
+            <p className="font-semibold">Your student access has ended.</p>
+            <p className="text-muted-foreground">
+              You graduated in {gradLabel}, so this account no longer earns free credits for answering
+              surveys and publishes at general-account pricing using purchased credits.
+            </p>
+            <Link to="/buy-credits" className="mt-2 inline-block font-semibold underline">Buy credits</Link>
+          </div>
+        </div>
+      )}
+
+
       {!isGeneral && !((profile as any).index_number) && (
         <IndexBackfill currentDepartment={profile.department || ""} />
       )}
