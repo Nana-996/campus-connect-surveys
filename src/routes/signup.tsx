@@ -423,10 +423,6 @@ function SignupPage() {
             Already have an account?{" "}
             <Link to="/auth" className="font-semibold text-foreground underline">Log in</Link>
           </p>
-          <div className="mt-3 text-center text-xs text-muted-foreground">
-            Didn't get the verification email?{" "}
-            <ResendVerification defaultEmail={email} />
-          </div>
         </div>
       </div>
     </div>
