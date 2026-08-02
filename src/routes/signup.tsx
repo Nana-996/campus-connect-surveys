@@ -154,11 +154,14 @@ function SignupPage() {
         return;
       }
       setPassword("");
-      setSignupNotice(
-        `Account created for ${email}. Check your inbox for a verification email — click the link to confirm before signing in.`,
-      );
-      toast.success("Verification email sent. Confirm your address to continue.");
-      navigate({ to: "/auth" });
+      if (!data.session) {
+        // Fallback in case a session was not returned with the signup.
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInError) throw signInError;
+      }
+      toast.success("Account created. Welcome to CampusVerify.");
+      navigate({ to: "/feed" });
+
 
     } catch (err: any) {
       const message = err.message ?? "Could not create account";
