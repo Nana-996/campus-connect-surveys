@@ -119,6 +119,13 @@ function SignupPage() {
       toast.error(message);
       return;
     }
+    if (userType === "student" && (!gradMonth || !gradYear)) {
+      const message = "Expected graduation month and year are required for student accounts.";
+      setFormError(message);
+      toast.error(message);
+      return;
+    }
+
     if (userType === "general" && !country) {
 
       const message = "Country is required for general accounts.";
