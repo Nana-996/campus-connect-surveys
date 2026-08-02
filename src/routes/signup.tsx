@@ -31,6 +31,13 @@ export const Route = createFileRoute("/signup")({
 
 const ACADEMIC_RE = /(^|\.)edu$|\.edu\.[a-z]{2,6}$|\.ac\.[a-z]{2,6}$|\.uni\.[a-z]{2,6}$/i;
 
+const GRAD_MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+const GRAD_YEARS = Array.from({ length: 11 }, (_, i) => String(new Date().getFullYear() + i));
+
+
 function SignupPage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
