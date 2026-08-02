@@ -193,6 +193,8 @@ function Profile() {
             <>
               <ReadOnlyField label="University" value={profile.university_name || "—"} />
               <ReadOnlyField label="Verified domain" value={profile.university_domain || "—"} />
+              <ReadOnlyField label="Expected graduation" value={gradLabel} />
+
               <div>
                 <Label htmlFor="profile-country" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Country</Label>
                 <Select value={country} onValueChange={setCountry}>
