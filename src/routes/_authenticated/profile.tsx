@@ -190,7 +190,17 @@ function Profile() {
             <>
               <ReadOnlyField label="University" value={profile.university_name || "—"} />
               <ReadOnlyField label="Verified domain" value={profile.university_domain || "—"} />
-              <ReadOnlyField label="Expected graduation" value={gradLabel} />
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Student eligibility</p>
+                <span
+                  className={`mt-1.5 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider ${
+                    isAlumni ? "bg-destructive/10 text-destructive" : "bg-highlight text-highlight-foreground"
+                  }`}
+                >
+                  {isAlumni ? <AlertTriangle className="h-3 w-3" /> : <ShieldCheck className="h-3 w-3" />}
+                  {isAlumni ? "Expired" : "Active"}
+                </span>
+              </div>
 
               <div>
                 <Label htmlFor="profile-country" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Country</Label>
