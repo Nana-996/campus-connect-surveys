@@ -71,9 +71,6 @@ function Profile() {
   if (!profile) return null;
   const isGeneral = profile.user_type === "general";
   const gradDate = (profile as any).graduation_date as string | null | undefined;
-  const gradLabel = gradDate
-    ? new Date(`${gradDate}T00:00:00`).toLocaleDateString(undefined, { month: "long", year: "numeric" })
-    : "—";
   const isAlumni = !isGeneral && !!gradDate && new Date(`${gradDate}T00:00:00`) < new Date(Date.now() - 30 * 864e5);
 
 
