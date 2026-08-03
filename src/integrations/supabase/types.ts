@@ -1040,6 +1040,7 @@ export type Database = {
       }
       is_academic_domain: { Args: { _domain: string }; Returns: boolean }
       is_alumni: { Args: { _user_id: string }; Returns: boolean }
+      is_student_eligible: { Args: { _user_id?: string }; Returns: boolean }
       list_lecturer_evaluations: {
         Args: { _lecturer_id: string }
         Returns: {
