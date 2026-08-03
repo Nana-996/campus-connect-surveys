@@ -71,9 +71,6 @@ function Profile() {
   if (!profile) return null;
   const isGeneral = profile.user_type === "general";
   const gradDate = (profile as any).graduation_date as string | null | undefined;
-  const gradLabel = gradDate
-    ? new Date(`${gradDate}T00:00:00`).toLocaleDateString(undefined, { month: "long", year: "numeric" })
-    : "—";
   const isAlumni = !isGeneral && !!gradDate && new Date(`${gradDate}T00:00:00`) < new Date(Date.now() - 30 * 864e5);
 
 
@@ -102,8 +99,8 @@ function Profile() {
           <div>
             <p className="font-semibold">Your student access has ended.</p>
             <p className="text-muted-foreground">
-              You graduated in {gradLabel}, so this account no longer earns free credits for answering
-              surveys and publishes at general-account pricing using purchased credits.
+              This account no longer earns free credits for answering surveys and publishes at
+              general-account pricing using purchased credits.
             </p>
             <Link to="/buy-credits" className="mt-2 inline-block font-semibold underline">Buy credits</Link>
           </div>
@@ -193,7 +190,17 @@ function Profile() {
             <>
               <ReadOnlyField label="University" value={profile.university_name || "—"} />
               <ReadOnlyField label="Verified domain" value={profile.university_domain || "—"} />
-              <ReadOnlyField label="Expected graduation" value={gradLabel} />
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Student eligibility</p>
+                <span
+                  className={`mt-1.5 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider ${
+                    isAlumni ? "bg-destructive/10 text-destructive" : "bg-highlight text-highlight-foreground"
+                  }`}
+                >
+                  {isAlumni ? <AlertTriangle className="h-3 w-3" /> : <ShieldCheck className="h-3 w-3" />}
+                  {isAlumni ? "Expired" : "Active"}
+                </span>
+              </div>
 
               <div>
                 <Label htmlFor="profile-country" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Country</Label>
