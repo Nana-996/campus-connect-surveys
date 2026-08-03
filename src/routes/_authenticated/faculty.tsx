@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Search, UserPlus, UserMinus, Eye, ShieldAlert, X, GraduationCap, CheckCircle2, Clock, ListChecks } from "lucide-react";
+import { Search, UserPlus, UserMinus, Eye, ShieldAlert, X, GraduationCap, CheckCircle2, Clock, ListChecks, Users } from "lucide-react";
+import { SectionNav } from "@/components/SectionNav";
+import { StatCard } from "@/components/StatCard";
 import {
   getMyFacultyScope,
   searchStudentByIndex,
@@ -45,31 +47,62 @@ function FacultyDashboard() {
 
   const hasUni = !!(scope.university_name && scope.university_name.trim());
 
+  return <FacultyShell universityName={scope.university_name} hasUni={hasUni} />;
+}
+
+function FacultyShell({ universityName, hasUni }: { universityName: string | null | undefined; hasUni: boolean }) {
+  const [section, setSection] = useState("roster");
+  const fetchRoster = useServerFn(listWatchlist);
+  const { data: roster = [] } = useQuery({
+    queryKey: ["faculty", "watchlist"],
+    queryFn: () => fetchRoster(),
+    enabled: hasUni,
+  });
+
+  const pendingTotal = roster.filter((s) => s.surveys_pending > 0).length;
+  const inactiveTotal = roster.filter((s) => !s.last_activity).length;
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
         <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Faculty</p>
         <h1 className="mt-1 font-serif text-5xl leading-[0.95]">My <em className="text-primary">roster.</em></h1>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
           {hasUni ? (
-            <>Build your personal watchlist of students at <span className="font-semibold">{scope.university_name}</span>. Only students you add appear here.</>
+            <>Track students at <span className="font-semibold">{universityName}</span>. Only students you add appear here.</>
           ) : (
             <>Set your university below to start tracking students. Faculty tracking is scoped to a single university.</>
           )}
         </p>
       </div>
 
-      {hasUni ? (
-        <>
-          <SearchAddPanel />
-          <RosterPanel />
-        </>
-      ) : (
+      {!hasUni ? (
         <SetUniversityPanel />
+      ) : (
+        <>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <StatCard label="On watchlist" value={roster.length} icon={Users} />
+            <StatCard label="Pending surveys" value={pendingTotal} icon={Clock} accent={pendingTotal > 0} />
+            <StatCard label="Caught up" value={roster.length - pendingTotal} icon={CheckCircle2} />
+            <StatCard label="Never responded" value={inactiveTotal} icon={ListChecks} />
+          </div>
+
+          <SectionNav
+            value={section}
+            onChange={setSection}
+            items={[
+              { value: "roster", label: "Watchlist", icon: Users, badge: roster.length },
+              { value: "add", label: "Add student", icon: UserPlus },
+            ]}
+          />
+
+          {section === "add" ? <SearchAddPanel /> : <RosterPanel />}
+        </>
       )}
     </div>
   );
 }
+
 
 function SetUniversityPanel() {
   const qc = useQueryClient();
@@ -235,9 +268,6 @@ function RosterPanel() {
     return true;
   });
 
-  const pendingTotal = roster.reduce((n, s) => n + (s.surveys_pending > 0 ? 1 : 0), 0);
-  const inactiveTotal = roster.filter((s) => !s.last_activity).length;
-
   const clearAll = () => {
     setFilter("");
     setStatusFilter("all");
@@ -245,14 +275,7 @@ function RosterPanel() {
 
   return (
     <section>
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h2 className="font-serif text-2xl">Watchlist ({roster.length})</h2>
-          <p className="text-[11px] text-muted-foreground">
-            {pendingTotal} with pending surveys · {inactiveTotal} never responded
-          </p>
-        </div>
-      </div>
+
 
       {roster.length > 0 && (
         <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center">
