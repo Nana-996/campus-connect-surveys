@@ -418,6 +418,86 @@ export type Database = {
         }
         Relationships: []
       }
+      school_invites: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          expires_at: string | null
+          id: string
+          revoked: boolean
+          role: string
+          school_domain: string
+          token: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          expires_at?: string | null
+          id?: string
+          revoked?: boolean
+          role: string
+          school_domain: string
+          token: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          expires_at?: string | null
+          id?: string
+          revoked?: boolean
+          role?: string
+          school_domain?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_invites_school_domain_fkey"
+            columns: ["school_domain"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["domain"]
+          },
+        ]
+      }
+      schools: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          domain: string
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          domain: string
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          domain?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       survey_report_views: {
         Row: {
           config: Json
@@ -781,9 +861,23 @@ export type Database = {
       }
     }
     Functions: {
+      accept_school_invite: { Args: { _token: string }; Returns: Json }
       admin_add_disposable_domain: {
         Args: { _domain: string }
         Returns: boolean
+      }
+      admin_create_school_invite: {
+        Args: {
+          _domain: string
+          _email?: string
+          _expires_days?: number
+          _role: string
+        }
+        Returns: {
+          expires_at: string
+          id: string
+          token: string
+        }[]
       }
       admin_dashboard_metrics: { Args: never; Returns: Json }
       admin_delete_survey: { Args: { _survey_id: string }; Returns: boolean }
@@ -824,6 +918,30 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      admin_list_school_invites: {
+        Args: { _domain: string }
+        Returns: {
+          accepted_at: string
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          revoked: boolean
+          role: string
+          token: string
+        }[]
+      }
+      admin_list_schools: {
+        Args: never
+        Returns: {
+          created_at: string
+          domain: string
+          id: string
+          is_active: boolean
+          name: string
+          open_invites: number
+        }[]
       }
       admin_list_survey_tracking_access: {
         Args: { _survey_id: string }
@@ -875,8 +993,13 @@ export type Database = {
         Returns: boolean
       }
       admin_resolve_flag: { Args: { _id: string }; Returns: boolean }
+      admin_revoke_school_invite: { Args: { _id: string }; Returns: boolean }
       admin_revoke_survey_tracking_access: {
         Args: { _faculty_user_id: string; _survey_id: string }
+        Returns: boolean
+      }
+      admin_set_school_active: {
+        Args: { _active: boolean; _domain: string }
         Returns: boolean
       }
       admin_set_survey_active: {
@@ -898,6 +1021,10 @@ export type Database = {
       admin_set_user_university: {
         Args: { _target_user_id: string; _university_name: string }
         Returns: boolean
+      }
+      admin_upsert_school: {
+        Args: { _domain: string; _name: string }
+        Returns: string
       }
       begin_survey_response: { Args: { _survey_id: string }; Returns: string }
       bootstrap_first_admin: { Args: never; Returns: boolean }
@@ -980,6 +1107,7 @@ export type Database = {
           count: number
         }[]
       }
+      get_school_invite: { Args: { _token: string }; Returns: Json }
       get_shared_dashboard: { Args: { _token: string }; Returns: Json }
       get_survey_questions_for_tracker: {
         Args: { _survey_id: string }

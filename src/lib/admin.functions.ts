@@ -310,3 +310,94 @@ export const checkAdminExists = createServerFn({ method: "GET" })
     if (error) genericError(error);
     return { exists: !!data };
   });
+
+// ---------- Schools onboarding ----------
+export const listSchools = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase.rpc("admin_list_schools" as any);
+    if (error) genericError(error);
+    return (data ?? []) as {
+      id: string; name: string; domain: string; is_active: boolean;
+      created_at: string; open_invites: number;
+    }[];
+  });
+
+export const upsertSchool = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .inputValidator((d: unknown) =>
+    z.object({
+      name: z.string().trim().min(2).max(120),
+      domain: z.string().trim().min(3).max(253).regex(/^[a-z0-9.-]+\.[a-z]{2,}$/i),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.rpc("admin_upsert_school" as any, {
+      _name: data.name,
+      _domain: data.domain.toLowerCase(),
+    });
+    if (error) genericError(error);
+    return { ok: true };
+  });
+
+export const setSchoolActive = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .inputValidator((d: unknown) =>
+    z.object({ domain: z.string().min(3).max(253), active: z.boolean() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.rpc("admin_set_school_active" as any, {
+      _domain: data.domain.toLowerCase(),
+      _active: data.active,
+    });
+    if (error) genericError(error);
+    return { ok: true };
+  });
+
+export const createSchoolInvite = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .inputValidator((d: unknown) =>
+    z.object({
+      domain: z.string().min(3).max(253),
+      role: z.enum(["faculty", "lecturer"]),
+      email: z.string().email().max(254).optional().or(z.literal("")),
+      expiresDays: z.number().int().min(1).max(90).default(14),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: rows, error } = await context.supabase.rpc("admin_create_school_invite" as any, {
+      _domain: data.domain.toLowerCase(),
+      _role: data.role,
+      _email: data.email ? data.email.trim().toLowerCase() : null,
+      _expires_days: data.expiresDays,
+    });
+    if (error) {
+      console.error("[admin:invite]", error);
+      throw new Error(error.message || "Could not create invite");
+    }
+    const row = Array.isArray(rows) ? rows[0] : rows;
+    return row as { id: string; token: string; expires_at: string | null };
+  });
+
+export const listSchoolInvites = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .inputValidator((d: unknown) => z.object({ domain: z.string().min(3).max(253) }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: rows, error } = await context.supabase.rpc("admin_list_school_invites" as any, {
+      _domain: data.domain.toLowerCase(),
+    });
+    if (error) genericError(error);
+    return (rows ?? []) as {
+      id: string; role: "faculty" | "lecturer"; token: string; email: string | null;
+      expires_at: string | null; revoked: boolean; accepted_at: string | null; created_at: string;
+    }[];
+  });
+
+export const revokeSchoolInvite = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.rpc("admin_revoke_school_invite" as any, { _id: data.id });
+    if (error) genericError(error);
+    return { ok: true };
+  });

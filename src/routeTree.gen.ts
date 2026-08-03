@@ -27,6 +27,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SurveyIdRouteImport } from './routes/survey.$id'
 import { Route as RTokenRouteImport } from './routes/r.$token'
+import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as BlogStudentSurveyQuestionsGuideRouteImport } from './routes/blog.student-survey-questions-guide'
 import { Route as BlogStudentPerceptionSurveysRouteImport } from './routes/blog.student-perception-surveys'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
@@ -131,6 +132,11 @@ const SurveyIdRoute = SurveyIdRouteImport.update({
 const RTokenRoute = RTokenRouteImport.update({
   id: '/r/$token',
   path: '/r/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InviteTokenRoute = InviteTokenRouteImport.update({
+  id: '/invite/$token',
+  path: '/invite/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BlogStudentSurveyQuestionsGuideRoute =
@@ -248,6 +254,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof AuthenticatedProfileRoute
   '/blog/student-perception-surveys': typeof BlogStudentPerceptionSurveysRoute
   '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/r/$token': typeof RTokenRoute
   '/survey/$id': typeof SurveyIdRoute
   '/manage/$surveyId': typeof AuthenticatedManageSurveyIdRoute
@@ -283,6 +290,7 @@ export interface FileRoutesByTo {
   '/profile': typeof AuthenticatedProfileRoute
   '/blog/student-perception-surveys': typeof BlogStudentPerceptionSurveysRoute
   '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/r/$token': typeof RTokenRoute
   '/survey/$id': typeof SurveyIdRoute
   '/manage/$surveyId': typeof AuthenticatedManageSurveyIdRoute
@@ -320,6 +328,7 @@ export interface FileRoutesById {
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/blog/student-perception-surveys': typeof BlogStudentPerceptionSurveysRoute
   '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/r/$token': typeof RTokenRoute
   '/survey/$id': typeof SurveyIdRoute
   '/_authenticated/manage/$surveyId': typeof AuthenticatedManageSurveyIdRoute
@@ -357,6 +366,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/blog/student-perception-surveys'
     | '/blog/student-survey-questions-guide'
+    | '/invite/$token'
     | '/r/$token'
     | '/survey/$id'
     | '/manage/$surveyId'
@@ -392,6 +402,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/blog/student-perception-surveys'
     | '/blog/student-survey-questions-guide'
+    | '/invite/$token'
     | '/r/$token'
     | '/survey/$id'
     | '/manage/$surveyId'
@@ -428,6 +439,7 @@ export interface FileRouteTypes {
     | '/_authenticated/profile'
     | '/blog/student-perception-surveys'
     | '/blog/student-survey-questions-guide'
+    | '/invite/$token'
     | '/r/$token'
     | '/survey/$id'
     | '/_authenticated/manage/$surveyId'
@@ -456,6 +468,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   BlogStudentPerceptionSurveysRoute: typeof BlogStudentPerceptionSurveysRoute
   BlogStudentSurveyQuestionsGuideRoute: typeof BlogStudentSurveyQuestionsGuideRoute
+  InviteTokenRoute: typeof InviteTokenRoute
   RTokenRoute: typeof RTokenRoute
   SurveyIdRoute: typeof SurveyIdRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
@@ -588,6 +601,13 @@ declare module '@tanstack/react-router' {
       path: '/r/$token'
       fullPath: '/r/$token'
       preLoaderRoute: typeof RTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invite/$token': {
+      id: '/invite/$token'
+      path: '/invite/$token'
+      fullPath: '/invite/$token'
+      preLoaderRoute: typeof InviteTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blog/student-survey-questions-guide': {
@@ -767,6 +787,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   BlogStudentPerceptionSurveysRoute: BlogStudentPerceptionSurveysRoute,
   BlogStudentSurveyQuestionsGuideRoute: BlogStudentSurveyQuestionsGuideRoute,
+  InviteTokenRoute: InviteTokenRoute,
   RTokenRoute: RTokenRoute,
   SurveyIdRoute: SurveyIdRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
@@ -775,13 +796,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
