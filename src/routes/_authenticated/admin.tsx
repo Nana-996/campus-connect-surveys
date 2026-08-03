@@ -240,22 +240,60 @@ function useSchools(users: any[], surveys: any[]): School[] {
 }
 
 function SchoolsPanel() {
+  const qc = useQueryClient();
   const { data: users = [], isLoading } = useAdminUsers();
   const { data: surveys = [] } = useAdminSurveys();
-  const schools = useSchools(users as any[], surveys as any[]);
+  const derived = useSchools(users as any[], surveys as any[]);
+
+  const fetchSchools = useServerFn(listSchools);
+  const saveSchool = useServerFn(upsertSchool);
+  const toggleSchool = useServerFn(setSchoolActive);
+  const { data: registry = [] } = useQuery({
+    queryKey: ["admin", "schools"],
+    queryFn: () => fetchSchools(),
+    retry: false,
+  });
 
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("people");
   const [scope, setScope] = useState("all");
+  const [newName, setNewName] = useState("");
+  const [newDomain, setNewDomain] = useState("");
+  const [inviteFor, setInviteFor] = useState<{ name: string; domain: string } | null>(null);
+
+  const schools = useMemo(() => {
+    const stats = new Map(derived.map((d) => [d.domain.toLowerCase(), d]));
+    const rows = registry.map((r) => {
+      const d = stats.get(r.domain.toLowerCase());
+      stats.delete(r.domain.toLowerCase());
+      return {
+        ...(d ?? {
+          key: r.domain, name: r.name, domain: r.domain, total: 0, students: 0, general: 0,
+          faculty: 0, admins: 0, flagged: 0, surveys: 0, activeSurveys: 0,
+        }),
+        key: r.domain,
+        name: r.name,
+        domain: r.domain,
+        onboarded: true,
+        is_active: r.is_active,
+        open_invites: Number(r.open_invites ?? 0),
+      };
+    });
+    for (const d of stats.values()) {
+      rows.push({ ...d, onboarded: false, is_active: true, open_invites: 0 });
+    }
+    return rows;
+  }, [derived, registry]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     let list = schools.filter((s) =>
       !q || s.name.toLowerCase().includes(q) || s.domain.toLowerCase().includes(q),
     );
-    if (scope === "with-faculty") list = list.filter((s) => s.faculty > 0);
-    if (scope === "no-faculty") list = list.filter((s) => s.faculty === 0);
-    if (scope === "active") list = list.filter((s) => s.activeSurveys > 0);
+    if (scope === "active") list = list.filter((s) => s.onboarded && s.is_active);
+    if (scope === "inactive") list = list.filter((s) => s.onboarded && !s.is_active);
+    if (scope === "not-onboarded") list = list.filter((s) => !s.onboarded);
+    if (scope === "invites") list = list.filter((s) => s.open_invites > 0);
 
     const sorted = [...list];
     if (sort === "people") sorted.sort((a, b) => b.total - a.total);
@@ -267,20 +305,63 @@ function SchoolsPanel() {
 
   const totals = useMemo(
     () => ({
-      students: schools.reduce((n, s) => n + s.students, 0),
-      faculty: schools.reduce((n, s) => n + s.faculty, 0),
-      surveys: schools.reduce((n, s) => n + s.surveys, 0),
+      onboarded: schools.filter((s) => s.onboarded && s.is_active).length,
+      pending: schools.filter((s) => !s.onboarded).length,
+      invites: schools.reduce((n, s) => n + s.open_invites, 0),
     }),
     [schools],
   );
 
+  async function addSchool() {
+    if (!newName.trim() || !newDomain.trim()) return toast.error("Name and email domain are required");
+    try {
+      await saveSchool({ data: { name: newName.trim(), domain: newDomain.trim().toLowerCase() } });
+      setNewName(""); setNewDomain("");
+      toast.success("School onboarded");
+      qc.invalidateQueries({ queryKey: ["admin", "schools"] });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not save school");
+    }
+  }
+
+  async function setActive(domain: string, active: boolean) {
+    try {
+      await toggleSchool({ data: { domain, active } });
+      toast.success(active ? "School activated" : "School deactivated");
+      qc.invalidateQueries({ queryKey: ["admin", "schools"] });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not update school");
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard label="Schools" value={schools.length} icon={Building2} />
-        <StatCard label="Students" value={totals.students} icon={GraduationCap} />
-        <StatCard label="Faculty staff" value={totals.faculty} icon={Briefcase} />
-        <StatCard label="Surveys" value={totals.surveys} icon={FileText} />
+        <StatCard label="Active schools" value={totals.onboarded} icon={Building2} />
+        <StatCard label="Not onboarded" value={totals.pending} icon={Ban} />
+        <StatCard label="Open invites" value={totals.invites} icon={UserPlus} />
+        <StatCard label="Students" value={derived.reduce((n, s) => n + s.students, 0)} icon={GraduationCap} />
+      </div>
+
+      {/* Onboard a school */}
+      <div className="rounded-2xl border border-foreground/15 bg-card p-4">
+        <p className="font-serif text-lg">Onboard a school</p>
+        <p className="text-xs text-muted-foreground">Register the school's email domain, then invite its faculty and lecturers.</p>
+        <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
+          <div>
+            <Label htmlFor="sch-name" className="text-xs">School name</Label>
+            <Input id="sch-name" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="University of Ghana" />
+          </div>
+          <div>
+            <Label htmlFor="sch-domain" className="text-xs">Email domain</Label>
+            <Input id="sch-domain" value={newDomain} onChange={(e) => setNewDomain(e.target.value)} placeholder="ug.edu.gh" />
+          </div>
+          <div className="flex items-end">
+            <Button className="w-full rounded-full sm:w-auto" onClick={addSchool}>
+              <Plus className="mr-1 h-4 w-4" /> Add
+            </Button>
+          </div>
+        </div>
       </div>
 
       <FilterBar
@@ -303,9 +384,10 @@ function SchoolsPanel() {
             onChange: setScope,
             options: [
               { value: "all", label: "All schools", count: schools.length },
-              { value: "with-faculty", label: "Has faculty staff" },
-              { value: "no-faculty", label: "No faculty staff" },
-              { value: "active", label: "Has active surveys" },
+              { value: "active", label: "Active" },
+              { value: "inactive", label: "Deactivated" },
+              { value: "not-onboarded", label: "Not onboarded" },
+              { value: "invites", label: "Has open invites" },
             ],
           },
         ]}
@@ -326,25 +408,185 @@ function SchoolsPanel() {
           {filtered.map((s) => (
             <li key={s.key} className="rounded-2xl border border-foreground/15 bg-card p-4">
               <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${s.onboarded && s.is_active ? "bg-primary/10 text-primary" : "bg-secondary text-muted-foreground"}`}>
                   <Building2 className="h-5 w-5" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="font-serif text-lg leading-tight">{s.name}</p>
                   <p className="truncate font-mono text-[10px] text-muted-foreground">{s.domain}</p>
                 </div>
-                {s.flagged > 0 && <Badge variant="destructive" className="rounded-full">{s.flagged} flagged</Badge>}
+                {!s.onboarded ? (
+                  <Badge variant="outline" className="rounded-full">Not onboarded</Badge>
+                ) : s.is_active ? (
+                  <Badge className="rounded-full">Active</Badge>
+                ) : (
+                  <Badge variant="secondary" className="rounded-full">Deactivated</Badge>
+                )}
               </div>
               <dl className="mt-3 grid grid-cols-4 gap-2 text-center">
                 <Metric label="People" value={s.total} />
                 <Metric label="Students" value={s.students} />
                 <Metric label="Faculty" value={s.faculty} />
-                <Metric label="Surveys" value={`${s.activeSurveys}/${s.surveys}`} />
+                <Metric label="Invites" value={s.open_invites} />
               </dl>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {!s.onboarded ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="rounded-full"
+                    onClick={async () => {
+                      await saveSchool({ data: { name: s.name, domain: s.domain } });
+                      toast.success("School onboarded");
+                      qc.invalidateQueries({ queryKey: ["admin", "schools"] });
+                    }}
+                  >
+                    <Plus className="mr-1 h-3.5 w-3.5" /> Onboard
+                  </Button>
+                ) : (
+                  <>
+                    <Button
+                      size="sm"
+                      variant={s.is_active ? "outline" : "default"}
+                      className="rounded-full"
+                      onClick={() => setActive(s.domain, !s.is_active)}
+                    >
+                      <Power className="mr-1 h-3.5 w-3.5" /> {s.is_active ? "Deactivate" : "Activate"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="rounded-full"
+                      disabled={!s.is_active}
+                      onClick={() => setInviteFor({ name: s.name, domain: s.domain })}
+                    >
+                      <UserPlus className="mr-1 h-3.5 w-3.5" /> Invites
+                    </Button>
+                  </>
+                )}
+              </div>
+              {inviteFor?.domain === s.domain && (
+                <SchoolInvitePanel school={inviteFor} onClose={() => setInviteFor(null)} />
+              )}
             </li>
           ))}
         </ul>
       )}
+    </div>
+  );
+}
+
+function SchoolInvitePanel({ school, onClose }: { school: { name: string; domain: string }; onClose: () => void }) {
+  const qc = useQueryClient();
+  const fetchInvites = useServerFn(listSchoolInvites);
+  const createInvite = useServerFn(createSchoolInvite);
+  const revokeInvite = useServerFn(revokeSchoolInvite);
+
+  const [role, setRole] = useState<"faculty" | "lecturer">("faculty");
+  const [email, setEmail] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const { data: invites = [] } = useQuery({
+    queryKey: ["admin", "school-invites", school.domain],
+    queryFn: () => fetchInvites({ data: { domain: school.domain } }),
+    retry: false,
+  });
+
+  const linkFor = (token: string) =>
+    typeof window === "undefined" ? `/invite/${token}` : `${window.location.origin}/invite/${token}`;
+
+  async function copy(token: string) {
+    try {
+      await navigator.clipboard.writeText(linkFor(token));
+      toast.success("Invite link copied");
+    } catch {
+      toast.error("Could not copy — long-press the link to copy");
+    }
+  }
+
+  async function generate() {
+    setBusy(true);
+    try {
+      const res = await createInvite({ data: { domain: school.domain, role, email: email.trim(), expiresDays: 14 } });
+      setEmail("");
+      qc.invalidateQueries({ queryKey: ["admin", "school-invites", school.domain] });
+      qc.invalidateQueries({ queryKey: ["admin", "schools"] });
+      await copy(res.token);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not create invite");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="mt-3 rounded-xl border border-foreground/15 bg-secondary/40 p-3">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Invite links</p>
+        <Button size="sm" variant="ghost" className="h-7 rounded-full text-xs" onClick={onClose}>Close</Button>
+      </div>
+
+      <div className="mt-2 flex flex-wrap items-end gap-2">
+        <div className="inline-flex rounded-full border border-foreground/15 bg-card p-0.5">
+          {(["faculty", "lecturer"] as const).map((r) => (
+            <button
+              key={r}
+              type="button"
+              onClick={() => setRole(r)}
+              className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${role === r ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+            >
+              {r}
+            </button>
+          ))}
+        </div>
+        <Input
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder={`name@${school.domain} (optional)`}
+          className="h-9 w-full flex-1 sm:w-auto"
+        />
+        <Button size="sm" className="rounded-full" disabled={busy} onClick={generate}>
+          <Plus className="mr-1 h-3.5 w-3.5" /> Generate link
+        </Button>
+      </div>
+
+      <ul className="mt-3 space-y-2">
+        {invites.length === 0 && <li className="text-xs text-muted-foreground">No invites yet.</li>}
+        {invites.map((i) => {
+          const used = !!i.accepted_at;
+          const expired = !!i.expires_at && new Date(i.expires_at) <= new Date();
+          const dead = used || expired || i.revoked;
+          return (
+            <li key={i.id} className="rounded-lg bg-card p-2 text-xs">
+              <div className="flex items-center gap-2">
+                <Badge variant={dead ? "secondary" : "default"} className="rounded-full capitalize">{i.role}</Badge>
+                <span className="truncate text-muted-foreground">{i.email ?? "Any recipient"}</span>
+                <span className="ml-auto shrink-0 text-[10px] uppercase tracking-wider text-muted-foreground">
+                  {used ? "Accepted" : i.revoked ? "Revoked" : expired ? "Expired" : "Open"}
+                </span>
+              </div>
+              {!dead && (
+                <div className="mt-2 flex items-center gap-2">
+                  <code className="min-w-0 flex-1 truncate rounded bg-secondary px-2 py-1 font-mono text-[10px]">{linkFor(i.token)}</code>
+                  <Button size="sm" variant="outline" className="h-7 rounded-full text-[11px]" onClick={() => copy(i.token)}>Copy</Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 rounded-full text-[11px] text-destructive"
+                    onClick={async () => {
+                      await revokeInvite({ data: { id: i.id } });
+                      qc.invalidateQueries({ queryKey: ["admin", "school-invites", school.domain] });
+                      qc.invalidateQueries({ queryKey: ["admin", "schools"] });
+                    }}
+                  >
+                    Revoke
+                  </Button>
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }
