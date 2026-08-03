@@ -411,9 +411,7 @@ function SignupPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <p className="mt-1 text-[11px] text-muted-foreground">
-                  Free student access ends after this date — your account then moves to paid general pricing.
-                </p>
+
               </div>
             )}
 
