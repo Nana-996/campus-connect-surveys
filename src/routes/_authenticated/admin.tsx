@@ -1,15 +1,20 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { FilterBar } from "@/components/FilterBar";
+import { SectionNav } from "@/components/SectionNav";
+import { StatCard } from "@/components/StatCard";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { ShieldAlert, Check, Trash2, Power, UserPlus, UserMinus, Flag, FlagOff, Plus, GraduationCap, BarChart3, ClipboardList } from "lucide-react";
+import {
+  ShieldAlert, Check, Trash2, Power, UserPlus, UserMinus, Flag, FlagOff, Plus,
+  GraduationCap, BarChart3, ClipboardList, LayoutDashboard, Building2, Users,
+  FileText, Ban, ArrowRight, MessageSquare,
+} from "lucide-react";
 import {
   getAdminMetrics,
   listAdminUsers,
@@ -44,10 +49,18 @@ import { Briefcase } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: Admin,
+  head: () => ({
+    meta: [
+      { title: "Admin Console — CampusVerify" },
+      { name: "description", content: "Manage schools, people, surveys and moderation across CampusVerify." },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
 });
 
 function Admin() {
   const fetchMetrics = useServerFn(getAdminMetrics);
+  const [section, setSection] = useState("overview");
   const { data: metrics, isLoading, error } = useQuery({
     queryKey: ["admin", "metrics"],
     queryFn: () => fetchMetrics(),
@@ -74,48 +87,277 @@ function Admin() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
         <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Admin</p>
         <h1 className="mt-1 font-serif text-5xl leading-[0.95]">Control <em className="text-primary">center.</em></h1>
+        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+          Everything in one place — schools on the platform, the people in them, their surveys and moderation.
+        </p>
       </div>
 
-      {metrics && (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <Kpi label="Users" value={metrics.users} />
-          <Kpi label="Active surveys" value={`${metrics.activeSurveys}/${metrics.surveys}`} />
-          <Kpi label="Responses (24h)" value={`${metrics.responses24h} / ${metrics.responses}`} />
-          <Kpi label="Open flags" value={metrics.openFlags} accent={metrics.openFlags > 0} />
-        </div>
-      )}
+      <SectionNav
+        value={section}
+        onChange={setSection}
+        items={[
+          { value: "overview", label: "Overview", icon: LayoutDashboard },
+          { value: "schools", label: "Schools", icon: Building2 },
+          { value: "users", label: "People", icon: Users },
+          { value: "surveys", label: "Surveys", icon: FileText },
+          { value: "evaluations", label: "Lecturers", icon: GraduationCap },
+          { value: "flags", label: "Flags", icon: Flag, badge: metrics?.openFlags },
+          { value: "domains", label: "Blocked", icon: Ban },
+        ]}
+      />
 
-      <Tabs defaultValue="users">
-        <TabsList className="flex flex-wrap">
-          <TabsTrigger value="users">Users</TabsTrigger>
-          <TabsTrigger value="surveys">Surveys</TabsTrigger>
-          <TabsTrigger value="evaluations">Lecturer evals</TabsTrigger>
-          <TabsTrigger value="flags">Flags</TabsTrigger>
-          <TabsTrigger value="domains">Blocked domains</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="users" className="mt-4"><UsersPanel /></TabsContent>
-        <TabsContent value="surveys" className="mt-4"><SurveysPanel /></TabsContent>
-        <TabsContent value="evaluations" className="mt-4"><EvaluationsPanel /></TabsContent>
-        <TabsContent value="flags" className="mt-4"><FlagsPanel /></TabsContent>
-        <TabsContent value="domains" className="mt-4"><DomainsPanel /></TabsContent>
-      </Tabs>
+      <div>
+        {section === "overview" && <OverviewPanel metrics={metrics} onGo={setSection} />}
+        {section === "schools" && <SchoolsPanel />}
+        {section === "users" && <UsersPanel />}
+        {section === "surveys" && <SurveysPanel />}
+        {section === "evaluations" && <EvaluationsPanel />}
+        {section === "flags" && <FlagsPanel />}
+        {section === "domains" && <DomainsPanel />}
+      </div>
     </div>
   );
 }
 
-function Kpi({ label, value, accent }: { label: string; value: string | number; accent?: boolean }) {
+// ---------------- Shared data hooks ----------------
+function useAdminUsers() {
+  const fetchUsers = useServerFn(listAdminUsers);
+  return useQuery({
+    queryKey: ["admin", "users", ""],
+    queryFn: () => fetchUsers({ data: {} }),
+  });
+}
+
+function useAdminSurveys() {
+  const fetchSurveys = useServerFn(listAdminSurveys);
+  return useQuery({ queryKey: ["admin", "surveys"], queryFn: () => fetchSurveys() });
+}
+
+// ---------------- Overview ----------------
+function OverviewPanel({ metrics, onGo }: { metrics: any; onGo: (s: string) => void }) {
+  const { data: users = [] } = useAdminUsers();
+  const { data: surveys = [] } = useAdminSurveys();
+  const schools = useSchools(users as any[], surveys as any[]);
+
   return (
-    <div className={`rounded-2xl border p-4 ${accent ? "border-destructive/40 bg-destructive/5" : "border-foreground/15 bg-card"}`}>
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className="mt-1 font-serif text-2xl">{value}</p>
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+        <StatCard label="Schools" value={schools.length} icon={Building2} hint="Universities on the platform" onClick={() => onGo("schools")} />
+        <StatCard label="People" value={metrics?.users ?? 0} icon={Users} hint="Registered accounts" onClick={() => onGo("users")} />
+        <StatCard label="Surveys" value={`${metrics?.activeSurveys ?? 0}/${metrics?.surveys ?? 0}`} icon={FileText} hint="Active of total" onClick={() => onGo("surveys")} />
+        <StatCard label="Responses 24h" value={metrics?.responses24h ?? 0} icon={MessageSquare} hint={`${metrics?.responses ?? 0} all time`} />
+        <StatCard label="Open flags" value={metrics?.openFlags ?? 0} icon={Flag} accent={(metrics?.openFlags ?? 0) > 0} hint="Needs review" onClick={() => onGo("flags")} />
+      </div>
+
+      <section className="rounded-2xl border border-foreground/15 bg-card">
+        <div className="flex items-center justify-between gap-2 border-b border-foreground/10 px-4 py-3">
+          <h2 className="font-serif text-xl">Top schools</h2>
+          <Button size="sm" variant="ghost" className="rounded-full" onClick={() => onGo("schools")}>
+            View all <ArrowRight className="ml-1 h-3 w-3" />
+          </Button>
+        </div>
+        {schools.length === 0 ? (
+          <p className="px-4 py-8 text-center text-sm text-muted-foreground">No schools yet.</p>
+        ) : (
+          <ul className="divide-y divide-foreground/10">
+            {schools.slice(0, 5).map((s) => (
+              <li key={s.key} className="flex flex-wrap items-center gap-3 px-4 py-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Building2 className="h-4 w-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-medium">{s.name}</p>
+                  <p className="truncate font-mono text-[10px] text-muted-foreground">{s.domain}</p>
+                </div>
+                <div className="flex gap-1.5 text-[10px]">
+                  <Badge variant="secondary" className="rounded-full">{s.students} students</Badge>
+                  <Badge variant="secondary" className="rounded-full">{s.surveys} surveys</Badge>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </div>
   );
 }
+
+// ---------------- Schools ----------------
+type School = {
+  key: string;
+  name: string;
+  domain: string;
+  total: number;
+  students: number;
+  general: number;
+  faculty: number;
+  admins: number;
+  flagged: number;
+  surveys: number;
+  activeSurveys: number;
+};
+
+function useSchools(users: any[], surveys: any[]): School[] {
+  return useMemo(() => {
+    const map = new Map<string, School>();
+    const keyOf = (name?: string, domain?: string) =>
+      (domain || name || "unknown").toLowerCase();
+
+    for (const u of users) {
+      const k = keyOf(u.university_name, u.university_domain);
+      if (!map.has(k)) {
+        map.set(k, {
+          key: k,
+          name: u.university_name || "Unspecified school",
+          domain: u.university_domain || "—",
+          total: 0, students: 0, general: 0, faculty: 0, admins: 0,
+          flagged: 0, surveys: 0, activeSurveys: 0,
+        });
+      }
+      const s = map.get(k)!;
+      s.total += 1;
+      if (u.user_type === "student") s.students += 1;
+      else s.general += 1;
+      if (u.roles?.includes("faculty") || u.roles?.includes("manager")) s.faculty += 1;
+      if (u.roles?.includes("admin")) s.admins += 1;
+      if (u.is_flagged) s.flagged += 1;
+    }
+
+    for (const sv of surveys) {
+      const k = keyOf(undefined, sv.university_domain);
+      const s = map.get(k);
+      if (!s) continue;
+      s.surveys += 1;
+      if (sv.is_active) s.activeSurveys += 1;
+    }
+
+    return Array.from(map.values()).sort((a, b) => b.total - a.total);
+  }, [users, surveys]);
+}
+
+function SchoolsPanel() {
+  const { data: users = [], isLoading } = useAdminUsers();
+  const { data: surveys = [] } = useAdminSurveys();
+  const schools = useSchools(users as any[], surveys as any[]);
+
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState("people");
+  const [scope, setScope] = useState("all");
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    let list = schools.filter((s) =>
+      !q || s.name.toLowerCase().includes(q) || s.domain.toLowerCase().includes(q),
+    );
+    if (scope === "with-faculty") list = list.filter((s) => s.faculty > 0);
+    if (scope === "no-faculty") list = list.filter((s) => s.faculty === 0);
+    if (scope === "active") list = list.filter((s) => s.activeSurveys > 0);
+
+    const sorted = [...list];
+    if (sort === "people") sorted.sort((a, b) => b.total - a.total);
+    if (sort === "students") sorted.sort((a, b) => b.students - a.students);
+    if (sort === "surveys") sorted.sort((a, b) => b.surveys - a.surveys);
+    if (sort === "name") sorted.sort((a, b) => a.name.localeCompare(b.name));
+    return sorted;
+  }, [schools, search, sort, scope]);
+
+  const totals = useMemo(
+    () => ({
+      students: schools.reduce((n, s) => n + s.students, 0),
+      faculty: schools.reduce((n, s) => n + s.faculty, 0),
+      surveys: schools.reduce((n, s) => n + s.surveys, 0),
+    }),
+    [schools],
+  );
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <StatCard label="Schools" value={schools.length} icon={Building2} />
+        <StatCard label="Students" value={totals.students} icon={GraduationCap} />
+        <StatCard label="Faculty staff" value={totals.faculty} icon={Briefcase} />
+        <StatCard label="Surveys" value={totals.surveys} icon={FileText} />
+      </div>
+
+      <FilterBar
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search school name or domain…"
+        sort={sort}
+        onSortChange={setSort}
+        sortOptions={[
+          { value: "people", label: "Most people" },
+          { value: "students", label: "Most students" },
+          { value: "surveys", label: "Most surveys" },
+          { value: "name", label: "Name (A–Z)" },
+        ]}
+        filters={[
+          {
+            key: "scope",
+            label: "Show",
+            value: scope,
+            onChange: setScope,
+            options: [
+              { value: "all", label: "All schools", count: schools.length },
+              { value: "with-faculty", label: "Has faculty staff" },
+              { value: "no-faculty", label: "No faculty staff" },
+              { value: "active", label: "Has active surveys" },
+            ],
+          },
+        ]}
+        totalCount={schools.length}
+        filteredCount={filtered.length}
+        onClear={() => { setSearch(""); setScope("all"); }}
+      />
+
+      {isLoading ? (
+        <p className="text-sm text-muted-foreground">Loading schools…</p>
+      ) : filtered.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-foreground/20 bg-card p-8 text-center text-sm text-muted-foreground">
+          <Building2 className="mx-auto h-6 w-6" />
+          <p className="mt-2">No schools match your filters.</p>
+        </div>
+      ) : (
+        <ul className="grid gap-3 sm:grid-cols-2">
+          {filtered.map((s) => (
+            <li key={s.key} className="rounded-2xl border border-foreground/15 bg-card p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Building2 className="h-5 w-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-serif text-lg leading-tight">{s.name}</p>
+                  <p className="truncate font-mono text-[10px] text-muted-foreground">{s.domain}</p>
+                </div>
+                {s.flagged > 0 && <Badge variant="destructive" className="rounded-full">{s.flagged} flagged</Badge>}
+              </div>
+              <dl className="mt-3 grid grid-cols-4 gap-2 text-center">
+                <Metric label="People" value={s.total} />
+                <Metric label="Students" value={s.students} />
+                <Metric label="Faculty" value={s.faculty} />
+                <Metric label="Surveys" value={`${s.activeSurveys}/${s.surveys}`} />
+              </dl>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function Metric({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="rounded-xl bg-secondary/60 px-1 py-2">
+      <dt className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</dt>
+      <dd className="font-serif text-base leading-none">{value}</dd>
+    </div>
+  );
+}
+
 
 // ---------------- Users ----------------
 function UsersPanel() {
