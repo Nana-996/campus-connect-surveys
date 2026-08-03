@@ -112,8 +112,6 @@
   "resolutions": {
     "dompurify": "^3.4.11",
     "ws": "^8.18.3",
-    "fast-uri": "^3.1.5",
-    "minimatch/brace-expansion": "1.1.18",
-    "brace-expansion": "^5.0.9"
+    "fast-uri": "^3.1.5"
   }
 }
