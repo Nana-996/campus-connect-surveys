@@ -35,7 +35,8 @@ const GRAD_MONTHS = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",
 ];
-const GRAD_YEARS = Array.from({ length: 11 }, (_, i) => String(new Date().getFullYear() + i));
+// Students may pick an expected graduation up to 6 years from today.
+const GRAD_YEARS = Array.from({ length: 7 }, (_, i) => String(new Date().getFullYear() + i));
 
 
 function SignupPage() {
