@@ -99,8 +99,8 @@ function Profile() {
           <div>
             <p className="font-semibold">Your student access has ended.</p>
             <p className="text-muted-foreground">
-              You graduated in {gradLabel}, so this account no longer earns free credits for answering
-              surveys and publishes at general-account pricing using purchased credits.
+              This account no longer earns free credits for answering surveys and publishes at
+              general-account pricing using purchased credits.
             </p>
             <Link to="/buy-credits" className="mt-2 inline-block font-semibold underline">Buy credits</Link>
           </div>
