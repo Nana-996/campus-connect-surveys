@@ -112,6 +112,10 @@
   "resolutions": {
     "dompurify": "^3.4.11",
     "ws": "^8.18.3",
-    "fast-uri": "^3.1.5"
+    "fast-uri": "^3.1.5",
+    "minimatch/brace-expansion": "1.1.18",
+    "glob/minimatch/brace-expansion": "5.0.9",
+    "@typescript-eslint/typescript-estree/minimatch/brace-expansion": "5.0.9",
+    "filelist/minimatch/brace-expansion": "2.1.4"
   }
 }
