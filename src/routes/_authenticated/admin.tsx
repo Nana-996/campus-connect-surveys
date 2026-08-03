@@ -36,6 +36,12 @@ import {
   removeDisposableDomain,
   listOpenFlags,
   resolveFlag,
+  listSchools,
+  upsertSchool,
+  setSchoolActive,
+  createSchoolInvite,
+  listSchoolInvites,
+  revokeSchoolInvite,
 } from "@/lib/admin.functions";
 import {
   listLecturersForStaff,
@@ -239,6 +245,8 @@ function useSchools(users: any[], surveys: any[]): School[] {
   }, [users, surveys]);
 }
 
+type SchoolRow = School & { onboarded: boolean; is_active: boolean; open_invites: number };
+
 function SchoolsPanel() {
   const qc = useQueryClient();
   const { data: users = [], isLoading } = useAdminUsers();
@@ -261,9 +269,9 @@ function SchoolsPanel() {
   const [newDomain, setNewDomain] = useState("");
   const [inviteFor, setInviteFor] = useState<{ name: string; domain: string } | null>(null);
 
-  const schools = useMemo(() => {
+  const schools = useMemo<SchoolRow[]>(() => {
     const stats = new Map(derived.map((d) => [d.domain.toLowerCase(), d]));
-    const rows = registry.map((r) => {
+    const rows: SchoolRow[] = registry.map((r) => {
       const d = stats.get(r.domain.toLowerCase());
       stats.delete(r.domain.toLowerCase());
       return {
@@ -465,7 +473,7 @@ function SchoolsPanel() {
                   </>
                 )}
               </div>
-              {inviteFor?.domain === s.domain && (
+              {inviteFor && inviteFor.domain === s.domain && (
                 <SchoolInvitePanel school={inviteFor} onClose={() => setInviteFor(null)} />
               )}
             </li>
