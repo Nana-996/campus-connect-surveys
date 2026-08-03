@@ -268,9 +268,6 @@ function RosterPanel() {
     return true;
   });
 
-  const pendingTotal = roster.reduce((n, s) => n + (s.surveys_pending > 0 ? 1 : 0), 0);
-  const inactiveTotal = roster.filter((s) => !s.last_activity).length;
-
   const clearAll = () => {
     setFilter("");
     setStatusFilter("all");
@@ -278,14 +275,7 @@ function RosterPanel() {
 
   return (
     <section>
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h2 className="font-serif text-2xl">Watchlist ({roster.length})</h2>
-          <p className="text-[11px] text-muted-foreground">
-            {pendingTotal} with pending surveys · {inactiveTotal} never responded
-          </p>
-        </div>
-      </div>
+
 
       {roster.length > 0 && (
         <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center">
