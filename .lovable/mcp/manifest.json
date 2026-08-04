@@ -1,0 +1,145 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.1",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://vwrhclqxuabltajcbmno.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "campus-connect-surveys",
+      "version": "0.1.0",
+      "title": "Campus Connect Surveys"
+    },
+    "tools": [
+      {
+        "name": "get_my_account",
+        "title": "Get my account",
+        "description": "Return the signed-in CampusVerify member's profile: name, university, department, year, user type and credit balance.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_my_surveys",
+        "title": "List my surveys",
+        "description": "List surveys created by the signed-in member, with response counts, goals, status and expiry. Optionally filter to active surveys only.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "active_only": {
+              "default": false,
+              "description": "Only return surveys that are currently active.",
+              "type": "boolean"
+            },
+            "limit": {
+              "default": 25,
+              "description": "Maximum number of surveys to return (1-100).",
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_survey",
+        "title": "Get survey",
+        "description": "Fetch one survey the signed-in member can access, including its full question list, targeting rules and progress.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "survey_id": {
+              "type": "string",
+              "description": "The survey id (UUID)."
+            }
+          },
+          "required": [
+            "survey_id"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_survey_responses",
+        "title": "List survey responses",
+        "description": "List the answers collected for a survey the signed-in member owns or is allowed to review. Returns anonymous answer payloads with submission times.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "survey_id": {
+              "type": "string",
+              "description": "The survey id (UUID)."
+            },
+            "limit": {
+              "default": 50,
+              "description": "Maximum number of responses to return (1-200).",
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "survey_id"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_available_surveys",
+        "title": "List available surveys",
+        "description": "List active surveys the signed-in member is currently eligible to answer, newest first, with their credit reward.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "limit": {
+              "default": 25,
+              "description": "Maximum number of surveys to return (1-100).",
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}

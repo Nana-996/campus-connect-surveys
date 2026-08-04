@@ -18,6 +18,7 @@ import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PitchRouteImport } from './routes/pitch'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as GuideRouteImport } from './routes/guide'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -39,7 +40,11 @@ import { Route as AuthenticatedFacultyRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedCreateRouteImport } from './routes/_authenticated/create'
 import { Route as AuthenticatedBuyCreditsRouteImport } from './routes/_authenticated/buy-credits'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as AuthenticatedManageSurveyIdRouteImport } from './routes/_authenticated/manage.$surveyId'
+import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -90,6 +95,11 @@ const PricingRoute = PricingRouteImport.update({
 const PitchRoute = PitchRouteImport.update({
   id: '/pitch',
   path: '/pitch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GuideRoute = GuideRouteImport.update({
@@ -198,12 +208,35 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotmcpChar93ListToolsRoute =
+  Char91DotmcpChar93ListToolsRouteImport.update({
+    id: '/.mcp/list-tools',
+    path: '/.mcp/list-tools',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedManageSurveyIdRoute =
   AuthenticatedManageSurveyIdRouteImport.update({
     id: '/$surveyId',
     path: '/$surveyId',
     getParentRoute: () => AuthenticatedManageRoute,
   } as any)
+const Char91DotmcpChar93InvokeToolToolRoute =
+  Char91DotmcpChar93InvokeToolToolRouteImport.update({
+    id: '/.mcp/invoke-tool/$tool',
+    path: '/.mcp/invoke-tool/$tool',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -247,6 +280,7 @@ export interface FileRoutesByFullPath {
   '/forgot-password': typeof ForgotPasswordRoute
   '/guide': typeof GuideRoute
   '/index': typeof Char91indexChar93Route
+  '/mcp': typeof McpRoute
   '/pitch': typeof PitchRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -255,6 +289,8 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/buy-credits': typeof AuthenticatedBuyCreditsRoute
   '/create': typeof AuthenticatedCreateRoute
@@ -269,6 +305,8 @@ export interface FileRoutesByFullPath {
   '/invite/$token': typeof InviteTokenRoute
   '/r/$token': typeof RTokenRoute
   '/survey/$id': typeof SurveyIdRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/manage/$surveyId': typeof AuthenticatedManageSurveyIdRoute
   '/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
   '/survey/$id/report': typeof AuthenticatedSurveyIdReportRoute
@@ -285,6 +323,7 @@ export interface FileRoutesByTo {
   '/forgot-password': typeof ForgotPasswordRoute
   '/guide': typeof GuideRoute
   '/index': typeof Char91indexChar93Route
+  '/mcp': typeof McpRoute
   '/pitch': typeof PitchRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -293,6 +332,8 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/buy-credits': typeof AuthenticatedBuyCreditsRoute
   '/create': typeof AuthenticatedCreateRoute
@@ -307,6 +348,8 @@ export interface FileRoutesByTo {
   '/invite/$token': typeof InviteTokenRoute
   '/r/$token': typeof RTokenRoute
   '/survey/$id': typeof SurveyIdRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/manage/$surveyId': typeof AuthenticatedManageSurveyIdRoute
   '/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
   '/survey/$id/report': typeof AuthenticatedSurveyIdReportRoute
@@ -325,6 +368,7 @@ export interface FileRoutesById {
   '/forgot-password': typeof ForgotPasswordRoute
   '/guide': typeof GuideRoute
   '/index': typeof Char91indexChar93Route
+  '/mcp': typeof McpRoute
   '/pitch': typeof PitchRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -333,6 +377,8 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/buy-credits': typeof AuthenticatedBuyCreditsRoute
   '/_authenticated/create': typeof AuthenticatedCreateRoute
@@ -347,6 +393,8 @@ export interface FileRoutesById {
   '/invite/$token': typeof InviteTokenRoute
   '/r/$token': typeof RTokenRoute
   '/survey/$id': typeof SurveyIdRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/manage/$surveyId': typeof AuthenticatedManageSurveyIdRoute
   '/_authenticated/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
   '/_authenticated/survey/$id/report': typeof AuthenticatedSurveyIdReportRoute
@@ -365,6 +413,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/guide'
     | '/index'
+    | '/mcp'
     | '/pitch'
     | '/pricing'
     | '/privacy'
@@ -373,6 +422,8 @@ export interface FileRouteTypes {
     | '/signup'
     | '/sitemap.xml'
     | '/terms'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/admin'
     | '/buy-credits'
     | '/create'
@@ -387,6 +438,8 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/r/$token'
     | '/survey/$id'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
     | '/manage/$surveyId'
     | '/survey/$id/analyze'
     | '/survey/$id/report'
@@ -403,6 +456,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/guide'
     | '/index'
+    | '/mcp'
     | '/pitch'
     | '/pricing'
     | '/privacy'
@@ -411,6 +465,8 @@ export interface FileRouteTypes {
     | '/signup'
     | '/sitemap.xml'
     | '/terms'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/admin'
     | '/buy-credits'
     | '/create'
@@ -425,6 +481,8 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/r/$token'
     | '/survey/$id'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
     | '/manage/$surveyId'
     | '/survey/$id/analyze'
     | '/survey/$id/report'
@@ -442,6 +500,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/guide'
     | '/index'
+    | '/mcp'
     | '/pitch'
     | '/pricing'
     | '/privacy'
@@ -450,6 +509,8 @@ export interface FileRouteTypes {
     | '/signup'
     | '/sitemap.xml'
     | '/terms'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/_authenticated/admin'
     | '/_authenticated/buy-credits'
     | '/_authenticated/create'
@@ -464,6 +525,8 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/r/$token'
     | '/survey/$id'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/manage/$surveyId'
     | '/_authenticated/survey/$id/analyze'
     | '/_authenticated/survey/$id/report'
@@ -482,6 +545,7 @@ export interface RootRouteChildren {
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   GuideRoute: typeof GuideRoute
   Char91indexChar93Route: typeof Char91indexChar93Route
+  McpRoute: typeof McpRoute
   PitchRoute: typeof PitchRoute
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -490,11 +554,15 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
+  Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   BlogStudentPerceptionSurveysRoute: typeof BlogStudentPerceptionSurveysRoute
   BlogStudentSurveyQuestionsGuideRoute: typeof BlogStudentSurveyQuestionsGuideRoute
   InviteTokenRoute: typeof InviteTokenRoute
   RTokenRoute: typeof RTokenRoute
   SurveyIdRoute: typeof SurveyIdRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
+  Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicPaystackWebhookRoute: typeof ApiPublicPaystackWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -564,6 +632,13 @@ declare module '@tanstack/react-router' {
       path: '/pitch'
       fullPath: '/pitch'
       preLoaderRoute: typeof PitchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/guide': {
@@ -713,12 +788,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/list-tools': {
+      id: '/.mcp/list-tools'
+      path: '/.mcp/list-tools'
+      fullPath: '/.mcp/list-tools'
+      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/manage/$surveyId': {
       id: '/_authenticated/manage/$surveyId'
       path: '/$surveyId'
       fullPath: '/manage/$surveyId'
       preLoaderRoute: typeof AuthenticatedManageSurveyIdRouteImport
       parentRoute: typeof AuthenticatedManageRoute
+    }
+    '/.mcp/invoke-tool/$tool': {
+      id: '/.mcp/invoke-tool/$tool'
+      path: '/.mcp/invoke-tool/$tool'
+      fullPath: '/.mcp/invoke-tool/$tool'
+      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
@@ -817,6 +920,7 @@ const rootRouteChildren: RootRouteChildren = {
   ForgotPasswordRoute: ForgotPasswordRoute,
   GuideRoute: GuideRoute,
   Char91indexChar93Route: Char91indexChar93Route,
+  McpRoute: McpRoute,
   PitchRoute: PitchRoute,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
@@ -825,11 +929,16 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
+  Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   BlogStudentPerceptionSurveysRoute: BlogStudentPerceptionSurveysRoute,
   BlogStudentSurveyQuestionsGuideRoute: BlogStudentSurveyQuestionsGuideRoute,
   InviteTokenRoute: InviteTokenRoute,
   RTokenRoute: RTokenRoute,
   SurveyIdRoute: SurveyIdRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
+  Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicPaystackWebhookRoute: ApiPublicPaystackWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
@@ -838,3 +947,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

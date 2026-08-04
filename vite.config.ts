@@ -1,6 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/tanstack/vite";
 import { VitePWA } from "vite-plugin-pwa";
 
 const __dirname_ = path.dirname(fileURLToPath(import.meta.url));
@@ -27,6 +28,7 @@ export default defineConfig({
         cloudflare: { nodeCompat: true, deployConfig: true },
       },
   plugins: [
+    mcpPlugin(),
     VitePWA({
     registerType: "autoUpdate",
     injectRegister: null, // we register from src/lib/pwa-register.ts under guards
@@ -50,7 +52,7 @@ export default defineConfig({
     },
     workbox: {
       navigateFallback: "/",
-      navigateFallbackDenylist: [/^\/api\//, /^\/~oauth/, /^\/_server/, /^\/lovable\//],
+      navigateFallbackDenylist: [/^\/api\//, /^\/~oauth/, /^\/_server/, /^\/lovable\//, /^\/mcp/, /^\/\.mcp/, /^\/\.well-known\//, /^\/\.lovable\//],
       globPatterns: ["**/*.{js,css,html,svg,png,ico,woff2}"],
       runtimeCaching: [
         {

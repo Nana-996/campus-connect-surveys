@@ -16,7 +16,11 @@ import { lovable } from "@/integrations/lovable/index";
 const searchSchema = z.object({
   mode: z.enum(["login", "signup"]).optional(),
   as: z.enum(["student", "general"]).optional(),
+  next: z.string().optional(),
 });
+
+// Only same-origin relative paths may be used as a post-login destination.
+const safeNext = (next?: string) => (next && /^\/(?!\/)/.test(next) ? next : null);
 
 export const Route = createFileRoute("/auth")({
   validateSearch: searchSchema,
@@ -47,10 +51,14 @@ function AuthPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [showResend, setShowResend] = useState(false);
 
+  const nextPath = safeNext(search.next);
+
   useEffect(() => {
-    if (!loading && user) navigate({ to: "/feed" });
-    else if (!loading && search.mode === "signup") navigate({ to: "/signup", replace: true });
-  }, [user, loading, search.mode, navigate]);
+    if (!loading && user) {
+      if (nextPath) window.location.replace(nextPath);
+      else navigate({ to: "/feed" });
+    } else if (!loading && search.mode === "signup") navigate({ to: "/signup", replace: true });
+  }, [user, loading, search.mode, nextPath, navigate]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,7 +90,8 @@ function AuthPage() {
         return;
       }
 
-      navigate({ to: "/feed" });
+      if (nextPath) window.location.replace(nextPath);
+      else navigate({ to: "/feed" });
     } catch (err: any) {
       const raw = err.message ?? "Something went wrong";
       const needsConfirm = /confirm/i.test(raw);
