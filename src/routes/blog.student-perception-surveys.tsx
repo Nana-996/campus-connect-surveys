@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
-const URL = "https://campus-spotlight-verify.lovable.app/blog/student-perception-surveys";
+const URL = "https://campus-verify.live/blog/student-perception-surveys";
 const TITLE = "Student Perception Surveys: The Complete Guide + Templates";
 const DESC =
   "How to design student perception surveys that measure teaching quality, campus climate, and support — with question templates and response tips.";

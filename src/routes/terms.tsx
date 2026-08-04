@@ -5,10 +5,12 @@ export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
       { title: "Terms of Service — CampusVerify" },
-      { name: "description", content: "The rules and agreements that govern your use of CampusVerify." },
+      { name: "description", content: "The CampusVerify terms of service: account eligibility, credit rules, survey conduct, payments, refunds and termination." },
       { property: "og:title", content: "Terms of Service — CampusVerify" },
-      { property: "og:description", content: "The rules and agreements that govern your use of CampusVerify." },
+      { property: "og:description", content: "Read the CampusVerify terms covering accounts, credits, survey conduct, payments and account termination." },
+      { property: "og:url", content: "https://campus-verify.live/terms" },
     ],
+    links: [{ rel: "canonical", href: "https://campus-verify.live/terms" }],
   }),
 });
 

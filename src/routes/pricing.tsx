@@ -9,11 +9,13 @@ export const Route = createFileRoute("/pricing")({
   component: PricingPage,
   head: () => ({
     meta: [
-      { title: "Pricing — CampusVerify" },
+      { title: "Pricing — Credit bundles for CampusVerify" },
       { name: "description", content: "Credit bundle pricing for CampusVerify. Students earn credits for free; general users buy credits to publish surveys." },
-      { property: "og:title", content: "Pricing — CampusVerify" },
-      { property: "og:description", content: "Credit bundle pricing for CampusVerify. Students earn credits for free; general users buy credits to publish surveys." },
+      { property: "og:title", content: "Pricing — Credit bundles for CampusVerify" },
+      { property: "og:description", content: "Compare CampusVerify credit bundles: students earn credits by answering surveys, general users buy credits to publish theirs." },
+      { property: "og:url", content: "https://campus-verify.live/pricing" },
     ],
+    links: [{ rel: "canonical", href: "https://campus-verify.live/pricing" }],
   }),
 });
 
