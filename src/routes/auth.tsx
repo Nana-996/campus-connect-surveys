@@ -9,6 +9,7 @@ import { PasswordInput } from "@/components/PasswordInput";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ArrowUpRight, LogIn, GraduationCap, Globe2 } from "lucide-react";
+import { ResendVerification } from "@/components/ResendVerification";
 
 import { lovable } from "@/integrations/lovable/index";
 
@@ -44,6 +45,7 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [showResend, setShowResend] = useState(false);
 
   useEffect(() => {
     if (!loading && user) navigate({ to: "/feed" });
@@ -82,9 +84,14 @@ function AuthPage() {
 
       navigate({ to: "/feed" });
     } catch (err: any) {
-      const message = err.message === "Invalid login credentials"
+      const raw = err.message ?? "Something went wrong";
+      const needsConfirm = /confirm/i.test(raw);
+      const message = raw === "Invalid login credentials"
         ? "That email and password don't match an account. Check your details, reset your password, or create an account."
-        : err.message ?? "Something went wrong";
+        : needsConfirm
+          ? "Your email isn't confirmed yet. Click the link in the confirmation email we sent you, or resend it below."
+          : raw;
+      setShowResend(needsConfirm);
 
       setFormError(message);
       toast.error(message);
@@ -172,7 +179,7 @@ function AuthPage() {
                 type="email"
                 required
                 value={email}
-                onChange={(e) => { setEmail(e.target.value); setFormError(null); }}
+                onChange={(e) => { setEmail(e.target.value); setFormError(null); setShowResend(false); }}
                 placeholder={isStudent ? "you@yourschool.edu" : "you@example.com"}
                 className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"
               />
@@ -234,6 +241,12 @@ function AuthPage() {
                 Google sign-in creates a General account.
               </p>
             </>
+          )}
+
+          {showResend && (
+            <div className="mt-6">
+              <ResendVerification defaultEmail={email} />
+            </div>
           )}
 
           <p className="mt-6 text-center text-xs text-muted-foreground">

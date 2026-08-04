@@ -1,9 +1,24 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { VitePWA } from "vite-plugin-pwa";
+
+const __dirname_ = path.dirname(fileURLToPath(import.meta.url));
 
 const isVercelBuild = process.env.VERCEL === "1" || process.env.VERCEL === "true";
 
 export default defineConfig({
+  // React Email pulls htmlparser2 -> entities; pin every import to the hoisted
+  // v4.5.0 copy (v5+ removed ./lib/decode.js and breaks SSR).
+  vite: {
+    resolve: {
+      alias: {
+      "entities/lib/decode.js": path.resolve(__dirname_, "node_modules/entities/lib/decode.js"),
+      "entities/lib/encode.js": path.resolve(__dirname_, "node_modules/entities/lib/encode.js"),
+        entities: path.resolve(__dirname_, "node_modules/entities"),
+      },
+    },
+  },
   nitro: isVercelBuild
     ? { preset: "vercel" }
     : {
@@ -35,7 +50,7 @@ export default defineConfig({
     },
     workbox: {
       navigateFallback: "/",
-      navigateFallbackDenylist: [/^\/api\//, /^\/~oauth/, /^\/_server/],
+      navigateFallbackDenylist: [/^\/api\//, /^\/~oauth/, /^\/_server/, /^\/lovable\//],
       globPatterns: ["**/*.{js,css,html,svg,png,ico,woff2}"],
       runtimeCaching: [
         {
