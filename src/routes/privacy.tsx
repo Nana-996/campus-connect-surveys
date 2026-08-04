@@ -70,7 +70,7 @@ function PrivacyPage() {
         </section>
         <section>
           <h2 className="font-serif text-2xl">7. International transfers</h2>
-          <p>Data may be processed outside your country, including by Supabase and Paddle. Where required, we rely on Standard Contractual Clauses or equivalent safeguards.</p>
+          <p>Data may be processed outside your country, including by Supabase and Paystack. Where required, we rely on Standard Contractual Clauses or equivalent safeguards.</p>
         </section>
         <section>
           <h2 className="font-serif text-2xl">8. Cookies and local storage</h2>
