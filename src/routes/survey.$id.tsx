@@ -78,7 +78,7 @@ export const Route = createFileRoute("/survey/$id")({
     const desc = rawDesc
       ? (rawDesc.length > 155 ? `${rawDesc.slice(0, 152)}…` : rawDesc)
       : "Answer a verified CampusVerify survey to earn credits. Log in or create a free account to participate.";
-    const url = `https://campus-spotlight-verify.lovable.app/survey/${params.id}`;
+    const url = `https://campus-verify.live/survey/${params.id}`;
     return {
       meta: [
         { title },
