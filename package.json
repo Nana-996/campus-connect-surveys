@@ -51,7 +51,7 @@
     "@tailwindcss/vite": "^4.2.1",
     "@tanstack/react-query": "^5.83.0",
     "@tanstack/react-router": "^1.170.17",
-    "@tanstack/react-start": "^1.168.27",
+    "@tanstack/react-start": "^1.168.35",
     "@tanstack/router-plugin": "^1.168.19",
     "@vercel/speed-insights": "^2.0.0",
     "class-variance-authority": "^0.7.1",
@@ -111,7 +111,8 @@
     },
     "minimatch@10": {
       "brace-expansion": "5.0.9"
-    }
+    },
+    "js-yaml": "^4.3.1"
   },
   "resolutions": {
     "dompurify": "^3.4.11",
@@ -120,7 +121,8 @@
     "minimatch/brace-expansion": "1.1.18",
     "glob/minimatch/brace-expansion": "5.0.9",
     "@typescript-eslint/typescript-estree/minimatch/brace-expansion": "5.0.9",
-    "filelist/minimatch/brace-expansion": "2.1.4"
+    "filelist/minimatch/brace-expansion": "2.1.4",
+    "js-yaml": "^4.3.1"
   },
   "pnpm": {
     "overrides": {
