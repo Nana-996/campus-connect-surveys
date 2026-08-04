@@ -5,9 +5,9 @@ export const Route = createFileRoute("/refund-policy")({
   head: () => ({
     meta: [
       { title: "Refund Policy — CampusVerify" },
-      { name: "description", content: "30-day money-back guarantee on CampusVerify credit purchases, processed by Paddle." },
+      { name: "description", content: "30-day money-back guarantee on CampusVerify credit purchases, processed by Paystack." },
       { property: "og:title", content: "Refund Policy — CampusVerify" },
-      { property: "og:description", content: "30-day money-back guarantee on CampusVerify credit purchases, processed by Paddle." },
+      { property: "og:description", content: "30-day money-back guarantee on CampusVerify credit purchases, processed by Paystack." },
     ],
   }),
 });
@@ -29,16 +29,16 @@ function RefundPolicyPage() {
         <section>
           <h2 className="font-serif text-2xl">2. How refunds are processed</h2>
           <p>
-            Our online reseller, <strong>Paddle.com</strong>, is the Merchant of Record for all CampusVerify orders. Paddle handles all billing, customer service inquiries, and refunds.
+            Our payment processor, <strong>Paystack</strong>, is the Merchant of Record for all CampusVerify orders. Paystack handles all billing, customer service inquiries, and refunds.
           </p>
           <p>
-            To request a refund, visit <a href="https://paddle.net" target="_blank" rel="noopener noreferrer" className="underline">paddle.net</a> and look up your order using the email address you used at checkout, or contact our support team and we'll help you raise the request with Paddle.
+            To request a refund, contact our support team with the email address you used at checkout and your Paystack transaction reference. We'll help you raise the request with Paystack.
           </p>
         </section>
         <section>
           <h2 className="font-serif text-2xl">3. What happens to your credits</h2>
           <p>
-            When a refund is issued, any unspent credits from that purchase are removed from your balance. If you have already spent some of the credits, the corresponding portion may be deducted from future purchases or the refund amount adjusted, in line with Paddle's <a href="https://www.paddle.com/legal/refund-policy" target="_blank" rel="noopener noreferrer" className="underline">Refund Policy</a>.
+            When a refund is issued, any unspent credits from that purchase are removed from your balance. If you have already spent some of the credits, the corresponding portion may be deducted from future purchases or the refund amount adjusted, in line with Paystack's refund policy.
           </p>
         </section>
         <section>
@@ -50,12 +50,12 @@ function RefundPolicyPage() {
         <section>
           <h2 className="font-serif text-2xl">5. Processing time</h2>
           <p>
-            Once approved, refunds are returned to the original payment method by Paddle, typically within 5–10 business days depending on your bank.
+            Once approved, refunds are returned to the original payment method by Paystack, typically within 5–10 business days depending on your bank.
           </p>
         </section>
         <section>
           <h2 className="font-serif text-2xl">6. Contact</h2>
-          <p>Questions about a refund? Visit <a href="https://paddle.net" target="_blank" rel="noopener noreferrer" className="underline">paddle.net</a> or reach Vibe Tribe Organisation through the support channel inside the app.</p>
+          <p>Questions about a refund? Reach Vibe Tribe Organisation through the support channel inside the app.</p>
         </section>
       </div>
     </div>
