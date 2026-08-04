@@ -25,7 +25,7 @@ function PrivacyPage() {
           <p>
             CampusVerify is a service operated by <strong>Vibe Tribe Organisation</strong> ("we", "us", "our").
             For the personal data described in this notice, Vibe Tribe Organisation acts as the <strong>data controller</strong>.
-            Our payment processor, Paddle.com Market Limited ("Paddle"), acts as the Merchant of Record and is a separate data controller for payment data it collects directly from you at checkout.
+            Our payment processor, Paystack, acts as the Merchant of Record and is a separate data controller for payment data it collects directly from you at checkout.
           </p>
         </section>
         <section>
@@ -33,7 +33,7 @@ function PrivacyPage() {
           <ul className="list-disc pl-5 space-y-2">
             <li><strong>Account data</strong> (email, name, university domain, department, year, interests) — to create and operate your account. Legal basis: performance of a contract.</li>
             <li><strong>Survey data</strong> (surveys you create and responses you submit) — to deliver the core service. Legal basis: performance of a contract.</li>
-            <li><strong>Credit and transaction metadata</strong> (bundle purchased, credits granted, Paddle transaction ID) — to fulfil purchases and prevent fraud. Legal basis: contract and legitimate interests.</li>
+            <li><strong>Credit and transaction metadata</strong> (bundle purchased, credits granted, Paystack transaction reference) — to fulfil purchases and prevent fraud. Legal basis: contract and legitimate interests.</li>
             <li><strong>Technical data</strong> (IP address, device, basic logs) — to keep the service secure and reliable. Legal basis: legitimate interests.</li>
             <li><strong>Support messages</strong> — to respond to you. Legal basis: legitimate interests.</li>
           </ul>
@@ -42,7 +42,7 @@ function PrivacyPage() {
           <h2 className="font-serif text-2xl">3. Who we share data with</h2>
           <ul className="list-disc pl-5 space-y-1">
             <li><strong>Supabase</strong> — database, authentication, and storage infrastructure.</li>
-            <li><strong>Paddle</strong> — our Merchant of Record for all paid transactions. Paddle handles billing, tax, invoicing, refund requests, and chargebacks, and receives the personal data needed for those activities (name, email, billing address, payment details). See Paddle's <a href="https://www.paddle.com/legal/privacy" target="_blank" rel="noopener noreferrer" className="underline">privacy policy</a>.</li>
+            <li><strong>Paystack</strong> — our Merchant of Record for all paid transactions. Paystack handles billing, tax, invoicing, refund requests, and chargebacks, and receives the personal data needed for those activities (name, email, billing address, payment details). See Paystack's <a href="https://paystack.com/privacy" target="_blank" rel="noopener noreferrer" className="underline">privacy policy</a>.</li>
             <li><strong>Google</strong> — for users who choose Sign in with Google.</li>
             <li><strong>Professional advisers and authorities</strong> — where required by law.</li>
           </ul>
@@ -70,11 +70,11 @@ function PrivacyPage() {
         </section>
         <section>
           <h2 className="font-serif text-2xl">7. International transfers</h2>
-          <p>Data may be processed outside your country, including by Supabase and Paddle. Where required, we rely on Standard Contractual Clauses or equivalent safeguards.</p>
+          <p>Data may be processed outside your country, including by Supabase and Paystack. Where required, we rely on Standard Contractual Clauses or equivalent safeguards.</p>
         </section>
         <section>
           <h2 className="font-serif text-2xl">8. Cookies and local storage</h2>
-          <p>We use local storage to keep you signed in and remember a few UI preferences. We do not use third-party advertising cookies. Paddle may set its own cookies on the checkout overlay.</p>
+          <p>We use local storage to keep you signed in and remember a few UI preferences. We do not use third-party advertising cookies. Paystack may set its own cookies on the checkout page.</p>
         </section>
         <section>
           <h2 className="font-serif text-2xl">9. Children</h2>

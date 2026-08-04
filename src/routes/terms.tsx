@@ -37,10 +37,10 @@ function TermsPage() {
         <section>
           <h2 className="font-serif text-2xl">4. Credits, payments, and Merchant of Record</h2>
           <p>
-            Students earn credits by answering surveys. General users may purchase credit bundles. <strong>Our order process is conducted by our online reseller Paddle.com. Paddle.com is the Merchant of Record for all our orders. Paddle provides all customer service inquiries and handles returns.</strong>
+            Students earn credits by answering surveys. General users may purchase credit bundles. <strong>Our order process is conducted by our online reseller Paystack. Paystack is the Merchant of Record for all our orders. Paystack provides payment processing, customer service inquiries, and handles returns.</strong>
           </p>
           <p>
-            By purchasing credits, you also agree to Paddle's <a href="https://www.paddle.com/legal/checkout-buyer-terms" target="_blank" rel="noopener noreferrer" className="underline">Checkout Buyer Terms</a>, which govern payment, billing, tax, invoicing, and refund mechanics. Prices are shown in USD at checkout; your bank may convert to your local currency. Credits are delivered to your balance after Paddle confirms payment.
+            By purchasing credits, you also agree to Paystack's <a href="https://paystack.com/terms" target="_blank" rel="noopener noreferrer" className="underline">Buyer Terms</a>, which govern payment, billing, tax, invoicing, and refund mechanics. Prices are shown in USD for comparison; checkout is charged in Ghana Cedis at the live exchange rate. Credits are delivered to your balance after Paystack confirms payment.
           </p>
           <p>
             Refunds are handled under our <Link to="/refund-policy" className="underline">Refund Policy</Link>. Earned (non-purchased) credits expire 30 days after issue. Purchased credits do not expire.
