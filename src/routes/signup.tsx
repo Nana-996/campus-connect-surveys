@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { ArrowUpRight, GraduationCap, Globe2 } from "lucide-react";
 
 import { InterestTagInput, type InterestEntry } from "@/components/InterestTagInput";
+import { ResendVerification } from "@/components/ResendVerification";
 import { AGE_RANGES, COUNTRIES, YEAR_OPTIONS, DEPARTMENT_SUGGESTIONS } from "@/lib/interests";
 
 export const Route = createFileRoute("/signup")({
@@ -177,13 +178,18 @@ function SignupPage() {
         return;
       }
       setPassword("");
-      if (!data.session) {
-        // Fallback in case a session was not returned with the signup.
-        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-        if (signInError) throw signInError;
+      if (data.session) {
+        // Session returned (email confirmation disabled) — go straight in.
+        toast.success("Account created. Welcome to CampusVerify.");
+        navigate({ to: "/feed" });
+        return;
       }
-      toast.success("Account created. Welcome to CampusVerify.");
-      navigate({ to: "/feed" });
+      // Email confirmation is on: the account is not usable until the link
+      // in the confirmation email is clicked.
+      setSignupNotice(
+        `We sent a confirmation link to ${email}. Click it to activate your account, then log in.`
+      );
+      toast.success("Check your inbox to confirm your email.");
 
 
     } catch (err: any) {
@@ -222,6 +228,18 @@ function SignupPage() {
           <p className="mt-2 text-sm text-muted-foreground">
             Pick the account type that fits you.
           </p>
+
+          {signupNotice && (
+            <div className="mt-4 space-y-3 rounded-2xl border border-primary/30 bg-primary/10 px-4 py-4 text-sm">
+              <p className="font-semibold">Confirm your email</p>
+              <p className="text-muted-foreground">{signupNotice}</p>
+              <ResendVerification defaultEmail={email} />
+              <p className="text-xs text-muted-foreground">
+                Already confirmed?{" "}
+                <Link to="/auth" className="font-semibold underline">Log in</Link>
+              </p>
+            </div>
+          )}
 
           {!loading && user && (
             <div className="mt-4 rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm">
