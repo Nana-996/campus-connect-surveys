@@ -51,10 +51,14 @@ function AuthPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [showResend, setShowResend] = useState(false);
 
+  const nextPath = safeNext(search.next);
+
   useEffect(() => {
-    if (!loading && user) navigate({ to: "/feed" });
-    else if (!loading && search.mode === "signup") navigate({ to: "/signup", replace: true });
-  }, [user, loading, search.mode, navigate]);
+    if (!loading && user) {
+      if (nextPath) window.location.replace(nextPath);
+      else navigate({ to: "/feed" });
+    } else if (!loading && search.mode === "signup") navigate({ to: "/signup", replace: true });
+  }, [user, loading, search.mode, nextPath, navigate]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,7 +90,8 @@ function AuthPage() {
         return;
       }
 
-      navigate({ to: "/feed" });
+      if (nextPath) window.location.replace(nextPath);
+      else navigate({ to: "/feed" });
     } catch (err: any) {
       const raw = err.message ?? "Something went wrong";
       const needsConfirm = /confirm/i.test(raw);
