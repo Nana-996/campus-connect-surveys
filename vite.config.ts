@@ -10,11 +10,13 @@ const isVercelBuild = process.env.VERCEL === "1" || process.env.VERCEL === "true
 export default defineConfig({
   // React Email pulls htmlparser2 -> entities; pin every import to the hoisted
   // v4.5.0 copy (v5+ removed ./lib/decode.js and breaks SSR).
-  resolve: {
-    alias: {
+  vite: {
+    resolve: {
+      alias: {
       "entities/lib/decode.js": path.resolve(__dirname_, "node_modules/entities/lib/decode.js"),
       "entities/lib/encode.js": path.resolve(__dirname_, "node_modules/entities/lib/encode.js"),
-      entities: path.resolve(__dirname_, "node_modules/entities"),
+        entities: path.resolve(__dirname_, "node_modules/entities"),
+      },
     },
   },
   nitro: isVercelBuild
