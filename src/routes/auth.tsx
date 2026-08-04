@@ -16,7 +16,11 @@ import { lovable } from "@/integrations/lovable/index";
 const searchSchema = z.object({
   mode: z.enum(["login", "signup"]).optional(),
   as: z.enum(["student", "general"]).optional(),
+  next: z.string().optional(),
 });
+
+// Only same-origin relative paths may be used as a post-login destination.
+const safeNext = (next?: string) => (next && /^\/(?!\/)/.test(next) ? next : null);
 
 export const Route = createFileRoute("/auth")({
   validateSearch: searchSchema,
