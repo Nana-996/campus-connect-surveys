@@ -44,7 +44,6 @@ import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/e
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as ApiPublicPaystackWebhookRouteImport } from './routes/api/public/paystack/webhook'
-import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as AuthenticatedSurveyIdReportRouteImport } from './routes/_authenticated/survey.$id.report'
 import { Route as AuthenticatedSurveyIdAnalyzeRouteImport } from './routes/_authenticated/survey.$id.analyze'
 
@@ -227,12 +226,6 @@ const ApiPublicPaystackWebhookRoute =
     path: '/api/public/paystack/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicPaymentsWebhookRoute =
-  ApiPublicPaymentsWebhookRouteImport.update({
-    id: '/api/public/payments/webhook',
-    path: '/api/public/payments/webhook',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const AuthenticatedSurveyIdReportRoute =
   AuthenticatedSurveyIdReportRouteImport.update({
     id: '/survey/$id/report',
@@ -279,7 +272,6 @@ export interface FileRoutesByFullPath {
   '/manage/$surveyId': typeof AuthenticatedManageSurveyIdRoute
   '/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
   '/survey/$id/report': typeof AuthenticatedSurveyIdReportRoute
-  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/paystack/webhook': typeof ApiPublicPaystackWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -318,7 +310,6 @@ export interface FileRoutesByTo {
   '/manage/$surveyId': typeof AuthenticatedManageSurveyIdRoute
   '/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
   '/survey/$id/report': typeof AuthenticatedSurveyIdReportRoute
-  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/paystack/webhook': typeof ApiPublicPaystackWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -359,7 +350,6 @@ export interface FileRoutesById {
   '/_authenticated/manage/$surveyId': typeof AuthenticatedManageSurveyIdRoute
   '/_authenticated/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
   '/_authenticated/survey/$id/report': typeof AuthenticatedSurveyIdReportRoute
-  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/paystack/webhook': typeof ApiPublicPaystackWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -400,7 +390,6 @@ export interface FileRouteTypes {
     | '/manage/$surveyId'
     | '/survey/$id/analyze'
     | '/survey/$id/report'
-    | '/api/public/payments/webhook'
     | '/api/public/paystack/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -439,7 +428,6 @@ export interface FileRouteTypes {
     | '/manage/$surveyId'
     | '/survey/$id/analyze'
     | '/survey/$id/report'
-    | '/api/public/payments/webhook'
     | '/api/public/paystack/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -479,7 +467,6 @@ export interface FileRouteTypes {
     | '/_authenticated/manage/$surveyId'
     | '/_authenticated/survey/$id/analyze'
     | '/_authenticated/survey/$id/report'
-    | '/api/public/payments/webhook'
     | '/api/public/paystack/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -508,7 +495,6 @@ export interface RootRouteChildren {
   InviteTokenRoute: typeof InviteTokenRoute
   RTokenRoute: typeof RTokenRoute
   SurveyIdRoute: typeof SurveyIdRoute
-  ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   ApiPublicPaystackWebhookRoute: typeof ApiPublicPaystackWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -762,13 +748,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaystackWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/payments/webhook': {
-      id: '/api/public/payments/webhook'
-      path: '/api/public/payments/webhook'
-      fullPath: '/api/public/payments/webhook'
-      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authenticated/survey/$id/report': {
       id: '/_authenticated/survey/$id/report'
       path: '/survey/$id/report'
@@ -851,7 +830,6 @@ const rootRouteChildren: RootRouteChildren = {
   InviteTokenRoute: InviteTokenRoute,
   RTokenRoute: RTokenRoute,
   SurveyIdRoute: SurveyIdRoute,
-  ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   ApiPublicPaystackWebhookRoute: ApiPublicPaystackWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
@@ -860,13 +838,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
