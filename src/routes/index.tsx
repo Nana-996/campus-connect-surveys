@@ -223,7 +223,7 @@ function Landing() {
                 fair way to reach verified peers — and reward respondents for showing up with real answers.
               </p>
               <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-                Student accounts are tied to a university email domain. Every credit moves through a transparent ledger. No bots, no troll farms,
+                Every account is tied to a verified email, and student accounts must use a university domain. Every credit moves through a transparent ledger. No bots, no troll farms,
                 no third-party advertisers staring over your shoulder.
 
               </p>
