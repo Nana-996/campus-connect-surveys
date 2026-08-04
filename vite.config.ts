@@ -28,6 +28,7 @@ export default defineConfig({
         cloudflare: { nodeCompat: true, deployConfig: true },
       },
   plugins: [
+    mcpPlugin(),
     VitePWA({
     registerType: "autoUpdate",
     injectRegister: null, // we register from src/lib/pwa-register.ts under guards
