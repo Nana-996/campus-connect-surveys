@@ -42,7 +42,9 @@ export const Route = createFileRoute("/guide")({
       { title: "CampusVerify — User Onboarding Guide" },
       { name: "description", content: "A step-by-step onboarding guide for students, lecturers, and faculty supervisors using CampusVerify." },
       { name: "robots", content: "noindex" },
+      { property: "og:url", content: "https://campus-verify.live/guide" },
     ],
+    links: [{ rel: "canonical", href: "https://campus-verify.live/guide" }],
   }),
 });
 

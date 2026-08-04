@@ -5,10 +5,12 @@ export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
       { title: "Privacy Policy — CampusVerify" },
-      { name: "description", content: "How CampusVerify collects, uses, and protects your data." },
+      { name: "description", content: "How CampusVerify collects, stores and protects student and respondent data, and how survey answers stay anonymous." },
       { property: "og:title", content: "Privacy Policy — CampusVerify" },
-      { property: "og:description", content: "How CampusVerify collects, uses, and protects your data." },
+      { property: "og:description", content: "Data we collect, how survey answers stay anonymous, and the controls you have over your CampusVerify account." },
+      { property: "og:url", content: "https://campus-verify.live/privacy" },
     ],
+    links: [{ rel: "canonical", href: "https://campus-verify.live/privacy" }],
   }),
 });
 

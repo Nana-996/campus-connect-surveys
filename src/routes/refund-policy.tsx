@@ -8,7 +8,9 @@ export const Route = createFileRoute("/refund-policy")({
       { name: "description", content: "30-day money-back guarantee on CampusVerify credit purchases, processed by Paystack." },
       { property: "og:title", content: "Refund Policy — CampusVerify" },
       { property: "og:description", content: "30-day money-back guarantee on CampusVerify credit purchases, processed by Paystack." },
+      { property: "og:url", content: "https://campus-verify.live/refund-policy" },
     ],
+    links: [{ rel: "canonical", href: "https://campus-verify.live/refund-policy" }],
   }),
 });
 

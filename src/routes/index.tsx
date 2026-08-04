@@ -358,7 +358,7 @@ function Tile({ icon, title, children, tone }: { icon: React.ReactNode; title: s
       <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-background/60 [&>svg]:h-5 [&>svg]:w-5">
         {icon}
       </div>
-      <h3 className="mt-4 font-serif text-2xl leading-tight">{title}</h3>
+      <h2 className="mt-4 font-serif text-2xl leading-tight">{title}</h2>
       <p className="mt-1 text-sm opacity-80">{children}</p>
     </div>
   );
@@ -371,7 +371,7 @@ function Step({ n, icon, title, children }: { n: string; icon: React.ReactNode; 
       <div className="mt-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary [&>svg]:h-5 [&>svg]:w-5">
         {icon}
       </div>
-      <h3 className="mt-3 font-serif text-2xl leading-tight">{title}</h3>
+      <h2 className="mt-3 font-serif text-2xl leading-tight">{title}</h2>
       <p className="mt-1 text-sm text-muted-foreground">{children}</p>
     </div>
   );
