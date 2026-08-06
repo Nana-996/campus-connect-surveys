@@ -1,12 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
-import { recoveryClient } from "@/lib/recovery-client";
+import { useServerFn } from "@tanstack/react-start";
+import { requestPasswordReset } from "@/lib/password-reset.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ArrowLeft, Mail, GraduationCap, Globe2 } from "lucide-react";
+
 
 const searchSchema = z.object({ as: z.enum(["student", "general"]).optional() });
 
@@ -35,18 +37,26 @@ function ForgotPasswordPage() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const { error } = await recoveryClient.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: `${window.location.origin}/reset-password?as=${tab}`,
+      const res = await requestReset({
+        data: {
+          email: email.trim(),
+          redirectTo: `${window.location.origin}/reset-password?as=${tab}`,
+        },
       });
-      if (error) throw error;
+      setOutcome(res.outcome);
       setSent(true);
-      toast.success("Check your inbox for a reset link.");
+      toast.success(
+        res.outcome === "confirmation_sent"
+          ? "Confirm your email first — we just sent you a confirmation link."
+          : "Check your inbox for a reset link.",
+      );
     } catch (err: any) {
-      toast.error(err.message ?? "Could not send reset email");
+      toast.error(err?.message ?? "Could not send reset email");
     } finally {
       setSubmitting(false);
     }
   };
+
 
   const isStudent = tab === "student";
 
