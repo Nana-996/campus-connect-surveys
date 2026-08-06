@@ -26,8 +26,6 @@ export const requestPasswordReset = createServerFn({ method: "POST" })
     const url = process.env["SUPABASE_URL"]!;
     const anonKey = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
     // Look up the account by email (admin API supports a filter query).
     let confirmed: boolean | null = null;
     try {
@@ -50,7 +48,6 @@ export const requestPasswordReset = createServerFn({ method: "POST" })
     } catch {
       confirmed = null;
     }
-    void supabaseAdmin;
 
     const post = async (path: string, redirect: string, body: unknown) =>
       fetch(`${url}/auth/v1/${path}?redirect_to=${encodeURIComponent(redirect)}`, {
