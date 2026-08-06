@@ -98,10 +98,24 @@ function ForgotPasswordPage() {
 
       {sent ? (
         <div className="mt-8 rounded-2xl border border-primary/30 bg-primary/5 p-5 text-sm">
-          <p className="font-semibold">Check your inbox.</p>
-          <p className="mt-1 text-muted-foreground">
-            If a {isStudent ? "student" : "general"} account exists for <strong>{email}</strong>, you'll get a reset link shortly. The link expires in 1 hour.
+          <p className="font-semibold">
+            {outcome === "confirmation_sent" ? "Confirm your email first." : "Check your inbox."}
           </p>
+          <p className="mt-1 text-muted-foreground">
+            {outcome === "confirmation_sent" ? (
+              <>
+                <strong>{email}</strong> was never confirmed, so a password reset can't be sent yet.
+                We've emailed you a confirmation link — click it, then come back here to reset your
+                password if you still need to.
+              </>
+            ) : (
+              <>
+                If a {isStudent ? "student" : "general"} account exists for <strong>{email}</strong>,
+                you'll get a reset link shortly. The link expires in 1 hour. Check your spam folder too.
+              </>
+            )}
+          </p>
+
           <button
             type="button"
             onClick={() => { setSent(false); setEmail(""); }}
