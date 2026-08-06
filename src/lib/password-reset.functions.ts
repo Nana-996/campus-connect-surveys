@@ -28,38 +28,50 @@ export const requestPasswordReset = createServerFn({ method: "POST" })
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    // Look up the account (admin API supports an email filter).
+    // Look up the account by email (admin API supports a filter query).
     let confirmed: boolean | null = null;
     try {
-      const { data: list, error } = await supabaseAdmin.auth.admin.listUsers({
-        page: 1,
-        perPage: 200,
-      });
-      if (!error && list?.users) {
-        const match = list.users.find((u) => (u.email ?? "").toLowerCase() === email);
-        if (match) confirmed = Boolean(match.email_confirmed_at ?? match.confirmed_at);
+      const res = await fetch(
+        `${url}/auth/v1/admin/users?page=1&per_page=50&filter=${encodeURIComponent(email)}`,
+        {
+          headers: {
+            apikey: process.env["SUPABASE_SERVICE_ROLE_KEY"]!,
+            Authorization: `Bearer ${process.env["SUPABASE_SERVICE_ROLE_KEY"]!}`,
+          },
+        },
+      );
+      if (res.ok) {
+        const body = (await res.json()) as { users?: Array<Record<string, any>> };
+        const match = (body.users ?? []).find(
+          (u) => String(u["email"] ?? "").toLowerCase() === email,
+        );
+        if (match) confirmed = Boolean(match["email_confirmed_at"] ?? match["confirmed_at"]);
       }
     } catch {
       confirmed = null;
     }
+    void supabaseAdmin;
 
-    const post = async (path: string, body: unknown) =>
-      fetch(`${url}/auth/v1/${path}`, {
+    const post = async (path: string, redirect: string, body: unknown) =>
+      fetch(`${url}/auth/v1/${path}?redirect_to=${encodeURIComponent(redirect)}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", apikey: anonKey, Authorization: `Bearer ${anonKey}` },
+        headers: {
+          "Content-Type": "application/json",
+          apikey: anonKey,
+          Authorization: `Bearer ${anonKey}`,
+        },
         body: JSON.stringify(body),
       });
 
     if (confirmed === false) {
-      // Unconfirmed account: confirm the address first.
-      await post("resend", {
-        type: "signup",
-        email,
-        options: { email_redirect_to: data.redirectTo.replace(/\/reset-password.*$/, "/auth") },
-      });
+      // Unconfirmed account: Supabase ignores recovery requests for these,
+      // so confirm the address first.
+      const authUrl = data.redirectTo.replace(/\/reset-password.*$/, "/auth");
+      await post("resend", authUrl, { type: "signup", email });
       return { outcome: "confirmation_sent" };
     }
 
-    await post("recover", { email, gotrue_meta_security: {} });
+    await post("recover", data.redirectTo, { email, gotrue_meta_security: {} });
     return { outcome: confirmed === true ? "reset_sent" : "unknown" };
   });
+
