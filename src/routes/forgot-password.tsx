@@ -31,7 +31,10 @@ function ForgotPasswordPage() {
   const [tab, setTab] = useState<AccountTab>(search.as ?? "student");
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
+  const [outcome, setOutcome] = useState<"reset_sent" | "confirmation_sent" | "unknown">("unknown");
   const [submitting, setSubmitting] = useState(false);
+  const requestReset = useServerFn(requestPasswordReset);
+
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
