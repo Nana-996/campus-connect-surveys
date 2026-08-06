@@ -1,12 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
-import { recoveryClient } from "@/lib/recovery-client";
+import { useServerFn } from "@tanstack/react-start";
+import { requestPasswordReset } from "@/lib/password-reset.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ArrowLeft, Mail, GraduationCap, Globe2 } from "lucide-react";
+
 
 const searchSchema = z.object({ as: z.enum(["student", "general"]).optional() });
 
@@ -29,24 +31,35 @@ function ForgotPasswordPage() {
   const [tab, setTab] = useState<AccountTab>(search.as ?? "student");
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
+  const [outcome, setOutcome] = useState<"reset_sent" | "confirmation_sent" | "unknown">("unknown");
   const [submitting, setSubmitting] = useState(false);
+  const requestReset = useServerFn(requestPasswordReset);
+
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const { error } = await recoveryClient.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: `${window.location.origin}/reset-password?as=${tab}`,
+      const res = await requestReset({
+        data: {
+          email: email.trim(),
+          redirectTo: `${window.location.origin}/reset-password?as=${tab}`,
+        },
       });
-      if (error) throw error;
+      setOutcome(res.outcome);
       setSent(true);
-      toast.success("Check your inbox for a reset link.");
+      toast.success(
+        res.outcome === "confirmation_sent"
+          ? "Confirm your email first — we just sent you a confirmation link."
+          : "Check your inbox for a reset link.",
+      );
     } catch (err: any) {
-      toast.error(err.message ?? "Could not send reset email");
+      toast.error(err?.message ?? "Could not send reset email");
     } finally {
       setSubmitting(false);
     }
   };
+
 
   const isStudent = tab === "student";
 
@@ -85,10 +98,24 @@ function ForgotPasswordPage() {
 
       {sent ? (
         <div className="mt-8 rounded-2xl border border-primary/30 bg-primary/5 p-5 text-sm">
-          <p className="font-semibold">Check your inbox.</p>
-          <p className="mt-1 text-muted-foreground">
-            If a {isStudent ? "student" : "general"} account exists for <strong>{email}</strong>, you'll get a reset link shortly. The link expires in 1 hour.
+          <p className="font-semibold">
+            {outcome === "confirmation_sent" ? "Confirm your email first." : "Check your inbox."}
           </p>
+          <p className="mt-1 text-muted-foreground">
+            {outcome === "confirmation_sent" ? (
+              <>
+                <strong>{email}</strong> was never confirmed, so a password reset can't be sent yet.
+                We've emailed you a confirmation link — click it, then come back here to reset your
+                password if you still need to.
+              </>
+            ) : (
+              <>
+                If a {isStudent ? "student" : "general"} account exists for <strong>{email}</strong>,
+                you'll get a reset link shortly. The link expires in 1 hour. Check your spam folder too.
+              </>
+            )}
+          </p>
+
           <button
             type="button"
             onClick={() => { setSent(false); setEmail(""); }}
