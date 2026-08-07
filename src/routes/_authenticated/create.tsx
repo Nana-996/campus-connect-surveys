@@ -83,11 +83,14 @@ function Create() {
   const [tier, setTier] = useState<Tier>(d.tier ?? "pro");
   const [title, setTitle] = useState(d.title ?? "");
   const [description, setDescription] = useState(d.description ?? "");
-  const [targetDept, setTargetDept] = useState(d.targetDept ?? "");
-  const [targetYear, setTargetYear] = useState(d.targetYear ?? "");
-  const [targetCountry, setTargetCountry] = useState<string>(d.targetCountry ?? "");
-  const [targetAge, setTargetAge] = useState<string>(d.targetAge ?? "");
-  const [targetInterests, setTargetInterests] = useState<InterestEntry[]>(d.targetInterests ?? []);
+  const [audience, setAudience] = useState<AudienceValue>({
+    department: d.targetDept ?? "",
+    year: d.targetYear ?? "",
+    country: d.targetCountry ?? "",
+    age_range: d.targetAge ?? "",
+    interests: d.targetInterests ?? [],
+    required: d.requiredCriteria ?? [],
+  });
   const [responseGoal, setResponseGoal] = useState<string>(d.responseGoal ?? "");
   const [expiresAt, setExpiresAt] = useState<string>(d.expiresAt ?? "");
   const [allowGeneral, setAllowGeneral] = useState(d.allowGeneral ?? true);
@@ -104,12 +107,16 @@ function Create() {
   useEffect(() => {
     try {
       localStorage.setItem(DRAFT_KEY, JSON.stringify({
-        tier, title, description, targetDept, targetYear, targetCountry,
-        targetAge, targetInterests, responseGoal, expiresAt, allowGeneral, questions,
+        tier, title, description,
+        targetDept: audience.department, targetYear: audience.year,
+        targetCountry: audience.country, targetAge: audience.age_range,
+        targetInterests: audience.interests, requiredCriteria: audience.required,
+        responseGoal, expiresAt, allowGeneral, questions,
         respondentBonus, minResponseSeconds,
       }));
     } catch {}
-  }, [tier, title, description, targetDept, targetYear, targetCountry, targetAge, targetInterests, responseGoal, expiresAt, allowGeneral, questions, respondentBonus, minResponseSeconds]);
+  }, [tier, title, description, audience, responseGoal, expiresAt, allowGeneral, questions, respondentBonus, minResponseSeconds]);
+
 
   // Reset bonus when switching off Pro
   useEffect(() => { if (tier !== "pro" && respondentBonus !== 0) setRespondentBonus(0); }, [tier]);
