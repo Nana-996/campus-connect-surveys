@@ -145,25 +145,70 @@ function Feed() {
   const matchesInterest = (s: Survey, i: string) =>
     i === "all" || !s.target_interests || s.target_interests.length === 0 || s.target_interests.includes(i);
 
-  const visible = surveys.filter((s) => {
-    if (isGeneral) {
-      if (scope === "mine") {
-        if (!matchesCountry(s, profile?.country ?? "all")) return false;
-        if (!matchesAge(s, profile?.age_range ?? "all")) return false;
+  // Relevance scoring — surveys that line up with your profile rank higher.
+  // Targeting is no longer an all-or-nothing gate, so the feed sorts by fit.
+  const eq = (a?: string | null, b?: string | null) =>
+    !!a && !!b && a.trim().toLowerCase() === b.trim().toLowerCase();
+
+  const scoreOf = (s: Survey) => {
+    const myInterests = ((profile as any)?.interests ?? []) as string[];
+    let score = 0;
+    let targeted = 0;
+    let hit = 0;
+    const reasons: string[] = [];
+
+    const dim = (target: unknown, matched: boolean, weight: number, label: string) => {
+      if (!target) return;
+      targeted += 1;
+      if (matched) { hit += 1; score += weight; reasons.push(label); }
+    };
+
+    dim(s.target_department, eq(s.target_department, profile?.department), 3, s.target_department ?? "");
+    dim(s.target_year, eq(s.target_year, profile?.year), 3, s.target_year ?? "");
+    dim(s.target_country, eq(s.target_country, (profile as any)?.country), 2, s.target_country ?? "");
+    dim(
+      s.target_age_range,
+      eq(s.target_age_range, (profile as any)?.age_range),
+      2,
+      s.target_age_range ? ageLabel(s.target_age_range) : "",
+    );
+    const overlap = (s.target_interests ?? []).filter((t) => myInterests.includes(t));
+    dim(
+      (s.target_interests ?? []).length > 0 ? "y" : null,
+      overlap.length > 0,
+      Math.min(4, overlap.length * 2),
+      overlap.map((t) => tagLabel(t)).join(" · "),
+    );
+
+    const perfect = targeted > 0 && hit === targeted;
+    return { score, targeted, hit, perfect, reasons: reasons.filter(Boolean) };
+  };
+
+  const scored = surveys.map((s) => ({ s, m: scoreOf(s) }));
+
+  const visible = scored
+    .filter(({ s, m }) => {
+      if (scope === "mine" && m.score === 0) return false;
+      if (isGeneral) {
+        if (!matchesCountry(s, countryFilter)) return false;
+        if (!matchesAge(s, ageFilter)) return false;
+        if (!matchesInterest(s, interestFilter)) return false;
+        return true;
       }
-      if (!matchesCountry(s, countryFilter)) return false;
-      if (!matchesAge(s, ageFilter)) return false;
-      if (!matchesInterest(s, interestFilter)) return false;
+      if (!matchesDept(s, deptFilter)) return false;
+      if (!matchesYear(s, yearFilter)) return false;
       return true;
-    }
-    if (scope === "mine") {
-      if (!matchesDept(s, profile?.department ?? "all")) return false;
-      if (!matchesYear(s, profile?.year ?? "all")) return false;
-    }
-    if (!matchesDept(s, deptFilter)) return false;
-    if (!matchesYear(s, yearFilter)) return false;
-    return true;
-  });
+    })
+    .sort((a, b) => {
+      const boost = (x: Survey) => (x.boosted_until && new Date(x.boosted_until) > new Date() ? 1 : 0);
+      return (
+        boost(b.s) - boost(a.s) ||
+        b.m.score - a.m.score ||
+        new Date(b.s.created_at).getTime() - new Date(a.s.created_at).getTime()
+      );
+    })
+    .map(({ s, m }) => ({ ...s, __match: m }));
+
 
   const generalCohortLabel = [profile?.country, profile?.age_range ? ageLabel(profile.age_range) : null].filter(Boolean).join(" / ");
   const studentCohortLabel = [profile?.department, profile?.year].filter(Boolean).join(" / ");
