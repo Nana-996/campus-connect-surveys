@@ -13,7 +13,8 @@ import { toast } from "sonner";
 import { Trash2, Plus, Zap } from "lucide-react";
 import { TIERS, type Tier } from "@/lib/credits";
 import { InterestTagInput, type InterestEntry } from "@/components/InterestTagInput";
-import { AGE_RANGES, COUNTRIES } from "@/lib/interests";
+import { AudienceBuilder, type AudienceValue, type CriterionKey } from "@/components/AudienceBuilder";
+
 
 type Question = {
   id: string;
@@ -48,10 +49,12 @@ const DRAFT_KEY = "cv:create-draft:v1";
 type Draft = {
   tier: Tier; title: string; description: string;
   targetDept: string; targetYear: string; targetCountry: string; targetAge: string;
-  targetInterests: InterestEntry[]; responseGoal: string; expiresAt: string;
+  targetInterests: InterestEntry[]; requiredCriteria: CriterionKey[];
+  responseGoal: string; expiresAt: string;
   allowGeneral: boolean; questions: Question[]; respondentBonus: number;
   minResponseSeconds: string;
 };
+
 const loadDraft = (): Partial<Draft> => {
   if (typeof window === "undefined") return {};
   try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || "{}"); } catch { return {}; }
@@ -80,11 +83,14 @@ function Create() {
   const [tier, setTier] = useState<Tier>(d.tier ?? "pro");
   const [title, setTitle] = useState(d.title ?? "");
   const [description, setDescription] = useState(d.description ?? "");
-  const [targetDept, setTargetDept] = useState(d.targetDept ?? "");
-  const [targetYear, setTargetYear] = useState(d.targetYear ?? "");
-  const [targetCountry, setTargetCountry] = useState<string>(d.targetCountry ?? "");
-  const [targetAge, setTargetAge] = useState<string>(d.targetAge ?? "");
-  const [targetInterests, setTargetInterests] = useState<InterestEntry[]>(d.targetInterests ?? []);
+  const [audience, setAudience] = useState<AudienceValue>({
+    department: d.targetDept ?? "",
+    year: d.targetYear ?? "",
+    country: d.targetCountry ?? "",
+    age_range: d.targetAge ?? "",
+    interests: d.targetInterests ?? [],
+    required: d.requiredCriteria ?? [],
+  });
   const [responseGoal, setResponseGoal] = useState<string>(d.responseGoal ?? "");
   const [expiresAt, setExpiresAt] = useState<string>(d.expiresAt ?? "");
   const [allowGeneral, setAllowGeneral] = useState(d.allowGeneral ?? true);
@@ -101,12 +107,16 @@ function Create() {
   useEffect(() => {
     try {
       localStorage.setItem(DRAFT_KEY, JSON.stringify({
-        tier, title, description, targetDept, targetYear, targetCountry,
-        targetAge, targetInterests, responseGoal, expiresAt, allowGeneral, questions,
+        tier, title, description,
+        targetDept: audience.department, targetYear: audience.year,
+        targetCountry: audience.country, targetAge: audience.age_range,
+        targetInterests: audience.interests, requiredCriteria: audience.required,
+        responseGoal, expiresAt, allowGeneral, questions,
         respondentBonus, minResponseSeconds,
       }));
     } catch {}
-  }, [tier, title, description, targetDept, targetYear, targetCountry, targetAge, targetInterests, responseGoal, expiresAt, allowGeneral, questions, respondentBonus, minResponseSeconds]);
+  }, [tier, title, description, audience, responseGoal, expiresAt, allowGeneral, questions, respondentBonus, minResponseSeconds]);
+
 
   // Reset bonus when switching off Pro
   useEffect(() => { if (tier !== "pro" && respondentBonus !== 0) setRespondentBonus(0); }, [tier]);
@@ -153,11 +163,17 @@ function Create() {
           description: description.trim(),
           questions: questions as any,
           tier,
-          target_department: tier === "basic" || isGeneral ? null : (targetDept || null),
-          target_year: tier === "basic" || isGeneral ? null : (targetYear || null),
-          target_country: tier === "basic" ? null : (targetCountry || null),
-          target_age_range: tier === "basic" ? null : (targetAge || null),
-          target_interests: tier === "basic" ? [] : targetInterests.map((t) => t.tag),
+          target_department: tier === "basic" || isGeneral ? null : (audience.department.trim() || null),
+          target_year: tier === "basic" || isGeneral ? null : (audience.year || null),
+          target_country: tier === "basic" || !isGeneral ? null : (audience.country || null),
+          target_age_range: tier === "basic" || !isGeneral ? null : (audience.age_range || null),
+          target_interests: tier === "basic" ? [] : audience.interests.map((t) => t.tag),
+          required_criteria: tier === "basic" ? [] : audience.required.filter((k) =>
+            k === "interests" ? audience.interests.length > 0
+              : isGeneral ? (k === "country" || k === "age_range")
+                : (k === "department" || k === "year"),
+          ),
+
           response_goal: goalNum,
           respondent_bonus: tier === "pro" ? respondentBonus : 0,
           min_response_seconds: Math.max(0, Math.min(600, parseInt(minResponseSeconds, 10) || 15)),
@@ -284,57 +300,15 @@ function Create() {
                 : <>Basic surveys go out to your whole campus — upgrade to <button type="button" onClick={() => setTier("targeted")} className="font-bold underline text-foreground">Targeted</button> to pick department, year & interests.</>}
             </p>
           ) : (
-            <div className="space-y-3">
-              {isGeneral ? (
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label htmlFor="tc">Target country</Label>
-                    <Select value={targetCountry} onValueChange={(v) => setTargetCountry(v === "__any" ? "" : v)}>
-                      <SelectTrigger id="tc"><SelectValue placeholder="Anywhere" /></SelectTrigger>
-                      <SelectContent className="max-h-60">
-                        <SelectItem value="__any">Anywhere</SelectItem>
-                        {COUNTRIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="ta">Target age range</Label>
-                    <Select value={targetAge} onValueChange={(v) => setTargetAge(v === "__any" ? "" : v)}>
-                      <SelectTrigger id="ta"><SelectValue placeholder="Any age" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__any">Any age</SelectItem>
-                        {AGE_RANGES.map((r) => <SelectItem key={r.id} value={r.id}>{r.label}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label htmlFor="td">Target department</Label>
-                    <Input id="td" value={targetDept} onChange={(e) => setTargetDept(e.target.value)} placeholder="Psychology" />
-                  </div>
-                  <div>
-                    <Label htmlFor="ty">Target year</Label>
-                    <Input id="ty" value={targetYear} onChange={(e) => setTargetYear(e.target.value)} placeholder="Year 2" />
-                  </div>
-                </div>
-              )}
-              <div>
-                <Label>Target interests</Label>
-                <div className="mt-1.5">
-                  <InterestTagInput
-                    value={targetInterests}
-                    onChange={setTargetInterests}
-                    placeholder="e.g. fitness, crypto, gaming…"
-                  />
-                </div>
-                <p className="mt-1 text-[11px] text-muted-foreground">
-                  Only respondents whose interests overlap will see this survey. Leave empty for no filter.
-                </p>
-              </div>
-            </div>
+            <AudienceBuilder
+              value={audience}
+              onChange={setAudience}
+              isGeneral={isGeneral}
+              allowGeneral={isGeneral ? true : allowGeneral}
+              responseGoal={goalNum}
+            />
           )}
+
 
           <div className="border-t border-foreground/10 pt-4">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Limits (optional)</p>

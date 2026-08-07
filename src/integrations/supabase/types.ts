@@ -832,6 +832,7 @@ export type Database = {
           min_response_seconds: number
           paid_cost: number
           questions: Json
+          required_criteria: string[]
           respondent_bonus: number
           response_count: number
           response_goal: number
@@ -859,6 +860,7 @@ export type Database = {
           min_response_seconds?: number
           paid_cost?: number
           questions?: Json
+          required_criteria?: string[]
           respondent_bonus?: number
           response_count?: number
           response_goal?: number
@@ -886,6 +888,7 @@ export type Database = {
           min_response_seconds?: number
           paid_cost?: number
           questions?: Json
+          required_criteria?: string[]
           respondent_bonus?: number
           response_count?: number
           response_goal?: number
@@ -1163,6 +1166,18 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      estimate_survey_reach: {
+        Args: {
+          _age_range?: string
+          _allow_general: boolean
+          _country?: string
+          _department?: string
+          _interests?: string[]
+          _required?: string[]
+          _year?: string
+        }
+        Returns: Json
+      }
       expire_earned_credits: { Args: never; Returns: undefined }
       faculty_add_to_watchlist: {
         Args: { _student_user_id: string }
@@ -1342,6 +1357,10 @@ export type Database = {
         Returns: boolean
       }
       require_admin_user: { Args: never; Returns: string }
+      target_text_matches: {
+        Args: { _actual: string; _target: string }
+        Returns: boolean
+      }
       update_my_student_info: {
         Args: { _department: string; _index_number: string }
         Returns: undefined
