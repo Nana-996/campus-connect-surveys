@@ -284,57 +284,15 @@ function Create() {
                 : <>Basic surveys go out to your whole campus — upgrade to <button type="button" onClick={() => setTier("targeted")} className="font-bold underline text-foreground">Targeted</button> to pick department, year & interests.</>}
             </p>
           ) : (
-            <div className="space-y-3">
-              {isGeneral ? (
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label htmlFor="tc">Target country</Label>
-                    <Select value={targetCountry} onValueChange={(v) => setTargetCountry(v === "__any" ? "" : v)}>
-                      <SelectTrigger id="tc"><SelectValue placeholder="Anywhere" /></SelectTrigger>
-                      <SelectContent className="max-h-60">
-                        <SelectItem value="__any">Anywhere</SelectItem>
-                        {COUNTRIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="ta">Target age range</Label>
-                    <Select value={targetAge} onValueChange={(v) => setTargetAge(v === "__any" ? "" : v)}>
-                      <SelectTrigger id="ta"><SelectValue placeholder="Any age" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__any">Any age</SelectItem>
-                        {AGE_RANGES.map((r) => <SelectItem key={r.id} value={r.id}>{r.label}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label htmlFor="td">Target department</Label>
-                    <Input id="td" value={targetDept} onChange={(e) => setTargetDept(e.target.value)} placeholder="Psychology" />
-                  </div>
-                  <div>
-                    <Label htmlFor="ty">Target year</Label>
-                    <Input id="ty" value={targetYear} onChange={(e) => setTargetYear(e.target.value)} placeholder="Year 2" />
-                  </div>
-                </div>
-              )}
-              <div>
-                <Label>Target interests</Label>
-                <div className="mt-1.5">
-                  <InterestTagInput
-                    value={targetInterests}
-                    onChange={setTargetInterests}
-                    placeholder="e.g. fitness, crypto, gaming…"
-                  />
-                </div>
-                <p className="mt-1 text-[11px] text-muted-foreground">
-                  Only respondents whose interests overlap will see this survey. Leave empty for no filter.
-                </p>
-              </div>
-            </div>
+            <AudienceBuilder
+              value={audience}
+              onChange={setAudience}
+              isGeneral={isGeneral}
+              allowGeneral={isGeneral ? true : allowGeneral}
+              responseGoal={goalNum}
+            />
           )}
+
 
           <div className="border-t border-foreground/10 pt-4">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Limits (optional)</p>
