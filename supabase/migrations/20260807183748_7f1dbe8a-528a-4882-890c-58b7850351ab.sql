@@ -1,0 +1,1 @@
+ALTER FUNCTION public.target_text_matches(text, text) SET search_path = '';
