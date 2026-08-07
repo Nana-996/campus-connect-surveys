@@ -250,7 +250,7 @@ function Feed() {
           onClick={() => setScope(scope === "mine" ? "all" : "mine")}
           className={`rounded-full border px-3 py-1 font-semibold uppercase tracking-wider transition ${scope === "mine" ? "border-primary bg-primary text-primary-foreground" : "border-foreground/20 bg-card hover:bg-accent"}`}
         >
-          {isGeneral ? "For me" : "My cohort"}{cohortLabel ? ` · ${cohortLabel}` : ""}
+          {isGeneral ? "Best for me" : "Best for me"}{cohortLabel ? ` · ${cohortLabel}` : ""}
         </button>
 
         {isGeneral ? (
@@ -398,6 +398,15 @@ function Feed() {
                           {isPro ? "★ Pro" : "↑ Boosted"}
                         </span>
                       )}
+                      {s.__match.targeted > 0 && s.__match.hit > 0 && (
+                        <span
+                          className="rounded-full bg-background/40 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider"
+                          title={s.__match.reasons.join(" · ")}
+                        >
+                          {s.__match.perfect ? "Perfect match" : `Match ${s.__match.hit}/${s.__match.targeted}`}
+                        </span>
+                      )}
+
                     </div>
                     {isDone && (
                       <span className="rounded-full bg-background/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
