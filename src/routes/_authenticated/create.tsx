@@ -13,7 +13,8 @@ import { toast } from "sonner";
 import { Trash2, Plus, Zap } from "lucide-react";
 import { TIERS, type Tier } from "@/lib/credits";
 import { InterestTagInput, type InterestEntry } from "@/components/InterestTagInput";
-import { AGE_RANGES, COUNTRIES } from "@/lib/interests";
+import { AudienceBuilder, type AudienceValue, type CriterionKey } from "@/components/AudienceBuilder";
+
 
 type Question = {
   id: string;
@@ -48,10 +49,12 @@ const DRAFT_KEY = "cv:create-draft:v1";
 type Draft = {
   tier: Tier; title: string; description: string;
   targetDept: string; targetYear: string; targetCountry: string; targetAge: string;
-  targetInterests: InterestEntry[]; responseGoal: string; expiresAt: string;
+  targetInterests: InterestEntry[]; requiredCriteria: CriterionKey[];
+  responseGoal: string; expiresAt: string;
   allowGeneral: boolean; questions: Question[]; respondentBonus: number;
   minResponseSeconds: string;
 };
+
 const loadDraft = (): Partial<Draft> => {
   if (typeof window === "undefined") return {};
   try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || "{}"); } catch { return {}; }
