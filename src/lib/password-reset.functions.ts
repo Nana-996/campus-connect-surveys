@@ -107,12 +107,13 @@ export const requestPasswordReset = createServerFn({ method: "POST" })
     if (confirmed === false) {
       // Unconfirmed account: Supabase ignores recovery requests for these,
       // so confirm the address first.
-      const authUrl = data.redirectTo.replace(/\/reset-password.*$/, "/auth");
+      const authUrl = redirectTo.replace(/\/reset-password.*$/, "/auth");
       await post("resend", authUrl, { type: "signup", email });
       return { outcome: "confirmation_sent" };
     }
 
-    await post("recover", data.redirectTo, { email, gotrue_meta_security: {} });
+    await post("recover", redirectTo, { email, gotrue_meta_security: {} });
+
     return { outcome: confirmed === true ? "reset_sent" : "unknown" };
   });
 
