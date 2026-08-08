@@ -89,7 +89,9 @@ function Field({
   const isSet =
     criterion === "interests"
       ? value.interests.length > 0
-      : String(value[criterion] ?? "").trim() !== "";
+      : criterion === "universities"
+        ? value.universities.length > 0
+        : String(value[criterion] ?? "").trim() !== "";
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-2">
