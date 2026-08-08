@@ -9,9 +9,14 @@ import { InterestTagInput, type InterestEntry } from "@/components/InterestTagIn
 import {
   AGE_RANGES, COUNTRIES, DEPARTMENT_SUGGESTIONS, YEAR_OPTIONS,
 } from "@/lib/interests";
-import { Loader2, Lock, Sparkle, Users, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Loader2, Lock, Sparkle, Users, AlertTriangle, CheckCircle2, GraduationCap, Plus, Search, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { EXPANSION_PRICE_GHS, EXPANSION_SLOTS } from "@/lib/university-slots";
 
-export type CriterionKey = "department" | "year" | "country" | "age_range" | "interests";
+export type CriterionKey = "department" | "year" | "country" | "age_range" | "interests" | "universities";
+
+export type UniversityOption = { domain: string; name: string; members: number };
 
 export type AudienceValue = {
   department: string;
@@ -19,6 +24,7 @@ export type AudienceValue = {
   country: string;
   age_range: string;
   interests: InterestEntry[];
+  universities: string[];
   required: CriterionKey[];
 };
 
@@ -30,6 +36,11 @@ type Props = {
   isGeneral: boolean;
   allowGeneral: boolean;
   responseGoal: number;
+  /** How many universities this creator may target. */
+  pickLimit?: number;
+  /** Called when the creator wants to buy more university slots. */
+  onBuySlots?: () => void;
+  buyingSlots?: boolean;
 };
 
 const ANY = "__any";
