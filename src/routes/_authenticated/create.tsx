@@ -103,6 +103,37 @@ function Create() {
     [{ id: crypto.randomUUID(), type: "text", text: "", required: true }]
   );
   const [submitting, setSubmitting] = useState(false);
+  const [mode, setMode] = useState<"credits" | "boost">("credits");
+  const [boostTier, setBoostTier] = useState<BoostTierId>("standard");
+  const isBoost = mode === "boost";
+  const selectedBoost = getBoostTier(boostTier) ?? BOOST_TIERS[1];
+
+  const startBoost = useServerFn(initializeResearchBoostCheckout);
+  const verifyBoost = useServerFn(verifyResearchBoostCheckout);
+
+  // Return from Paystack after a Research Boost purchase.
+  const boostRef = search.boost_ref ?? null;
+  useEffect(() => {
+    if (!boostRef) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await verifyBoost({ data: { reference: boostRef } });
+        if (cancelled) return;
+        if (res.status === "success") {
+          try { localStorage.removeItem(DRAFT_KEY); } catch {}
+          toast.success(`Research Boost active — ${res.responses} targeted responses queued.`);
+          if (res.surveyId) navigate({ to: "/survey/$id", params: { id: res.surveyId } });
+          else navigate({ to: "/my-surveys" });
+        } else {
+          toast.error("Payment was not completed. Your survey stays unpublished.");
+        }
+      } catch (err: any) {
+        if (!cancelled) toast.error(err?.message ?? "Could not verify payment");
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [boostRef]);
 
   useEffect(() => {
     try {
@@ -131,12 +162,15 @@ function Create() {
     setQuestions((q) => q.map((x) => (x.id === id ? { ...x, ...patch } : x)));
 
   const tierMax = TIERS[tier].responseGoal;
-  const goalNum = responseGoal ? Math.max(1, Math.min(tierMax, parseInt(responseGoal, 10) || tierMax)) : tierMax;
+  const goalNum = isBoost
+    ? selectedBoost.responses
+    : responseGoal ? Math.max(1, Math.min(tierMax, parseInt(responseGoal, 10) || tierMax)) : tierMax;
   const bonusTotal = tier === "pro" ? respondentBonus * goalNum : 0;
   const baseTierCost = isGeneral ? TIERS[tier].cost * 2 : TIERS[tier].cost;
   const totalCost = baseTierCost + bonusTotal;
   const spendable = isGeneral ? (profile?.paid_credits ?? 0) : (profile?.earned_credits ?? 0);
   const canAffordTotal = spendable >= totalCost;
+
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
