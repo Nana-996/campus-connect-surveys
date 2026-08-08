@@ -316,6 +316,7 @@ function Create() {
               Auto-closes when either limit is reached. Ultimate cap: 6 months from publish.
             </p>
             <div className="mt-3 grid grid-cols-2 gap-3">
+              {!isBoost && (
               <div>
                 <Label htmlFor="goal" className="text-xs">Response goal</Label>
                 <Input
@@ -328,6 +329,8 @@ function Create() {
                   placeholder={`Default ${TIERS[tier].responseGoal}`}
                 />
               </div>
+              )}
+
               <div>
                 <Label htmlFor="exp" className="text-xs">Closes on</Label>
                 <Input
