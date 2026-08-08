@@ -18,6 +18,11 @@ import {
   initializeResearchBoostCheckout,
   verifyResearchBoostCheckout,
 } from "@/utils/research-boost.functions";
+import {
+  initializeUniversitySlotsCheckout,
+  verifyUniversitySlotsCheckout,
+} from "@/utils/university-slots.functions";
+import { FREE_UNIVERSITY_PICKS } from "@/lib/university-slots";
 import { InterestTagInput, type InterestEntry } from "@/components/InterestTagInput";
 import { AudienceBuilder, type AudienceValue, type CriterionKey } from "@/components/AudienceBuilder";
 
@@ -30,7 +35,7 @@ type Question = {
   required?: boolean;
 };
 
-type CreateSearch = { lecturer?: string; course?: string; boost_ref?: string };
+type CreateSearch = { lecturer?: string; course?: string; boost_ref?: string; slots_ref?: string };
 
 export const Route = createFileRoute("/_authenticated/create")({
   component: Create,
@@ -38,6 +43,7 @@ export const Route = createFileRoute("/_authenticated/create")({
     lecturer: typeof s.lecturer === "string" ? s.lecturer : undefined,
     course: typeof s.course === "string" ? s.course : undefined,
     boost_ref: typeof s.boost_ref === "string" ? s.boost_ref : undefined,
+    slots_ref: typeof s.slots_ref === "string" ? s.slots_ref : undefined,
   }),
 
   head: () => ({
@@ -58,6 +64,7 @@ type Draft = {
   tier: Tier; title: string; description: string;
   targetDept: string; targetYear: string; targetCountry: string; targetAge: string;
   targetInterests: InterestEntry[]; requiredCriteria: CriterionKey[];
+  targetUniversities: string[];
   responseGoal: string; expiresAt: string;
   allowGeneral: boolean; questions: Question[]; respondentBonus: number;
   minResponseSeconds: string;
@@ -97,6 +104,7 @@ function Create() {
     country: d.targetCountry ?? "",
     age_range: d.targetAge ?? "",
     interests: d.targetInterests ?? [],
+    universities: d.targetUniversities ?? [],
     required: d.requiredCriteria ?? [],
   });
   const [responseGoal, setResponseGoal] = useState<string>(d.responseGoal ?? "");
@@ -143,6 +151,47 @@ function Create() {
     return () => { cancelled = true; };
   }, [boostRef]);
 
+  // University targeting allowance (5 free, +10 per paid expansion).
+  const pickLimit = ((profile as any)?.university_pick_limit as number | undefined) ?? FREE_UNIVERSITY_PICKS;
+  const [buyingSlots, setBuyingSlots] = useState(false);
+  const startSlots = useServerFn(initializeUniversitySlotsCheckout);
+  const verifySlots = useServerFn(verifyUniversitySlotsCheckout);
+
+  const buySlots = async () => {
+    setBuyingSlots(true);
+    try {
+      const res = await startSlots({ data: { originUrl: window.location.origin } });
+      window.location.href = res.authorizationUrl;
+    } catch (err: any) {
+      toast.error(err?.message ?? "Could not start payment");
+      setBuyingSlots(false);
+    }
+  };
+
+  // Return from Paystack after buying extra university picks.
+  const slotsRef = search.slots_ref ?? null;
+  useEffect(() => {
+    if (!slotsRef) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await verifySlots({ data: { reference: slotsRef } });
+        if (cancelled) return;
+        if (res.status === "success") {
+          toast.success(`Added ${res.slots} more university picks.`);
+          await refreshProfile?.();
+        } else {
+          toast.error("Payment was not completed.");
+        }
+        navigate({ to: "/create", search: {}, replace: true });
+      } catch (err: any) {
+        if (!cancelled) toast.error(err?.message ?? "Could not verify payment");
+      }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slotsRef]);
+
   useEffect(() => {
     try {
       localStorage.setItem(DRAFT_KEY, JSON.stringify({
@@ -150,6 +199,7 @@ function Create() {
         targetDept: audience.department, targetYear: audience.year,
         targetCountry: audience.country, targetAge: audience.age_range,
         targetInterests: audience.interests, requiredCriteria: audience.required,
+        targetUniversities: audience.universities,
         responseGoal, expiresAt, allowGeneral, questions,
         respondentBonus, minResponseSeconds,
       }));
@@ -218,10 +268,12 @@ function Create() {
             ? (audience.age_range || null)
             : tier === "basic" || !isGeneral ? null : (audience.age_range || null),
           target_interests: !isBoost && tier === "basic" ? [] : audience.interests.map((t) => t.tag),
+          target_universities: !isBoost && tier === "basic" ? [] : audience.universities,
           required_criteria: isBoost
             ? audience.required.filter((k) => (k === "interests" ? audience.interests.length > 0 : true))
             : tier === "basic" ? [] : audience.required.filter((k) =>
                 k === "interests" ? audience.interests.length > 0
+                  : k === "universities" ? audience.universities.length > 0
                   : isGeneral ? (k === "country" || k === "age_range")
                     : (k === "department" || k === "year"),
               ),
@@ -433,6 +485,9 @@ function Create() {
               isGeneral={isGeneral}
               allowGeneral={isBoost ? true : (isGeneral ? true : allowGeneral)}
               responseGoal={goalNum}
+              pickLimit={pickLimit}
+              onBuySlots={buySlots}
+              buyingSlots={buyingSlots}
             />
           )}
 
