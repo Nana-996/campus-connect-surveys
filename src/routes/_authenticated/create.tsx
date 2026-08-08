@@ -293,7 +293,7 @@ function Create() {
             <Textarea id="desc" value={description} onChange={(e) => setDescription(e.target.value)}
               placeholder="A short context for respondents." />
           </div>
-          {tier === "basic" ? (
+          {tier === "basic" && !isBoost ? (
             <p className="text-xs text-muted-foreground italic">
               {isGeneral
                 ? <>Basic surveys are open to the entire public — upgrade to <button type="button" onClick={() => setTier("targeted")} className="font-bold underline text-foreground">Targeted</button> to filter by country, age & interests.</>
@@ -304,10 +304,11 @@ function Create() {
               value={audience}
               onChange={setAudience}
               isGeneral={isGeneral}
-              allowGeneral={isGeneral ? true : allowGeneral}
+              allowGeneral={isBoost ? true : (isGeneral ? true : allowGeneral)}
               responseGoal={goalNum}
             />
           )}
+
 
 
           <div className="border-t border-foreground/10 pt-4">
