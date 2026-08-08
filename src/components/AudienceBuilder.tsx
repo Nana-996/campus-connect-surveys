@@ -356,6 +356,24 @@ export function AudienceBuilder({
       )}
 
       <Field
+        label="Universities"
+        criterion="universities"
+        value={value}
+        onToggle={toggle}
+        hint="Leave empty to reach every campus. Required locks the survey to the campuses you pick."
+      >
+        <UniversityPicker
+          selected={value.universities}
+          onChange={(universities) => set({ universities })}
+          limit={pickLimit}
+          onBuySlots={onBuySlots}
+          buying={buyingSlots}
+        />
+      </Field>
+
+
+
+      <Field
         label="Interests"
         criterion="interests"
         value={value}
