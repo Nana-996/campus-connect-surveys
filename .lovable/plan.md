@@ -1,38 +1,71 @@
-## Goal
+# Research Boost — paid targeted distribution
 
-Remove email-verification as a blocker for signing up and logging in, since there is no sender domain and confirmation emails are unreliable. Students still must use an academic email domain (.edu / .ac.xx) to get a Student account.
+A new way to publish: instead of spending credits, anyone (general users **and** students) can pay cash for a guaranteed number of responses from a precisely targeted population.
 
-## What changes
+## The product
 
-### 1. Auth setting
-Turn on auto-confirm for email signups. New accounts become usable immediately — no confirmation email, no "Email not confirmed" login error. Google sign-in (General accounts) keeps working exactly as it does today.
+Four price points, charged in Ghana Cedis through Paystack:
 
-### 2. Signup flow (`src/routes/signup.tsx`)
-- After a successful signup, sign the user in and send them straight to the feed instead of showing "check your inbox".
-- Keep the existing duplicate-email detection so re-registering with an existing address gives a clear "This email already has an account — log in instead" message with a link to the login page.
-- Keep the academic-domain requirement and the disposable-domain block for Student accounts, unchanged.
-- Remove the "Didn't get the verification email?" resend block and the "verified email required" tag from this page.
+| Boost | Price | Targeted responses |
+|---|---|---|
+| Starter | ₵10 | 50 |
+| Standard | ₵20 | 100 |
+| Advanced | ₵35 | 200 |
+| Campus-wide | ₵50 | 500 |
 
-### 3. Login page (`src/routes/auth.tsx`)
-- Remove the resend-verification block.
-- Replace the failed-login message with an accurate one: wrong email or password, with a link to reset the password or create an account. No more references to verifying email.
+Targeting is picked with the existing Audience builder: university/school, faculty or department, level/year, interests, country. The live reach estimate already built into that component tells the buyer, before paying, how many real people match — if the matching pool is smaller than the responses they want, the purchase is blocked with a suggestion to widen the audience or pick a smaller boost.
 
-### 4. Copy cleanup
-- Marketing line on the landing page that says "Every account is tied to a verified email" becomes "Student accounts are tied to a university email domain" — accurate to the new rule.
-- The `ResendVerification` component becomes unused and is deleted.
+Boosts run for 30 days. If the quota isn't filled by then the boost simply ends — no refunds, stated clearly at checkout and in the refund policy page.
 
-### 5. Project memory
-The stored rule "Require email verification, never auto sign-in" is now wrong; it gets updated to record that email confirmation is off and students are gated by academic domain instead.
+## Buyer flow
 
-## Trade-off you should know
+```text
+Create survey  ->  choose "Research Boost" instead of a credit tier
+      |
+      v
+Audience builder (school / department / level / interests)  +  response target
+      |
+      v
+Reach check: enough matching people?  -- no -->  widen audience or smaller boost
+      | yes
+      v
+Paystack checkout (GHS)  ->  redirect back  ->  verified
+      |
+      v
+Survey goes live, pinned to the top of matching users' feeds until the quota fills
+```
 
-Without mailbox verification, someone can sign up with an academic-looking address they don't own. Your existing defences still apply: academic-domain check, disposable-domain blocklist, admin flagging, and per-user credit caps. When you later get a sender domain, flipping confirmation back on is a one-setting change plus restoring the resend control.
+The survey is saved as an unpublished draft before payment and only goes live once Paystack confirms. Abandoned checkouts leave a draft the user can retry or delete; no credits are ever charged for a boosted survey.
 
-Also note: password reset still sends email. That flow will remain unreliable until a sender domain exists — an admin can reset a user manually in the meantime.
+## Distribution
 
-## Technical details
+- Boosted surveys sit above everything else in the feed of every user who matches the required criteria, ahead of the existing credit-tier boosts.
+- The paid response target becomes the survey's hard response goal — once reached, the survey stops accepting responses and closes automatically.
+- Respondents earn credits for boosted surveys exactly as they do today.
+- The creator's Report Studio gains a progress strip: responses delivered vs paid-for, days remaining, and a breakdown of which targeted segments have responded (reusing the existing tracking category grouping).
 
-- `supabase--configure_auth` with `auto_confirm_email: true`, `disable_signup: false`, `external_anonymous_users_enabled: false`, `password_hibp_enabled` unchanged.
-- No database migration needed: `handle_new_user` / `sanitize_profile_on_insert` triggers and the profiles INSERT policy already produce correct defaults on first session.
-- Signup keeps `signUp()` then navigates on the returned session; with auto-confirm, `data.session` is non-null, so no extra `signInWithPassword` call is needed (a fallback sign-in is added in case the session is absent).
-- Files touched: `src/routes/signup.tsx`, `src/routes/auth.tsx`, `src/routes/index.tsx`, delete `src/components/ResendVerification.tsx`.
+## Who can buy
+
+Both general users and students can buy a boost with money. It sits alongside — not in place of — the credit system: students keep earning and spending credits for ordinary surveys, and general users keep buying credit bundles. A boost is a separate cash purchase tied to one specific survey.
+
+## Technical notes
+
+**Database**
+- New table `public.research_boosts`: `user_id`, `survey_id`, `boost_tier`, `target_responses`, `price_ghs_pesewas`, `paystack_reference`, `status` (`pending` / `paid` / `active` / `completed` / `expired`), `targeting` JSONB snapshot, `expires_at`, `activated_at`. GRANTs for `authenticated` + `service_role`; RLS so a user reads only their own rows, plus admin read via `has_role`.
+- `surveys.tier` gains a `research_boost` value. `charge_survey_publish_credit` is amended: for that tier it charges no credits, forces `is_active = false` and `response_goal`/`expires_at` from the boost record instead of the tier table.
+- New security-definer RPC `activate_research_boost(_reference, _raw)` — idempotent: marks the boost paid, sets the survey `is_active = true`, `boosted_until = now() + 30 days`, `response_goal = target_responses`.
+- `handle_new_response` closes the survey when `response_count >= response_goal` for boosted surveys.
+- Admin RPC `admin_list_research_boosts()` for the admin portal.
+
+**Payments**
+- New server functions in `src/utils/research-boost.functions.ts`: `initializeResearchBoostCheckout` (validates tier + reach + ownership, inserts the pending boost, calls Paystack with an `rb_` reference prefix) and `verifyResearchBoostCheckout` (verifies with Paystack, calls `activate_research_boost`).
+- `src/routes/api/public/paystack/webhook.ts` routes by reference prefix: `cv_` → existing `credit_paystack_purchase`, `rb_` → `activate_research_boost`. Signature verification is unchanged.
+
+**Frontend**
+- `src/lib/research-boost.ts`: tier table (price, response count, label, blurb) shared by pricing page and create flow.
+- `src/routes/_authenticated/create.tsx`: a "Research Boost" option in the publish step that swaps the credit-cost panel for boost tiers, wires the Audience builder's reach estimate into an eligibility check, and sends the user to Paystack.
+- Boost return handling on `/create` (or a small `/boost-complete` step) calling the verify function, mirroring the existing `buy-credits` `paystack_ref` pattern.
+- `src/routes/_authenticated/feed.tsx`: boosted surveys rank above all others for matching users, with a distinct badge.
+- `src/routes/pricing.tsx`: a Research Boost section with the four cedi tiers, visible to students too (the student-only free notice is adjusted so students can still reach it).
+- Progress strip in `src/routes/_authenticated/survey.$id.report.tsx`.
+- Refund policy page gains a line: boosts are non-refundable, unfilled quota is not returned.
