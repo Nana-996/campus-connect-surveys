@@ -64,6 +64,7 @@ type Draft = {
   tier: Tier; title: string; description: string;
   targetDept: string; targetYear: string; targetCountry: string; targetAge: string;
   targetInterests: InterestEntry[]; requiredCriteria: CriterionKey[];
+  targetUniversities: string[];
   responseGoal: string; expiresAt: string;
   allowGeneral: boolean; questions: Question[]; respondentBonus: number;
   minResponseSeconds: string;
