@@ -141,7 +141,7 @@ function Create() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!profile) return;
-    if (!canAffordTotal) {
+    if (!isBoost && !canAffordTotal) {
       const need = totalCost - spendable;
       const where = isGeneral ? "buy more credits to publish." : "answer surveys to earn them.";
       toast.error(`Need ${need} more credit${need === 1 ? "" : "s"} — ${where}`);
@@ -162,28 +162,48 @@ function Create() {
           title: title.trim(),
           description: description.trim(),
           questions: questions as any,
-          tier,
-          target_department: tier === "basic" || isGeneral ? null : (audience.department.trim() || null),
-          target_year: tier === "basic" || isGeneral ? null : (audience.year || null),
-          target_country: tier === "basic" || !isGeneral ? null : (audience.country || null),
-          target_age_range: tier === "basic" || !isGeneral ? null : (audience.age_range || null),
-          target_interests: tier === "basic" ? [] : audience.interests.map((t) => t.tag),
-          required_criteria: tier === "basic" ? [] : audience.required.filter((k) =>
-            k === "interests" ? audience.interests.length > 0
-              : isGeneral ? (k === "country" || k === "age_range")
-                : (k === "department" || k === "year"),
-          ),
+          tier: (isBoost ? "research_boost" : tier) as any,
+          target_department: isBoost
+            ? (audience.department.trim() || null)
+            : tier === "basic" || isGeneral ? null : (audience.department.trim() || null),
+          target_year: isBoost
+            ? (audience.year || null)
+            : tier === "basic" || isGeneral ? null : (audience.year || null),
+          target_country: isBoost
+            ? (audience.country || null)
+            : tier === "basic" || !isGeneral ? null : (audience.country || null),
+          target_age_range: isBoost
+            ? (audience.age_range || null)
+            : tier === "basic" || !isGeneral ? null : (audience.age_range || null),
+          target_interests: !isBoost && tier === "basic" ? [] : audience.interests.map((t) => t.tag),
+          required_criteria: isBoost
+            ? audience.required.filter((k) => (k === "interests" ? audience.interests.length > 0 : true))
+            : tier === "basic" ? [] : audience.required.filter((k) =>
+                k === "interests" ? audience.interests.length > 0
+                  : isGeneral ? (k === "country" || k === "age_range")
+                    : (k === "department" || k === "year"),
+              ),
 
-          response_goal: goalNum,
-          respondent_bonus: tier === "pro" ? respondentBonus : 0,
+          response_goal: isBoost ? selectedBoost.responses : goalNum,
+          respondent_bonus: !isBoost && tier === "pro" ? respondentBonus : 0,
           min_response_seconds: Math.max(0, Math.min(600, parseInt(minResponseSeconds, 10) || 15)),
-          allow_general_respondents: isGeneral ? true : allowGeneral,
+          allow_general_respondents: isBoost ? true : isGeneral ? true : allowGeneral,
           ...(lecturerId ? { lecturer_id: lecturerId, is_evaluation: true, course_code: courseCode.trim() || null } : {}),
-          ...(expiresIso ? { expires_at: expiresIso } : {}),
+          ...(!isBoost && expiresIso ? { expires_at: expiresIso } : {}),
         })
         .select("id")
         .single();
       if (error) throw error;
+
+      if (isBoost) {
+        try { localStorage.removeItem(DRAFT_KEY); } catch {}
+        const res = await startBoost({
+          data: { surveyId: data.id, boostTier: selectedBoost.id, originUrl: window.location.origin },
+        });
+        window.location.href = res.authorizationUrl;
+        return;
+      }
+
       await refreshProfile();
       toast.success(`Published as ${TIERS[tier].label}!`);
       try { localStorage.removeItem(DRAFT_KEY); } catch {}
@@ -196,6 +216,7 @@ function Create() {
   };
 
   const selected = TIERS[tier];
+
 
 
   return (
