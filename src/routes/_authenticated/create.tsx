@@ -485,6 +485,9 @@ function Create() {
               isGeneral={isGeneral}
               allowGeneral={isBoost ? true : (isGeneral ? true : allowGeneral)}
               responseGoal={goalNum}
+              pickLimit={pickLimit}
+              onBuySlots={buySlots}
+              buyingSlots={buyingSlots}
             />
           )}
 
