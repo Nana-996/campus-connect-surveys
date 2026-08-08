@@ -100,7 +100,7 @@
     "vite": "^7.3.1"
   },
   "overrides": {
-    "dompurify": "^3.4.11",
+    "dompurify": "^3.4.13",
     "ws": "^8.18.3",
     "fast-uri": "^3.1.5",
     "minimatch@3": {
@@ -117,7 +117,7 @@
     "@tanstack/router-core": "1.171.15"
   },
   "resolutions": {
-    "dompurify": "^3.4.11",
+    "dompurify": "^3.4.13",
     "ws": "^8.18.3",
     "fast-uri": "^3.1.5",
     "minimatch/brace-expansion": "1.1.18",
