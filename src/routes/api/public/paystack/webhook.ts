@@ -35,16 +35,24 @@ export const Route = createFileRoute("/api/public/paystack/webhook")({
         }
 
         if (event.event === "charge.success" && event.data?.reference && event.data.status === "success") {
+          const reference = event.data.reference;
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-          const { error } = await supabaseAdmin.rpc("credit_paystack_purchase", {
-            _reference: event.data.reference,
-            _raw: event.data as never,
-          });
+          const isBoost = reference.startsWith("rb_");
+          const { error } = isBoost
+            ? await supabaseAdmin.rpc("activate_research_boost", {
+                _reference: reference,
+                _raw: event.data as never,
+              })
+            : await supabaseAdmin.rpc("credit_paystack_purchase", {
+                _reference: reference,
+                _raw: event.data as never,
+              });
           if (error) {
             // Unknown-reference errors are non-fatal — they mean this event isn't ours.
             console.warn("paystack webhook credit error:", error.message);
           }
         }
+
 
         return Response.json({ received: true });
       },
