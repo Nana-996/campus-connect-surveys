@@ -17,6 +17,7 @@ type Survey = {
   target_country?: string | null;
   target_age_range?: string | null;
   target_interests?: string[] | null;
+  target_universities?: string[] | null;
   response_count: number;
   questions: any[];
   created_at: string;
