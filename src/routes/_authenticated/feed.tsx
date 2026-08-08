@@ -180,6 +180,15 @@ function Feed() {
       Math.min(4, overlap.length * 2),
       overlap.map((t) => tagLabel(t)).join(" · "),
     );
+    const unis = s.target_universities ?? [];
+    const myDomain = (profile?.university_domain ?? "").trim().toLowerCase();
+    dim(
+      unis.length > 0 ? "y" : null,
+      !!myDomain && unis.includes(myDomain),
+      3,
+      "Your university",
+    );
+
 
     const perfect = targeted > 0 && hit === targeted;
     return { score, targeted, hit, perfect, reasons: reasons.filter(Boolean) };
