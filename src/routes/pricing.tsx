@@ -1,9 +1,11 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { CREDIT_BUNDLES, PAID_BUNDLES } from "@/lib/credit-bundles";
+import { BOOST_TIERS } from "@/lib/research-boost";
 import { useUsdToGhs } from "@/hooks/useForex";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Check, Coins, Sparkles } from "lucide-react";
+import { Check, Coins, Sparkles, Target } from "lucide-react";
+
 
 export const Route = createFileRoute("/pricing")({
   component: PricingPage,
@@ -112,14 +114,41 @@ function PricingPage() {
         </ul>
       </div>
 
+      <div className="mt-12 rounded-3xl border-2 border-primary/40 bg-primary/5 p-6">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary">Research Boost</p>
+        <h3 className="mt-1 font-serif text-2xl">Buy responses, not credits</h3>
+        <p className="mt-2 max-w-2xl text-xs text-muted-foreground">
+          Need 100 Level 200 Pharmacy students, or 200 people interested in engineering? Pick your
+          population when creating a survey, pay in cedis, and CampusVerify pushes it to the top of
+          matching feeds until your quota is filled (or 30 days pass). Available to students and
+          general users.
+        </p>
+        <ul className="mt-4 grid gap-1.5 text-sm sm:grid-cols-2">
+          {BOOST_TIERS.map((b) => (
+            <li key={b.id} className="flex items-center justify-between border-b border-foreground/10 py-1.5">
+              <span>{b.label} · {b.responses} targeted responses</span>
+              <span className="inline-flex items-center gap-1 font-semibold text-primary">
+                <Target className="h-3.5 w-3.5" />GHS {b.priceGhs}
+              </span>
+            </li>
+          ))}
+        </ul>
+        <Button asChild className="mt-5 rounded-full">
+          <Link to="/create">Start a Research Boost</Link>
+        </Button>
+      </div>
+
       <div className="mt-10 rounded-3xl border border-foreground/15 bg-card p-6 text-sm">
         <h3 className="font-serif text-xl">Billing &amp; refunds</h3>
         <p className="mt-2 text-muted-foreground">
-          Payments are processed securely by Paystack in Ghana Cedis. See our{" "}
+          Payments are processed securely by Paystack in Ghana Cedis. Research Boosts are
+          non-refundable once activated, including if the response quota isn't filled before the
+          boost expires. See our{" "}
           <Link to="/refund-policy" className="underline">Refund Policy</Link> and{" "}
           <Link to="/terms" className="underline">Terms of Service</Link> for details.
         </p>
       </div>
+
     </div>
   );
 }

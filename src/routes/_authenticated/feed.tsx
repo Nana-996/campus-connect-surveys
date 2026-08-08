@@ -200,13 +200,19 @@ function Feed() {
       return true;
     })
     .sort((a, b) => {
-      const boost = (x: Survey) => (x.boosted_until && new Date(x.boosted_until) > new Date() ? 1 : 0);
+      const boost = (x: Survey) =>
+        x.tier === "research_boost" && x.boosted_until && new Date(x.boosted_until) > new Date()
+          ? 2
+          : x.boosted_until && new Date(x.boosted_until) > new Date()
+            ? 1
+            : 0;
       return (
         boost(b.s) - boost(a.s) ||
         b.m.score - a.m.score ||
         new Date(b.s.created_at).getTime() - new Date(a.s.created_at).getTime()
       );
     })
+
     .map(({ s, m }) => ({ ...s, __match: m }));
 
 
@@ -395,9 +401,10 @@ function Feed() {
                       </span>
                       {isBoosted && (
                         <span className="rounded-full bg-highlight px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-highlight-foreground">
-                          {isPro ? "★ Pro" : "↑ Boosted"}
+                          {s.tier === "research_boost" ? "◎ Research" : isPro ? "★ Pro" : "↑ Boosted"}
                         </span>
                       )}
+
                       {s.__match.targeted > 0 && s.__match.hit > 0 && (
                         <span
                           className="rounded-full bg-background/40 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider"

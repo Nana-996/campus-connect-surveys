@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -10,8 +11,13 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Trash2, Plus, Zap } from "lucide-react";
+import { Trash2, Plus, Zap, Target } from "lucide-react";
 import { TIERS, type Tier } from "@/lib/credits";
+import { BOOST_TIERS, BOOST_DAYS, getBoostTier, type BoostTierId } from "@/lib/research-boost";
+import {
+  initializeResearchBoostCheckout,
+  verifyResearchBoostCheckout,
+} from "@/utils/research-boost.functions";
 import { InterestTagInput, type InterestEntry } from "@/components/InterestTagInput";
 import { AudienceBuilder, type AudienceValue, type CriterionKey } from "@/components/AudienceBuilder";
 
@@ -24,14 +30,16 @@ type Question = {
   required?: boolean;
 };
 
-type CreateSearch = { lecturer?: string; course?: string };
+type CreateSearch = { lecturer?: string; course?: string; boost_ref?: string };
 
 export const Route = createFileRoute("/_authenticated/create")({
   component: Create,
   validateSearch: (s: Record<string, unknown>): CreateSearch => ({
     lecturer: typeof s.lecturer === "string" ? s.lecturer : undefined,
     course: typeof s.course === "string" ? s.course : undefined,
+    boost_ref: typeof s.boost_ref === "string" ? s.boost_ref : undefined,
   }),
+
   head: () => ({
     meta: [
       { title: "Create a survey — CampusVerify" },
@@ -103,6 +111,37 @@ function Create() {
     [{ id: crypto.randomUUID(), type: "text", text: "", required: true }]
   );
   const [submitting, setSubmitting] = useState(false);
+  const [mode, setMode] = useState<"credits" | "boost">("credits");
+  const [boostTier, setBoostTier] = useState<BoostTierId>("standard");
+  const isBoost = mode === "boost";
+  const selectedBoost = getBoostTier(boostTier) ?? BOOST_TIERS[1];
+
+  const startBoost = useServerFn(initializeResearchBoostCheckout);
+  const verifyBoost = useServerFn(verifyResearchBoostCheckout);
+
+  // Return from Paystack after a Research Boost purchase.
+  const boostRef = search.boost_ref ?? null;
+  useEffect(() => {
+    if (!boostRef) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await verifyBoost({ data: { reference: boostRef } });
+        if (cancelled) return;
+        if (res.status === "success") {
+          try { localStorage.removeItem(DRAFT_KEY); } catch {}
+          toast.success(`Research Boost active — ${res.responses} targeted responses queued.`);
+          if (res.surveyId) navigate({ to: "/survey/$id", params: { id: res.surveyId } });
+          else navigate({ to: "/my-surveys" });
+        } else {
+          toast.error("Payment was not completed. Your survey stays unpublished.");
+        }
+      } catch (err: any) {
+        if (!cancelled) toast.error(err?.message ?? "Could not verify payment");
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [boostRef]);
 
   useEffect(() => {
     try {
@@ -131,17 +170,20 @@ function Create() {
     setQuestions((q) => q.map((x) => (x.id === id ? { ...x, ...patch } : x)));
 
   const tierMax = TIERS[tier].responseGoal;
-  const goalNum = responseGoal ? Math.max(1, Math.min(tierMax, parseInt(responseGoal, 10) || tierMax)) : tierMax;
+  const goalNum = isBoost
+    ? selectedBoost.responses
+    : responseGoal ? Math.max(1, Math.min(tierMax, parseInt(responseGoal, 10) || tierMax)) : tierMax;
   const bonusTotal = tier === "pro" ? respondentBonus * goalNum : 0;
   const baseTierCost = isGeneral ? TIERS[tier].cost * 2 : TIERS[tier].cost;
   const totalCost = baseTierCost + bonusTotal;
   const spendable = isGeneral ? (profile?.paid_credits ?? 0) : (profile?.earned_credits ?? 0);
   const canAffordTotal = spendable >= totalCost;
 
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!profile) return;
-    if (!canAffordTotal) {
+    if (!isBoost && !canAffordTotal) {
       const need = totalCost - spendable;
       const where = isGeneral ? "buy more credits to publish." : "answer surveys to earn them.";
       toast.error(`Need ${need} more credit${need === 1 ? "" : "s"} — ${where}`);
@@ -162,28 +204,48 @@ function Create() {
           title: title.trim(),
           description: description.trim(),
           questions: questions as any,
-          tier,
-          target_department: tier === "basic" || isGeneral ? null : (audience.department.trim() || null),
-          target_year: tier === "basic" || isGeneral ? null : (audience.year || null),
-          target_country: tier === "basic" || !isGeneral ? null : (audience.country || null),
-          target_age_range: tier === "basic" || !isGeneral ? null : (audience.age_range || null),
-          target_interests: tier === "basic" ? [] : audience.interests.map((t) => t.tag),
-          required_criteria: tier === "basic" ? [] : audience.required.filter((k) =>
-            k === "interests" ? audience.interests.length > 0
-              : isGeneral ? (k === "country" || k === "age_range")
-                : (k === "department" || k === "year"),
-          ),
+          tier: (isBoost ? "research_boost" : tier) as any,
+          target_department: isBoost
+            ? (audience.department.trim() || null)
+            : tier === "basic" || isGeneral ? null : (audience.department.trim() || null),
+          target_year: isBoost
+            ? (audience.year || null)
+            : tier === "basic" || isGeneral ? null : (audience.year || null),
+          target_country: isBoost
+            ? (audience.country || null)
+            : tier === "basic" || !isGeneral ? null : (audience.country || null),
+          target_age_range: isBoost
+            ? (audience.age_range || null)
+            : tier === "basic" || !isGeneral ? null : (audience.age_range || null),
+          target_interests: !isBoost && tier === "basic" ? [] : audience.interests.map((t) => t.tag),
+          required_criteria: isBoost
+            ? audience.required.filter((k) => (k === "interests" ? audience.interests.length > 0 : true))
+            : tier === "basic" ? [] : audience.required.filter((k) =>
+                k === "interests" ? audience.interests.length > 0
+                  : isGeneral ? (k === "country" || k === "age_range")
+                    : (k === "department" || k === "year"),
+              ),
 
-          response_goal: goalNum,
-          respondent_bonus: tier === "pro" ? respondentBonus : 0,
+          response_goal: isBoost ? selectedBoost.responses : goalNum,
+          respondent_bonus: !isBoost && tier === "pro" ? respondentBonus : 0,
           min_response_seconds: Math.max(0, Math.min(600, parseInt(minResponseSeconds, 10) || 15)),
-          allow_general_respondents: isGeneral ? true : allowGeneral,
+          allow_general_respondents: isBoost ? true : isGeneral ? true : allowGeneral,
           ...(lecturerId ? { lecturer_id: lecturerId, is_evaluation: true, course_code: courseCode.trim() || null } : {}),
-          ...(expiresIso ? { expires_at: expiresIso } : {}),
+          ...(!isBoost && expiresIso ? { expires_at: expiresIso } : {}),
         })
         .select("id")
         .single();
       if (error) throw error;
+
+      if (isBoost) {
+        try { localStorage.removeItem(DRAFT_KEY); } catch {}
+        const res = await startBoost({
+          data: { surveyId: data.id, boostTier: selectedBoost.id, originUrl: window.location.origin },
+        });
+        window.location.href = res.authorizationUrl;
+        return;
+      }
+
       await refreshProfile();
       toast.success(`Published as ${TIERS[tier].label}!`);
       try { localStorage.removeItem(DRAFT_KEY); } catch {}
@@ -196,6 +258,7 @@ function Create() {
   };
 
   const selected = TIERS[tier];
+
 
 
   return (
@@ -233,9 +296,70 @@ function Create() {
       )}
 
       <form onSubmit={submit} className="mt-8 space-y-6">
+        {/* Mode switch */}
+        <div className="inline-flex rounded-full border-2 border-foreground/15 bg-card p-1 text-xs font-semibold">
+          <button
+            type="button"
+            onClick={() => setMode("credits")}
+            className={`rounded-full px-4 py-2 transition ${mode === "credits" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            Publish with credits
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("boost")}
+            className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 transition ${mode === "boost" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            <Target className="h-3.5 w-3.5" /> Research Boost
+          </button>
+        </div>
+
         {/* Tier selector */}
         <div>
           <h2 className="sr-only">Publishing tier</h2>
+          {isBoost ? (
+            <>
+              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Research Boost package</Label>
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                Pay in cedis and CampusVerify pushes your survey to the top of the feed for the exact
+                population you pick below, until your paid response quota is filled (or {BOOST_DAYS} days pass).
+              </p>
+              <div className="mt-2 grid gap-3 sm:grid-cols-4">
+                {BOOST_TIERS.map((b) => {
+                  const active = boostTier === b.id;
+                  return (
+                    <button
+                      key={b.id}
+                      type="button"
+                      onClick={() => setBoostTier(b.id)}
+                      className={`relative text-left rounded-2xl border-2 p-4 transition shadow-paper ${
+                        active ? "border-primary bg-primary text-primary-foreground" : "border-foreground/15 bg-card hover:border-foreground/40"
+                      }`}
+                    >
+                      {b.badge && (
+                        <span className="absolute -top-2 right-3 rounded-full bg-highlight px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-highlight-foreground">
+                          {b.badge}
+                        </span>
+                      )}
+                      <span className="font-serif text-2xl">GHS {b.priceGhs}</span>
+                      <p className="mt-0.5 text-[11px] opacity-80">{b.label} · {b.tagline}</p>
+                      <p className="mt-3 text-xs font-bold">{b.responses} targeted responses</p>
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="mt-3 rounded-xl border border-foreground/10 bg-card p-3 text-xs">
+                <p className="font-semibold">{selectedBoost.label} boost includes:</p>
+                <ul className="mt-1 grid gap-0.5 text-muted-foreground sm:grid-cols-2">
+                  <li>· Guaranteed slot at the top of matching feeds</li>
+                  <li>· Quota of {selectedBoost.responses} responses from your chosen population</li>
+                  <li>· Auto-closes the moment the quota is filled</li>
+                  <li>· Runs for up to {BOOST_DAYS} days · no credits used</li>
+                </ul>
+              </div>
+            </>
+          ) : (
+            <>
           <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Publishing tier</Label>
           <div className="mt-2 grid gap-3 sm:grid-cols-4">
             {TIER_ORDER.map((t) => {
@@ -278,7 +402,10 @@ function Create() {
               {selected.features.map((f) => <li key={f}>· {f}</li>)}
             </ul>
           </div>
+            </>
+          )}
         </div>
+
 
         {/* Survey body */}
         <div className="rounded-3xl border border-foreground/15 bg-card p-6 space-y-4 shadow-paper">
@@ -293,7 +420,7 @@ function Create() {
             <Textarea id="desc" value={description} onChange={(e) => setDescription(e.target.value)}
               placeholder="A short context for respondents." />
           </div>
-          {tier === "basic" ? (
+          {tier === "basic" && !isBoost ? (
             <p className="text-xs text-muted-foreground italic">
               {isGeneral
                 ? <>Basic surveys are open to the entire public — upgrade to <button type="button" onClick={() => setTier("targeted")} className="font-bold underline text-foreground">Targeted</button> to filter by country, age & interests.</>
@@ -304,10 +431,11 @@ function Create() {
               value={audience}
               onChange={setAudience}
               isGeneral={isGeneral}
-              allowGeneral={isGeneral ? true : allowGeneral}
+              allowGeneral={isBoost ? true : (isGeneral ? true : allowGeneral)}
               responseGoal={goalNum}
             />
           )}
+
 
 
           <div className="border-t border-foreground/10 pt-4">
@@ -316,6 +444,7 @@ function Create() {
               Auto-closes when either limit is reached. Ultimate cap: 6 months from publish.
             </p>
             <div className="mt-3 grid grid-cols-2 gap-3">
+              {!isBoost && (
               <div>
                 <Label htmlFor="goal" className="text-xs">Response goal</Label>
                 <Input
@@ -328,6 +457,8 @@ function Create() {
                   placeholder={`Default ${TIERS[tier].responseGoal}`}
                 />
               </div>
+              )}
+
               <div>
                 <Label htmlFor="exp" className="text-xs">Closes on</Label>
                 <Input
@@ -524,7 +655,7 @@ function Create() {
           </Button>
         </div>
 
-        {!canAffordTotal && (
+        {!isBoost && !canAffordTotal && (
           <p className="text-center text-xs font-medium text-destructive">
             Need {totalCost - spendable} more credit{(totalCost - spendable) === 1 ? "" : "s"} —{" "}
             {isGeneral ? (
@@ -534,10 +665,15 @@ function Create() {
             )}
           </p>
         )}
-        <Button type="submit" size="lg" disabled={submitting || !canAffordTotal}
+        <Button type="submit" size="lg" disabled={submitting || (!isBoost && !canAffordTotal)}
           className="h-14 w-full rounded-full bg-primary text-base">
-          {submitting ? "Publishing…" : `Publish ${selected.label} · ${totalCost} credit${totalCost === 1 ? "" : "s"} →`}
+          {submitting
+            ? (isBoost ? "Redirecting to payment…" : "Publishing…")
+            : isBoost
+              ? `Buy Research Boost · GHS ${selectedBoost.priceGhs} for ${selectedBoost.responses} responses →`
+              : `Publish ${selected.label} · ${totalCost} credit${totalCost === 1 ? "" : "s"} →`}
         </Button>
+
 
 
       </form>
