@@ -18,6 +18,11 @@ import {
   initializeResearchBoostCheckout,
   verifyResearchBoostCheckout,
 } from "@/utils/research-boost.functions";
+import {
+  initializeUniversitySlotsCheckout,
+  verifyUniversitySlotsCheckout,
+} from "@/utils/university-slots.functions";
+import { FREE_UNIVERSITY_PICKS } from "@/lib/university-slots";
 import { InterestTagInput, type InterestEntry } from "@/components/InterestTagInput";
 import { AudienceBuilder, type AudienceValue, type CriterionKey } from "@/components/AudienceBuilder";
 
