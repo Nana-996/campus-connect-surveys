@@ -233,9 +233,70 @@ function Create() {
       )}
 
       <form onSubmit={submit} className="mt-8 space-y-6">
+        {/* Mode switch */}
+        <div className="inline-flex rounded-full border-2 border-foreground/15 bg-card p-1 text-xs font-semibold">
+          <button
+            type="button"
+            onClick={() => setMode("credits")}
+            className={`rounded-full px-4 py-2 transition ${mode === "credits" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            Publish with credits
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("boost")}
+            className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 transition ${mode === "boost" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            <Target className="h-3.5 w-3.5" /> Research Boost
+          </button>
+        </div>
+
         {/* Tier selector */}
         <div>
           <h2 className="sr-only">Publishing tier</h2>
+          {isBoost ? (
+            <>
+              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Research Boost package</Label>
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                Pay in cedis and CampusVerify pushes your survey to the top of the feed for the exact
+                population you pick below, until your paid response quota is filled (or {BOOST_DAYS} days pass).
+              </p>
+              <div className="mt-2 grid gap-3 sm:grid-cols-4">
+                {BOOST_TIERS.map((b) => {
+                  const active = boostTier === b.id;
+                  return (
+                    <button
+                      key={b.id}
+                      type="button"
+                      onClick={() => setBoostTier(b.id)}
+                      className={`relative text-left rounded-2xl border-2 p-4 transition shadow-paper ${
+                        active ? "border-primary bg-primary text-primary-foreground" : "border-foreground/15 bg-card hover:border-foreground/40"
+                      }`}
+                    >
+                      {b.badge && (
+                        <span className="absolute -top-2 right-3 rounded-full bg-highlight px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-highlight-foreground">
+                          {b.badge}
+                        </span>
+                      )}
+                      <span className="font-serif text-2xl">GHS {b.priceGhs}</span>
+                      <p className="mt-0.5 text-[11px] opacity-80">{b.label} · {b.tagline}</p>
+                      <p className="mt-3 text-xs font-bold">{b.responses} targeted responses</p>
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="mt-3 rounded-xl border border-foreground/10 bg-card p-3 text-xs">
+                <p className="font-semibold">{selectedBoost.label} boost includes:</p>
+                <ul className="mt-1 grid gap-0.5 text-muted-foreground sm:grid-cols-2">
+                  <li>· Guaranteed slot at the top of matching feeds</li>
+                  <li>· Quota of {selectedBoost.responses} responses from your chosen population</li>
+                  <li>· Auto-closes the moment the quota is filled</li>
+                  <li>· Runs for up to {BOOST_DAYS} days · no credits used</li>
+                </ul>
+              </div>
+            </>
+          ) : (
+            <>
           <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Publishing tier</Label>
           <div className="mt-2 grid gap-3 sm:grid-cols-4">
             {TIER_ORDER.map((t) => {
@@ -278,7 +339,10 @@ function Create() {
               {selected.features.map((f) => <li key={f}>· {f}</li>)}
             </ul>
           </div>
+            </>
+          )}
         </div>
+
 
         {/* Survey body */}
         <div className="rounded-3xl border border-foreground/15 bg-card p-6 space-y-4 shadow-paper">
