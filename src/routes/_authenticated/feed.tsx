@@ -200,13 +200,19 @@ function Feed() {
       return true;
     })
     .sort((a, b) => {
-      const boost = (x: Survey) => (x.boosted_until && new Date(x.boosted_until) > new Date() ? 1 : 0);
+      const boost = (x: Survey) =>
+        x.tier === "research_boost" && x.boosted_until && new Date(x.boosted_until) > new Date()
+          ? 2
+          : x.boosted_until && new Date(x.boosted_until) > new Date()
+            ? 1
+            : 0;
       return (
         boost(b.s) - boost(a.s) ||
         b.m.score - a.m.score ||
         new Date(b.s.created_at).getTime() - new Date(a.s.created_at).getTime()
       );
     })
+
     .map(({ s, m }) => ({ ...s, __match: m }));
 
 
