@@ -108,7 +108,122 @@ function Field({
   );
 }
 
-export function AudienceBuilder({ value, onChange, isGeneral, allowGeneral, responseGoal }: Props) {
+/** Multi-select over the universities present on the platform, capped by the creator's allowance. */
+function UniversityPicker({
+  selected, onChange, limit, onBuySlots, buying,
+}: {
+  selected: string[];
+  onChange: (next: string[]) => void;
+  limit: number;
+  onBuySlots?: () => void;
+  buying?: boolean;
+}) {
+  const [options, setOptions] = useState<UniversityOption[]>([]);
+  const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.rpc("list_universities" as never);
+      if (cancelled) return;
+      setOptions(((data as unknown as UniversityOption[]) ?? []));
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const atCap = selected.length >= limit;
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return options.filter((o) => !q || o.name.toLowerCase().includes(q) || o.domain.includes(q)).slice(0, 40);
+  }, [options, query]);
+
+  const nameOf = (domain: string) =>
+    options.find((o) => o.domain === domain)?.name ?? domain;
+
+  const toggleUni = (domain: string) => {
+    if (selected.includes(domain)) onChange(selected.filter((d) => d !== domain));
+    else if (!atCap) onChange([...selected, domain]);
+  };
+
+  return (
+    <div className="rounded-2xl border border-foreground/15 bg-background/40 p-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="inline-flex items-center gap-1.5 text-xs font-semibold">
+          <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
+          {selected.length} of {limit} universities picked
+        </p>
+        {onBuySlots && (
+          <Button type="button" size="sm" variant={atCap ? "default" : "ghost"} onClick={onBuySlots} disabled={buying}>
+            {buying ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Plus className="mr-1 h-3 w-3" />}
+            +{EXPANSION_SLOTS} picks · ₵{EXPANSION_PRICE_GHS}
+          </Button>
+        )}
+      </div>
+
+      {selected.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {selected.map((d) => (
+            <Badge key={d} variant="secondary" className="gap-1">
+              {nameOf(d)}
+              <button type="button" onClick={() => toggleUni(d)} aria-label={`Remove ${nameOf(d)}`}>
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          ))}
+        </div>
+      )}
+
+      <div className="relative mt-2">
+        <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search universities…"
+          className="pl-8"
+        />
+      </div>
+
+      <div className="mt-2 max-h-44 overflow-y-auto rounded-xl border border-foreground/10">
+        {loading ? (
+          <p className="p-3 text-[11px] text-muted-foreground">Loading universities…</p>
+        ) : filtered.length === 0 ? (
+          <p className="p-3 text-[11px] text-muted-foreground">No universities match that search yet.</p>
+        ) : (
+          filtered.map((o) => {
+            const on = selected.includes(o.domain);
+            return (
+              <button
+                key={o.domain}
+                type="button"
+                onClick={() => toggleUni(o.domain)}
+                disabled={!on && atCap}
+                className={`flex w-full items-center justify-between gap-2 border-b border-foreground/5 px-3 py-2 text-left text-xs last:border-0 transition ${
+                  on ? "bg-primary/10 font-semibold" : "hover:bg-secondary/60 disabled:opacity-40"
+                }`}
+              >
+                <span className="truncate">{o.name}</span>
+                <span className="shrink-0 text-[10px] text-muted-foreground">{o.members} members</span>
+              </button>
+            );
+          })
+        )}
+      </div>
+
+      {atCap && (
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          You've used all {limit} picks. Add {EXPANSION_SLOTS} more for ₵{EXPANSION_PRICE_GHS}.
+        </p>
+      )}
+    </div>
+  );
+}
+
+export function AudienceBuilder({
+  value, onChange, isGeneral, allowGeneral, responseGoal,
+  pickLimit = 5, onBuySlots, buyingSlots,
+}: Props) {
   const [reach, setReach] = useState<Reach | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -124,16 +239,20 @@ export function AudienceBuilder({ value, onChange, isGeneral, allowGeneral, resp
   // Drop "required" flags for criteria that were cleared out.
   useEffect(() => {
     const stillSet = value.required.filter((k) =>
-      k === "interests" ? value.interests.length > 0 : String(value[k] ?? "").trim() !== "",
+      k === "interests"
+        ? value.interests.length > 0
+        : k === "universities"
+          ? value.universities.length > 0
+          : String(value[k] ?? "").trim() !== "",
     );
     if (stillSet.length !== value.required.length) set({ required: stillSet });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value.department, value.year, value.country, value.age_range, value.interests.length]);
+  }, [value.department, value.year, value.country, value.age_range, value.interests.length, value.universities.length]);
 
   const tagIds = useMemo(() => value.interests.map((i) => i.tag), [value.interests]);
   const signature = JSON.stringify([
     allowGeneral, value.department, value.year, value.country, value.age_range,
-    tagIds, value.required,
+    tagIds, value.universities, value.required,
   ]);
 
   useEffect(() => {
@@ -148,6 +267,7 @@ export function AudienceBuilder({ value, onChange, isGeneral, allowGeneral, resp
         _age_range: value.age_range || null,
         _interests: tagIds,
         _required: value.required,
+        _universities: value.universities,
       } as never);
       if (cancelled) return;
       setReach((data as unknown as Reach) ?? null);
