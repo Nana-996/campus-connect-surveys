@@ -478,6 +478,65 @@ export type Database = {
         }
         Relationships: []
       }
+      research_boosts: {
+        Row: {
+          activated_at: string | null
+          boost_tier: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          paystack_reference: string
+          price_ghs_pesewas: number
+          raw: Json | null
+          status: string
+          survey_id: string | null
+          target_responses: number
+          targeting: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          activated_at?: string | null
+          boost_tier: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          paystack_reference: string
+          price_ghs_pesewas: number
+          raw?: Json | null
+          status?: string
+          survey_id?: string | null
+          target_responses: number
+          targeting?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          activated_at?: string | null
+          boost_tier?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          paystack_reference?: string
+          price_ghs_pesewas?: number
+          raw?: Json | null
+          status?: string
+          survey_id?: string | null
+          target_responses?: number
+          targeting?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "research_boosts_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       review_flags: {
         Row: {
           created_at: string
@@ -976,6 +1035,10 @@ export type Database = {
     }
     Functions: {
       accept_school_invite: { Args: { _token: string }; Returns: Json }
+      activate_research_boost: {
+        Args: { _raw?: Json; _reference: string }
+        Returns: Json
+      }
       admin_add_disposable_domain: {
         Args: { _domain: string }
         Returns: boolean
@@ -1032,6 +1095,25 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      admin_list_research_boosts: {
+        Args: never
+        Returns: {
+          activated_at: string
+          boost_tier: string
+          buyer_name: string
+          created_at: string
+          delivered: number
+          expires_at: string
+          id: string
+          price_ghs_pesewas: number
+          status: string
+          survey_id: string
+          survey_title: string
+          target_responses: number
+          targeting: Json
+          user_id: string
+        }[]
       }
       admin_list_school_invites: {
         Args: { _domain: string }
