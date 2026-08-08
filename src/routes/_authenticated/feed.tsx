@@ -401,9 +401,10 @@ function Feed() {
                       </span>
                       {isBoosted && (
                         <span className="rounded-full bg-highlight px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-highlight-foreground">
-                          {isPro ? "★ Pro" : "↑ Boosted"}
+                          {s.tier === "research_boost" ? "◎ Research" : isPro ? "★ Pro" : "↑ Boosted"}
                         </span>
                       )}
+
                       {s.__match.targeted > 0 && s.__match.hit > 0 && (
                         <span
                           className="rounded-full bg-background/40 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider"
