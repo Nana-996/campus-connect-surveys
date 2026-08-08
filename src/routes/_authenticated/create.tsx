@@ -268,10 +268,12 @@ function Create() {
             ? (audience.age_range || null)
             : tier === "basic" || !isGeneral ? null : (audience.age_range || null),
           target_interests: !isBoost && tier === "basic" ? [] : audience.interests.map((t) => t.tag),
+          target_universities: !isBoost && tier === "basic" ? [] : audience.universities,
           required_criteria: isBoost
             ? audience.required.filter((k) => (k === "interests" ? audience.interests.length > 0 : true))
             : tier === "basic" ? [] : audience.required.filter((k) =>
                 k === "interests" ? audience.interests.length > 0
+                  : k === "universities" ? audience.universities.length > 0
                   : isGeneral ? (k === "country" || k === "age_range")
                     : (k === "department" || k === "year"),
               ),
