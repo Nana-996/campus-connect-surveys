@@ -151,6 +151,47 @@ function Create() {
     return () => { cancelled = true; };
   }, [boostRef]);
 
+  // University targeting allowance (5 free, +10 per paid expansion).
+  const pickLimit = ((profile as any)?.university_pick_limit as number | undefined) ?? FREE_UNIVERSITY_PICKS;
+  const [buyingSlots, setBuyingSlots] = useState(false);
+  const startSlots = useServerFn(initializeUniversitySlotsCheckout);
+  const verifySlots = useServerFn(verifyUniversitySlotsCheckout);
+
+  const buySlots = async () => {
+    setBuyingSlots(true);
+    try {
+      const res = await startSlots({ data: { originUrl: window.location.origin } });
+      window.location.href = res.authorizationUrl;
+    } catch (err: any) {
+      toast.error(err?.message ?? "Could not start payment");
+      setBuyingSlots(false);
+    }
+  };
+
+  // Return from Paystack after buying extra university picks.
+  const slotsRef = search.slots_ref ?? null;
+  useEffect(() => {
+    if (!slotsRef) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await verifySlots({ data: { reference: slotsRef } });
+        if (cancelled) return;
+        if (res.status === "success") {
+          toast.success(`Added ${res.slots} more university picks.`);
+          await refreshProfile?.();
+        } else {
+          toast.error("Payment was not completed.");
+        }
+        navigate({ to: "/create", search: {}, replace: true });
+      } catch (err: any) {
+        if (!cancelled) toast.error(err?.message ?? "Could not verify payment");
+      }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slotsRef]);
+
   useEffect(() => {
     try {
       localStorage.setItem(DRAFT_KEY, JSON.stringify({
@@ -158,6 +199,7 @@ function Create() {
         targetDept: audience.department, targetYear: audience.year,
         targetCountry: audience.country, targetAge: audience.age_range,
         targetInterests: audience.interests, requiredCriteria: audience.required,
+        targetUniversities: audience.universities,
         responseGoal, expiresAt, allowGeneral, questions,
         respondentBonus, minResponseSeconds,
       }));
