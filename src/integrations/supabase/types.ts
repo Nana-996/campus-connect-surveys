@@ -431,6 +431,7 @@ export type Database = {
           paid_credits: number
           university_domain: string
           university_name: string
+          university_pick_limit: number
           user_type: string
           year: string
         }
@@ -452,6 +453,7 @@ export type Database = {
           paid_credits?: number
           university_domain?: string
           university_name?: string
+          university_pick_limit?: number
           user_type?: string
           year?: string
         }
@@ -473,6 +475,7 @@ export type Database = {
           paid_credits?: number
           university_domain?: string
           university_name?: string
+          university_pick_limit?: number
           user_type?: string
           year?: string
         }
@@ -899,6 +902,7 @@ export type Database = {
           target_country: string | null
           target_department: string | null
           target_interests: string[]
+          target_universities: string[]
           target_year: string | null
           tier: string
           title: string
@@ -927,6 +931,7 @@ export type Database = {
           target_country?: string | null
           target_department?: string | null
           target_interests?: string[]
+          target_universities?: string[]
           target_year?: string | null
           tier?: string
           title: string
@@ -955,6 +960,7 @@ export type Database = {
           target_country?: string | null
           target_department?: string | null
           target_interests?: string[]
+          target_universities?: string[]
           target_year?: string | null
           tier?: string
           title?: string
@@ -969,6 +975,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      university_slot_purchases: {
+        Row: {
+          created_at: string
+          granted_at: string | null
+          id: string
+          paystack_reference: string
+          price_ghs_pesewas: number
+          raw: Json | null
+          slots: number
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_at?: string | null
+          id?: string
+          paystack_reference: string
+          price_ghs_pesewas: number
+          raw?: Json | null
+          slots?: number
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_at?: string | null
+          id?: string
+          paystack_reference?: string
+          price_ghs_pesewas?: number
+          raw?: Json | null
+          slots?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
@@ -1256,6 +1301,7 @@ export type Database = {
           _department?: string
           _interests?: string[]
           _required?: string[]
+          _universities?: string[]
           _year?: string
         }
         Returns: Json
@@ -1376,6 +1422,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      grant_university_slots: {
+        Args: { _raw?: Json; _reference: string }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1397,6 +1447,14 @@ export type Database = {
           response_goal: number
           survey_id: string
           title: string
+        }[]
+      }
+      list_universities: {
+        Args: never
+        Returns: {
+          domain: string
+          members: number
+          name: string
         }[]
       }
       list_university_surveys: {
