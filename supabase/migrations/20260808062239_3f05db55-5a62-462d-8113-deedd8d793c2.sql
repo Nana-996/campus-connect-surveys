@@ -1,0 +1,10 @@
+REVOKE ALL ON FUNCTION public.enforce_university_targeting() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.research_boost_autoclose() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.charge_survey_publish_credit() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.email_queue_wake() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.handle_new_response() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.handle_new_user() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.prevent_last_admin_removal() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.protect_profile_sensitive_columns() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.protect_survey_sensitive_columns() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.sanitize_profile_on_insert() FROM PUBLIC, anon, authenticated;
