@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -10,8 +11,13 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Trash2, Plus, Zap } from "lucide-react";
+import { Trash2, Plus, Zap, Target } from "lucide-react";
 import { TIERS, type Tier } from "@/lib/credits";
+import { BOOST_TIERS, BOOST_DAYS, getBoostTier, type BoostTierId } from "@/lib/research-boost";
+import {
+  initializeResearchBoostCheckout,
+  verifyResearchBoostCheckout,
+} from "@/utils/research-boost.functions";
 import { InterestTagInput, type InterestEntry } from "@/components/InterestTagInput";
 import { AudienceBuilder, type AudienceValue, type CriterionKey } from "@/components/AudienceBuilder";
 
@@ -24,14 +30,16 @@ type Question = {
   required?: boolean;
 };
 
-type CreateSearch = { lecturer?: string; course?: string };
+type CreateSearch = { lecturer?: string; course?: string; boost_ref?: string };
 
 export const Route = createFileRoute("/_authenticated/create")({
   component: Create,
   validateSearch: (s: Record<string, unknown>): CreateSearch => ({
     lecturer: typeof s.lecturer === "string" ? s.lecturer : undefined,
     course: typeof s.course === "string" ? s.course : undefined,
+    boost_ref: typeof s.boost_ref === "string" ? s.boost_ref : undefined,
   }),
+
   head: () => ({
     meta: [
       { title: "Create a survey — CampusVerify" },
