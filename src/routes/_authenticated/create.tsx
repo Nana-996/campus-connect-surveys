@@ -35,7 +35,7 @@ type Question = {
   required?: boolean;
 };
 
-type CreateSearch = { lecturer?: string; course?: string; boost_ref?: string };
+type CreateSearch = { lecturer?: string; course?: string; boost_ref?: string; slots_ref?: string };
 
 export const Route = createFileRoute("/_authenticated/create")({
   component: Create,
@@ -43,6 +43,7 @@ export const Route = createFileRoute("/_authenticated/create")({
     lecturer: typeof s.lecturer === "string" ? s.lecturer : undefined,
     course: typeof s.course === "string" ? s.course : undefined,
     boost_ref: typeof s.boost_ref === "string" ? s.boost_ref : undefined,
+    slots_ref: typeof s.slots_ref === "string" ? s.slots_ref : undefined,
   }),
 
   head: () => ({
