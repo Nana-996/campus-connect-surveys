@@ -1,9 +1,11 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { CREDIT_BUNDLES, PAID_BUNDLES } from "@/lib/credit-bundles";
+import { BOOST_TIERS } from "@/lib/research-boost";
 import { useUsdToGhs } from "@/hooks/useForex";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Check, Coins, Sparkles } from "lucide-react";
+import { Check, Coins, Sparkles, Target } from "lucide-react";
+
 
 export const Route = createFileRoute("/pricing")({
   component: PricingPage,
