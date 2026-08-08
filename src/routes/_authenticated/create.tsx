@@ -104,6 +104,7 @@ function Create() {
     country: d.targetCountry ?? "",
     age_range: d.targetAge ?? "",
     interests: d.targetInterests ?? [],
+    universities: d.targetUniversities ?? [],
     required: d.requiredCriteria ?? [],
   });
   const [responseGoal, setResponseGoal] = useState<string>(d.responseGoal ?? "");
