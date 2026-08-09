@@ -94,7 +94,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@type": "Organization",
           name: "CampusVerify",
           url: "https://campus-verify.live",
-          logo: "https://campus-verify.live/favicon.ico",
+          logo: "https://campus-verify.live/favicon.png",
         }),
       },
       {
