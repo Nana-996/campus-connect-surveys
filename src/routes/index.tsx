@@ -149,138 +149,95 @@ function Landing() {
       </header>
 
       <main className="mx-auto max-w-6xl px-6">
-        {/* Bento hero */}
-        <section className="grid gap-4 sm:grid-cols-6 sm:grid-rows-[auto_auto]">
-          <div className="sm:col-span-4 sm:row-span-2 rounded-3xl border border-foreground/15 bg-card p-8 sm:p-12 shadow-paper">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-highlight px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-highlight-foreground">
-              <BookOpen className="h-3 w-3" /> for curious students
-            </span>
-            <h1 className="mt-5 font-serif text-5xl leading-[0.95] tracking-tight sm:text-7xl">
-              Real research,<br />
-              <em className="text-primary">real classmates,</em><br />
-              real fast.
-            </h1>
-            <p className="mt-6 max-w-xl text-base text-muted-foreground sm:text-lg">
-              Run dissertations and side-projects on a feed of verified students from your own campus.
-              No bots. No randoms. Just your people answering your questions.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              {isSignedIn ? (
-                <Link to="/feed">
+        {/* Hero — one promise only */}
+        <section className="flex flex-col items-center py-16 text-center sm:py-24">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-foreground/15 bg-card px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground shadow-paper">
+            <BookOpen className="h-3 w-3" /> For students & researchers
+          </span>
+          <h1 className="mt-6 max-w-3xl font-serif text-5xl leading-[0.95] tracking-tight sm:text-7xl">
+            This is where university students and researchers <em className="text-primary">help each other</em> get research responses.
+          </h1>
+          <p className="mt-6 max-w-xl text-lg text-muted-foreground">
+            Publish a survey, answer a few in return, and watch real responses roll in from verified classmates.
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            {isSignedIn ? (
+              <Link to="/feed">
+                <Button size="lg" className="h-12 rounded-full bg-primary px-7 text-base">
+                  Open your feed <ArrowUpRight className="ml-1 h-4 w-4" />
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link to="/signup">
                   <Button size="lg" className="h-12 rounded-full bg-primary px-7 text-base">
-                    Open your feed <ArrowUpRight className="ml-1 h-4 w-4" />
+                    Get started free <ArrowUpRight className="ml-1 h-4 w-4" />
                   </Button>
                 </Link>
-              ) : (
-                <>
-                  <Link to="/signup">
-                    <Button size="lg" className="h-12 rounded-full bg-primary px-7 text-base">
-                      Claim free credits <ArrowUpRight className="ml-1 h-4 w-4" />
-                    </Button>
-                  </Link>
-                  <Link to="/auth">
-                    <Button size="lg" variant="outline" className="h-12 rounded-full border-foreground/30 px-7 text-base">
-                      I already belong here
-                    </Button>
-                  </Link>
-                </>
-              )}
-            </div>
+                <Link to="/auth">
+                  <Button size="lg" variant="outline" className="h-12 rounded-full border-foreground/30 px-7 text-base">
+                    I already belong here
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
+          <p className="mt-4 text-xs text-muted-foreground">
+            Students get 10 free credits. General accounts get 5.
+          </p>
+        </section>
 
-          <div className="sm:col-span-2 rounded-3xl bg-primary p-6 text-primary-foreground shadow-paper">
-            <p className="font-serif text-6xl leading-none">10</p>
-            <p className="mt-2 text-xs uppercase tracking-[0.2em] opacity-80">free credits for students on join</p>
-            <div className="mt-6 h-px bg-primary-foreground/20" />
-            <p className="mt-4 font-serif text-2xl italic leading-tight">
-              "Got 80 responses in two days."
-            </p>
-            <p className="mt-2 text-[11px] uppercase tracking-wider opacity-70">— psych student, year 3</p>
+        {/* How it works — three simple steps */}
+        <section id="how-it-works" className="scroll-mt-20 rounded-3xl border border-foreground/15 bg-card p-8 sm:p-12 shadow-paper">
+          <div className="text-center">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">How it works</p>
+            <h2 className="mt-2 font-serif text-3xl sm:text-4xl leading-[0.95]">Give answers. Get answers.</h2>
           </div>
-
-          <div className="sm:col-span-2 rounded-3xl border border-foreground/15 bg-highlight p-6 text-highlight-foreground shadow-paper">
-            <BarChart3 className="h-7 w-7" />
-            <p className="mt-3 font-serif text-2xl leading-tight">Target by department or year.</p>
-            <p className="mt-2 text-sm opacity-80">Your data is finally usable.</p>
+          <div className="mt-10 grid gap-6 sm:grid-cols-3">
+            <Step n="01" icon={<Send />} title="Publish your survey">
+              Write your questions, set who can respond, and hit publish.
+            </Step>
+            <Step n="02" icon={<Inbox />} title="Answer a few surveys">
+              Earn credits by helping other students with their research.
+            </Step>
+            <Step n="03" icon={<BarChart3 />} title="Collect real responses">
+              Watch verified respondents fill your survey — no bots, no randoms.
+            </Step>
           </div>
         </section>
 
-        {/* feature row */}
+        {/* Why this works — three proof points */}
         <section className="mt-4 grid gap-4 sm:grid-cols-3">
-          <Tile icon={<BadgeCheck />} title="Verified-only" tone="card">
-            Sign in with your university email. Surveys never leave campus unless you say so.
+          <Tile icon={<BadgeCheck />} title="Verified students only" tone="card">
+            Every student account is tied to a real university email.
           </Tile>
-          <Tile icon={<Scale />} title="Fair credit economy" tone="accent">
-            Earn 1 by answering. Spend to publish. Everyone gives, everyone gets.
+          <Tile icon={<Scale />} title="Fair credit exchange" tone="accent">
+            Earn credits by answering. Spend them to publish your own surveys.
           </Tile>
-          <Tile icon={<NotebookPen />} title="Built for thesis season" tone="card">
-            Clean export, no setup. Hit publish, watch responses land.
+          <Tile icon={<NotebookPen />} title="Built for real research" tone="card">
+            Clean exports, targeting, and honest data you can actually use.
           </Tile>
-        </section>
-
-        {/* How it works */}
-        <section id="how-it-works" className="mt-20 scroll-mt-20">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">How it works</p>
-          <h2 className="mt-2 font-serif text-4xl sm:text-5xl leading-[0.95]">Four steps. <em className="text-primary">No friction.</em></h2>
-          <div className="mt-8 grid gap-4 sm:grid-cols-4">
-            <Step n="01" icon={<GraduationCap />} title="Verify">Sign up with your university email. Students get 10 free credits; general accounts get 5.</Step>
-            <Step n="02" icon={<Send />} title="Publish">Pick a tier (Basic, Targeted, Boosted, Pro), write questions, hit publish.</Step>
-            <Step n="03" icon={<Inbox />} title="Earn">Answer surveys in your feed to earn credits — fund your own research at no cost.</Step>
-            <Step n="04" icon={<Trophy />} title="Export">Watch responses land in real time. Export clean data when you're ready.</Step>
-          </div>
-        </section>
-
-        {/* About */}
-        <section id="about" className="mt-20 scroll-mt-20 rounded-3xl border border-foreground/15 bg-card p-8 sm:p-12 shadow-paper">
-          <div className="grid gap-8 sm:grid-cols-2">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">About</p>
-              <h2 className="mt-2 font-serif text-4xl sm:text-5xl leading-[0.95]">Built on campus, <em className="text-primary">for campus.</em></h2>
-              <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
-                CampusVerify started because thesis season shouldn't mean DMing strangers on WhatsApp. We give university researchers a clean,
-                fair way to reach verified peers — and reward respondents for showing up with real answers.
-              </p>
-              <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-                Every account is tied to a verified email, and student accounts must use a university domain. Every credit moves through a transparent ledger. No bots, no troll farms,
-                no third-party advertisers staring over your shoulder.
-
-              </p>
-            </div>
-            <div className="grid gap-3">
-              <Stat n="100%" label="Verified accounts" />
-              <Stat n="0" label="Third-party ad trackers" />
-              <Stat n="30 days" label="Credit-earn freshness window" />
-              <Stat n="Free" label="To join and to use" />
-            </div>
-          </div>
         </section>
 
         {/* FAQ */}
         <section id="faq" className="mt-20 scroll-mt-20">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">FAQ</p>
-          <h2 className="mt-2 font-serif text-4xl sm:text-5xl leading-[0.95]">Quick <em className="text-primary">answers.</em></h2>
+          <div className="text-center">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">FAQ</p>
+            <h2 className="mt-2 font-serif text-3xl sm:text-4xl leading-[0.95]">Quick answers</h2>
+          </div>
           <div className="mt-8 grid gap-3 sm:grid-cols-2">
             <Faq q="Who can sign up?">
-              Anyone with a valid academic email (.edu, .edu.xx, .ac.xx, .uni.xx) can create a student account. Non-students can sign up as
-              general accounts and reach the wider public audience.
+              Anyone with a valid academic email can create a student account. Non-students can join as general accounts.
             </Faq>
             <Faq q="How do credits work?">
-              You spend credits to publish a survey and earn 1 credit for each quality response you submit. CampusVerify is free to use —
-              every credit you spend comes from answering other people's surveys.
+              You spend credits to publish and earn 1 credit for each quality response you give.
             </Faq>
-            <Faq q="Can I target specific departments?">
-              Yes — pick the Targeted tier or higher to filter by department, year, country, age range, and interests.
-            </Faq>
-            <Faq q="How do I get more credits?">
-              Open your feed and answer surveys from other people. Each quality response earns you 1 credit — fuel for your own research.
+            <Faq q="Can I target specific students?">
+              Yes — filter by department, year, country, age range, and interests.
             </Faq>
             <Faq q="Is my data private?">
-              Survey creators see responses, not respondent identities beyond what your questions ask. See the{" "}
-              <Link to="/privacy" className="font-semibold underline">Privacy Policy</Link> for the full picture.
-            </Faq>
-            <Faq q="What if I forgot my password?">
-              Use the <Link to="/forgot-password" className="font-semibold underline">Forgot password</Link> link on the login screen.
-              We'll email a secure reset link.
+              Creators see responses, not identities beyond what your questions ask. See our{" "}
+              <Link to="/privacy" className="font-semibold underline">Privacy Policy</Link>.
             </Faq>
           </div>
         </section>
@@ -290,7 +247,7 @@ function Landing() {
           <MessageCircleQuestion className="mx-auto h-8 w-8" />
           <h2 className="mt-3 font-serif text-4xl sm:text-5xl leading-[0.95]">Ready to ask <em>better questions?</em></h2>
           <p className="mx-auto mt-3 max-w-md text-sm opacity-80">
-            Sign up in under a minute. Start with free credits. Publish your first survey today.
+            Join in under a minute and start collecting real responses today.
           </p>
           <div className="mt-6 flex justify-center">
             {isSignedIn ? (
