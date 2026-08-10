@@ -16,11 +16,9 @@ import {
   NotebookPen,
   BookOpen,
   ArrowUpRight,
-  GraduationCap,
   MessageCircleQuestion,
   Send,
   Inbox,
-  Trophy,
   Menu,
 } from "lucide-react";
 
