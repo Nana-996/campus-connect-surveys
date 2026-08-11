@@ -665,10 +665,10 @@ function UsersPanel() {
         sorted.sort((a, b) => (a.full_name ?? "").localeCompare(b.full_name ?? ""));
         break;
       case "credits-desc":
-        sorted.sort((a, b) => (b.earned_credits ?? 0) - (a.earned_credits ?? 0));
+        sorted.sort((a, b) => ((b.earned_credits ?? 0) + (b.paid_credits ?? 0)) - ((a.earned_credits ?? 0) + (a.paid_credits ?? 0)));
         break;
       case "credits-asc":
-        sorted.sort((a, b) => (a.earned_credits ?? 0) - (b.earned_credits ?? 0));
+        sorted.sort((a, b) => ((a.earned_credits ?? 0) + (a.paid_credits ?? 0)) - ((b.earned_credits ?? 0) + (b.paid_credits ?? 0)));
         break;
       case "university":
         sorted.sort((a, b) => (a.university_name ?? "").localeCompare(b.university_name ?? ""));
