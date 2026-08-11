@@ -1223,6 +1223,7 @@ export type Database = {
           full_name: string
           id: string
           is_flagged: boolean
+          paid_credits: number
           roles: Database["public"]["Enums"]["app_role"][]
           university_domain: string
           university_name: string
