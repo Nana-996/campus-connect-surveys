@@ -206,6 +206,16 @@ function Create() {
     } catch {}
   }, [tier, title, description, audience, responseGoal, expiresAt, allowGeneral, questions, respondentBonus, minResponseSeconds]);
 
+  // Let the user know their in-progress draft survived a refresh / connection drop.
+  const restoredRef = useRef(
+    !!(d.title || d.description || (d.questions?.some((q) => q.text?.trim()) ?? false)),
+  );
+  useEffect(() => {
+    if (!restoredRef.current) return;
+    restoredRef.current = false;
+    toast.info("Draft restored — we saved where you left off.");
+  }, []);
+
 
   // Reset bonus when switching off Pro
   useEffect(() => { if (tier !== "pro" && respondentBonus !== 0) setRespondentBonus(0); }, [tier]);
