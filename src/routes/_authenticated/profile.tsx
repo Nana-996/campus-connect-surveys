@@ -289,25 +289,43 @@ function Profile() {
             <p className="text-[11px] uppercase tracking-[0.25em] opacity-70">Your credits</p>
             <Sparkles className="h-4 w-4 opacity-80" />
           </div>
-          <p className="mt-2 font-serif text-7xl leading-none">{profile.earned_credits}</p>
-          <p className="mt-2 text-xs opacity-80">
-            Earn credits by answering surveys — 1 credit per quality response. Spend them to publish your own.
+          <p className="mt-2 font-serif text-7xl leading-none">
+            {isGeneral || isAlumni ? (profile as any).paid_credits ?? 0 : profile.earned_credits}
           </p>
-          <Link to="/feed">
-            <Button className="mt-6 rounded-full bg-highlight text-highlight-foreground hover:bg-highlight/90">
-              <Sparkles className="mr-1 h-4 w-4" /> Earn credits — answer surveys
-            </Button>
-          </Link>
+          <p className="mt-2 text-xs opacity-80">
+            {isGeneral || isAlumni
+              ? "Credits you can spend to publish surveys. Top up any time — admin awards land here too."
+              : "Earn credits by answering surveys — 1 credit per quality response. Spend them to publish your own."}
+          </p>
+          {isGeneral || isAlumni ? (
+            <Link to="/buy-credits">
+              <Button className="mt-6 rounded-full bg-highlight text-highlight-foreground hover:bg-highlight/90">
+                <Sparkles className="mr-1 h-4 w-4" /> Buy credits
+              </Button>
+            </Link>
+          ) : (
+            <Link to="/feed">
+              <Button className="mt-6 rounded-full bg-highlight text-highlight-foreground hover:bg-highlight/90">
+                <Sparkles className="mr-1 h-4 w-4" /> Earn credits — answer surveys
+              </Button>
+            </Link>
+          )}
         </div>
 
-        {/* Earned wallet */}
+        {/* Second wallet */}
         <div className="sm:col-span-2 rounded-3xl border border-foreground/15 bg-accent p-6 text-accent-foreground shadow-paper">
-          <p className="text-[11px] uppercase tracking-[0.25em] opacity-70">Earned this month</p>
-          <p className="mt-2 font-serif text-6xl leading-none">{profile.earned_credits}</p>
-          <p className="mt-2 text-[11px] opacity-80">earn 1 per quality response</p>
-          {nextExpiry && (
+          <p className="text-[11px] uppercase tracking-[0.25em] opacity-70">
+            {isGeneral || isAlumni ? "Earned (legacy)" : "Purchased"}
+          </p>
+          <p className="mt-2 font-serif text-6xl leading-none">
+            {isGeneral || isAlumni ? profile.earned_credits : (profile as any).paid_credits ?? 0}
+          </p>
+          <p className="mt-2 text-[11px] opacity-80">
+            {isGeneral || isAlumni ? "not spendable on this account type" : "purchased credits never expire"}
+          </p>
+          {!isGeneral && !isAlumni && nextExpiry && (
             <p className="mt-3 inline-flex items-center gap-1 rounded-full bg-background/40 px-2 py-0.5 text-[10px] font-bold uppercase">
-              <Clock className="h-3 w-3" /> expires {new Date(nextExpiry).toLocaleDateString()}
+              <Clock className="h-3 w-3" /> earned expires {new Date(nextExpiry).toLocaleDateString()}
             </p>
           )}
         </div>
