@@ -4,9 +4,13 @@
 //   - queued survey responses awaiting upload
 import { get, set, del, keys, createStore } from "idb-keyval";
 
-const surveyStore = createStore("cv-offline", "surveys");
-const feedStore = createStore("cv-offline", "feed");
-const queueStore = createStore("cv-offline", "response-queue");
+// NOTE: idb-keyval's createStore only creates ONE object store per database
+// upgrade, so three stores sharing the "cv-offline" database name meant only
+// the first one ever existed ("object store not found" at runtime).
+// Each store gets its own database instead.
+const surveyStore = createStore("cv-offline-surveys", "surveys");
+const feedStore = createStore("cv-offline-feed", "feed");
+const queueStore = createStore("cv-offline-queue", "response-queue");
 
 export type CachedSurvey = {
   id: string;
