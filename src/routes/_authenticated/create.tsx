@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -205,6 +205,16 @@ function Create() {
       }));
     } catch {}
   }, [tier, title, description, audience, responseGoal, expiresAt, allowGeneral, questions, respondentBonus, minResponseSeconds]);
+
+  // Let the user know their in-progress draft survived a refresh / connection drop.
+  const restoredRef = useRef(
+    !!(d.title || d.description || (d.questions?.some((q) => q.text?.trim()) ?? false)),
+  );
+  useEffect(() => {
+    if (!restoredRef.current) return;
+    restoredRef.current = false;
+    toast.info("Draft restored — we saved where you left off.");
+  }, []);
 
 
   // Reset bonus when switching off Pro

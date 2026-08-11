@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -113,6 +113,27 @@ function SurveyPage() {
     if (typeof window === "undefined") return;
     try { localStorage.setItem(draftKey, JSON.stringify(answers)); } catch {}
   }, [answers, draftKey]);
+  // Save immediately on refresh/close/tab-hide so nothing is lost mid-answer.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const flush = () => { try { localStorage.setItem(draftKey, JSON.stringify(answersRef.current)); } catch {} };
+    window.addEventListener("beforeunload", flush);
+    window.addEventListener("pagehide", flush);
+    document.addEventListener("visibilitychange", flush);
+    return () => {
+      window.removeEventListener("beforeunload", flush);
+      window.removeEventListener("pagehide", flush);
+      document.removeEventListener("visibilitychange", flush);
+    };
+  }, [draftKey]);
+  const answersRef = useRef(answers);
+  useEffect(() => { answersRef.current = answers; }, [answers]);
+  const restoredAnswers = useRef(Object.keys(answers).length > 0);
+  useEffect(() => {
+    if (!restoredAnswers.current) return;
+    restoredAnswers.current = false;
+    toast.info("We restored your unfinished answers.");
+  }, []);
   const [submitting, setSubmitting] = useState(false);
   const [startedAt] = useState<number>(() => Date.now());
   const [responses, setResponses] = useState<any[] | null>(null);
