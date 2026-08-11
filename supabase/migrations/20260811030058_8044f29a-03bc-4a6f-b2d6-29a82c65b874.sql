@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public.target_text_matches(text, text) TO authenticated, anon;
