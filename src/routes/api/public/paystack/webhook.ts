@@ -41,7 +41,10 @@ export const Route = createFileRoute("/api/public/paystack/webhook")({
             ? ["activate_research_boost", { _reference: reference, _raw: event.data as never }]
             : reference.startsWith("up_")
               ? ["grant_university_slots", { _reference: reference, _raw: event.data as never }]
-              : ["credit_paystack_purchase", { _reference: reference, _raw: event.data as never }];
+              : reference.startsWith("don_")
+                ? ["mark_donation_paid", { _reference: reference, _raw: event.data as never }]
+                : ["credit_paystack_purchase", { _reference: reference, _raw: event.data as never }];
+
           const { error } = await supabaseAdmin.rpc(rpc[0] as never, rpc[1] as never);
           if (error) {
             // Unknown-reference errors are non-fatal — they mean this event isn't ours.
