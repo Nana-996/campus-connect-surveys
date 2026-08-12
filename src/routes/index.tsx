@@ -281,6 +281,8 @@ function Landing() {
               <li><a href="#faq" className="hover:text-primary">FAQ</a></li>
               <li><Link to="/signup" className="hover:text-primary">Sign up</Link></li>
               <li><Link to="/auth" className="hover:text-primary">Log in</Link></li>
+              <li><Link to="/donate" className="hover:text-primary">Donate</Link></li>
+
             </ul>
           </div>
           <div>
