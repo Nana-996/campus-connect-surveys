@@ -1,4 +1,6 @@
 import type { ComponentType } from 'react'
+import { template as donationReceiptTemplate } from './donation-receipt'
+
 
 export interface TemplateEntry {
   component: ComponentType<any>

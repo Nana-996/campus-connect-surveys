@@ -29,6 +29,7 @@ export async function initializeTransaction(input: {
   reference: string;
   callbackUrl: string;
   metadata?: Record<string, unknown>;
+  planCode?: string;
 }) {
   return (await paystackFetch("/transaction/initialize", {
     method: "POST",
@@ -39,9 +40,32 @@ export async function initializeTransaction(input: {
       reference: input.reference,
       callback_url: input.callbackUrl,
       metadata: input.metadata,
+      ...(input.planCode ? { plan: input.planCode } : {}),
     }),
   })) as { authorization_url: string; access_code: string; reference: string };
 }
+
+/**
+ * Find (or create) a monthly Paystack plan for a given GHS amount so recurring
+ * donation pledges can be charged automatically each month.
+ */
+export async function getOrCreateMonthlyDonationPlan(amountGhsPesewas: number): Promise<string> {
+  const name = `CampusVerify monthly donation ${amountGhsPesewas}`;
+  const list = (await paystackFetch(
+    `/plan?perPage=100&status=active&amount=${amountGhsPesewas}&interval=monthly`,
+  )) as Array<{ name?: string; plan_code?: string; amount?: number; interval?: string }>;
+  const existing = Array.isArray(list)
+    ? list.find((p) => p.name === name && p.amount === amountGhsPesewas && p.interval === "monthly")
+    : undefined;
+  if (existing?.plan_code) return existing.plan_code;
+
+  const created = (await paystackFetch("/plan", {
+    method: "POST",
+    body: JSON.stringify({ name, amount: amountGhsPesewas, interval: "monthly", currency: "GHS" }),
+  })) as { plan_code: string };
+  return created.plan_code;
+}
+
 
 export async function verifyTransaction(reference: string) {
   return (await paystackFetch(`/transaction/verify/${encodeURIComponent(reference)}`)) as {
