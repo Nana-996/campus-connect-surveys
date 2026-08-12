@@ -39,6 +39,8 @@ import { Route as AuthenticatedPollsRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as BlogStudentPerceptionSurveysRouteImport } from './routes/blog.student-perception-surveys'
 import { Route as BlogStudentSurveyQuestionsGuideRouteImport } from './routes/blog.student-survey-questions-guide'
+import { Route as DonateIndexRouteImport } from './routes/donate.index'
+import { Route as DonateThankYouRouteImport } from './routes/donate.thank-you'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as RTokenRouteImport } from './routes/r.$token'
@@ -209,6 +211,16 @@ const BlogStudentSurveyQuestionsGuideRoute =
     path: '/blog/student-survey-questions-guide',
     getParentRoute: () => rootRouteImport,
   } as any)
+const DonateIndexRoute = DonateIndexRouteImport.update({
+  id: '/donate/',
+  path: '/donate/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DonateThankYouRoute = DonateThankYouRouteImport.update({
+  id: '/donate/thank-you',
+  path: '/donate/thank-you',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
   path: '/email/unsubscribe',
@@ -328,10 +340,12 @@ export interface FileRoutesByFullPath {
   '/profile': typeof AuthenticatedProfileRoute
   '/blog/student-perception-surveys': typeof BlogStudentPerceptionSurveysRoute
   '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
+  '/donate/thank-you': typeof DonateThankYouRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/invite/$token': typeof InviteTokenRoute
   '/r/$token': typeof RTokenRoute
   '/survey/$id': typeof SurveyIdRoute
+  '/donate/': typeof DonateIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/manage/$surveyId': typeof AuthenticatedManageSurveyIdRoute
@@ -375,10 +389,12 @@ export interface FileRoutesByTo {
   '/profile': typeof AuthenticatedProfileRoute
   '/blog/student-perception-surveys': typeof BlogStudentPerceptionSurveysRoute
   '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
+  '/donate/thank-you': typeof DonateThankYouRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/invite/$token': typeof InviteTokenRoute
   '/r/$token': typeof RTokenRoute
   '/survey/$id': typeof SurveyIdRoute
+  '/donate': typeof DonateIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/manage/$surveyId': typeof AuthenticatedManageSurveyIdRoute
@@ -424,10 +440,12 @@ export interface FileRoutesById {
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/blog/student-perception-surveys': typeof BlogStudentPerceptionSurveysRoute
   '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
+  '/donate/thank-you': typeof DonateThankYouRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/invite/$token': typeof InviteTokenRoute
   '/r/$token': typeof RTokenRoute
   '/survey/$id': typeof SurveyIdRoute
+  '/donate/': typeof DonateIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/manage/$surveyId': typeof AuthenticatedManageSurveyIdRoute
@@ -473,10 +491,12 @@ export interface FileRouteTypes {
     | '/profile'
     | '/blog/student-perception-surveys'
     | '/blog/student-survey-questions-guide'
+    | '/donate/thank-you'
     | '/email/unsubscribe'
     | '/invite/$token'
     | '/r/$token'
     | '/survey/$id'
+    | '/donate/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/manage/$surveyId'
@@ -520,10 +540,12 @@ export interface FileRouteTypes {
     | '/profile'
     | '/blog/student-perception-surveys'
     | '/blog/student-survey-questions-guide'
+    | '/donate/thank-you'
     | '/email/unsubscribe'
     | '/invite/$token'
     | '/r/$token'
     | '/survey/$id'
+    | '/donate'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/manage/$surveyId'
@@ -568,10 +590,12 @@ export interface FileRouteTypes {
     | '/_authenticated/profile'
     | '/blog/student-perception-surveys'
     | '/blog/student-survey-questions-guide'
+    | '/donate/thank-you'
     | '/email/unsubscribe'
     | '/invite/$token'
     | '/r/$token'
     | '/survey/$id'
+    | '/donate/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/manage/$surveyId'
@@ -608,10 +632,12 @@ export interface RootRouteChildren {
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   BlogStudentPerceptionSurveysRoute: typeof BlogStudentPerceptionSurveysRoute
   BlogStudentSurveyQuestionsGuideRoute: typeof BlogStudentSurveyQuestionsGuideRoute
+  DonateThankYouRoute: typeof DonateThankYouRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   InviteTokenRoute: typeof InviteTokenRoute
   RTokenRoute: typeof RTokenRoute
   SurveyIdRoute: typeof SurveyIdRoute
+  DonateIndexRoute: typeof DonateIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
@@ -835,6 +861,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogStudentSurveyQuestionsGuideRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/donate/': {
+      id: '/donate/'
+      path: '/donate'
+      fullPath: '/donate/'
+      preLoaderRoute: typeof DonateIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/donate/thank-you': {
+      id: '/donate/thank-you'
+      path: '/donate/thank-you'
+      fullPath: '/donate/thank-you'
+      preLoaderRoute: typeof DonateThankYouRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/email/unsubscribe': {
       id: '/email/unsubscribe'
       path: '/email/unsubscribe'
@@ -1016,10 +1056,12 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   BlogStudentPerceptionSurveysRoute: BlogStudentPerceptionSurveysRoute,
   BlogStudentSurveyQuestionsGuideRoute: BlogStudentSurveyQuestionsGuideRoute,
+  DonateThankYouRoute: DonateThankYouRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   InviteTokenRoute: InviteTokenRoute,
   RTokenRoute: RTokenRoute,
   SurveyIdRoute: SurveyIdRoute,
+  DonateIndexRoute: DonateIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
