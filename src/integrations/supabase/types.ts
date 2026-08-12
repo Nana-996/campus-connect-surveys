@@ -62,6 +62,60 @@ export type Database = {
         }
         Relationships: []
       }
+      donations: {
+        Row: {
+          amount_ghs_pesewas: number
+          created_at: string
+          donor_email: string
+          donor_name: string
+          frequency: string
+          id: string
+          message: string | null
+          paid_at: string | null
+          paystack_reference: string
+          raw: Json | null
+          receipt_number: string | null
+          receipt_sent_at: string | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount_ghs_pesewas: number
+          created_at?: string
+          donor_email: string
+          donor_name?: string
+          frequency?: string
+          id?: string
+          message?: string | null
+          paid_at?: string | null
+          paystack_reference: string
+          raw?: Json | null
+          receipt_number?: string | null
+          receipt_sent_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount_ghs_pesewas?: number
+          created_at?: string
+          donor_email?: string
+          donor_name?: string
+          frequency?: string
+          id?: string
+          message?: string | null
+          paid_at?: string | null
+          paystack_reference?: string
+          raw?: Json | null
+          receipt_number?: string | null
+          receipt_sent_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       earning_caps: {
         Row: {
           day_bucket: string
@@ -1470,6 +1524,32 @@ export type Database = {
           response_goal: number
           title: string
         }[]
+      }
+      mark_donation_paid: {
+        Args: { _raw: Json; _reference: string }
+        Returns: {
+          amount_ghs_pesewas: number
+          created_at: string
+          donor_email: string
+          donor_name: string
+          frequency: string
+          id: string
+          message: string | null
+          paid_at: string | null
+          paystack_reference: string
+          raw: Json | null
+          receipt_number: string | null
+          receipt_sent_at: string | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "donations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       move_to_dlq: {
         Args: {
