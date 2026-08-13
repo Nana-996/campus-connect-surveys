@@ -126,6 +126,9 @@ function Landing() {
                 <SheetClose asChild>
                   <a href="#faq" className="py-2 hover:text-foreground">FAQ</a>
                 </SheetClose>
+                <SheetClose asChild>
+                  <Link to="/donate" className="py-2 hover:text-foreground">Support</Link>
+                </SheetClose>
                 <div className="my-2 h-px bg-border" />
                 {isSignedIn ? (
                   <SheetClose asChild>
