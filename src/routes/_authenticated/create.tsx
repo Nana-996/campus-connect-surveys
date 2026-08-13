@@ -614,8 +614,9 @@ function Create() {
               </span>
             </div>
             <p className="mt-2 text-[11px] text-muted-foreground">
-              Max +3 bonus credits per response. The total reward pool ({respondentBonus} × {goalNum} response goal = {bonusTotal} credits) is held from your balance at publish.
+              Max +3 bonus credits per response. This reward pool ({respondentBonus} × {goalNum} response goal = {bonusTotal} credits) is funded by CampusVerify — nothing extra is deducted from your balance.
             </p>
+
           </div>
         )}
 
