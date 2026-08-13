@@ -192,7 +192,11 @@ function Create() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slotsRef]);
 
+  // Set once the survey is published so autosave stops re-writing a stale draft.
+  const publishedRef = useRef(false);
+
   useEffect(() => {
+    if (publishedRef.current) return;
     try {
       localStorage.setItem(DRAFT_KEY, JSON.stringify({
         tier, title, description,
@@ -235,7 +239,8 @@ function Create() {
     : responseGoal ? Math.max(1, Math.min(tierMax, parseInt(responseGoal, 10) || tierMax)) : tierMax;
   const bonusTotal = tier === "pro" ? respondentBonus * goalNum : 0;
   const baseTierCost = isGeneral ? TIERS[tier].cost * 2 : TIERS[tier].cost;
-  const totalCost = baseTierCost + bonusTotal;
+  // Respondent bonus credits are funded by the platform — never charged to the creator.
+  const totalCost = baseTierCost;
   const spendable = isGeneral ? (profile?.paid_credits ?? 0) : (profile?.earned_credits ?? 0);
   const canAffordTotal = spendable >= totalCost;
 
@@ -299,14 +304,26 @@ function Create() {
         .single();
       if (error) throw error;
 
+      publishedRef.current = true;
+      try { localStorage.removeItem(DRAFT_KEY); } catch {}
+
       if (isBoost) {
-        try { localStorage.removeItem(DRAFT_KEY); } catch {}
         const res = await startBoost({
           data: { surveyId: data.id, boostTier: selectedBoost.id, originUrl: window.location.origin },
         });
         window.location.href = res.authorizationUrl;
         return;
       }
+
+      // Reset the studio so a fresh visit never shows the published survey again.
+      setTitle("");
+      setDescription("");
+      setQuestions([{ id: crypto.randomUUID(), type: "text", text: "", required: true }]);
+      setAudience({ department: "", year: "", country: "", age_range: "", interests: [], universities: [], required: [] });
+      setResponseGoal("");
+      setExpiresAt("");
+      setRespondentBonus(0);
+      setMinResponseSeconds("15");
 
       await refreshProfile();
       toast.success(`Published as ${TIERS[tier].label}!`);
@@ -613,8 +630,9 @@ function Create() {
               </span>
             </div>
             <p className="mt-2 text-[11px] text-muted-foreground">
-              Max +3 bonus credits per response. The total reward pool ({respondentBonus} × {goalNum} response goal = {bonusTotal} credits) is held from your balance at publish.
+              Max +3 bonus credits per response. This reward pool ({respondentBonus} × {goalNum} response goal = {bonusTotal} credits) is funded by CampusVerify — nothing extra is deducted from your balance.
             </p>
+
           </div>
         )}
 
