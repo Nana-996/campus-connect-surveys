@@ -235,7 +235,8 @@ function Create() {
     : responseGoal ? Math.max(1, Math.min(tierMax, parseInt(responseGoal, 10) || tierMax)) : tierMax;
   const bonusTotal = tier === "pro" ? respondentBonus * goalNum : 0;
   const baseTierCost = isGeneral ? TIERS[tier].cost * 2 : TIERS[tier].cost;
-  const totalCost = baseTierCost + bonusTotal;
+  // Respondent bonus credits are funded by the platform — never charged to the creator.
+  const totalCost = baseTierCost;
   const spendable = isGeneral ? (profile?.paid_credits ?? 0) : (profile?.earned_credits ?? 0);
   const canAffordTotal = spendable >= totalCost;
 
