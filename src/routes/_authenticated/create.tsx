@@ -192,7 +192,11 @@ function Create() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slotsRef]);
 
+  // Set once the survey is published so autosave stops re-writing a stale draft.
+  const publishedRef = useRef(false);
+
   useEffect(() => {
+    if (publishedRef.current) return;
     try {
       localStorage.setItem(DRAFT_KEY, JSON.stringify({
         tier, title, description,
