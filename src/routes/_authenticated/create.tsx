@@ -304,14 +304,26 @@ function Create() {
         .single();
       if (error) throw error;
 
+      publishedRef.current = true;
+      try { localStorage.removeItem(DRAFT_KEY); } catch {}
+
       if (isBoost) {
-        try { localStorage.removeItem(DRAFT_KEY); } catch {}
         const res = await startBoost({
           data: { surveyId: data.id, boostTier: selectedBoost.id, originUrl: window.location.origin },
         });
         window.location.href = res.authorizationUrl;
         return;
       }
+
+      // Reset the studio so a fresh visit never shows the published survey again.
+      setTitle("");
+      setDescription("");
+      setQuestions([{ id: crypto.randomUUID(), type: "text", text: "", required: true }]);
+      setAudience({ department: "", year: "", country: "", age_range: "", interests: [], universities: [], required: [] });
+      setResponseGoal("");
+      setExpiresAt("");
+      setRespondentBonus(0);
+      setMinResponseSeconds("15");
 
       await refreshProfile();
       toast.success(`Published as ${TIERS[tier].label}!`);
