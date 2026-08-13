@@ -218,6 +218,46 @@ function Landing() {
           </Tile>
         </section>
 
+        {/* Donation CTA — stationery card */}
+        <section className="mt-12 scroll-mt-20">
+          <div className="relative rounded-3xl border border-border bg-card p-8 text-center shadow-paper sm:p-12">
+            {/* Top academic ornament */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-4">
+              <div className="h-px w-8 bg-primary/30" />
+            </div>
+
+            {/* Corner accents */}
+            <div className="absolute top-3 left-3 h-3 w-3 border-t border-l border-highlight/40" />
+            <div className="absolute bottom-3 right-3 h-3 w-3 border-b border-r border-highlight/40" />
+
+            <h2 className="font-serif text-2xl italic leading-tight text-primary sm:text-3xl">
+              Keep CampusVerify independent
+            </h2>
+            <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">
+              We rely on the community to keep this a private, secure, ad-free space for campus research. Every contribution supports student-led surveys.
+            </p>
+
+            <div className="mt-8 flex flex-col items-center gap-4">
+              <Link to="/donate">
+                <Button className="rounded-full bg-primary px-8 text-primary-foreground hover:bg-primary/90">
+                  Support our mission
+                </Button>
+              </Link>
+
+              <div className="flex items-center gap-4">
+                <span className="h-px w-8 bg-border" />
+                <Link
+                  to="/donate"
+                  className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground hover:text-primary"
+                >
+                  Learn more about our funding
+                </Link>
+                <span className="h-px w-8 bg-border" />
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* FAQ */}
         <section id="faq" className="mt-20 scroll-mt-20">
           <div className="text-center">
