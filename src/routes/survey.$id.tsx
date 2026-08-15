@@ -149,28 +149,30 @@ function SurveyPage() {
   }>(null);
 
   const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/survey/${id}` : `/survey/${id}`;
+  const shareInput = {
+    title: survey?.title,
+    description: survey?.description,
+    questionCount: survey?.questions?.length ?? 0,
+    url: shareUrl,
+  };
   const handleShare = async () => {
-    const shareData = {
-      title: survey?.title ? `Take this survey: ${survey.title}` : "Take this survey",
-      text: survey?.description || "Help me out by answering this quick verified survey on CampusVerify.",
-      url: shareUrl,
-    };
     try {
       if (typeof navigator !== "undefined" && (navigator as any).share) {
-        await (navigator as any).share(shareData);
+        await (navigator as any).share(shareData(shareInput));
         return;
       }
     } catch { /* user cancelled — fall through to copy */ }
     try {
-      await navigator.clipboard.writeText(shareUrl);
+      await navigator.clipboard.writeText(shareMessage(shareInput));
       setCopied(true);
-      toast.success("Link copied! Share it anywhere.");
+      toast.success("Message + link copied! Paste it anywhere.");
       setTimeout(() => setCopied(false), 2500);
     } catch {
-      toast.error("Couldn't copy. Long-press the link to copy manually.");
+      toast.error("Couldn't copy. Long-press the text to copy manually.");
       setCopied(true);
     }
   };
+
 
   const handleDelete = async () => {
     if (!survey) return;
