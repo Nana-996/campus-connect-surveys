@@ -157,7 +157,8 @@ function MySurveys() {
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => handleShare(s.id)}
+                  onClick={() => handleShare(s)}
+
                   className="rounded-full border-foreground/30 bg-background/40"
                 >
                   {sharedId === s.id ? <Check className="mr-1 h-3.5 w-3.5" /> : <Share2 className="mr-1 h-3.5 w-3.5" />}
