@@ -5,6 +5,8 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { safeErrorMessage } from "@/lib/safe-error";
+import { shareData, shareMessage } from "@/lib/share-message";
+
 import { Users, Eye, ArrowUpRight, BarChart3, Share2, Copy, Check, Trash2 } from "lucide-react";
 import {
   AlertDialog,
