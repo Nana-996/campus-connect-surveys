@@ -579,17 +579,18 @@ function SurveyPage() {
                 {copied ? "Copied" : "Share link"}
               </Button>
             </div>
-            <div className="mt-3 flex items-center gap-2 rounded-xl border border-foreground/15 bg-card px-3 py-2">
-              <code className="flex-1 truncate text-[11px] text-muted-foreground">{shareUrl}</code>
+            <div className="mt-3 rounded-xl border border-foreground/15 bg-card px-3 py-2">
+              <p className="whitespace-pre-line text-[11px] leading-relaxed text-muted-foreground">{shareMessage(shareInput)}</p>
               <button
                 type="button"
                 onClick={handleShare}
-                className="inline-flex shrink-0 items-center gap-1 rounded-full bg-foreground/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wider hover:bg-foreground/20"
-                aria-label="Copy link"
+                className="mt-2 inline-flex shrink-0 items-center gap-1 rounded-full bg-foreground/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wider hover:bg-foreground/20"
+                aria-label="Copy message and link"
               >
-                <Copy className="h-3 w-3" /> Copy
+                <Copy className="h-3 w-3" /> Copy message
               </button>
             </div>
+
           </div>
         </div>
 
