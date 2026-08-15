@@ -7,6 +7,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Coins, Home, PlusCircle, FolderOpen, User, LogOut, BarChart3, Briefcase, Shield, GraduationCap, GraduationCap as EarnIcon, Wallet } from "lucide-react";
 import { getMyManagerScope } from "@/lib/manager.functions";
 import { getMyFacultyScope } from "@/lib/faculty.functions";
+import { BrandMark } from "@/components/BrandMark";
+
 
 export function AppHeader() {
   const { profile, signOut } = useAuth();
