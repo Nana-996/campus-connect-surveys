@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { safeErrorMessage } from "@/lib/safe-error";
+import { shareData, shareMessage } from "@/lib/share-message";
+
 import { Download, ArrowLeft, Users, FileText, BarChart3, TrendingUp, Activity, Hash, Lock, ShieldCheck, Share2, Copy, Check, Trash2 } from "lucide-react";
 import {
   AlertDialog,
@@ -149,28 +151,30 @@ function SurveyPage() {
   }>(null);
 
   const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/survey/${id}` : `/survey/${id}`;
+  const shareInput = {
+    title: survey?.title,
+    description: survey?.description,
+    questionCount: survey?.questions?.length ?? 0,
+    url: shareUrl,
+  };
   const handleShare = async () => {
-    const shareData = {
-      title: survey?.title ? `Take this survey: ${survey.title}` : "Take this survey",
-      text: survey?.description || "Help me out by answering this quick verified survey on CampusVerify.",
-      url: shareUrl,
-    };
     try {
       if (typeof navigator !== "undefined" && (navigator as any).share) {
-        await (navigator as any).share(shareData);
+        await (navigator as any).share(shareData(shareInput));
         return;
       }
     } catch { /* user cancelled — fall through to copy */ }
     try {
-      await navigator.clipboard.writeText(shareUrl);
+      await navigator.clipboard.writeText(shareMessage(shareInput));
       setCopied(true);
-      toast.success("Link copied! Share it anywhere.");
+      toast.success("Message + link copied! Paste it anywhere.");
       setTimeout(() => setCopied(false), 2500);
     } catch {
-      toast.error("Couldn't copy. Long-press the link to copy manually.");
+      toast.error("Couldn't copy. Long-press the text to copy manually.");
       setCopied(true);
     }
   };
+
 
   const handleDelete = async () => {
     if (!survey) return;
@@ -575,17 +579,18 @@ function SurveyPage() {
                 {copied ? "Copied" : "Share link"}
               </Button>
             </div>
-            <div className="mt-3 flex items-center gap-2 rounded-xl border border-foreground/15 bg-card px-3 py-2">
-              <code className="flex-1 truncate text-[11px] text-muted-foreground">{shareUrl}</code>
+            <div className="mt-3 rounded-xl border border-foreground/15 bg-card px-3 py-2">
+              <p className="whitespace-pre-line text-[11px] leading-relaxed text-muted-foreground">{shareMessage(shareInput)}</p>
               <button
                 type="button"
                 onClick={handleShare}
-                className="inline-flex shrink-0 items-center gap-1 rounded-full bg-foreground/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wider hover:bg-foreground/20"
-                aria-label="Copy link"
+                className="mt-2 inline-flex shrink-0 items-center gap-1 rounded-full bg-foreground/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wider hover:bg-foreground/20"
+                aria-label="Copy message and link"
               >
-                <Copy className="h-3 w-3" /> Copy
+                <Copy className="h-3 w-3" /> Copy message
               </button>
             </div>
+
           </div>
         </div>
 
