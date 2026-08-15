@@ -61,13 +61,8 @@ function Landing() {
     <div className="min-h-screen">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
         <Link to="/" className="flex items-center gap-2 font-serif text-3xl text-primary">
-          <img
-            src="/logo-mark.png"
-            alt=""
-            width={32}
-            height={32}
-            className="h-8 w-8"
-          />
+          <BrandMark className="h-8 w-8" title="" />
+
           CampusVerify
         </Link>
 
