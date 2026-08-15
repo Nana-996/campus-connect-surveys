@@ -39,13 +39,8 @@ export function AppHeader() {
     <header className="sticky top-0 z-40 border-b border-foreground/15 bg-background/85 backdrop-blur">
       <div className="mx-auto grid h-16 max-w-5xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 sm:px-5">
         <Link to="/feed" className="flex min-w-0 items-center gap-2">
-          <img
-            src="/logo-mark.png"
-            alt="CampusVerify"
-            width={28}
-            height={28}
-            className="h-7 w-7 shrink-0"
-          />
+          <BrandMark className="h-7 w-7" title="CampusVerify" />
+
           <span className="truncate font-serif text-2xl leading-none text-primary sm:text-3xl">CampusVerify</span>
           <span className="hidden font-sans text-[10px] uppercase tracking-[0.25em] text-muted-foreground sm:inline">
             est. today
