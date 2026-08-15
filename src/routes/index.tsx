@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
+import { BrandMark } from "@/components/BrandMark";
+
 import {
   Sheet,
   SheetContent,
