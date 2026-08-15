@@ -42,18 +42,38 @@ function MySurveys() {
   const shareUrl = (id: string) =>
     typeof window !== "undefined" ? `${window.location.origin}/survey/${id}` : `/survey/${id}`;
 
-  const handleShare = async (id: string) => {
-    const url = shareUrl(id);
+  const messageFor = (s: Survey) =>
+    shareMessage({
+      title: s.title,
+      description: s.description,
+      questionCount: s.questions?.length ?? 0,
+      url: shareUrl(s.id),
+    });
+
+  const handleShare = async (s: Survey) => {
+    const payload = shareData({
+      title: s.title,
+      description: s.description,
+      questionCount: s.questions?.length ?? 0,
+      url: shareUrl(s.id),
+    });
     try {
-      await navigator.clipboard.writeText(url);
-      setSharedId(id);
-      toast.success("Link copied! Share it to get responses");
-      setTimeout(() => setSharedId((curr) => (curr === id ? null : curr)), 2500);
+      if (typeof navigator !== "undefined" && (navigator as any).share) {
+        await (navigator as any).share(payload);
+        return;
+      }
+    } catch { /* cancelled — fall through to copy */ }
+    try {
+      await navigator.clipboard.writeText(messageFor(s));
+      setSharedId(s.id);
+      toast.success("Message + link copied! Paste it anywhere.");
+      setTimeout(() => setSharedId((curr) => (curr === s.id ? null : curr)), 2500);
     } catch {
-      toast.error("Couldn't copy. Long-press the link to copy manually.");
-      setSharedId(id);
+      toast.error("Couldn't copy. Long-press the text to copy manually.");
+      setSharedId(s.id);
     }
   };
+
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
