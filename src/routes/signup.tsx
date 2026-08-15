@@ -1,3 +1,4 @@
+import { BrandMark } from "@/components/BrandMark";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -204,7 +205,7 @@ function SignupPage() {
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       <div className="relative hidden flex-col justify-between bg-primary p-12 text-primary-foreground lg:flex">
-        <Link to="/" className="font-serif text-3xl">CampusVerify</Link>
+        <Link to="/" className="flex items-center gap-2 font-serif text-3xl"><BrandMark className="h-8 w-8" title="" />CampusVerify</Link>
         <div>
           <p className="font-serif text-7xl leading-[0.9]">
             Join<br /><em>the conversation.</em>

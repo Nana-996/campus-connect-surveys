@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
+import { BrandMark } from "@/components/BrandMark";
+
 import {
   Sheet,
   SheetContent,
@@ -61,13 +63,8 @@ function Landing() {
     <div className="min-h-screen">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
         <Link to="/" className="flex items-center gap-2 font-serif text-3xl text-primary">
-          <img
-            src="/logo-mark.png"
-            alt=""
-            width={32}
-            height={32}
-            className="h-8 w-8"
-          />
+          <BrandMark className="h-8 w-8" title="" />
+
           CampusVerify
         </Link>
 
@@ -106,13 +103,8 @@ function Landing() {
             <SheetContent side="right" className="w-3/4 sm:max-w-sm">
               <SheetHeader>
                 <SheetTitle className="flex items-center gap-2 font-serif text-2xl text-primary text-left">
-                  <img
-                    src="/logo-mark.png"
-                    alt=""
-                    width={28}
-                    height={28}
-                    className="h-7 w-7"
-                  />
+                  <BrandMark className="h-7 w-7" title="" />
+
                   CampusVerify
                 </SheetTitle>
               </SheetHeader>
