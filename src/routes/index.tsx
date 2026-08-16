@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth";
+import { SocialLinks } from "@/components/SocialLinks";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -316,6 +317,7 @@ function Landing() {
             <p className="mt-2 max-w-xs text-xs text-muted-foreground">
               A credit-powered survey feed for verified university students and the curious general public.
             </p>
+            <SocialLinks className="mt-4" />
           </div>
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Product</p>

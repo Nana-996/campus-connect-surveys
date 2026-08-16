@@ -13,8 +13,9 @@ import { toast } from "sonner";
 import {
   ShieldAlert, Check, Trash2, Power, UserPlus, UserMinus, Flag, FlagOff, Plus,
   GraduationCap, BarChart3, ClipboardList, LayoutDashboard, Building2, Users,
-  FileText, Ban, ArrowRight, MessageSquare,
+  FileText, Ban, ArrowRight, MessageSquare, Link2, Pencil, X,
 } from "lucide-react";
+import { PLATFORM_META, PlatformIcon } from "@/components/SocialLinks";
 import {
   getAdminMetrics,
   listAdminUsers,
@@ -42,6 +43,9 @@ import {
   createSchoolInvite,
   listSchoolInvites,
   revokeSchoolInvite,
+  listSocialLinks,
+  upsertSocialLink,
+  deleteSocialLink,
 } from "@/lib/admin.functions";
 import {
   listLecturersForStaff,
@@ -113,6 +117,7 @@ function Admin() {
           { value: "evaluations", label: "Lecturers", icon: GraduationCap },
           { value: "flags", label: "Flags", icon: Flag, badge: metrics?.openFlags },
           { value: "domains", label: "Blocked", icon: Ban },
+          { value: "links", label: "Links", icon: Link2 },
         ]}
       />
 
@@ -124,6 +129,7 @@ function Admin() {
         {section === "evaluations" && <EvaluationsPanel />}
         {section === "flags" && <FlagsPanel />}
         {section === "domains" && <DomainsPanel />}
+        {section === "links" && <SocialLinksPanel />}
       </div>
     </div>
   );
@@ -1300,5 +1306,145 @@ function LecturerEvaluationsList({ lecturerId }: { lecturerId: string }) {
         </li>
       ))}
     </ul>
+  );
+}
+
+// ---------------- Social & website links ----------------
+type SocialLinkRow = {
+  id: string;
+  platform: string;
+  label: string | null;
+  url: string;
+  sort_order: number;
+  is_active: boolean;
+};
+
+function SocialLinksPanel() {
+  const qc = useQueryClient();
+  const fetchLinks = useServerFn(listSocialLinks);
+  const save = useServerFn(upsertSocialLink);
+  const remove = useServerFn(deleteSocialLink);
+
+  const empty = { id: undefined as string | undefined, platform: "website", label: "", url: "", sortOrder: 0, isActive: true };
+  const [form, setForm] = useState(empty);
+  const [saving, setSaving] = useState(false);
+
+  const { data: links = [] } = useQuery({ queryKey: ["admin", "social-links"], queryFn: () => fetchLinks() });
+  const refresh = () => qc.invalidateQueries({ queryKey: ["admin", "social-links"] });
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.url.trim()) return;
+    setSaving(true);
+    try {
+      await save({ data: { ...form, label: form.label || undefined } });
+      toast.success(form.id ? "Link updated" : "Link added");
+      setForm(empty);
+      refresh();
+    } catch (err: any) {
+      toast.error(err?.message ?? "Could not save link");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-5">
+      <div className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Public presence</p>
+        <h2 className="mt-1 font-serif text-3xl">Social & website <em className="text-primary">links.</em></h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          These appear in the site footer as small icon buttons — no raw URLs on show.
+        </p>
+
+        <form onSubmit={submit} className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,160px)_minmax(0,1fr)_minmax(0,180px)_auto]">
+          <div>
+            <Label className="text-xs">Platform</Label>
+            <select
+              value={form.platform}
+              onChange={(e) => setForm({ ...form, platform: e.target.value })}
+              className="mt-1 h-10 w-full rounded-xl border border-foreground/20 bg-background px-3 text-sm"
+            >
+              {Object.entries(PLATFORM_META).map(([key, meta]) => (
+                <option key={key} value={key}>{meta.label}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <Label className="text-xs">URL</Label>
+            <Input
+              className="mt-1 h-10 rounded-xl"
+              placeholder="https://instagram.com/yourhandle"
+              value={form.url}
+              onChange={(e) => setForm({ ...form, url: e.target.value })}
+            />
+          </div>
+          <div>
+            <Label className="text-xs">Tooltip (optional)</Label>
+            <Input
+              className="mt-1 h-10 rounded-xl"
+              placeholder="e.g. Founder's site"
+              value={form.label}
+              onChange={(e) => setForm({ ...form, label: e.target.value })}
+            />
+          </div>
+          <div className="flex items-end gap-2">
+            <Button type="submit" disabled={saving} className="h-10 rounded-xl">
+              {form.id ? <Check className="mr-1 h-3.5 w-3.5" /> : <Plus className="mr-1 h-3.5 w-3.5" />}
+              {form.id ? "Update" : "Add"}
+            </Button>
+            {form.id && (
+              <Button type="button" variant="outline" className="h-10 rounded-xl" onClick={() => setForm(empty)}>
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            )}
+          </div>
+        </form>
+      </div>
+
+      {links.length > 0 && (
+        <div className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Preview</p>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {(links as SocialLinkRow[]).filter((l) => l.is_active).map((l) => (
+              <span key={l.id} title={l.label || PLATFORM_META[l.platform]?.label} className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-foreground/15 bg-background text-muted-foreground">
+                <PlatformIcon platform={l.platform} className="h-4 w-4" />
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <ul className="divide-y divide-foreground/10 rounded-2xl border border-foreground/15 bg-card">
+        {(links as SocialLinkRow[]).map((l) => (
+          <li key={l.id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <PlatformIcon platform={l.platform} className="h-4 w-4" />
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold">{l.label || PLATFORM_META[l.platform]?.label || l.platform}</p>
+                <p className="truncate text-xs text-muted-foreground">{l.url}</p>
+              </div>
+              {!l.is_active && <Badge variant="outline" className="text-[10px]">Hidden</Badge>}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="outline" onClick={() => setForm({
+                id: l.id, platform: l.platform, label: l.label ?? "", url: l.url, sortOrder: l.sort_order, isActive: l.is_active,
+              })}><Pencil className="h-3 w-3" /></Button>
+              <Button size="sm" variant="outline" onClick={async () => {
+                await save({ data: { id: l.id, platform: l.platform as any, label: l.label ?? undefined, url: l.url, sortOrder: l.sort_order, isActive: !l.is_active } });
+                refresh();
+              }}><Power className="h-3 w-3" /></Button>
+              <Button size="sm" variant="outline" onClick={async () => {
+                await remove({ data: { id: l.id } });
+                toast.success("Link removed"); refresh();
+              }}><Trash2 className="h-3 w-3" /></Button>
+            </div>
+          </li>
+        ))}
+        {links.length === 0 && <li className="px-4 py-6 text-center text-sm text-muted-foreground">No links yet.</li>}
+      </ul>
+    </div>
   );
 }
