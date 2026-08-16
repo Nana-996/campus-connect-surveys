@@ -21,7 +21,7 @@ const TikTokIcon = (props: { className?: string }) => (
   </svg>
 );
 
-export const PLATFORM_META: Record<string, { label: string; Icon: (p: { className?: string }) => JSX.Element }> = {
+export const PLATFORM_META: Record<string, { label: string; Icon: (p: { className?: string }) => React.ReactElement }> = {
   website: { label: "Website", Icon: (p) => <Globe className={p.className} /> },
   x: { label: "X", Icon: (p) => <XIcon className={p.className} /> },
   instagram: { label: "Instagram", Icon: (p) => <Instagram className={p.className} /> },
