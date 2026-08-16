@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactElement } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Globe, Instagram, Facebook, Linkedin, Youtube, Github, Mail, MessageCircle } from "lucide-react";
 
@@ -21,7 +21,7 @@ const TikTokIcon = (props: { className?: string }) => (
   </svg>
 );
 
-export const PLATFORM_META: Record<string, { label: string; Icon: (p: { className?: string }) => React.ReactElement }> = {
+export const PLATFORM_META: Record<string, { label: string; Icon: (p: { className?: string }) => ReactElement }> = {
   website: { label: "Website", Icon: (p) => <Globe className={p.className} /> },
   x: { label: "X", Icon: (p) => <XIcon className={p.className} /> },
   instagram: { label: "Instagram", Icon: (p) => <Instagram className={p.className} /> },
