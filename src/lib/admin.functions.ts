@@ -401,3 +401,54 @@ export const revokeSchoolInvite = createServerFn({ method: "POST" })
     if (error) genericError(error);
     return { ok: true };
   });
+
+// ---------- Social / website links ----------
+const PLATFORMS = ["website", "x", "instagram", "facebook", "linkedin", "youtube", "tiktok", "github", "whatsapp", "email"] as const;
+
+export const listSocialLinks = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("social_links" as any)
+      .select("id, platform, label, url, sort_order, is_active")
+      .order("sort_order", { ascending: true });
+    if (error) genericError(error);
+    return (data ?? []) as any[];
+  });
+
+export const upsertSocialLink = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .inputValidator((d: unknown) =>
+    z.object({
+      id: z.string().uuid().optional(),
+      platform: z.enum(PLATFORMS),
+      label: z.string().trim().max(60).optional().or(z.literal("")),
+      url: z.string().trim().url().max(500),
+      sortOrder: z.number().int().min(0).max(999).default(0),
+      isActive: z.boolean().default(true),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const row = {
+      platform: data.platform,
+      label: data.label || null,
+      url: data.url,
+      sort_order: data.sortOrder,
+      is_active: data.isActive,
+    };
+    const q = data.id
+      ? context.supabase.from("social_links" as any).update(row).eq("id", data.id)
+      : context.supabase.from("social_links" as any).insert(row);
+    const { error } = await q;
+    if (error) genericError(error);
+    return { ok: true };
+  });
+
+export const deleteSocialLink = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.from("social_links" as any).delete().eq("id", data.id);
+    if (error) genericError(error);
+    return { ok: true };
+  });
