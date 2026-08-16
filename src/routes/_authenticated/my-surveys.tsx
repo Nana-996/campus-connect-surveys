@@ -5,9 +5,9 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { safeErrorMessage } from "@/lib/safe-error";
-import { shareData, shareMessage } from "@/lib/share-message";
+import { ShareMessageEditor } from "@/components/ShareMessageEditor";
 
-import { Users, Eye, ArrowUpRight, BarChart3, Share2, Copy, Check, Trash2 } from "lucide-react";
+import { Users, Eye, ArrowUpRight, BarChart3, Share2, Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,45 +37,12 @@ function MySurveys() {
   const { user } = useAuth();
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [loading, setLoading] = useState(true);
-  const [sharedId, setSharedId] = useState<string | null>(null);
+  const [shareOpen, setShareOpen] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Survey | null>(null);
   const [deleting, setDeleting] = useState(false);
 
   const shareUrl = (id: string) =>
     typeof window !== "undefined" ? `${window.location.origin}/survey/${id}` : `/survey/${id}`;
-
-  const messageFor = (s: Survey) =>
-    shareMessage({
-      title: s.title,
-      description: s.description,
-      questionCount: s.questions?.length ?? 0,
-      url: shareUrl(s.id),
-    });
-
-  const handleShare = async (s: Survey) => {
-    const payload = shareData({
-      title: s.title,
-      description: s.description,
-      questionCount: s.questions?.length ?? 0,
-      url: shareUrl(s.id),
-    });
-    try {
-      if (typeof navigator !== "undefined" && (navigator as any).share) {
-        await (navigator as any).share(payload);
-        return;
-      }
-    } catch { /* cancelled — fall through to copy */ }
-    try {
-      await navigator.clipboard.writeText(messageFor(s));
-      setSharedId(s.id);
-      toast.success("Message + link copied! Paste it anywhere.");
-      setTimeout(() => setSharedId((curr) => (curr === s.id ? null : curr)), 2500);
-    } catch {
-      toast.error("Couldn't copy. Long-press the text to copy manually.");
-      setSharedId(s.id);
-    }
-  };
-
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -159,12 +126,10 @@ function MySurveys() {
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => handleShare(s)}
-
+                  onClick={() => setShareOpen((curr) => (curr === s.id ? null : s.id))}
                   className="rounded-full border-foreground/30 bg-background/40"
                 >
-                  {sharedId === s.id ? <Check className="mr-1 h-3.5 w-3.5" /> : <Share2 className="mr-1 h-3.5 w-3.5" />}
-                  {sharedId === s.id ? "Copied" : "Share"}
+                  <Share2 className="mr-1 h-3.5 w-3.5" /> Share
                 </Button>
                 <Button
                   size="sm"
@@ -175,19 +140,15 @@ function MySurveys() {
                   <Trash2 className="mr-1 h-3.5 w-3.5" /> Delete
                 </Button>
               </div>
-              {sharedId === s.id && (
-                <div className="mt-3 rounded-2xl border border-foreground/15 bg-background/60 px-3 py-2">
-                  <p className="whitespace-pre-line text-[11px] leading-relaxed opacity-80">{messageFor(s)}</p>
-                  <button
-                    type="button"
-                    onClick={() => handleShare(s)}
-                    className="mt-2 inline-flex shrink-0 items-center gap-1 rounded-full bg-foreground/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wider hover:bg-foreground/20"
-                    aria-label="Copy message and link"
-                  >
-                    <Copy className="h-3 w-3" /> Copy message
-                  </button>
-                </div>
-
+              {shareOpen === s.id && (
+                <ShareMessageEditor
+                  className="mt-3"
+                  surveyId={s.id}
+                  title={s.title}
+                  description={s.description}
+                  questionCount={s.questions?.length ?? 0}
+                  url={shareUrl(s.id)}
+                />
               )}
             </div>
           ))}

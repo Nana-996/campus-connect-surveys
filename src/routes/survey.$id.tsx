@@ -9,9 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { safeErrorMessage } from "@/lib/safe-error";
-import { shareData, shareMessage } from "@/lib/share-message";
+import { ShareMessageEditor } from "@/components/ShareMessageEditor";
 
-import { Download, ArrowLeft, Users, FileText, BarChart3, TrendingUp, Activity, Hash, Lock, ShieldCheck, Share2, Copy, Check, Trash2 } from "lucide-react";
+import { Download, ArrowLeft, Users, FileText, BarChart3, TrendingUp, Activity, Hash, Lock, ShieldCheck, Check, Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -141,7 +141,6 @@ function SurveyPage() {
   const [responses, setResponses] = useState<any[] | null>(null);
   const [chartTypes, setChartTypes] = useState<Record<string, ChartType>>({});
   const [verifyOpen, setVerifyOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [result, setResult] = useState<null | {
@@ -151,30 +150,6 @@ function SurveyPage() {
   }>(null);
 
   const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/survey/${id}` : `/survey/${id}`;
-  const shareInput = {
-    title: survey?.title,
-    description: survey?.description,
-    questionCount: survey?.questions?.length ?? 0,
-    url: shareUrl,
-  };
-  const handleShare = async () => {
-    try {
-      if (typeof navigator !== "undefined" && (navigator as any).share) {
-        await (navigator as any).share(shareData(shareInput));
-        return;
-      }
-    } catch { /* user cancelled — fall through to copy */ }
-    try {
-      await navigator.clipboard.writeText(shareMessage(shareInput));
-      setCopied(true);
-      toast.success("Message + link copied! Paste it anywhere.");
-      setTimeout(() => setCopied(false), 2500);
-    } catch {
-      toast.error("Couldn't copy. Long-press the text to copy manually.");
-      setCopied(true);
-    }
-  };
-
 
   const handleDelete = async () => {
     if (!survey) return;
@@ -569,28 +544,20 @@ function SurveyPage() {
             {survey.target_year && <span className="rounded-full bg-accent px-3 py-1 text-accent-foreground">{survey.target_year}</span>}
           </div>
           <div className="mt-6 rounded-2xl border border-foreground/15 bg-background/60 p-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground">Share this survey</p>
-                <p className="mt-1 text-xs text-muted-foreground">Send the link to friends, classmates or your group chat — verified responses earn you data fast.</p>
-              </div>
-              <Button onClick={handleShare} size="sm" className="rounded-full bg-primary">
-                {copied ? <Check className="mr-1 h-4 w-4" /> : <Share2 className="mr-1 h-4 w-4" />}
-                {copied ? "Copied" : "Share link"}
-              </Button>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground">Share this survey</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Send the link to friends, classmates or your group chat — the explainer travels with it, and you can rewrite it in your own words.
+              </p>
             </div>
-            <div className="mt-3 rounded-xl border border-foreground/15 bg-card px-3 py-2">
-              <p className="whitespace-pre-line text-[11px] leading-relaxed text-muted-foreground">{shareMessage(shareInput)}</p>
-              <button
-                type="button"
-                onClick={handleShare}
-                className="mt-2 inline-flex shrink-0 items-center gap-1 rounded-full bg-foreground/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wider hover:bg-foreground/20"
-                aria-label="Copy message and link"
-              >
-                <Copy className="h-3 w-3" /> Copy message
-              </button>
-            </div>
-
+            <ShareMessageEditor
+              className="mt-3"
+              surveyId={id}
+              title={survey.title}
+              description={survey.description}
+              questionCount={survey.questions?.length ?? 0}
+              url={shareUrl}
+            />
           </div>
         </div>
 
