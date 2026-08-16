@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { safeErrorMessage } from "@/lib/safe-error";
 import { ShareMessageEditor } from "@/components/ShareMessageEditor";
 
-import { Download, ArrowLeft, Users, FileText, BarChart3, TrendingUp, Activity, Hash, Lock, ShieldCheck, Share2, Copy, Check, Trash2 } from "lucide-react";
+import { Download, ArrowLeft, Users, FileText, BarChart3, TrendingUp, Activity, Hash, Lock, ShieldCheck, Check, Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -141,7 +141,6 @@ function SurveyPage() {
   const [responses, setResponses] = useState<any[] | null>(null);
   const [chartTypes, setChartTypes] = useState<Record<string, ChartType>>({});
   const [verifyOpen, setVerifyOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [result, setResult] = useState<null | {
