@@ -6,6 +6,7 @@ import { Users, Filter, ArrowUpRight, Sparkles, WifiOff } from "lucide-react";
 
 import { tagLabel, ageLabel, AGE_RANGES, COUNTRIES, INTEREST_TAGS } from "@/lib/interests";
 import { cacheFeed, getCachedFeed } from "@/lib/offline-store";
+import { VisibilityBadge } from "@/components/VisibilityBadge";
 
 type Survey = {
   id: string;
@@ -23,6 +24,7 @@ type Survey = {
   created_at: string;
   tier?: string | null;
   boosted_until?: string | null;
+  visibility?: string | null;
 };
 
 export const Route = createFileRoute("/_authenticated/feed")({
@@ -439,6 +441,7 @@ function Feed() {
                   )}
                 </div>
                 <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-medium uppercase tracking-wider opacity-80">
+                  <VisibilityBadge visibility={s.visibility} />
                   <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{s.response_count}</span>
                   <span>·</span>
                   <span>{s.questions?.length ?? 0} Qs</span>

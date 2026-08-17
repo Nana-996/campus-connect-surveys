@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { safeErrorMessage } from "@/lib/safe-error";
 import { ShareMessageEditor } from "@/components/ShareMessageEditor";
+import { VisibilityBadge } from "@/components/VisibilityBadge";
+import { VisibilityControl } from "@/components/VisibilityControl";
+import type { Visibility } from "@/lib/visibility";
 
 import { Users, Eye, ArrowUpRight, BarChart3, Share2, Trash2 } from "lucide-react";
 import {
@@ -27,6 +30,7 @@ type Survey = {
   is_active: boolean;
   created_at: string;
   questions: any[];
+  visibility: Visibility;
 };
 
 export const Route = createFileRoute("/_authenticated/my-surveys")({
@@ -39,6 +43,7 @@ function MySurveys() {
   const [loading, setLoading] = useState(true);
   const [shareOpen, setShareOpen] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Survey | null>(null);
+  const [audienceOpen, setAudienceOpen] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
   const shareUrl = (id: string) =>
@@ -107,6 +112,7 @@ function MySurveys() {
                   </p>
                   <h3 className="mt-2 font-serif text-3xl leading-tight">{s.title}</h3>
                   <p className="mt-1 text-xs opacity-70">{s.questions?.length ?? 0} questions</p>
+                  <VisibilityBadge visibility={s.visibility} full className="mt-2" />
                 </div>
                 <div className="rounded-full bg-background/50 px-3 py-1 text-xs font-bold inline-flex items-center gap-1">
                   <Users className="h-3 w-3" /> {s.response_count}
@@ -134,12 +140,30 @@ function MySurveys() {
                 <Button
                   size="sm"
                   variant="outline"
+                  onClick={() => setAudienceOpen((curr) => (curr === s.id ? null : s.id))}
+                  className="rounded-full border-foreground/30 bg-background/40"
+                >
+                  <Users className="mr-1 h-3.5 w-3.5" /> Audience
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
                   onClick={() => setDeleteTarget(s)}
                   className="rounded-full border-destructive/40 bg-background/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
                 >
                   <Trash2 className="mr-1 h-3.5 w-3.5" /> Delete
                 </Button>
               </div>
+              {audienceOpen === s.id && (
+                <VisibilityControl
+                  className="mt-3"
+                  surveyId={s.id}
+                  value={s.visibility ?? "everyone"}
+                  onChange={(v) =>
+                    setSurveys((prev) => prev.map((x) => (x.id === s.id ? { ...x, visibility: v } : x)))
+                  }
+                />
+              )}
               {shareOpen === s.id && (
                 <ShareMessageEditor
                   className="mt-3"

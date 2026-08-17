@@ -25,6 +25,8 @@ import {
 import { FREE_UNIVERSITY_PICKS } from "@/lib/university-slots";
 import { InterestTagInput, type InterestEntry } from "@/components/InterestTagInput";
 import { AudienceBuilder, type AudienceValue, type CriterionKey } from "@/components/AudienceBuilder";
+import { VisibilityPicker } from "@/components/VisibilityPicker";
+import type { Visibility } from "@/lib/visibility";
 
 
 type Question = {
@@ -66,7 +68,7 @@ type Draft = {
   targetInterests: InterestEntry[]; requiredCriteria: CriterionKey[];
   targetUniversities: string[];
   responseGoal: string; expiresAt: string;
-  allowGeneral: boolean; questions: Question[]; respondentBonus: number;
+  allowGeneral: boolean; visibility?: Visibility; questions: Question[]; respondentBonus: number;
   minResponseSeconds: string;
 };
 
@@ -109,7 +111,10 @@ function Create() {
   });
   const [responseGoal, setResponseGoal] = useState<string>(d.responseGoal ?? "");
   const [expiresAt, setExpiresAt] = useState<string>(d.expiresAt ?? "");
-  const [allowGeneral, setAllowGeneral] = useState(d.allowGeneral ?? true);
+  const [visibility, setVisibility] = useState<Visibility>(
+    d.visibility ?? (d.allowGeneral === false ? "campus" : "everyone"),
+  );
+  const allowGeneral = visibility === "everyone";
   const [respondentBonus, setRespondentBonus] = useState<number>(
     Math.max(0, Math.min(3, d.respondentBonus ?? 0))
   );
@@ -204,11 +209,11 @@ function Create() {
         targetCountry: audience.country, targetAge: audience.age_range,
         targetInterests: audience.interests, requiredCriteria: audience.required,
         targetUniversities: audience.universities,
-        responseGoal, expiresAt, allowGeneral, questions,
+        responseGoal, expiresAt, allowGeneral, visibility, questions,
         respondentBonus, minResponseSeconds,
       }));
     } catch {}
-  }, [tier, title, description, audience, responseGoal, expiresAt, allowGeneral, questions, respondentBonus, minResponseSeconds]);
+  }, [tier, title, description, audience, responseGoal, expiresAt, visibility, questions, respondentBonus, minResponseSeconds]);
 
   // Let the user know their in-progress draft survived a refresh / connection drop.
   const restoredRef = useRef(
@@ -296,7 +301,7 @@ function Create() {
           response_goal: isBoost ? selectedBoost.responses : goalNum,
           respondent_bonus: !isBoost && tier === "pro" ? respondentBonus : 0,
           min_response_seconds: Math.max(0, Math.min(600, parseInt(minResponseSeconds, 10) || 15)),
-          allow_general_respondents: isBoost ? true : isGeneral ? true : allowGeneral,
+          visibility: isBoost ? "everyone" : visibility,
           ...(lecturerId ? { lecturer_id: lecturerId, is_evaluation: true, course_code: courseCode.trim() || null } : {}),
           ...(!isBoost && expiresIso ? { expires_at: expiresIso } : {}),
         })
@@ -324,6 +329,7 @@ function Create() {
       setExpiresAt("");
       setRespondentBonus(0);
       setMinResponseSeconds("15");
+      setVisibility("everyone");
 
       await refreshProfile();
       toast.success(`Published as ${TIERS[tier].label}!`);
@@ -570,26 +576,18 @@ function Create() {
             </div>
           </div>
 
-          {isGeneral ? (
-            <p className="rounded-xl border border-foreground/15 bg-background/40 p-3 text-[11px] text-muted-foreground">
-              Your surveys are open to the public — anyone on CampusVerify can find and answer them.
-            </p>
-          ) : (
-            <label className="flex items-start gap-3 rounded-xl border border-foreground/15 bg-background/40 p-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={allowGeneral}
-                onChange={(e) => setAllowGeneral(e.target.checked)}
-                className="mt-0.5 h-4 w-4 accent-primary"
-              />
-              <div>
-                <p className="text-xs font-semibold">Open to anyone (recommended)</p>
-                <p className="text-[11px] text-muted-foreground">
-                  On by default — students from other campuses and general users can find and answer this survey. Uncheck to limit responses to your own campus only.
-                </p>
-              </div>
-            </label>
-          )}
+          <VisibilityPicker
+            value={isBoost ? "everyone" : visibility}
+            onChange={setVisibility}
+            disabled={isBoost ? ["campus", "students", "private"] : []}
+            note={
+              isBoost
+                ? "Research Boost buys reach, so boosted surveys are always open to everyone."
+                : visibility === "private"
+                  ? "After publishing, add the email addresses you want to invite from My surveys."
+                  : "You can change this later from My surveys without losing responses."
+            }
+          />
         </div>
 
         {/* Pro-only: respondent bonus credits */}
