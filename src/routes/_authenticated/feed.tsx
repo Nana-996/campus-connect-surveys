@@ -441,6 +441,7 @@ function Feed() {
                   )}
                 </div>
                 <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-medium uppercase tracking-wider opacity-80">
+                  <VisibilityBadge visibility={s.visibility} />
                   <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{s.response_count}</span>
                   <span>·</span>
                   <span>{s.questions?.length ?? 0} Qs</span>
