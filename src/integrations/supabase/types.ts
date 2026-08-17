@@ -758,6 +758,38 @@ export type Database = {
         }
         Relationships: []
       }
+      survey_invites: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          invited_by: string
+          survey_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          invited_by: string
+          survey_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          invited_by?: string
+          survey_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_invites_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       survey_report_views: {
         Row: {
           config: Json
@@ -994,6 +1026,7 @@ export type Database = {
           tier: string
           title: string
           university_domain: string
+          visibility: string
         }
         Insert: {
           allow_general_respondents?: boolean
@@ -1023,6 +1056,7 @@ export type Database = {
           tier?: string
           title: string
           university_domain: string
+          visibility?: string
         }
         Update: {
           allow_general_respondents?: boolean
@@ -1052,6 +1086,7 @@ export type Database = {
           tier?: string
           title?: string
           university_domain?: string
+          visibility?: string
         }
         Relationships: [
           {
@@ -1524,6 +1559,7 @@ export type Database = {
       is_academic_domain: { Args: { _domain: string }; Returns: boolean }
       is_alumni: { Args: { _user_id: string }; Returns: boolean }
       is_student_eligible: { Args: { _user_id?: string }; Returns: boolean }
+      is_survey_invited: { Args: { _survey_id: string }; Returns: boolean }
       list_lecturer_evaluations: {
         Args: { _lecturer_id: string }
         Returns: {
