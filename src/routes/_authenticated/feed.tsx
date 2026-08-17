@@ -6,6 +6,7 @@ import { Users, Filter, ArrowUpRight, Sparkles, WifiOff } from "lucide-react";
 
 import { tagLabel, ageLabel, AGE_RANGES, COUNTRIES, INTEREST_TAGS } from "@/lib/interests";
 import { cacheFeed, getCachedFeed } from "@/lib/offline-store";
+import { VisibilityBadge } from "@/components/VisibilityBadge";
 
 type Survey = {
   id: string;
@@ -23,6 +24,7 @@ type Survey = {
   created_at: string;
   tier?: string | null;
   boosted_until?: string | null;
+  visibility?: string | null;
 };
 
 export const Route = createFileRoute("/_authenticated/feed")({
