@@ -13,9 +13,11 @@ import { toast } from "sonner";
 import {
   ShieldAlert, Check, Trash2, Power, UserPlus, UserMinus, Flag, FlagOff, Plus,
   GraduationCap, BarChart3, ClipboardList, LayoutDashboard, Building2, Users,
-  FileText, Ban, ArrowRight, MessageSquare, Link2, Pencil, X,
+  FileText, Ban, ArrowRight, MessageSquare, Link2, Pencil, X, Megaphone,
 } from "lucide-react";
+import { BroadcastPanel } from "@/components/BroadcastPanel";
 import { PLATFORM_META, PlatformIcon } from "@/components/SocialLinks";
+
 import {
   getAdminMetrics,
   listAdminUsers,
@@ -118,6 +120,7 @@ function Admin() {
           { value: "flags", label: "Flags", icon: Flag, badge: metrics?.openFlags },
           { value: "domains", label: "Blocked", icon: Ban },
           { value: "links", label: "Links", icon: Link2 },
+          { value: "broadcast", label: "Broadcast", icon: Megaphone },
         ]}
       />
 
@@ -130,6 +133,8 @@ function Admin() {
         {section === "flags" && <FlagsPanel />}
         {section === "domains" && <DomainsPanel />}
         {section === "links" && <SocialLinksPanel />}
+        {section === "broadcast" && <BroadcastPanel />}
+
       </div>
     </div>
   );
