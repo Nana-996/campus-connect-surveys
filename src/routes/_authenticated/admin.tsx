@@ -13,9 +13,11 @@ import { toast } from "sonner";
 import {
   ShieldAlert, Check, Trash2, Power, UserPlus, UserMinus, Flag, FlagOff, Plus,
   GraduationCap, BarChart3, ClipboardList, LayoutDashboard, Building2, Users,
-  FileText, Ban, ArrowRight, MessageSquare, Link2, Pencil, X,
+  FileText, Ban, ArrowRight, MessageSquare, Link2, Pencil, X, Megaphone,
 } from "lucide-react";
+import { BroadcastPanel } from "@/components/BroadcastPanel";
 import { PLATFORM_META, PlatformIcon } from "@/components/SocialLinks";
+
 import {
   getAdminMetrics,
   listAdminUsers,
