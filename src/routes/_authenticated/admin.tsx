@@ -118,6 +118,7 @@ function Admin() {
           { value: "flags", label: "Flags", icon: Flag, badge: metrics?.openFlags },
           { value: "domains", label: "Blocked", icon: Ban },
           { value: "links", label: "Links", icon: Link2 },
+          { value: "broadcast", label: "Broadcast", icon: Megaphone },
         ]}
       />
 
@@ -130,6 +131,8 @@ function Admin() {
         {section === "flags" && <FlagsPanel />}
         {section === "domains" && <DomainsPanel />}
         {section === "links" && <SocialLinksPanel />}
+        {section === "broadcast" && <BroadcastPanel />}
+
       </div>
     </div>
   );
