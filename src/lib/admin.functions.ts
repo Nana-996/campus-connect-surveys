@@ -452,3 +452,82 @@ export const deleteSocialLink = createServerFn({ method: "POST" })
     if (error) genericError(error);
     return { ok: true };
   });
+
+// ---------- Broadcast audience (export recipients for an external email tool) ----------
+const broadcastFilters = z.object({
+  userType: z.enum(["all", "student", "general"]).default("all"),
+  role: z.enum(["all", "admin", "manager", "faculty", "none"]).default("all"),
+  universityDomain: z.string().max(120).optional(),
+  onlyConfirmed: z.boolean().default(true),
+});
+
+export const getBroadcastAudience = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .inputValidator((d: unknown) => broadcastFilters.parse(d ?? {}))
+  .handler(async ({ data, context }) => {
+    // Profiles (+roles) come through the admin-gated RPC; email addresses live in
+    // auth and are only reachable with the service-role client.
+    const { data: rows, error } = await context.supabase.rpc("admin_list_users" as any, { _search: undefined });
+    if (error) genericError(error);
+    const profiles = (rows ?? []) as Array<{
+      id: string; full_name: string; user_type: string;
+      university_name: string; university_domain: string;
+      roles: string[] | null;
+    }>;
+    const byId = new Map(profiles.map((p) => [p.id, p]));
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const authUsers: Array<{ id: string; email: string; confirmed: boolean }> = [];
+    for (let page = 1; page <= 20; page++) {
+      const { data: pageData, error: authError } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 1000 });
+      if (authError) genericError(authError);
+      for (const u of pageData?.users ?? []) {
+        if (u.email) {
+          authUsers.push({
+            id: u.id,
+            email: u.email,
+            confirmed: Boolean(u.email_confirmed_at ?? (u as any).confirmed_at),
+          });
+        }
+      }
+      if ((pageData?.users?.length ?? 0) < 1000) break;
+    }
+
+    const { data: suppressedRows } = await supabaseAdmin.from("suppressed_emails").select("email");
+    const suppressed = new Set((suppressedRows ?? []).map((r: any) => String(r.email).toLowerCase()));
+
+    let skippedSuppressed = 0;
+    let skippedUnconfirmed = 0;
+    const recipients: Array<{
+      email: string; name: string; userType: string; university: string; domain: string; roles: string[];
+    }> = [];
+
+    for (const u of authUsers) {
+      const p = byId.get(u.id);
+      if (!p) continue;
+      const roles = (p.roles ?? []).filter(Boolean);
+      if (data.userType !== "all" && p.user_type !== data.userType) continue;
+      if (data.role === "none" && roles.length > 0) continue;
+      if (data.role !== "all" && data.role !== "none" && !roles.includes(data.role)) continue;
+      if (data.universityDomain && p.university_domain !== data.universityDomain) continue;
+      if (suppressed.has(u.email.toLowerCase())) { skippedSuppressed += 1; continue; }
+      if (data.onlyConfirmed && !u.confirmed) { skippedUnconfirmed += 1; continue; }
+      recipients.push({
+        email: u.email,
+        name: p.full_name ?? "",
+        userType: p.user_type ?? "",
+        university: p.university_name ?? "",
+        domain: p.university_domain ?? "",
+        roles,
+      });
+    }
+
+    recipients.sort((a, b) => a.email.localeCompare(b.email));
+
+    const domains = Array.from(
+      new Set(profiles.map((p) => p.university_domain).filter((d): d is string => Boolean(d))),
+    ).sort();
+
+    return { recipients, total: recipients.length, skippedSuppressed, skippedUnconfirmed, domains };
+  });
