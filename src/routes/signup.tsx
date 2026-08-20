@@ -224,7 +224,8 @@ function SignupPage() {
 
       <div className="flex items-center justify-center px-6 py-10">
         <div className="w-full max-w-md">
-          <Link to="/" className="mb-8 inline-block font-serif text-3xl text-primary lg:hidden">
+          <Link to="/" className="mb-8 inline-flex items-center gap-2 font-serif text-3xl text-primary lg:hidden">
+            <img src="/logo-mark.png" alt="CampusVerify" width={36} height={36} className="h-9 w-9" />
             CampusVerify
           </Link>
           <h1 className="font-serif text-5xl leading-[0.95]">Create account.</h1>
