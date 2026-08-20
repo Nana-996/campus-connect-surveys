@@ -114,7 +114,10 @@ function AuthPage() {
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       <div className="relative hidden flex-col justify-between bg-primary p-12 text-primary-foreground lg:flex">
-        <Link to="/" className="font-serif text-3xl">CampusVerify</Link>
+        <Link to="/" className="flex items-center gap-3 font-serif text-3xl">
+          <img src="/logo-mark.png" alt="CampusVerify" width={44} height={44} className="h-11 w-11 rounded-xl bg-background p-1" />
+          CampusVerify
+        </Link>
         <div>
           <p className="font-serif text-7xl leading-[0.9]">
             Welcome<br /><em>{isStudent ? "back to campus." : "back."}</em>
