@@ -471,6 +471,7 @@ export type Database = {
           age_range: string | null
           country: string | null
           created_at: string
+          demographics_updated_at: string | null
           department: string
           earned_credits: number
           email_hash: string | null
@@ -493,6 +494,7 @@ export type Database = {
           age_range?: string | null
           country?: string | null
           created_at?: string
+          demographics_updated_at?: string | null
           department?: string
           earned_credits?: number
           email_hash?: string | null
@@ -515,6 +517,7 @@ export type Database = {
           age_range?: string | null
           country?: string | null
           created_at?: string
+          demographics_updated_at?: string | null
           department?: string
           earned_credits?: number
           email_hash?: string | null
