@@ -204,7 +204,10 @@ function SignupPage() {
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       <div className="relative hidden flex-col justify-between bg-primary p-12 text-primary-foreground lg:flex">
-        <Link to="/" className="font-serif text-3xl">CampusVerify</Link>
+        <Link to="/" className="flex items-center gap-3 font-serif text-3xl">
+          <img src="/logo-mark.png" alt="CampusVerify" width={44} height={44} className="h-11 w-11 rounded-xl bg-background p-1" />
+          CampusVerify
+        </Link>
         <div>
           <p className="font-serif text-7xl leading-[0.9]">
             Join<br /><em>the conversation.</em>
@@ -221,7 +224,8 @@ function SignupPage() {
 
       <div className="flex items-center justify-center px-6 py-10">
         <div className="w-full max-w-md">
-          <Link to="/" className="mb-8 inline-block font-serif text-3xl text-primary lg:hidden">
+          <Link to="/" className="mb-8 inline-flex items-center gap-2 font-serif text-3xl text-primary lg:hidden">
+            <img src="/logo-mark.png" alt="CampusVerify" width={36} height={36} className="h-9 w-9" />
             CampusVerify
           </Link>
           <h1 className="font-serif text-5xl leading-[0.95]">Create account.</h1>
