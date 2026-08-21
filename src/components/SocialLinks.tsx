@@ -65,7 +65,13 @@ export function SocialLinks({
   if (links.length === 0) return null;
 
   return (
-    <div className={`flex flex-wrap items-center gap-2 ${className}`}>
+    <div className={className}>
+      {label ? (
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+          {label}
+        </p>
+      ) : null}
+      <div className="flex flex-wrap items-center gap-2">
       {links.map((l) => {
         const name = l.label || PLATFORM_META[l.platform]?.label || "Link";
         return (
