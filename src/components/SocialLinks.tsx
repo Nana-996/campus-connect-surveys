@@ -40,7 +40,14 @@ export function PlatformIcon({ platform, className }: { platform: string; classN
 }
 
 /** Small icon row of the admin-managed social / personal website links. */
-export function SocialLinks({ className = "" }: { className?: string }) {
+export function SocialLinks({
+  className = "",
+  label = "Follow us on social media",
+}: {
+  className?: string;
+  /** Small caption shown above the icons. Pass null to hide it. */
+  label?: string | null;
+}) {
   const [links, setLinks] = useState<SocialLink[]>([]);
 
   useEffect(() => {
