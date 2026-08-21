@@ -88,6 +88,7 @@ export function SocialLinks({
           </a>
         );
       })}
+      </div>
     </div>
   );
 }
