@@ -408,7 +408,7 @@ function executiveSummary(L: Layout, stats: SurveyStats) {
   });
 }
 
-function questionSection(L: Layout, qs: QuestionStats, options: ReportOptions) {
+function questionSection(L: Layout, qs: QuestionStats, options: ReportOptions, isLast = false) {
   L.space(90);
   L.gap(4);
 
@@ -431,7 +431,7 @@ function questionSection(L: Layout, qs: QuestionStats, options: ReportOptions) {
 
   if (qs.answered === 0) {
     L.text("No answers were submitted for this question.", { size: 9, color: MUTED });
-    L.rule();
+    if (!isLast) L.rule();
     return;
   }
 
@@ -480,7 +480,7 @@ function questionSection(L: Layout, qs: QuestionStats, options: ReportOptions) {
     } else {
       L.text(`All ${t.verbatims.length} verbatim responses are available in the data package (responses_long.csv).`, { size: 8, color: MUTED });
     }
-    L.rule();
+    if (!isLast) L.rule();
     return;
   }
 
@@ -516,7 +516,7 @@ function questionSection(L: Layout, qs: QuestionStats, options: ReportOptions) {
       align: ["left", "right", "right", "right"],
     },
   );
-  L.rule();
+  if (!isLast) L.rule();
 }
 
 function crossTabSection(L: Layout, tabs: CrossTab[]) {
@@ -587,7 +587,7 @@ export async function buildResearchReport(args: {
 
   L.newPage();
   L.sectionTitle("Results question by question");
-  stats.questions.forEach((qs) => questionSection(L, qs, options));
+  stats.questions.forEach((qs, i) => questionSection(L, qs, options, i === stats.questions.length - 1));
 
   if (options.includeCrossTabs && options.mode === "full") {
     const closed = stats.questions.filter((q) => q.question.type !== "text" && q.answered > 0).map((q) => q.question);
