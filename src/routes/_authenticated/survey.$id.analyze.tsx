@@ -597,12 +597,16 @@ function AnalyzePage() {
               >
                 <FileText className="mr-1 h-3.5 w-3.5" /> Build Report
               </Link>
+              <SurveyExportDialog
+                survey={survey as any}
+                rows={filtered as any}
+                allRows={responses as any}
+                profiles={profileMap as any}
+                filtersLabel={activeFilterChips.length ? activeFilterChips.map((c) => `${String(c.k).replace("_", " ")} = ${c.v}`).join(", ") : null}
+                preparedBy={null}
+              />
               <Button size="sm" variant="outline" onClick={exportCSV} className="rounded-full">
-                <Download className="mr-1 h-3.5 w-3.5" /> CSV (raw)
-              </Button>
-              <Button size="sm" variant="outline" onClick={exportPDF} className="rounded-full">
-                {!isPremium && <Lock className="mr-1 h-3 w-3" />}
-                <FileText className="mr-1 h-3.5 w-3.5" /> Quick PDF
+                <Download className="mr-1 h-3.5 w-3.5" /> Quick CSV
               </Button>
               <Button size="sm" variant="outline" onClick={saveCurrentView} className="rounded-full">
                 {!isPremium && <Lock className="mr-1 h-3 w-3" />}
