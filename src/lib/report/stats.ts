@@ -273,6 +273,7 @@ export function computeSurveyStats(
       demoGroup("country", "Country"),
       demoGroup("age_range", "Age range"),
     ].filter((g) => g.rows.length > 0 && !(g.rows.length === 1 && g.rows[0].label === "Unspecified")),
+    questions,
   };
 }
 
