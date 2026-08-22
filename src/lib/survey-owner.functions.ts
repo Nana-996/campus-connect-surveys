@@ -22,7 +22,7 @@ export const getOwnerSurveyResults = createServerFn({ method: "GET" })
     const { data: survey, error: surveyError } = await supabaseAdmin
       .from("surveys")
       .select(
-        "id, creator_id, title, description, questions, response_count, response_goal, expires_at, created_at, tier, university_domain, target_department, target_year, is_active",
+        "id, creator_id, title, description, questions, response_count, response_goal, expires_at, created_at, tier, university_domain, target_department, target_year, target_country, target_age_range, target_interests, target_universities, required_criteria, allow_general_respondents, visibility, is_active",
       )
       .eq("id", data.surveyId)
       .maybeSingle();
