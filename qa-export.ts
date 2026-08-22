@@ -64,3 +64,8 @@ const blob = await buildResearchReport({
 });
 writeFileSync("/tmp/qa/report.pdf", Buffer.from(await blob.arrayBuffer()));
 console.log("ok", stats.n, stats.questions.length);
+
+import { buildDataPackage } from "@/lib/report/csv";
+const zip = await buildDataPackage({ survey, stats, rows, profiles, options: { ...DEFAULT_REPORT_OPTIONS, filtersLabel: "country = Ghana", preparedBy: "Nana Djan", verbatimLimit: 8 } } as any);
+writeFileSync("/tmp/qa/package.zip", Buffer.from(await zip.arrayBuffer()));
+console.log("zip ok");
