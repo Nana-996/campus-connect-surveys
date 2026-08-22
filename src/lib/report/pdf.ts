@@ -160,25 +160,27 @@ class Layout {
 
   keyValues(pairs: Array<[string, string]>) {
     const colW = this.contentW / 2 - 10;
-    pairs.forEach(([k, v], i) => {
-      const col = i % 2;
-      if (col === 0) this.space(30);
-      const x = this.margin + col * (colW + 20);
+    // Render two cells per row and advance by the taller of the two, so the
+    // left and right columns always stay on the same baseline grid.
+    for (let i = 0; i < pairs.length; i += 2) {
+      const row = [pairs[i], pairs[i + 1]].filter(Boolean) as Array<[string, string]>;
+      const wrapped = row.map(([, v]) => this.doc.splitTextToSize(v || "—", colW).slice(0, 3) as string[]);
+      const rowH = Math.max(30, 18 + Math.max(...wrapped.map((w) => w.length)) * 11) + 6;
+      this.space(rowH);
       const yStart = this.y;
-      this.doc.setFont("helvetica", "bold");
-      this.doc.setFontSize(7);
-      ink(this.doc, MUTED);
-      this.doc.text(k.toUpperCase(), x, yStart + 6);
-      this.doc.setFont("helvetica", "normal");
-      this.doc.setFontSize(9);
-      ink(this.doc, INK);
-      const lines = this.doc.splitTextToSize(v || "—", colW);
-      lines.slice(0, 3).forEach((ln: string, li: number) => this.doc.text(ln, x, yStart + 18 + li * 11));
-      if (col === 1 || i === pairs.length - 1) {
-        const used = 18 + Math.min(3, this.doc.splitTextToSize(v || "—", colW).length) * 11;
-        this.y = yStart + Math.max(30, used) + 4;
-      }
-    });
+      row.forEach(([k], col) => {
+        const x = this.margin + col * (colW + 20);
+        this.doc.setFont("helvetica", "bold");
+        this.doc.setFontSize(7);
+        ink(this.doc, MUTED);
+        this.doc.text(k.toUpperCase(), x, yStart + 6);
+        this.doc.setFont("helvetica", "normal");
+        this.doc.setFontSize(9);
+        ink(this.doc, INK);
+        wrapped[col].forEach((ln, li) => this.doc.text(ln, x, yStart + 18 + li * 11));
+      });
+      this.y = yStart + rowH;
+    }
   }
 
   table(head: string[], rows: string[][], opts: { widths?: number[]; align?: Array<"left" | "right"> } = {}) {
