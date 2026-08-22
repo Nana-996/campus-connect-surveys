@@ -21,6 +21,7 @@ import {
 } from "recharts";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { analyzeSentiment, classifyResponse } from "@/lib/text-analysis";
+import { SurveyExportDialog } from "@/components/SurveyExportDialog";
 
 type ChartType = "hbar" | "bar" | "pie" | "donut" | "line" | "area";
 const ALL_CHART_TYPES: ChartType[] = ["hbar", "bar", "pie", "donut", "line", "area"];
