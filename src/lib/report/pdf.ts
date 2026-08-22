@@ -133,7 +133,10 @@ class Layout {
     this.doc.setFont("helvetica", "bold");
     this.doc.setFontSize(7.5);
     ink(this.doc, MUTED);
-    this.doc.text(txt.toUpperCase(), this.margin, this.y + 6);
+    let label = txt.toUpperCase();
+    while (label.length > 1 && this.doc.getTextWidth(label) > this.contentW) label = label.slice(0, -1);
+    if (label.length < txt.length) label = `${label.slice(0, -1)}…`;
+    this.doc.text(label, this.margin, this.y + 6);
     this.y += 14;
   }
 
@@ -198,7 +201,12 @@ class Layout {
       let x = this.margin + 6;
       head.forEach((h, i) => {
         const right = align[i] === "right";
-        this.doc.text(h.toUpperCase(), right ? x + widths[i] - 12 : x, this.y + 10, right ? { align: "right" } : undefined);
+        const full = h.toUpperCase();
+        let t = full;
+        const maxW = widths[i] - 12;
+        while (t.length > 1 && this.doc.getTextWidth(t) > maxW) t = t.slice(0, -1);
+        if (t.length < full.length) t = `${t.slice(0, -1)}…`;
+        this.doc.text(t, right ? x + widths[i] - 12 : x, this.y + 10, right ? { align: "right" } : undefined);
         x += widths[i];
       });
       this.y += rowH;
