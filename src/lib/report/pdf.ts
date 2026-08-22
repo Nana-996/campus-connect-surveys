@@ -92,6 +92,9 @@ class Layout {
   }
 
   newPage() {
+    // Never emit an empty sheet: if nothing has been drawn on the current
+    // page yet, reuse it instead of adding a blank one.
+    if (this.y <= this.margin && this.doc.getNumberOfPages() > 1) return;
     this.doc.addPage();
     this.page += 1;
     this.paintPage();
