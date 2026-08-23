@@ -223,11 +223,12 @@ function SurveyPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, user?.id]);
 
-  // Auto-open the verify modal for unauthenticated visitors as soon as the survey loads.
+  // Unauthenticated visitors can read and answer the questions; we only ask
+  // them to sign up at submit time (or resume a pending submit after signup).
   useEffect(() => {
-    if (!loading && survey && !user) setVerifyOpen(true);
     if (user) setVerifyOpen(false);
-  }, [loading, survey, user?.id]);
+  }, [user?.id]);
+
 
   // Load creator-only or respondent-state data once signed in.
   useEffect(() => {
