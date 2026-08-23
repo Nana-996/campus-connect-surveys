@@ -598,7 +598,7 @@ function SurveyPage() {
           </div>
         </div>
 
-        {!user ? (
+        {!user && !survey.questions?.length ? (
           <div className="mt-6 rounded-3xl border border-dashed border-foreground/30 bg-card p-8 text-center shadow-paper">
             <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
               <Lock className="h-5 w-5" />
