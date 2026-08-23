@@ -271,25 +271,42 @@ function SurveyPage() {
     );
   };
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!survey) return;
-    if (!user) { setVerifyOpen(true); return; }
-    if (new Date(survey.expires_at) <= new Date()) { toast.error("This survey has closed."); return; }
-    if (survey.response_count >= survey.response_goal) { toast.error("This survey has reached its response goal."); return; }
+  const validateAnswers = () => {
+    if (!survey) return false;
+    if (new Date(survey.expires_at) <= new Date()) { toast.error("This survey has closed."); return false; }
+    if (survey.response_count >= survey.response_goal) { toast.error("This survey has reached its response goal."); return false; }
     for (const q of survey.questions) {
       const isRequired = q.required ?? true;
       if (isRequired && (!answers[q.id] || answers[q.id].toString().trim() === "")) {
-        toast.error("Please answer all required questions."); return;
+        toast.error("Please answer all required questions."); return false;
       }
+    }
+    return true;
+  };
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!survey) return;
+    if (!validateAnswers()) return;
+    if (!user) {
+      // Answers stay in the local draft; we submit them right after signup.
+      try { localStorage.setItem(pendingKey, "1"); } catch {}
+      setVerifyOpen(true);
+      return;
     }
     const duration = Date.now() - startedAt;
     if (duration < 15000) {
       toast.error(`Take your time — at least 15 seconds for quality credit (${Math.floor(duration/1000)}s so far).`);
       return;
     }
+    await doSubmit(duration);
+  };
+
+  const doSubmit = async (duration: number) => {
+    if (!survey || !user) return;
     setSubmitting(true);
     const isOffline = typeof navigator !== "undefined" && navigator.onLine === false;
+
     try {
       if (isOffline) {
         await enqueueResponse({
