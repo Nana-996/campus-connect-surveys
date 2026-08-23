@@ -107,6 +107,8 @@ function SurveyPage() {
   const [loading, setLoading] = useState(true);
   const [alreadyAnswered, setAlreadyAnswered] = useState(false);
   const draftKey = `cv:answers:${id}`;
+  const pendingKey = `cv:pending-submit:${id}`;
+
   const [answers, setAnswers] = useState<Record<string, string>>(() => {
     if (typeof window === "undefined") return {};
     try { return JSON.parse(localStorage.getItem(draftKey) || "{}"); } catch { return {}; }
@@ -223,11 +225,12 @@ function SurveyPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, user?.id]);
 
-  // Auto-open the verify modal for unauthenticated visitors as soon as the survey loads.
+  // Unauthenticated visitors can read and answer the questions; we only ask
+  // them to sign up at submit time (or resume a pending submit after signup).
   useEffect(() => {
-    if (!loading && survey && !user) setVerifyOpen(true);
     if (user) setVerifyOpen(false);
-  }, [loading, survey, user?.id]);
+  }, [user?.id]);
+
 
   // Load creator-only or respondent-state data once signed in.
   useEffect(() => {
@@ -270,25 +273,42 @@ function SurveyPage() {
     );
   };
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!survey) return;
-    if (!user) { setVerifyOpen(true); return; }
-    if (new Date(survey.expires_at) <= new Date()) { toast.error("This survey has closed."); return; }
-    if (survey.response_count >= survey.response_goal) { toast.error("This survey has reached its response goal."); return; }
+  const validateAnswers = () => {
+    if (!survey) return false;
+    if (new Date(survey.expires_at) <= new Date()) { toast.error("This survey has closed."); return false; }
+    if (survey.response_count >= survey.response_goal) { toast.error("This survey has reached its response goal."); return false; }
     for (const q of survey.questions) {
       const isRequired = q.required ?? true;
       if (isRequired && (!answers[q.id] || answers[q.id].toString().trim() === "")) {
-        toast.error("Please answer all required questions."); return;
+        toast.error("Please answer all required questions."); return false;
       }
+    }
+    return true;
+  };
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!survey) return;
+    if (!validateAnswers()) return;
+    if (!user) {
+      // Answers stay in the local draft; we submit them right after signup.
+      try { localStorage.setItem(pendingKey, "1"); } catch {}
+      setVerifyOpen(true);
+      return;
     }
     const duration = Date.now() - startedAt;
     if (duration < 15000) {
       toast.error(`Take your time — at least 15 seconds for quality credit (${Math.floor(duration/1000)}s so far).`);
       return;
     }
+    await doSubmit(duration);
+  };
+
+  const doSubmit = async (duration: number) => {
+    if (!survey || !user) return;
     setSubmitting(true);
     const isOffline = typeof navigator !== "undefined" && navigator.onLine === false;
+
     try {
       if (isOffline) {
         await enqueueResponse({
@@ -357,6 +377,23 @@ function SurveyPage() {
       setSubmitting(false);
     }
   };
+
+  // Someone answered before signing up: submit their saved answers as soon as
+  // their account exists (works even after an email-confirmation round trip).
+  const resumed = useRef(false);
+  useEffect(() => {
+    if (!user || !survey || alreadyAnswered || isOwner || resumed.current) return;
+    if (typeof window === "undefined") return;
+    if (localStorage.getItem(pendingKey) !== "1") return;
+    if (!survey.questions?.length) return;
+    if (!Object.keys(answersRef.current).length) return;
+    resumed.current = true;
+    try { localStorage.removeItem(pendingKey); } catch {}
+    void (async () => {
+      if (!validateAnswers()) return;
+      await doSubmit(Math.max(Date.now() - startedAt, 15000));
+    })();
+  }, [user?.id, survey?.id, alreadyAnswered, isOwner]);
 
 
   const exportCSV = () => {
@@ -561,7 +598,7 @@ function SurveyPage() {
           </div>
         </div>
 
-        {!user ? (
+        {!user && !survey.questions?.length ? (
           <div className="mt-6 rounded-3xl border border-dashed border-foreground/30 bg-card p-8 text-center shadow-paper">
             <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
               <Lock className="h-5 w-5" />
@@ -686,7 +723,17 @@ function SurveyPage() {
           </div>
         ) : (
           <form onSubmit={submit} className="mt-6 space-y-3">
+            {!user && (
+              <div className="flex items-start gap-3 rounded-3xl border border-dashed border-foreground/25 bg-card p-4 shadow-paper">
+                <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <p className="text-sm text-muted-foreground">
+                  Answer the questions now — you'll only be asked to create a free account when you submit,
+                  so your response counts and you earn a credit.
+                </p>
+              </div>
+            )}
             {survey.questions.map((q, i) => {
+
               const isRequired = q.required ?? true;
               return (
               <div key={q.id} className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
@@ -738,7 +785,8 @@ function SurveyPage() {
               );
             })}
             <Button type="submit" size="lg" className="h-14 w-full rounded-full bg-primary text-base" disabled={submitting}>
-              {submitting ? "Submitting…" : "Submit & earn 1 credit →"}
+              {submitting ? "Submitting…" : user ? "Submit & earn 1 credit →" : "Submit answers & create account →"}
+
             </Button>
           </form>
         )}

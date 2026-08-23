@@ -28,12 +28,17 @@ export const getSurveyPublic = createServerFn({ method: "GET" })
       return { survey: null, ownerName: null };
     }
     const s = result as Record<string, any>;
+    const questions = s.is_evaluation
+      ? sanitizeEvaluationQuestions(s.questions ?? [])
+      : (s.questions ?? []);
     return {
       survey: {
         id: s.id,
         creator_id: s.creator_id,
         title: s.title,
         description: s.description,
+        questions,
+        is_evaluation: s.is_evaluation ?? false,
         response_count: s.response_count,
         response_goal: s.response_goal,
         expires_at: s.expires_at,
@@ -44,6 +49,7 @@ export const getSurveyPublic = createServerFn({ method: "GET" })
       ownerName: s.owner_name || null,
     };
   });
+
 
 // Internal metadata keys that must never reach respondents on evaluations.
 // Stripped from each question and from each option (when options are objects).

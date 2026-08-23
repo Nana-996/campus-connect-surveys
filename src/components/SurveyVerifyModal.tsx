@@ -127,11 +127,12 @@ export function SurveyVerifyModal({ open, onClose, onVerified, surveyTitle }: Pr
             CampusVerify
           </div>
           <h2 id="verify-title" className="mt-3 font-serif text-3xl leading-tight">
-            Verify to Answer This Survey
+            Almost done — save your answers
           </h2>
           <p className="mt-1.5 text-sm opacity-90">
-            Create a quick account to earn credits and support student research.
+            Create a quick account (or log in) and we'll submit the answers you just filled in.
           </p>
+
           {surveyTitle && (
             <p className="mt-3 truncate text-[11px] font-semibold uppercase tracking-wider opacity-80">
               For: {surveyTitle}
