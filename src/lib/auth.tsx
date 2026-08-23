@@ -119,6 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
       setSession(s);
       if (s?.user) {
+        markActive();
         setTimeout(() => {
           loadProfile(s.user).catch((err) => {
             setProfile(null);
@@ -130,9 +131,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setProfileError(null);
       }
     });
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(async ({ data }) => {
+      // Stay signed in across visits, but drop the session after a long gap.
+      if (data.session?.user && isSessionStale()) {
+        clearActivity();
+        await supabase.auth.signOut();
+        setSession(null);
+        setProfile(null);
+        setLoading(false);
+        return;
+      }
       setSession(data.session);
       if (data.session?.user) {
+        markActive();
         loadProfile(data.session.user)
           .catch((err) => {
             setProfile(null);
@@ -145,6 +156,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     return () => sub.subscription.unsubscribe();
   }, []);
+
+  // Refresh the activity stamp while the app is in use.
+  useEffect(() => {
+    if (!session?.user) return;
+    markActive();
+    const onVisible = () => {
+      if (document.visibilityState === "visible") markActive();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    const id = window.setInterval(markActive, 5 * 60 * 1000);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisible);
+      window.clearInterval(id);
+    };
+  }, [session?.user?.id]);
+
 
   // Live-sync profile so admin credit grants & trigger updates appear immediately.
   useEffect(() => {
