@@ -107,6 +107,8 @@ function SurveyPage() {
   const [loading, setLoading] = useState(true);
   const [alreadyAnswered, setAlreadyAnswered] = useState(false);
   const draftKey = `cv:answers:${id}`;
+  const pendingKey = `cv:pending-submit:${id}`;
+
   const [answers, setAnswers] = useState<Record<string, string>>(() => {
     if (typeof window === "undefined") return {};
     try { return JSON.parse(localStorage.getItem(draftKey) || "{}"); } catch { return {}; }
