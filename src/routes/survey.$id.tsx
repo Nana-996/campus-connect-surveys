@@ -723,7 +723,17 @@ function SurveyPage() {
           </div>
         ) : (
           <form onSubmit={submit} className="mt-6 space-y-3">
+            {!user && (
+              <div className="flex items-start gap-3 rounded-3xl border border-dashed border-foreground/25 bg-card p-4 shadow-paper">
+                <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <p className="text-sm text-muted-foreground">
+                  Answer the questions now — you'll only be asked to create a free account when you submit,
+                  so your response counts and you earn a credit.
+                </p>
+              </div>
+            )}
             {survey.questions.map((q, i) => {
+
               const isRequired = q.required ?? true;
               return (
               <div key={q.id} className="rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper">
