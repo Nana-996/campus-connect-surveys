@@ -785,7 +785,8 @@ function SurveyPage() {
               );
             })}
             <Button type="submit" size="lg" className="h-14 w-full rounded-full bg-primary text-base" disabled={submitting}>
-              {submitting ? "Submitting…" : "Submit & earn 1 credit →"}
+              {submitting ? "Submitting…" : user ? "Submit & earn 1 credit →" : "Submit answers & create account →"}
+
             </Button>
           </form>
         )}
