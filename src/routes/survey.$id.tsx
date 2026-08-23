@@ -376,6 +376,23 @@ function SurveyPage() {
     }
   };
 
+  // Someone answered before signing up: submit their saved answers as soon as
+  // their account exists (works even after an email-confirmation round trip).
+  const resumed = useRef(false);
+  useEffect(() => {
+    if (!user || !survey || alreadyAnswered || isOwner || resumed.current) return;
+    if (typeof window === "undefined") return;
+    if (localStorage.getItem(pendingKey) !== "1") return;
+    if (!survey.questions?.length) return;
+    if (!Object.keys(answersRef.current).length) return;
+    resumed.current = true;
+    try { localStorage.removeItem(pendingKey); } catch {}
+    void (async () => {
+      if (!validateAnswers()) return;
+      await doSubmit(Math.max(Date.now() - startedAt, 15000));
+    })();
+  }, [user?.id, survey?.id, alreadyAnswered, isOwner]);
+
 
   const exportCSV = () => {
     if (!survey || !responses) return;
