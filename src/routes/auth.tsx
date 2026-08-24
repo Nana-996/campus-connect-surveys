@@ -50,6 +50,7 @@ function AuthPage() {
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [showResend, setShowResend] = useState(false);
+  const [remember, setRemember] = useState(true);
 
   const nextPath = safeNext(search.next);
 
@@ -65,7 +66,7 @@ function AuthPage() {
     setFormError(null);
     setSubmitting(true);
     try {
-      await signIn(email, password);
+      await signIn(email, password, remember);
 
       // Hard block: verify the account type matches the selected tab.
       const { data: authData } = await supabase.auth.getUser();
@@ -217,6 +218,22 @@ function AuthPage() {
                 className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"
               />
             </div>
+            <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-foreground/15 bg-card p-3">
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-[hsl(var(--primary))]"
+              />
+              <span className="text-sm">
+                <span className="font-semibold">Remember me</span>
+                <span className="block text-xs text-muted-foreground">
+                  {remember
+                    ? "Stay signed in for 30 days of inactivity."
+                    : "Sign out after 1 day of inactivity — best on shared devices."}
+                </span>
+              </span>
+            </label>
             {formError && (
               <div className="rounded-2xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                 {formError}
