@@ -12,6 +12,7 @@ import { ShieldCheck, Sparkles, Clock, AlertTriangle, Globe2, Lock, GraduationCa
 import { DAILY_EARN_CAP, WEEKLY_EARN_CAP, EARNED_EXPIRY_DAYS } from "@/lib/credits";
 import { ageLabel, AGE_RANGES, COUNTRIES, YEAR_OPTIONS, DEPARTMENT_SUGGESTIONS } from "@/lib/interests";
 import { IndexBackfill } from "@/components/IndexBackfill";
+import { SessionCard } from "@/components/SessionCard";
 import { toast } from "sonner";
 import { safeErrorMessage } from "@/lib/safe-error";
 
@@ -106,6 +107,8 @@ function Profile() {
           </div>
         </div>
       )}
+
+      <SessionCard />
 
 
       {!isGeneral && !((profile as any).index_number) && (
