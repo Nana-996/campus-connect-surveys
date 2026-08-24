@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { markActive, clearActivity, isSessionStale } from "@/lib/session-activity";
+import { markActive, clearActivity, isSessionStale, startSession, getLastLogin } from "@/lib/session-activity";
 
 
 export type Profile = {
@@ -29,7 +29,7 @@ type AuthCtx = {
   profile: Profile | null;
   profileError: string | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string, remember?: boolean) => Promise<void>;
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
 };
@@ -121,6 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
       setSession(s);
       if (s?.user) {
+        if (getLastLogin() === null) startSession(true);
         markActive();
         setTimeout(() => {
           loadProfile(s.user).catch((err) => {
@@ -145,6 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       setSession(data.session);
       if (data.session?.user) {
+        if (getLastLogin() === null) startSession(true);
         markActive();
         loadProfile(data.session.user)
           .catch((err) => {
@@ -200,10 +202,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     profile,
     profileError,
     loading,
-    signIn: async (email, password) => {
+    signIn: async (email, password, remember = true) => {
       setProfileError(null);
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
+      startSession(remember);
       setSession(data.session);
       if (data.user) await loadProfile(data.user);
     },
