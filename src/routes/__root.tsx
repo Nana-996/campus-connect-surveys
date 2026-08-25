@@ -13,6 +13,7 @@ import { AuthProvider } from "@/lib/auth";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { registerPwa } from "@/lib/pwa-register";
 import { installAutoSync } from "@/lib/offline-sync";
+import { captureReferralFromUrl } from "@/lib/referral";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 
 import appCss from "../styles.css?url";
@@ -126,6 +127,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   useEffect(() => {
+    captureReferralFromUrl();
     installAutoSync();
     void registerPwa();
   }, []);
