@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { SurveyVerifyModal } from "@/components/SurveyVerifyModal";
 import { AppHeader } from "@/components/AppHeader";
+import { ReferralInvite } from "@/components/ReferralInvite";
 import { getSurveyPublic, getSurveyForRespondent } from "@/lib/survey-public.functions";
 import { getOwnerSurveyResults } from "@/lib/survey-owner.functions";
 import { cacheSurvey, getCachedSurvey, enqueueResponse } from "@/lib/offline-store";

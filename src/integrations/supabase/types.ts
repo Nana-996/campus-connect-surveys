@@ -484,6 +484,7 @@ export type Database = {
           interests_raw: string[]
           is_flagged: boolean
           paid_credits: number
+          referral_code: string | null
           university_domain: string
           university_name: string
           university_pick_limit: number
@@ -507,6 +508,7 @@ export type Database = {
           interests_raw?: string[]
           is_flagged?: boolean
           paid_credits?: number
+          referral_code?: string | null
           university_domain?: string
           university_name?: string
           university_pick_limit?: number
@@ -530,11 +532,42 @@ export type Database = {
           interests_raw?: string[]
           is_flagged?: boolean
           paid_credits?: number
+          referral_code?: string | null
           university_domain?: string
           university_name?: string
           university_pick_limit?: number
           user_type?: string
           year?: string
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          created_at: string
+          credits_awarded: number
+          id: string
+          referred_user_id: string
+          referred_user_type: string
+          referrer_id: string
+          wallet: string
+        }
+        Insert: {
+          created_at?: string
+          credits_awarded?: number
+          id?: string
+          referred_user_id: string
+          referred_user_type: string
+          referrer_id: string
+          wallet: string
+        }
+        Update: {
+          created_at?: string
+          credits_awarded?: number
+          id?: string
+          referred_user_id?: string
+          referred_user_type?: string
+          referrer_id?: string
+          wallet?: string
         }
         Relationships: []
       }
@@ -1399,6 +1432,7 @@ export type Database = {
         Args: { _survey_id: string; _user_id?: string }
         Returns: boolean
       }
+      claim_referral: { Args: { _code: string }; Returns: Json }
       credit_paystack_purchase: {
         Args: { _raw: Json; _reference: string }
         Returns: undefined
@@ -1632,6 +1666,8 @@ export type Database = {
         }
         Returns: number
       }
+      my_referral_code: { Args: never; Returns: string }
+      new_referral_code: { Args: never; Returns: string }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {

@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { markActive, clearActivity, isSessionStale, startSession, getLastLogin } from "@/lib/session-activity";
+import { clearStoredReferralCode, storedReferralCode } from "@/lib/referral";
 
 
 export type Profile = {
@@ -161,7 +162,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  // Refresh the activity stamp while the app is in use.
+  // Attribute a stored referral code once the account exists. The server
+  // awards the referrer's credits (once per referred account) and rejects
+  // self-referrals or repeat claims.
+  useEffect(() => {
+    const uid = session?.user?.id;
+    if (!uid) return;
+    const code = storedReferralCode();
+    if (!code) return;
+    void (async () => {
+      const { data, error } = await supabase.rpc("claim_referral", { _code: code });
+      const result = (data ?? null) as { ok?: boolean; reason?: string } | null;
+      // Clear unless the profile row simply isn't ready yet.
+      if (!error && result?.reason !== "no_profile") clearStoredReferralCode();
+    })();
+  }, [session?.user?.id, profile?.id]);
+
+
   useEffect(() => {
     if (!session?.user) return;
     markActive();
