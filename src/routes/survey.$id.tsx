@@ -905,6 +905,8 @@ function SubmissionResult({
           </Link>
         </div>
       </div>
+
+      <ReferralInvite className="mt-4" />
     </div>
   );
 }
