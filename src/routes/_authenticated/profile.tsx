@@ -8,7 +8,10 @@ import { Label } from "@/components/ui/label";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { ShieldCheck, Sparkles, Clock, AlertTriangle, Globe2, Lock, GraduationCap } from "lucide-react";
+import { ShieldCheck, Sparkles, Clock, AlertTriangle, Globe2, Lock, GraduationCap, Users, UserPlus } from "lucide-react";
+import { StatCard } from "@/components/StatCard";
+import { ReferralInvite } from "@/components/ReferralInvite";
+import { REFERRAL_REWARD_STUDENT, REFERRAL_REWARD_GENERAL } from "@/lib/referral";
 import { DAILY_EARN_CAP, WEEKLY_EARN_CAP, EARNED_EXPIRY_DAYS } from "@/lib/credits";
 import { ageLabel, AGE_RANGES, COUNTRIES, YEAR_OPTIONS, DEPARTMENT_SUGGESTIONS } from "@/lib/interests";
 import { IndexBackfill } from "@/components/IndexBackfill";
@@ -24,6 +27,7 @@ function Profile() {
   const { profile, user, refreshProfile } = useAuth();
   const [responses, setResponses] = useState<any[]>([]);
   const [ledger, setLedger] = useState<any[]>([]);
+  const [referrals, setReferrals] = useState<any[]>([]);
   const [caps, setCaps] = useState<{ day_count: number; week_count: number } | null>(null);
   const [nextExpiry, setNextExpiry] = useState<string | null>(null);
   const [name, setName] = useState(profile?.full_name ?? "");
@@ -47,19 +51,23 @@ function Profile() {
     if (!user) return;
     let active = true;
     (async () => {
-      const [resps, led, c] = await Promise.all([
+      const [resps, led, c, refs] = await Promise.all([
         supabase.from("survey_responses").select("id, created_at, survey:surveys(title)")
           .eq("respondent_id", user.id).order("created_at", { ascending: false }).limit(20),
         supabase.from("credit_ledger").select("*").eq("user_id", user.id)
           .order("created_at", { ascending: false }).limit(15),
         supabase.from("earning_caps").select("day_count, week_count").eq("user_id", user.id).maybeSingle(),
+        supabase.from("referrals").select("id, referred_user_type, credits_awarded, wallet, created_at")
+          .eq("referrer_id", user.id).order("created_at", { ascending: false }),
       ]);
       if (!active) return;
       if (resps.error) console.warn("Profile responses request failed.", resps.error);
       if (led.error) console.warn("Credit ledger request failed.", led.error);
       if (c.error) console.warn("Earning caps request failed.", c.error);
+      if (refs.error) console.warn("Referrals request failed.", refs.error);
       setResponses(resps.data ?? []);
       setLedger(led.data ?? []);
+      setReferrals(refs.data ?? []);
       setCaps(c.data ?? { day_count: 0, week_count: 0 });
       const earliest = (led.data ?? [])
         .filter((r: any) => r.wallet === "earned" && r.delta > 0 && r.expires_at)
@@ -374,6 +382,47 @@ function Profile() {
       </div>
 
       {/* Ledger */}
+      {/* Referral stats */}
+      <section className="mt-10 rounded-3xl border border-foreground/15 bg-card p-6 shadow-paper">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="font-serif text-3xl leading-tight">Referrals</h2>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-secondary-foreground">
+            <Users className="h-3 w-3" /> {REFERRAL_REWARD_STUDENT} student · {REFERRAL_REWARD_GENERAL} general
+          </span>
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Credits are awarded once per account that registers with your link.
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <StatCard
+            label="Credited referrals"
+            value={referrals.filter((r) => (r.credits_awarded ?? 0) > 0).length}
+            hint="rewarded sign-ups"
+            icon={UserPlus}
+          />
+          <StatCard
+            label="Credited accounts"
+            value={referrals.length}
+            hint={`${referrals.filter((r) => r.referred_user_type === "student").length} student · ${
+              referrals.filter((r) => r.referred_user_type !== "student").length
+            } general`}
+            icon={Users}
+          />
+          <StatCard
+            label="Bonus credits earned"
+            value={referrals.reduce((sum, r) => sum + (r.credits_awarded ?? 0), 0)}
+            hint="from referrals so far"
+            icon={Sparkles}
+          />
+        </div>
+        {referrals.length === 0 && (
+          <p className="mt-4 text-sm text-muted-foreground">
+            No referrals yet — share your link below to start earning.
+          </p>
+        )}
+        <ReferralInvite className="mt-5" />
+      </section>
+
       <h2 className="mt-10 font-serif text-3xl">Credit history</h2>
       {ledger.length === 0 ? (
         <p className="mt-2 text-sm text-muted-foreground">No activity yet.</p>
