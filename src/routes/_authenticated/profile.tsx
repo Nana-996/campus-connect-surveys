@@ -48,19 +48,23 @@ function Profile() {
     if (!user) return;
     let active = true;
     (async () => {
-      const [resps, led, c] = await Promise.all([
+      const [resps, led, c, refs] = await Promise.all([
         supabase.from("survey_responses").select("id, created_at, survey:surveys(title)")
           .eq("respondent_id", user.id).order("created_at", { ascending: false }).limit(20),
         supabase.from("credit_ledger").select("*").eq("user_id", user.id)
           .order("created_at", { ascending: false }).limit(15),
         supabase.from("earning_caps").select("day_count, week_count").eq("user_id", user.id).maybeSingle(),
+        supabase.from("referrals").select("id, referred_user_type, credits_awarded, wallet, created_at")
+          .eq("referrer_id", user.id).order("created_at", { ascending: false }),
       ]);
       if (!active) return;
       if (resps.error) console.warn("Profile responses request failed.", resps.error);
       if (led.error) console.warn("Credit ledger request failed.", led.error);
       if (c.error) console.warn("Earning caps request failed.", c.error);
+      if (refs.error) console.warn("Referrals request failed.", refs.error);
       setResponses(resps.data ?? []);
       setLedger(led.data ?? []);
+      setReferrals(refs.data ?? []);
       setCaps(c.data ?? { day_count: 0, week_count: 0 });
       const earliest = (led.data ?? [])
         .filter((r: any) => r.wallet === "earned" && r.delta > 0 && r.expires_at)
