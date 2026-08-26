@@ -7,6 +7,7 @@ import { Users, Filter, ArrowUpRight, Sparkles, WifiOff } from "lucide-react";
 import { tagLabel, ageLabel, AGE_RANGES, COUNTRIES, INTEREST_TAGS } from "@/lib/interests";
 import { cacheFeed, getCachedFeed } from "@/lib/offline-store";
 import { VisibilityBadge } from "@/components/VisibilityBadge";
+import { DonateNudge } from "@/components/DonateNudge";
 
 type Survey = {
   id: string;
@@ -466,6 +467,7 @@ function Feed() {
             );
           })}
           </div>
+          <DonateNudge className="mt-8" />
         </>
       )}
     </div>
