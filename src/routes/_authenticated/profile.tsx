@@ -379,6 +379,47 @@ function Profile() {
       </div>
 
       {/* Ledger */}
+      {/* Referral stats */}
+      <section className="mt-10 rounded-3xl border border-foreground/15 bg-card p-6 shadow-paper">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="font-serif text-3xl leading-tight">Referrals</h2>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-secondary-foreground">
+            <Users className="h-3 w-3" /> {REFERRAL_REWARD_STUDENT} student · {REFERRAL_REWARD_GENERAL} general
+          </span>
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Credits are awarded once per account that registers with your link.
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <StatCard
+            label="Credited referrals"
+            value={referrals.filter((r) => (r.credits_awarded ?? 0) > 0).length}
+            hint="rewarded sign-ups"
+            icon={UserPlus}
+          />
+          <StatCard
+            label="Credited accounts"
+            value={referrals.length}
+            hint={`${referrals.filter((r) => r.referred_user_type === "student").length} student · ${
+              referrals.filter((r) => r.referred_user_type !== "student").length
+            } general`}
+            icon={Users}
+          />
+          <StatCard
+            label="Bonus credits earned"
+            value={referrals.reduce((sum, r) => sum + (r.credits_awarded ?? 0), 0)}
+            hint="from referrals so far"
+            icon={Sparkles}
+          />
+        </div>
+        {referrals.length === 0 && (
+          <p className="mt-4 text-sm text-muted-foreground">
+            No referrals yet — share your link below to start earning.
+          </p>
+        )}
+        <ReferralInvite className="mt-5" />
+      </section>
+
       <h2 className="mt-10 font-serif text-3xl">Credit history</h2>
       {ledger.length === 0 ? (
         <p className="mt-2 text-sm text-muted-foreground">No activity yet.</p>
