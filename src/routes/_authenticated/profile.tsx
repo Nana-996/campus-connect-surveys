@@ -24,6 +24,7 @@ function Profile() {
   const { profile, user, refreshProfile } = useAuth();
   const [responses, setResponses] = useState<any[]>([]);
   const [ledger, setLedger] = useState<any[]>([]);
+  const [referrals, setReferrals] = useState<any[]>([]);
   const [caps, setCaps] = useState<{ day_count: number; week_count: number } | null>(null);
   const [nextExpiry, setNextExpiry] = useState<string | null>(null);
   const [name, setName] = useState(profile?.full_name ?? "");
