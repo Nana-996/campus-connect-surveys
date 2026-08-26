@@ -11,6 +11,7 @@ import {
 import { ShieldCheck, Sparkles, Clock, AlertTriangle, Globe2, Lock, GraduationCap, Users, UserPlus } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { ReferralInvite } from "@/components/ReferralInvite";
+import { DonateNudge } from "@/components/DonateNudge";
 import { REFERRAL_REWARD_STUDENT, REFERRAL_REWARD_GENERAL } from "@/lib/referral";
 import { DAILY_EARN_CAP, WEEKLY_EARN_CAP, EARNED_EXPIRY_DAYS } from "@/lib/credits";
 import { ageLabel, AGE_RANGES, COUNTRIES, YEAR_OPTIONS, DEPARTMENT_SUGGESTIONS } from "@/lib/interests";
@@ -421,6 +422,7 @@ function Profile() {
           </p>
         )}
         <ReferralInvite className="mt-5" />
+        <DonateNudge variant="card" className="mt-5" />
       </section>
 
       <h2 className="mt-10 font-serif text-3xl">Credit history</h2>
