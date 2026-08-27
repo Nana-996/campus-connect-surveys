@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Copy, Download, Megaphone, RefreshCw, Mail } from "lucide-react";
-import { getBroadcastAudience } from "@/lib/admin.functions";
+import { Copy, Download, Megaphone, RefreshCw, Mail, Send, Loader2 } from "lucide-react";
+import { getBroadcastAudience, sendBroadcastEmail } from "@/lib/admin.functions";
 
 type Filters = {
   userType: "all" | "student" | "general";
