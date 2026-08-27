@@ -39,10 +39,13 @@ function csvEscape(value: string) {
 
 export function BroadcastPanel() {
   const fetchAudience = useServerFn(getBroadcastAudience);
+  const sendBroadcast = useServerFn(sendBroadcastEmail);
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [subject, setSubject] = useState(DEFAULT_SUBJECT);
   const [body, setBody] = useState(DEFAULT_BODY);
   const [batchSize, setBatchSize] = useState(50);
+  const [testEmail, setTestEmail] = useState("");
+  const [sending, setSending] = useState<"test" | "all" | null>(null);
 
   const { data, isFetching, refetch, error } = useQuery({
     queryKey: ["admin", "broadcast", filters],
