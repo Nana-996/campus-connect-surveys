@@ -151,8 +151,8 @@ export function BroadcastPanel() {
           <div>
             <p className="font-serif text-2xl leading-tight">Broadcast studio</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Build the recipient list, write the announcement, then export both into your own email
-              platform. Nothing is sent from CampusVerify — suppressed (unsubscribed / bounced)
+              Build the recipient list, write the announcement, then send it straight from your own
+              domain — or export it into another email platform. Suppressed (unsubscribed / bounced)
               addresses are removed automatically.
             </p>
           </div>
