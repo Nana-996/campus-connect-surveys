@@ -102,6 +102,45 @@ export function BroadcastPanel() {
     toast.success("CSV downloaded");
   }
 
+  async function send(mode: "test" | "all") {
+    if (subject.trim().length < 3 || body.trim().length < 10) {
+      return toast.error("Add a subject and a message body first.");
+    }
+    if (mode === "test" && !testEmail.trim()) {
+      return toast.error("Enter an address for the test send.");
+    }
+    if (mode === "all") {
+      if (recipients.length === 0) return toast.error("No recipients match these filters.");
+      const ok = window.confirm(
+        `Send "${subject}" to ${recipients.length} recipient(s) from noreply@campus-verify.live?`,
+      );
+      if (!ok) return;
+    }
+    setSending(mode);
+    try {
+      const res = await sendBroadcast({
+        data: {
+          userType: filters.userType,
+          role: filters.role,
+          universityDomain: filters.universityDomain || undefined,
+          onlyConfirmed: filters.onlyConfirmed,
+          subject: subject.trim(),
+          body: body.trim(),
+          ...(mode === "test" ? { testEmail: testEmail.trim() } : {}),
+        },
+      });
+      toast.success(
+        mode === "test"
+          ? "Test email queued — check that inbox in a minute."
+          : `Queued ${res.queued} email(s)${res.skipped ? `, ${res.skipped} skipped` : ""}${res.failed ? `, ${res.failed} failed` : ""}.`,
+      );
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not queue the broadcast.");
+    } finally {
+      setSending(null);
+    }
+  }
+
   const errMsg = (error as any)?.message as string | undefined;
 
   return (
@@ -218,6 +257,40 @@ export function BroadcastPanel() {
               <Copy className="mr-1.5 h-3.5 w-3.5" /> Copy both
             </Button>
           </div>
+        </div>
+      </div>
+
+      {/* Send from CampusVerify */}
+      <div className="rounded-2xl border border-foreground/15 bg-card p-5">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          Send from CampusVerify
+        </p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Delivers through your own sending domain as{" "}
+          <span className="font-medium text-foreground">CampusVerify &lt;noreply@campus-verify.live&gt;</span>.
+          Each message is branded, includes a one-click unsubscribe link, and skips suppressed addresses.
+          Up to 500 recipients per send.
+        </p>
+        <div className="mt-3 flex flex-wrap items-end gap-2">
+          <div>
+            <Label className="text-xs" htmlFor="bc-test">Test address</Label>
+            <Input
+              id="bc-test"
+              type="email"
+              placeholder="you@example.com"
+              value={testEmail}
+              onChange={(e) => setTestEmail(e.target.value)}
+              className="h-9 w-64"
+            />
+          </div>
+          <Button variant="outline" size="sm" onClick={() => void send("test")} disabled={sending !== null}>
+            {sending === "test" ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Send className="mr-1.5 h-3.5 w-3.5" />}
+            Send test
+          </Button>
+          <Button size="sm" onClick={() => void send("all")} disabled={sending !== null || recipients.length === 0}>
+            {sending === "all" ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Megaphone className="mr-1.5 h-3.5 w-3.5" />}
+            Send to {recipients.length} recipient{recipients.length === 1 ? "" : "s"}
+          </Button>
         </div>
       </div>
 
