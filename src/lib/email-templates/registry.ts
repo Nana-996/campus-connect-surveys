@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react'
 import { template as donationReceiptTemplate } from './donation-receipt'
+import { template as broadcastTemplate } from './broadcast'
 
 
 export interface TemplateEntry {
