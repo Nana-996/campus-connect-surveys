@@ -18,7 +18,7 @@ import { configHash } from "./hash";
 import { questionsOf, subgroupCompare, aggregateQuestion, type Dimension } from "./analysis";
 import { sanitizeText, untrusted, UNTRUSTED_NOTE } from "./untrusted";
 import { DEFAULT_TARGETING, questionSchema, targetingSchema, type DraftQuestion, type WorkspaceDraft } from "./types";
-import { publishDraftAsUser, writeDraftToStudio } from "./publish";
+import { publishDraftAsUser } from "./publish";
 
 export type OwnerResults = Awaited<ReturnType<typeof import("@/lib/survey-owner.functions").getOwnerSurveyResults>>;
 
