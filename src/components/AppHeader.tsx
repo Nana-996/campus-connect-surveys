@@ -132,6 +132,8 @@ export function AppHeader() {
         <DesktopLink to="/polls">Polls</DesktopLink>
         <DesktopLink to="/create">Create survey</DesktopLink>
         <DesktopLink to="/my-surveys">My surveys</DesktopLink>
+        {/* WebMCP Challenge addition */}
+        <DesktopLink to="/workspace">Workspace</DesktopLink>
         {showManager && <DesktopLink to="/manage">Manage</DesktopLink>}
         {isFaculty && <DesktopLink to="/faculty">Faculty</DesktopLink>}
         {isAdmin && <DesktopLink to="/admin">Admin</DesktopLink>}

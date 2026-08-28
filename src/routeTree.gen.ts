@@ -38,6 +38,7 @@ import { Route as AuthenticatedManageRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedMySurveysRouteImport } from './routes/_authenticated/my-surveys'
 import { Route as AuthenticatedPollsRouteImport } from './routes/_authenticated/polls'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedWorkspaceRouteImport } from './routes/_authenticated/workspace'
 import { Route as BlogStudentPerceptionSurveysRouteImport } from './routes/blog.student-perception-surveys'
 import { Route as BlogStudentSurveyQuestionsGuideRouteImport } from './routes/blog.student-survey-questions-guide'
 import { Route as DonateIndexRouteImport } from './routes/donate.index'
@@ -205,6 +206,11 @@ const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedWorkspaceRoute = AuthenticatedWorkspaceRouteImport.update({
+  id: '/workspace',
+  path: '/workspace',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const BlogStudentPerceptionSurveysRoute =
   BlogStudentPerceptionSurveysRouteImport.update({
     id: '/blog/student-perception-surveys',
@@ -345,6 +351,7 @@ export interface FileRoutesByFullPath {
   '/my-surveys': typeof AuthenticatedMySurveysRoute
   '/polls': typeof AuthenticatedPollsRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/workspace': typeof AuthenticatedWorkspaceRoute
   '/blog/student-perception-surveys': typeof BlogStudentPerceptionSurveysRoute
   '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
   '/donate/thank-you': typeof DonateThankYouRoute
@@ -395,6 +402,7 @@ export interface FileRoutesByTo {
   '/my-surveys': typeof AuthenticatedMySurveysRoute
   '/polls': typeof AuthenticatedPollsRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/workspace': typeof AuthenticatedWorkspaceRoute
   '/blog/student-perception-surveys': typeof BlogStudentPerceptionSurveysRoute
   '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
   '/donate/thank-you': typeof DonateThankYouRoute
@@ -447,6 +455,7 @@ export interface FileRoutesById {
   '/_authenticated/my-surveys': typeof AuthenticatedMySurveysRoute
   '/_authenticated/polls': typeof AuthenticatedPollsRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/workspace': typeof AuthenticatedWorkspaceRoute
   '/blog/student-perception-surveys': typeof BlogStudentPerceptionSurveysRoute
   '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
   '/donate/thank-you': typeof DonateThankYouRoute
@@ -499,6 +508,7 @@ export interface FileRouteTypes {
     | '/my-surveys'
     | '/polls'
     | '/profile'
+    | '/workspace'
     | '/blog/student-perception-surveys'
     | '/blog/student-survey-questions-guide'
     | '/donate/thank-you'
@@ -549,6 +559,7 @@ export interface FileRouteTypes {
     | '/my-surveys'
     | '/polls'
     | '/profile'
+    | '/workspace'
     | '/blog/student-perception-surveys'
     | '/blog/student-survey-questions-guide'
     | '/donate/thank-you'
@@ -600,6 +611,7 @@ export interface FileRouteTypes {
     | '/_authenticated/my-surveys'
     | '/_authenticated/polls'
     | '/_authenticated/profile'
+    | '/_authenticated/workspace'
     | '/blog/student-perception-surveys'
     | '/blog/student-survey-questions-guide'
     | '/donate/thank-you'
@@ -867,6 +879,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/workspace': {
+      id: '/_authenticated/workspace'
+      path: '/workspace'
+      fullPath: '/workspace'
+      preLoaderRoute: typeof AuthenticatedWorkspaceRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/blog/student-perception-surveys': {
       id: '/blog/student-perception-surveys'
       path: '/blog/student-perception-surveys'
@@ -1031,6 +1050,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedMySurveysRoute: typeof AuthenticatedMySurveysRoute
   AuthenticatedPollsRoute: typeof AuthenticatedPollsRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedWorkspaceRoute: typeof AuthenticatedWorkspaceRoute
   AuthenticatedSurveyIdAnalyzeRoute: typeof AuthenticatedSurveyIdAnalyzeRoute
   AuthenticatedSurveyIdReportRoute: typeof AuthenticatedSurveyIdReportRoute
 }
@@ -1045,6 +1065,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedMySurveysRoute: AuthenticatedMySurveysRoute,
   AuthenticatedPollsRoute: AuthenticatedPollsRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedWorkspaceRoute: AuthenticatedWorkspaceRoute,
   AuthenticatedSurveyIdAnalyzeRoute: AuthenticatedSurveyIdAnalyzeRoute,
   AuthenticatedSurveyIdReportRoute: AuthenticatedSurveyIdReportRoute,
 }
