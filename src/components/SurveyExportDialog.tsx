@@ -74,6 +74,24 @@ export function SurveyExportDialog({
   const [includeSampleProfile, setIncludeSampleProfile] = useState(true);
   const [includeAppendix, setIncludeAppendix] = useState(true);
 
+  // WebMCP Challenge addition: honour an agent-prepared export request for
+  // this survey. It only opens and pre-selects the format — the human presses
+  // the export button themselves.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = localStorage.getItem(EXPORT_REQUEST_KEY);
+      if (!raw) return;
+      const req = JSON.parse(raw) as { surveyId?: string; kind?: Kind };
+      if (req?.surveyId !== survey.id) return;
+      localStorage.removeItem(EXPORT_REQUEST_KEY);
+      if (req.kind && KINDS.some((k) => k.id === req.kind)) setKind(req.kind);
+      setOpen(true);
+    } catch {
+      /* ignore malformed request */
+    }
+  }, [survey.id]);
+
   const activeRows = useFilters && filtersLabel ? rows : allRows;
   const base = useMemo(() => safeFileName(survey.title), [survey.title]);
 
