@@ -1,4 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+// WebMCP Challenge addition: lets the Agent Workspace pre-configure this
+// existing dialog instead of an agent silently downloading anything.
+import { EXPORT_REQUEST_KEY } from "@/lib/webmcp/publish";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
