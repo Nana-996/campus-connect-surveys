@@ -9,6 +9,7 @@
     "build:dev": "vite build --mode development",
     "vercel-build": "vite build",
     "preview": "vite preview",
+    "test": "vitest run",
     "lint": "eslint .",
     "format": "prettier --write ."
   },
