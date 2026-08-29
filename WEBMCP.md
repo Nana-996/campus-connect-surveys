@@ -60,7 +60,7 @@ Nothing else in CampusVerify was modified, redesigned or replaced.
 ## 2. WebMCP API used
 
 The tools are registered with the **W3C Web Model Context API** (the WebMCP
-proposal): `navigator.modelContext.registerTool(tool)`, returning a handle with
+proposal): `document.modelContext.registerTool(tool)`, returning a handle with
 `unregister()`. Each tool declares `name`, `description`, a JSON-Schema
 `inputSchema`, `annotations` (`readOnlyHint`, `destructiveHint`,
 `openWorldHint`) and an `execute()` returning MCP-shaped
@@ -68,13 +68,15 @@ proposal): `navigator.modelContext.registerTool(tool)`, returning a handle with
 
 **No npm dependency was added for WebMCP.** Reasons:
 
-1. Browsers/agentic browsers that support the API expose `navigator.modelContext`
+1. Browsers/agentic browsers that support the API expose `document.modelContext`
    natively; agents that do not, inject their own shim before page scripts run.
    Installing a polyfill would risk shadowing a better native implementation.
 2. The surface we need is tiny and fully specified.
 
-`getModelContext()` therefore *uses whatever is already present*, and only when
-`navigator.modelContext` is absent does it install a local, spec-shaped fallback
+`getModelContext()` therefore *uses whatever is already present* (preferring
+`document.modelContext`, accepting the legacy `navigator.modelContext` only as a
+compatibility fallback), and only when both are
+absent does it install a local, spec-shaped fallback
 (`listTools()` / `callTool()`), which also makes the tools drivable from
 Playwright and unit tests. The workspace header shows which mode is active.
 
@@ -185,11 +187,11 @@ returns an error when signed out, and every survey read is filtered by
 The whole flow can also be driven end-to-end against the local fallback:
 
 ```js
-await navigator.modelContext.callTool("cv_get_workspace_context");
-await navigator.modelContext.callTool("cv_propose_survey_draft", { /* ... */ });
-await navigator.modelContext.callTool("cv_request_publication_approval");
+await document.modelContext.callTool("cv_get_workspace_context");
+await document.modelContext.callTool("cv_propose_survey_draft", { /* ... */ });
+await document.modelContext.callTool("cv_request_publication_approval");
 // human presses Approve in the UI
-await navigator.modelContext.callTool("cv_publish_survey", { approval_id });
+await document.modelContext.callTool("cv_publish_survey", { approval_id });
 ```
 
 ---

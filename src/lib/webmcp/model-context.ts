@@ -3,7 +3,7 @@
 //
 // Browser-facing WebMCP surface.
 //
-// The challenge targets the W3C Web Model Context API (`navigator.modelContext`,
+// The challenge targets the W3C Web Model Context API (`document.modelContext`,
 // the WebMCP proposal): a page registers tools with the *browser*, and an AI
 // browser agent (extension / agentic browser) discovers and calls them in the
 // user's authenticated tab.
@@ -12,7 +12,7 @@
 // a small, well-defined interface, browsers that support it expose it natively,
 // and agents that do not have a native implementation inject their own shim
 // before page scripts run. So we only install a local, spec-shaped fallback
-// when `navigator.modelContext` is absent — which also makes the tools callable
+// when `document.modelContext` (or the legacy `navigator.modelContext`) is absent — which also makes the tools callable
 // from Playwright/unit tests. If a native or agent-provided implementation is
 // present we use it untouched.
 
@@ -90,7 +90,7 @@ function createFallback(): FallbackModelContext {
  * Returns the page's model context, installing a local fallback if needed.
  *
  * The current WebMCP proposal exposes the API on `document.modelContext`.
- * Earlier drafts (and some agent-injected shims) used `navigator.modelContext`,
+ * Earlier drafts (and some agent-injected shims) used `document.modelContext`,
  * so that location is still accepted as a compatibility fallback — but it is
  * never preferred over `document.modelContext`.
  */
