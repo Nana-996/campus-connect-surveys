@@ -90,7 +90,7 @@ function createFallback(): FallbackModelContext {
  * Returns the page's model context, installing a local fallback if needed.
  *
  * The current WebMCP proposal exposes the API on `document.modelContext`.
- * Earlier drafts (and some agent-injected shims) used `document.modelContext`,
+ * Earlier drafts (and some agent-injected shims) used `navigator.modelContext`,
  * so that location is still accepted as a compatibility fallback — but it is
  * never preferred over `document.modelContext`.
  */
