@@ -3,7 +3,7 @@
 //
 // Browser-facing WebMCP surface.
 //
-// The challenge targets the W3C Web Model Context API (`navigator.modelContext`,
+// The challenge targets the W3C Web Model Context API (`document.modelContext`,
 // the WebMCP proposal): a page registers tools with the *browser*, and an AI
 // browser agent (extension / agentic browser) discovers and calls them in the
 // user's authenticated tab.
@@ -12,7 +12,7 @@
 // a small, well-defined interface, browsers that support it expose it natively,
 // and agents that do not have a native implementation inject their own shim
 // before page scripts run. So we only install a local, spec-shaped fallback
-// when `navigator.modelContext` is absent — which also makes the tools callable
+// when `document.modelContext` (or the legacy `navigator.modelContext`) is absent — which also makes the tools callable
 // from Playwright/unit tests. If a native or agent-provided implementation is
 // present we use it untouched.
 
@@ -86,22 +86,53 @@ function createFallback(): FallbackModelContext {
   };
 }
 
-/** Returns the page's model context, installing a local fallback if needed. */
+/**
+ * Returns the page's model context, installing a local fallback if needed.
+ *
+ * The current WebMCP proposal exposes the API on `document.modelContext`.
+ * Earlier drafts (and some agent-injected shims) used `navigator.modelContext`,
+ * so that location is still accepted as a compatibility fallback — but it is
+ * never preferred over `document.modelContext`.
+ */
 export function getModelContext(): { ctx: ModelContext; native: boolean } | null {
-  if (typeof window === "undefined" || typeof navigator === "undefined") return null;
-  const nav = navigator as Navigator & { modelContext?: ModelContext };
-  if (nav.modelContext && typeof nav.modelContext.registerTool === "function") {
-    const native = !(nav.modelContext as Partial<FallbackModelContext>).__campusverifyFallback;
-    return { ctx: nav.modelContext, native };
+  if (typeof window === "undefined" || typeof document === "undefined") return null;
+  const doc = document as Document & { modelContext?: ModelContext };
+  const nav = (typeof navigator !== "undefined" ? navigator : undefined) as
+    | (Navigator & { modelContext?: ModelContext })
+    | undefined;
+
+  const existing =
+    doc.modelContext && typeof doc.modelContext.registerTool === "function"
+      ? doc.modelContext
+      : nav?.modelContext && typeof nav.modelContext.registerTool === "function"
+        ? nav.modelContext
+        : null;
+
+  if (existing) {
+    const native = !(existing as Partial<FallbackModelContext>).__campusverifyFallback;
+    return { ctx: existing, native };
   }
+
   const fallback = createFallback();
+  let installed = false;
   try {
-    Object.defineProperty(nav, "modelContext", { value: fallback, configurable: true, writable: true });
+    Object.defineProperty(doc, "modelContext", { value: fallback, configurable: true, writable: true });
+    installed = true;
   } catch {
-    return { ctx: fallback, native: false };
+    /* ignore */
   }
+  // Mirror onto navigator for legacy agents/tests that still look there.
+  if (nav) {
+    try {
+      Object.defineProperty(nav, "modelContext", { value: fallback, configurable: true, writable: true });
+    } catch {
+      /* ignore */
+    }
+  }
+  void installed;
   return { ctx: fallback, native: false };
 }
+
 
 export const TOOLS_CHANGED_EVENT = TOOLS_CHANGED;
 
