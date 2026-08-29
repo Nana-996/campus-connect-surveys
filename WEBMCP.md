@@ -33,7 +33,7 @@ All new code is confined to clearly marked files, each beginning with a
 
 | Path | Purpose |
 | --- | --- |
-| `src/lib/webmcp/model-context.ts` | WebMCP surface: acquires `navigator.modelContext`, installs a spec-shaped local fallback when absent |
+| `src/lib/webmcp/model-context.ts` | WebMCP surface: acquires `document.modelContext` (legacy `navigator.modelContext` accepted for compatibility), installs a spec-shaped local fallback when absent |
 | `src/lib/webmcp/types.ts` | Zod schemas + types for drafts, targeting, approvals, activity log |
 | `src/lib/webmcp/hash.ts` | Canonical JSON + stable hash used to bind approvals to an exact configuration |
 | `src/lib/webmcp/untrusted.ts` | Sanitisation, untrusted-content envelope, minimum-cell suppression |
