@@ -680,7 +680,12 @@ export function buildTools(deps: ToolDeps): WebMcpTool[] {
         type: "object",
         properties: {
           survey_id: { type: "string" },
-          format: { enum: ["report", "summary", "package", "csv"] },
+          format: {
+            type: "string",
+            enum: ["report", "summary", "package", "csv"],
+            default: "report",
+            description: "Export format to pre-select in the export dialog.",
+          },
         },
         required: ["survey_id"],
         additionalProperties: false,
