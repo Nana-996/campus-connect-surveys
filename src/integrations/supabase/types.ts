@@ -1036,6 +1036,7 @@ export type Database = {
       surveys: {
         Row: {
           allow_general_respondents: boolean
+          allow_response_download: boolean
           boosted_until: string | null
           course_code: string | null
           created_at: string
@@ -1066,6 +1067,7 @@ export type Database = {
         }
         Insert: {
           allow_general_respondents?: boolean
+          allow_response_download?: boolean
           boosted_until?: string | null
           course_code?: string | null
           created_at?: string
@@ -1096,6 +1098,7 @@ export type Database = {
         }
         Update: {
           allow_general_respondents?: boolean
+          allow_response_download?: boolean
           boosted_until?: string | null
           course_code?: string | null
           created_at?: string

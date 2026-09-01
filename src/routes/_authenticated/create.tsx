@@ -69,7 +69,7 @@ type Draft = {
   targetUniversities: string[];
   responseGoal: string; expiresAt: string;
   allowGeneral: boolean; visibility?: Visibility; questions: Question[]; respondentBonus: number;
-  minResponseSeconds: string;
+  minResponseSeconds: string; allowResponseDownload?: boolean;
 };
 
 const loadDraft = (): Partial<Draft> => {
@@ -119,6 +119,7 @@ function Create() {
     Math.max(0, Math.min(3, d.respondentBonus ?? 0))
   );
   const [minResponseSeconds, setMinResponseSeconds] = useState<string>(d.minResponseSeconds ?? "15");
+  const [allowResponseDownload, setAllowResponseDownload] = useState<boolean>(d.allowResponseDownload ?? false);
   const [questions, setQuestions] = useState<Question[]>(
     d.questions && d.questions.length > 0 ? d.questions :
     [{ id: crypto.randomUUID(), type: "text", text: "", required: true }]
@@ -210,10 +211,10 @@ function Create() {
         targetInterests: audience.interests, requiredCriteria: audience.required,
         targetUniversities: audience.universities,
         responseGoal, expiresAt, allowGeneral, visibility, questions,
-        respondentBonus, minResponseSeconds,
+        respondentBonus, minResponseSeconds, allowResponseDownload,
       }));
     } catch {}
-  }, [tier, title, description, audience, responseGoal, expiresAt, visibility, questions, respondentBonus, minResponseSeconds]);
+  }, [tier, title, description, audience, responseGoal, expiresAt, visibility, questions, respondentBonus, minResponseSeconds, allowResponseDownload]);
 
   // Let the user know their in-progress draft survived a refresh / connection drop.
   const restoredRef = useRef(
@@ -301,6 +302,7 @@ function Create() {
           response_goal: isBoost ? selectedBoost.responses : goalNum,
           respondent_bonus: !isBoost && tier === "pro" ? respondentBonus : 0,
           min_response_seconds: Math.max(0, Math.min(600, parseInt(minResponseSeconds, 10) || 15)),
+          allow_response_download: allowResponseDownload,
           visibility: isBoost ? "everyone" : visibility,
           ...(lecturerId ? { lecturer_id: lecturerId, is_evaluation: true, course_code: courseCode.trim() || null } : {}),
           ...(!isBoost && expiresIso ? { expires_at: expiresIso } : {}),
@@ -573,6 +575,23 @@ function Create() {
               <p className="mt-1 text-[11px] text-muted-foreground">
                 Anti-farming: responses submitted faster than this earn no credits and are silently flagged for review. Respondents don't see the threshold. Default 15s; set 0 to disable.
               </p>
+            </div>
+            <div className="mt-4 rounded-2xl border border-foreground/15 bg-background/60 p-3">
+              <label htmlFor="allow-response-download" className="flex cursor-pointer items-start gap-3">
+                <input
+                  id="allow-response-download"
+                  type="checkbox"
+                  className="mt-1 h-4 w-4 accent-[var(--primary)]"
+                  checked={allowResponseDownload}
+                  onChange={(e) => setAllowResponseDownload(e.target.checked)}
+                />
+                <span>
+                  <span className="text-sm font-semibold">Allow respondents to download a copy of their response</span>
+                  <span className="mt-1 block text-[11px] text-muted-foreground">
+                    After submitting, each respondent can download a branded PDF of their own answers only. Off by default.
+                  </span>
+                </span>
+              </label>
             </div>
           </div>
 
