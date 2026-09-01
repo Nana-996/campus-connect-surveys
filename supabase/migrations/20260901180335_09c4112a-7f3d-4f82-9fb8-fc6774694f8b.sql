@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public.new_referral_code() TO authenticated;
