@@ -61,6 +61,7 @@ type Survey = {
   expires_at: string;
   target_department: string | null;
   target_year: string | null;
+  allow_response_download?: boolean;
 };
 
 export const Route = createFileRoute("/survey/$id")({
@@ -151,6 +152,8 @@ function SurveyPage() {
     delta: number;
     reason: string;
     newBalance: number;
+    submittedAt?: string;
+    answers?: Record<string, string>;
   }>(null);
 
   const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/survey/${id}` : `/survey/${id}`;
@@ -350,7 +353,7 @@ function SurveyPage() {
       const delta = ledger?.delta ?? 0;
       const reason = ledger?.reason ?? "response";
       const newBalance = prof?.earned_credits ?? 0;
-      setResult({ delta, reason, newBalance });
+      setResult({ delta, reason, newBalance, submittedAt: new Date().toISOString(), answers: { ...answers } });
       if (delta > 0) {
         toast.success(`+${delta} credit${delta === 1 ? "" : "s"} earned!`);
       }
@@ -561,7 +564,7 @@ function SurveyPage() {
   const content = (() => {
     if (loading) return <p className="text-sm text-muted-foreground">Loading...</p>;
     if (!survey) return <p className="text-sm text-muted-foreground">Survey not found.</p>;
-    if (result) return <SubmissionResult result={result} onClose={() => navigate({ to: "/feed" })} />;
+    if (result) return <SubmissionResult result={result} survey={survey} onClose={() => navigate({ to: "/feed" })} />;
     return (
       <div>
         {user ? (
@@ -841,11 +844,29 @@ function SurveyPage() {
 
 function SubmissionResult({
   result,
+  survey,
   onClose,
 }: {
-  result: { delta: number; reason: string; newBalance: number };
+  result: { delta: number; reason: string; newBalance: number; submittedAt?: string; answers?: Record<string, string> };
+  survey: Survey | null;
   onClose: () => void;
 }) {
+  const canDownload = !!(survey?.allow_response_download && result.answers && result.submittedAt);
+  const downloadCopy = async () => {
+    if (!survey || !result.answers || !result.submittedAt) return;
+    try {
+      const { downloadMyResponsePdf } = await import("@/lib/report/response-pdf");
+      await downloadMyResponsePdf({
+        surveyTitle: survey.title,
+        surveyDescription: survey.description,
+        questions: survey.questions.map((q) => ({ id: q.id, text: q.text, type: q.type })),
+        answers: result.answers,
+        submittedAt: result.submittedAt,
+      });
+    } catch (err: any) {
+      toast.error(err?.message ?? "Couldn't generate your PDF.");
+    }
+  };
   const earned = result.delta > 0;
   const reasonLabel = (() => {
     switch (result.reason) {
@@ -893,6 +914,17 @@ function SubmissionResult({
           <p className="mt-4 text-[11px] text-muted-foreground">
             Tip: take at least 15 seconds and answer every question thoughtfully to earn credit.
           </p>
+        )}
+
+        {canDownload && (
+          <Button
+            onClick={downloadCopy}
+            variant="outline"
+            size="lg"
+            className="mt-6 w-full rounded-full border-foreground/30 sm:w-auto"
+          >
+            <Download className="mr-2 h-4 w-4" /> Download my response
+          </Button>
         )}
 
         <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
