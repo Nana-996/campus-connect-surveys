@@ -113,7 +113,7 @@ export const getSurveyForRespondent = createServerFn({ method: "GET" })
     const { data: s, error } = await supabase
       .from("surveys")
       .select(
-        "id, creator_id, title, description, questions, response_count, response_goal, expires_at, target_department, target_year, is_active, university_domain, allow_general_respondents, is_evaluation",
+        "id, creator_id, title, description, questions, response_count, response_goal, expires_at, target_department, target_year, is_active, university_domain, allow_general_respondents, is_evaluation, allow_response_download",
       )
       .eq("id", data.id)
       .maybeSingle();
