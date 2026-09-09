@@ -1,99 +1,132 @@
-# WebMCP Research Workspace for CampusVerify
+# Redesigning the report export and the Analysis page
 
-A browser-side WebMCP layer that lets an AI browser agent operate CampusVerify's existing research tools while the human researcher keeps control of every consequential decision. All existing app functionality stays as-is; the competition work is a clearly separated, additive layer.
+## What I found in the current code
 
-## A. Current architecture (verified by inspection)
+There are **two separate exporters**, and they disagree:
 
-- Survey creation/publish: `src/routes/_authenticated/create.tsx` ("Survey Studio"). Publishing is a direct authenticated client insert into `surveys` (line ~269) with tier, targeting (`target_department`, `target_year`, `target_country`, `target_age_range`, `target_interests`, `target_universities`, `required_criteria`), `response_goal`, `visibility`, `respondent_bonus`, expiry. Credit charging happens in the database (publish trigger), so RLS + triggers already enforce affordability and ownership. Draft state persists to `localStorage` (`DRAFT_KEY`) and `src/lib/offline-store.ts`.
-- Targeting UI + reach estimate: `src/components/AudienceBuilder.tsx`, RPC `estimate_survey_reach`.
-- Owner survey list / progress: `src/routes/_authenticated/my-surveys.tsx`, `manage.$surveyId.tsx`.
-- Analysis: `src/routes/_authenticated/survey.$id.analyze.tsx` (overview, questions, subgroup compare, cross-tab, raw, saved views), fed by `getOwnerSurveyResults` in `src/lib/survey-owner.functions.ts` — a `requireSupabaseAuth` server fn that verifies `creator_id === context.userId` and pseudonymizes `respondent_id` before anything leaves the server.
-- Saved views / share links: tables `survey_report_views`, `survey_share_tokens` (client inserts in analyze route).
-- Reporting/export: `src/routes/_authenticated/survey.$id.report.tsx`, `src/lib/report/{stats,charts,pdf,csv}.ts`, `src/components/SurveyExportDialog.tsx`.
-- Auth: `src/lib/auth.tsx` (AuthProvider), `_authenticated` gate, bearer attach in `src/start.ts`.
-- Existing MCP: server-side `src/lib/mcp/**` (5 read-only OAuth tools) + plugin-generated routes. Pre-existing groundwork, untouched by this work.
+- **Analysis page → "Export results" dialog** (`SurveyExportDialog` → `src/lib/report/pdf.ts`) draws charts as real vector graphics into the PDF. This one is structurally sound.
+- **Report Studio** (`survey.$id.report.tsx`) builds the PDF by screenshotting the on-screen pages with `html2canvas-pro` after a fixed 300 ms wait. This is where missing/blank graphs come from: the wait is a guess, animated chart libraries frequently have not painted yet, and any element using an unsupported colour function makes the capture fail silently. It also produces fuzzy raster pages.
 
-## B. New WebMCP tools
+Other confirmed problems:
 
-All registered in the browser via `navigator.modelContext` on authenticated research routes only. Naming prefix `cv_` so they are unmistakably the competition layer.
+- **Loading is hand-rolled.** Both pages use `useEffect` + `useState` with no retry, no error screen and no distinction between "still loading", "no access", "load failed" and "zero responses". If the fetch throws, the page shows *"Survey not found or you don't have access"* plus a toast that disappears — which matches "responses sometimes do not load".
+- **The owner's chart choices are ignored in the export.** `survey_visualizations.chart_type` is saved per question and used on screen, but the PDF re-decides: rating → columns, ≤6 options → donut, otherwise bars. So the export does not match the app.
+- **Branding is a placeholder.** The cover draws a rounded square with the letter "C" instead of the real `logo-mark.png`, and there is no researcher, institution or confidentiality block.
+- **Layout bugs.** In the horizontal-bar branch, the chart is drawn *before* the page-space check, so a chart near the bottom can be cut in half. Long option labels are truncated with no legend fallback. Bars and columns show counts but never percentages.
+- **Cross-tabs are arbitrary** — the report pairs question 1×2, 2×3, 3×4… rather than what the owner chose on screen.
+- **A legacy CSV exporter still lives in the Analysis page** (quotes every cell, no BOM, `Q: <full question text>` headers) alongside the good `src/lib/report/csv.ts`.
 
-Read-only (execute immediately, no confirmation):
-1. `cv_get_workspace_context` — in: none. out: signed-in member type, university, credit balance, current route, active survey draft summary, list of owned surveys with response counts/goals. No participant identities.
-2. `cv_list_my_surveys` — in: `{ active_only?, limit? }`. out: id, title, status, responses/goal, expiry.
-3. `cv_get_survey_progress` — in: `{ survey_id }`. out: response count, % of goal, pace, time remaining, whether goal met.
-4. `cv_estimate_audience_reach` — in: targeting criteria. out: estimated reachable respondents (wraps `estimate_survey_reach`).
-5. `cv_analyze_subgroups` — in: `{ survey_id, dimension ('year'|'department'|'country'|'age_range'), groups?: string[], question_ids? }`. out: per-group n, per-question distributions/means, gap summary. Uses `getOwnerSurveyResults` (owner-verified, pseudonymized). Supports the "first-year vs final-year" comparison.
-6. `cv_get_question_results` — in: `{ survey_id, question_id, filters? }`. out: aggregate distribution only, never raw free-text tied to an individual beyond what the owner already sees in the UI.
+---
 
-Proposal / draft (mutate only local UI state, always reversible, no server write):
-7. `cv_propose_survey_draft` — in: `{ objective, title, description, questions[] }`. out: draft id + normalized draft. Side effect: fills Survey Studio fields and shows the draft in the Agent Workspace panel for human editing.
-8. `cv_propose_targeting` — in: `{ department?, year?, country?, age_range?, interests?, universities?, required_criteria?, response_goal?, visibility?, expires_at? }`. Side effect: populates AudienceBuilder + goal fields, returns reach estimate. No publish.
-9. `cv_revise_draft` — in: `{ patch }`. Same shape, partial update.
+## 1. What the exported report contains
 
-Consequential (require explicit human approval in-app before execution):
-10. `cv_request_publish_approval` — in: `{ confirm_token? }`. Side effect: opens the Approval Card with a full publication summary (title, question count, targeting, required criteria, goal, tier, credit cost, visibility). Returns `pending_approval` with an `approval_id`. It does **not** publish.
-11. `cv_publish_survey` — in: `{ approval_id }`. Executes only if that approval id was approved by the human in the UI within the session and the draft hash is unchanged. Reuses the exact Survey Studio submit path (same insert + credit trigger + reset + navigation). Out: survey id and URL. Rejects otherwise.
-12. `cv_save_analysis_view` — in: `{ survey_id, name, config }`. Requires approval (writes a row); low-risk so approval is a single-click inline confirm.
-13. `cv_prepare_report` — in: `{ survey_id, sections, format }`. Side effect: opens the existing export dialog pre-configured; the human presses Export/Download. The agent never silently downloads or shares.
+Single A4 PDF, cream/green CampusVerify identity, in this order:
 
-Explicitly NOT exposed: raw SQL, arbitrary table reads, participant identities/emails, credit purchases, Research Boost payments, share-token minting, admin/faculty tools, broadcast email.
+1. **Cover** — real CampusVerify logo mark, report title, survey title/subtitle, prepared-by (researcher name), institution where known, fieldwork period, response count, generation date, and an edition label (Full / Summary).
+2. **Confidentiality & privacy notice** — on the cover foot: pseudonymous respondents, no names or emails, small-cell suppression under 5, and "intended for the named recipient".
+3. **Table of contents** with page numbers (full edition only).
+4. **Executive summary** — 5–8 auto-drafted findings the owner can edit before export.
+5. **Methodology & survey information** — survey ID, status, who could respond, targeting, required vs preferred criteria, launch/close dates, response goal vs achieved, completion rate, median/mean time, filters applied to this cut, and a responses-over-time chart.
+6. **Respondent profile** — institution, department, year, country, age range as table + chart, each with counts and % of sample. Conditional: skipped entirely when no demographic field has data.
+7. **Question-by-question results** — per question: number, wording, type, required/optional, n answered / skipped / response rate, the chart, and a frequency table (answer, count, % of answered, % of all). Rating questions add mean/median/SD/min/max. Text questions get themes, sentiment and a capped set of verbatims.
+8. **Cross-tabulations** — only the pairs the owner selected on screen, with row/column totals and <5 suppression. Conditional.
+9. **Key findings & interpretation** — owner-written commentary per question, carried over from Report Studio.
+10. **Appendix** — full questionnaire wording and the variable map matching the CSV codebook, plus a line stating that raw responses are available as a separate data package. Conditional.
+11. **Suggested citation.**
 
-## C. Action classification
+Every page carries a running header (survey title) and footer (CampusVerify · page X of Y · generated date).
 
-| Class | Tools | Gate |
-|---|---|---|
-| Read-only | 1–6 | none (owner-scoped by existing RLS/server fn) |
-| Proposal | 7–9 | none; only local state, human edits freely |
-| Consequential | 10–13 | explicit human approval in the Approval Card; publish additionally needs an approval id bound to a draft hash |
+## 2. What is deliberately excluded
 
-Credits are only ever spent through tool 11 after approval; the credit cost is shown in the approval summary.
+- Raw per-respondent answer tables (they belong in the CSV/ZIP, not a 200-page PDF).
+- Pseudonymous respondent IDs next to answers.
+- Screenshots of app chrome: filter bars, tabs, buttons, share links, saved-view controls.
+- Credits, tiers, boosts, pricing and any CampusVerify billing language.
+- Unbounded verbatim dumps — capped per question with a pointer to the data package.
+- Empty sections: a question with zero answers gets one line, not a chart; a missing demographic field is omitted rather than shown as an empty table.
+- Decorative gradients, emoji and marketing copy.
 
-## D. Safe registration against existing backend
+## 3. Charts: selection and reliable rendering
 
-- New module `src/lib/webmcp/` (all competition code lives here): `provider.tsx` (React provider registering tools), `tools/*.ts`, `approvals.ts` (approval store), `types.ts`.
-- Registration happens inside `_authenticated` routes only, from a component that already has `useAuth()` — so tools close over the live session and never take a user id as input. Signed-out ⇒ no tools registered.
-- Every tool calls existing code paths: `useServerFn(getOwnerSurveyResults)`, `supabase.rpc('estimate_survey_reach')`, the `surveys` insert used by Survey Studio, `survey_report_views` insert. No new server functions unless a gap appears; no new RLS policies, no new grants.
-- Inputs validated with zod at the tool boundary; outputs are projected to explicit safe fields.
-- API: W3C `navigator.modelContext.registerTool(...)`; ship the `@mcp-b/global` polyfill so the tools are available in browsers/extensions without native support. Tools are unregistered on unmount/sign-out.
+- **All report charts stay vector-drawn into jsPDF** (`src/lib/report/charts.ts`). No `html2canvas` anywhere in the export path — that removes the render race and blank charts entirely, and works even if the tab is in the background.
+- **The export honours the owner's saved chart type** from `survey_visualizations`, falling back to a sane default: rating → column chart; ≤6 options → donut with legend; 7–15 → horizontal bars; >15 → bars for the top 12 plus an explicit "+N further answers (see table)" line; text → no chart.
+- **Labels and legends fixed**: every bar/column/slice shows count *and* % of answered; long labels wrap to two lines instead of being cut with "…"; donut legends show label, count and %; axis baselines and a "n = X answered" caption on every chart.
+- **Guards**: a question with 0 answers renders a "no answers" note, never an empty axis; all-zero data renders the table only; the drawing helpers return their measured height and the layout reserves space *before* drawing, so no chart is ever split across a page break.
+- Report Studio keeps `html2canvas` only for its on-screen themed preview export, or is retired in favour of the shared vector engine (my recommendation, see section 8).
 
-## E. UI changes
+## 4. Loading and normalizing response data
 
-- New **Agent Workspace** panel (route `/_authenticated/workspace`, plus a compact docked strip on `create` and `analyze`):
-  - Objective box (human states the research objective).
-  - Live **Agent activity log**: every tool call, its class badge (Read / Proposal / Needs approval), inputs summary, and result.
-  - **Draft review card**: agent-proposed title/questions/targeting, fully editable inline by the human, with Accept / Revise.
-  - **Approval Card**: publication summary + credit cost + Approve / Decline; approving is the only path that unlocks `cv_publish_survey`.
-  - **Monitoring strip**: response count vs goal after publish.
-  - Analysis results and saved-view actions surfaced in the same log with links into the existing analyze page.
-- Small "Agent connected / not connected" indicator in the header of that route. No chatbot, no message composer.
+- Move both pages to **TanStack Query** with the existing `getOwnerSurveyResults` server function: keyed by survey id, retried twice, with explicit `isPending` / `isError` / empty states instead of a silent fallback.
+- Distinguish four states in the UI: **loading** (skeleton), **not owner / not found** (clear message), **load failed** (error card with a Retry button and the reason), **loaded but zero responses** (empty state explaining the report will be structural only).
+- One **normalization step** before analysis and export: coerce `answers` to a string map, trim, drop answers whose question no longer exists, map answers that don't match any declared option into an explicit "Other / legacy answer" row, treat blank/whitespace as skipped, and guard against null `duration_ms` and unparseable timestamps.
+- **The export dialog refuses to run on stale or failed data.** It reads the same query result the page renders; if the query is loading, errored, or the row count has changed since the page loaded, the Download button is disabled with an explanation. Zero-response exports produce a valid structural report with an explicit "no responses collected" statement rather than an empty file.
+- Every export logs a one-line integrity check (rows in, rows counted per question) and surfaces a warning in the PDF's methodology page if any response was dropped during normalization.
 
-## F. Security & privacy
+## 5. Cover / header / footer system
 
-- All data access stays behind the owner-verified `getOwnerSurveyResults`; respondent ids remain pseudonymized; no profile emails/names exposed.
-- Prompt injection: survey titles, descriptions, question text and free-text responses are untrusted. Tool outputs wrap all user-generated text in explicit `untrusted_content` fields with a fixed note that it is data, not instructions; free-text is truncated and never used to build tool arguments automatically. Approval summaries render text as plain text, never as actionable directives.
-- Approval tokens are single-use, session-scoped, bound to a hash of the exact draft being approved — an agent cannot mutate the draft after approval and re-use the token.
-- No tool can widen RLS, use service role, or reach admin/faculty/broadcast surfaces.
-- Rate limit: per-session cap on consequential tool attempts; declines are logged in the activity feed.
+A single branded frame applied to every generated PDF:
 
-## G. Competition boundary
+- **Cover**: green band with the real `logo-mark.png`, "CampusVerify · Survey Research Report", report title, survey subtitle, then a metadata block — prepared by, institution (from the owner's profile / survey university domain, omitted when unknown), fieldwork dates, responses analysed, questions, completion rate, median time, generated timestamp, and the filtered-cut label when filters were applied.
+- **Confidentiality line** on the cover and repeated in the methodology section.
+- **Running header** from page 2: survey title (left), section name (right), hairline rule.
+- **Footer** on every page: "CampusVerify · campus-verify.live", page X of Y, generation date.
+- Colours and type come from the existing report palette (deep green #1f4d33, sage, cream paper) — no new brand identity.
 
-- All new code under `src/lib/webmcp/**`, `src/components/webmcp/**`, `src/routes/_authenticated/workspace.tsx`, prefixed tool names `cv_*`.
-- Each new file carries a header comment: `WebMCP Challenge — added after competition start. Not part of pre-existing CampusVerify functionality.`
-- `WEBMCP.md` at repo root documenting: what pre-existed (survey engine, targeting, analysis, exports, backend MCP server), what is new (browser WebMCP tools, approval model, workspace UI), and the demo script.
-- Touches to existing files kept minimal and additive: mount the provider, add a nav link, expose imperative setters from Survey Studio / analyze page.
+## 6. Sections and their conditions
 
-## H. Verification plan
+| Section | Included when |
+| --- | --- |
+| Cover, methodology, question-by-question, footer/citation | Always |
+| Table of contents | Full edition, more than ~4 pages |
+| Executive summary | At least one question has answers |
+| Respondent profile | At least one demographic field has real values |
+| Charts per question | Question is choice/rating and has ≥1 answer |
+| Verbatims | Text questions exist, owner enabled them |
+| Cross-tabulations | Owner selected at least one pair, ≥2 closed questions |
+| Interpretation/commentary | Owner wrote any |
+| Appendix + variable map | Full edition, owner enabled it |
 
-- Per-tool unit tests (vitest) for input validation, output projection, and that untrusted text is wrapped.
-- Guard tests: `cv_publish_survey` without/with stale/reused approval id ⇒ rejected; tools return "not authenticated" when signed out; a non-owner survey id returns not-found via the existing server fn.
-- Playwright end-to-end driving the workflow: objective → draft proposed → human edits → targeting proposed with reach → approval card → approve → publish → progress read → first-year vs final-year comparison → save view → prepare report. Screenshots at each checkpoint.
-- Manual pass with a real MCP-capable browser agent against the preview to confirm tool discovery and registration.
-- Regression check that Survey Studio, analyze, and export still work with no agent present.
+## 7. Export formats
 
-## I. Blockers / assumptions
+- **PDF first** — the visual report, in Full and Summary editions.
+- **Data exports stay separate**: "Responses only (CSV)" and the ZIP data package (wide + long responses, codebook, summary tables, cross-tabs, README with citation). No raw response tables inside the PDF.
+- **XLSX**: not added now. The Excel-safe CSV (UTF-8 BOM, CRLF, RFC-4180 quoting) already opens correctly; XLSX would add a dependency for little gain. Flag it as a later option.
+- The legacy CSV exporter in the Analysis page is deleted so there is one CSV implementation.
 
-1. WebMCP is still an emerging standard — the plan targets `navigator.modelContext` with the `@mcp-b/global` polyfill. Confirm the challenge's expected API surface/version before implementation.
-2. Assumes publishing continues to run as the authenticated client insert (credits charged by DB trigger); no server-side publish endpoint is added.
-3. Assumes agent operation on behalf of the signed-in owner only — no cross-user or admin agent capability.
-4. Judging demo will need a seeded survey with enough responses across year groups for the first-year vs final-year comparison to be meaningful; confirm whether a demo dataset is acceptable.
-5. `getOwnerSurveyResults` returns full response payloads to the client; subgroup analysis reuses that, so no new data exposure — confirm that is acceptable for the demo account.
+## 8. Analysis page changes (scoped)
+
+- One **Export** entry point (the existing dialog), with a small preflight: report title, prepared-by, institution, edition, and include/exclude toggles for profile, verbatims, cross-tabs, appendix. It shows exactly how many responses will be included.
+- The dialog gains a **"what you see is what you export" guarantee**: it uses the same filtered rows, the same chart types and the same computed stats object the page renders.
+- On-screen **cross-tab and subgroup selections are remembered** and passed to the export instead of the report auto-guessing pairs.
+- Chart-type pickers on screen persist to `survey_visualizations` (already the case) and now drive the PDF.
+- Error/empty/loading states as described in section 4.
+- **Report Studio**: keep the page and its commentary/section-ordering, but switch its Export button to the shared vector PDF builder so both routes produce the same document. No visual redesign of unrelated pages.
+
+## 9. Mobile and desktop
+
+- Export dialog becomes a full-height sheet on small screens with stacked options and a sticky Download button.
+- Charts on screen keep their responsive containers; PDF output is resolution-independent and identical on phone and desktop because it is generated from data, not from the DOM.
+- Large exports run in chunks with a progress toast so mobile Safari does not appear frozen; the blob is downloaded via the existing `downloadBlob` helper which works on iOS.
+- Analysis tables get horizontal scroll containers instead of shrinking text.
+
+## 10. Verification plan
+
+Automated (Vitest, on `src/lib/report/*`):
+
+- Totals parity: for a fixture survey, per-question `answered + skipped === n`, option counts sum to `answered`, and the numbers the PDF builder receives are the identical `SurveyStats` object the Analysis page renders.
+- Percentages: `% of answered` sums to 100 (±0.1) per closed question; `% of all` uses n, not the answered subset.
+- Normalization: blank strings, whitespace, unknown options, null durations and bad timestamps all handled without throwing.
+- Suppression: every cross-tab cell with 1–4 respondents renders as "—" in both PDF and CSV.
+
+Fixture matrix — each generates a PDF and is checked for page count, no blank charts and no overlapping text:
+
+1. 0 responses, 2. 1 response, 3. 4 responses (suppression boundary), 4. ~50, 5. ~1,000 with 20 questions, 6. all three question types together, 7. every optional demographic missing, 8. very long question wording and 400-word verbatims, 9. a question with 20 options, 10. filtered cut vs unfiltered.
+
+Manual QA: render each generated PDF to images and inspect for clipped text, split charts, wrong page numbering and missing branding, then compare three question totals per fixture against the on-screen figures.
+
+## Technical notes
+
+- Files touched: `src/lib/report/charts.ts`, `pdf.ts`, `stats.ts`, `csv.ts`; a new `src/lib/report/normalize.ts`; `src/components/SurveyExportDialog.tsx`; `src/routes/_authenticated/survey.$id.analyze.tsx`; `src/routes/_authenticated/survey.$id.report.tsx`; new tests under `src/lib/report/__tests__/`.
+- `getOwnerSurveyResults` gains the owner's display name and institution for the cover (no new tables, no schema migration, no RLS change).
+- Logo embedded as a base64 asset so the PDF never depends on a network fetch.
+- No new dependencies; `html2canvas-pro` is removed from the export path.
