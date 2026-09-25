@@ -296,17 +296,28 @@ class Layout {
 
 /* ------------------------------- sections ------------------------------- */
 
-function cover(L: Layout, survey: SurveyLike, stats: SurveyStats, options: ReportOptions) {
+function cover(L: Layout, survey: SurveyLike, stats: SurveyStats, options: ReportOptions, logo: string | null) {
   const { doc } = L;
   fill(doc, REPORT_PALETTE[0]);
   doc.rect(0, 0, L.W, 190, "F");
 
-  fill(doc, "#b8c47a");
-  doc.roundedRect(L.margin, 44, 34, 34, 10, 10, "F");
-  ink(doc, REPORT_PALETTE[0]);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(17);
-  doc.text("C", L.margin + 12, 68);
+  let drewLogo = false;
+  if (logo) {
+    try {
+      doc.addImage(logo, "PNG", L.margin, 44, 34, 34);
+      drewLogo = true;
+    } catch {
+      drewLogo = false;
+    }
+  }
+  if (!drewLogo) {
+    fill(doc, "#b8c47a");
+    doc.roundedRect(L.margin, 44, 34, 34, 10, 10, "F");
+    ink(doc, REPORT_PALETTE[0]);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(17);
+    doc.text("C", L.margin + 12, 68);
+  }
 
   ink(doc, "#e8efe4");
   doc.setFont("helvetica", "bold");
@@ -319,12 +330,14 @@ function cover(L: Layout, survey: SurveyLike, stats: SurveyStats, options: Repor
   ink(doc, "#ffffff");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(24);
-  const titleLines = doc.splitTextToSize(survey.title, L.contentW).slice(0, 3);
+  const titleLines = doc.splitTextToSize(options.reportTitle || survey.title, L.contentW).slice(0, 3);
   titleLines.forEach((ln: string, i: number) => doc.text(ln, L.margin, 118 + i * 26));
 
   L.y = 210;
+  if (options.subtitle) L.text(options.subtitle, { size: 11, bold: true });
   if (survey.description) L.text(survey.description, { size: 10, color: MUTED });
   L.gap(6);
+
 
   const cards: Array<[string, string]> = [
     ["Responses analysed", String(stats.n)],
