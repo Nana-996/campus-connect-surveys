@@ -165,6 +165,8 @@ function ReportBuilderPage() {
   const { user } = useAuth();
   const fetchOwnerResults = useServerFn(getOwnerSurveyResults);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
   const [exporting, setExporting] = useState(false);
   const [survey, setSurvey] = useState<Survey | null>(null);
   const [responses, setResponses] = useState<ResponseRow[]>([]);
@@ -185,31 +187,43 @@ function ReportBuilderPage() {
   useEffect(() => {
     if (!user) { setLoading(false); return; }
     let active = true;
+    setLoading(true);
+    setLoadError(null);
+    // Two quiet retries: a single dropped request should never look like
+    // "this survey has no responses".
     (async () => {
-      try {
-        const data = await fetchOwnerResults({ data: { surveyId: id } });
-        if (!active) return;
-        if (!data.survey) { setLoading(false); return; }
-        const s = data.survey as unknown as Survey;
-        const rs = (data.responses as unknown as ResponseRow[]) ?? [];
-        setSurvey(s);
-        setResponses(rs);
-        setProfiles(((data.profiles ?? []) as unknown as ProfileRow[]));
-        setReportTitle(`${s.title}`);
-        setSubtitle("Survey findings report");
-        setSummary(autoSummary(s, rs));
-        setSections(s.questions.map((q) => ({
-          qid: q.id, included: true, comment: "", chart: defaultChart(q), showRawText: false,
-        })));
-      } catch (err: any) {
-        toast.error(err?.message ?? "Couldn't load report data.");
-      } finally {
-        if (active) setLoading(false);
+      let lastErr: any = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          const data = await fetchOwnerResults({ data: { surveyId: id } });
+          if (!active) return;
+          if (!data.survey) { setLoadError("Survey not found, or you don't have access to its results."); setLoading(false); return; }
+          const s = data.survey as unknown as Survey;
+          const rs = (data.responses as unknown as ResponseRow[]) ?? [];
+          setSurvey(s);
+          setResponses(rs);
+          setProfiles(((data.profiles ?? []) as unknown as ProfileRow[]));
+          setReportTitle(`${s.title}`);
+          setSubtitle("Survey findings report");
+          setSummary(autoSummary(s, rs));
+          setSections(s.questions.map((q) => ({
+            qid: q.id, included: true, comment: "", chart: defaultChart(q), showRawText: false,
+          })));
+          setLoading(false);
+          return;
+        } catch (err: any) {
+          lastErr = err;
+          await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
+        }
       }
+      if (!active) return;
+      console.error("[report] load failed", lastErr);
+      setLoadError(lastErr?.message ?? "We couldn't load this survey's responses.");
+      setLoading(false);
     })();
     return () => { active = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, user?.id]);
+  }, [id, user?.id, reloadKey]);
 
   const qMap = useMemo(() => {
     const m: Record<string, Question> = {};
@@ -253,36 +267,53 @@ function ReportBuilderPage() {
 
   const reportRef = useRef<HTMLDivElement | null>(null);
 
+  // The PDF is drawn from the response data itself (vector charts, real text),
+  // never from a screenshot of the page — so charts can't come out blank and
+  // the numbers always match what the studio shows.
   const exportPDF = async () => {
-    if (!reportRef.current) return;
+    if (!survey) return;
     setExporting(true);
     const toastId = toast.loading("Generating PDF…");
     try {
-      await new Promise((r) => setTimeout(r, 300));
-      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
-        import("html2canvas-pro"),
-        import("jspdf"),
-      ]);
-      const pageEls = Array.from(reportRef.current.querySelectorAll<HTMLElement>("[data-report-page]"));
-      if (pageEls.length === 0) throw new Error("Nothing to export");
+      const [{ computeSurveyStats }, { buildResearchReport, DEFAULT_REPORT_OPTIONS, safeFileName }, { downloadBlob }] =
+        await Promise.all([
+          import("@/lib/report/stats"),
+          import("@/lib/report/pdf"),
+          import("@/lib/report/csv"),
+        ]);
 
-      const doc = new jsPDF({ unit: "pt", format: "a4" });
-      const W = doc.internal.pageSize.getWidth();
-      const H = doc.internal.pageSize.getHeight();
+      const profileMap: Record<string, any> = {};
+      profiles.forEach((p) => { profileMap[p.id] = p; });
 
-      for (let i = 0; i < pageEls.length; i++) {
-        const canvas = await html2canvas(pageEls[i], { scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false });
-        const imgData = canvas.toDataURL("image/png");
-        if (i > 0) doc.addPage();
-        const ratio = canvas.height / canvas.width;
-        const drawH = W * ratio;
-        if (drawH <= H) doc.addImage(imgData, "PNG", 0, 0, W, drawH);
-        else {
-          const scaledW = H / ratio;
-          doc.addImage(imgData, "PNG", (W - scaledW) / 2, 0, scaledW, H);
-        }
-      }
-      doc.save(`${(reportTitle || survey?.title || "survey").replace(/\s+/g, "_")}_report.pdf`);
+      const chartTypes: Record<string, "bar" | "column" | "donut" | "none"> = {};
+      const commentary: Record<string, string> = {};
+      includedSections.forEach((s) => {
+        chartTypes[s.qid] =
+          s.chart === "pie" || s.chart === "donut" ? "donut" : s.chart === "column" ? "column" : s.chart === "table" ? "none" : "bar";
+        if (s.comment.trim()) commentary[s.qid] = s.comment.trim();
+      });
+      const excludeQuestionIds = sections.filter((s) => !s.included).map((s) => s.qid);
+
+      const stats = computeSurveyStats(survey as any, responses as any, profileMap, responses.length);
+      const blob = await buildResearchReport({
+        survey: survey as any,
+        stats,
+        rows: responses as any,
+        options: {
+          ...DEFAULT_REPORT_OPTIONS,
+          reportTitle: reportTitle || survey.title,
+          subtitle: subtitle || null,
+          preparedBy: preparedBy || null,
+          institution: profileMap[survey.creator_id]?.university_name ?? null,
+          summaryText: showFindings ? summary : null,
+          includeSampleProfile: showDemographics,
+          includeVerbatims: includedSections.some((s) => s.showRawText),
+          chartTypes,
+          commentary,
+          excludeQuestionIds,
+        },
+      });
+      downloadBlob(blob, `${safeFileName(reportTitle || survey.title)}_report.pdf`);
       toast.success("Report exported.", { id: toastId });
     } catch (err: any) {
       console.error("[report] export failed", err);
@@ -314,7 +345,15 @@ function ReportBuilderPage() {
   };
 
   if (loading) return <p className="text-sm text-muted-foreground">Loading report studio…</p>;
-  if (!survey) return <p className="text-sm text-muted-foreground">Survey not found.</p>;
+  if (loadError || !survey) {
+    return (
+      <div className="mx-auto max-w-md rounded-xl border bg-card p-6 text-center">
+        <p className="text-sm font-medium">We couldn't load this report</p>
+        <p className="mt-2 text-sm text-muted-foreground">{loadError ?? "Survey not found."}</p>
+        <Button className="mt-4" onClick={() => setReloadKey((k) => k + 1)}>Try again</Button>
+      </div>
+    );
+  }
 
   const t = THEMES[theme];
   const includedSections = sections.filter((s) => s.included);

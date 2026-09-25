@@ -155,6 +155,8 @@ function AnalyzePage() {
   const { user } = useAuth();
   const fetchOwnerResults = useServerFn(getOwnerSurveyResults);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
   const [survey, setSurvey] = useState<Survey | null>(null);
   const [responses, setResponses] = useState<Response[]>([]);
   const [profileMap, setProfileMap] = useState<Record<string, Profile>>({});
@@ -170,31 +172,44 @@ function AnalyzePage() {
   useEffect(() => {
     if (!user) { setLoading(false); return; }
     let active = true;
+    setLoading(true);
+    setLoadError(null);
+    // Retry quietly twice: a dropped request must never be mistaken for
+    // "this survey has no responses".
     (async () => {
-      try {
-        const ownerData = await fetchOwnerResults({ data: { surveyId: id } });
-        if (!active) return;
-        if (!ownerData.survey) { setLoading(false); return; }
-        setSurvey(ownerData.survey as unknown as Survey);
-        const resps = (ownerData.responses as unknown as Response[]) ?? [];
-        setResponses(resps);
-
-        const map: Record<string, Profile> = {};
-        ((ownerData.profiles as unknown as Profile[]) ?? []).forEach((pr) => { map[pr.id] = pr; });
-        setProfileMap(map);
-        setSavedViews((ownerData.savedViews as any) ?? []);
-        setShareTokens((ownerData.shareTokens as any) ?? []);
-      } catch (err: any) {
-        console.error("[analyze] load failed", err);
-        toast.error(err?.message ?? "Couldn't load survey results.");
-      } finally {
-        if (active) setLoading(false);
+      let lastErr: any = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          const ownerData = await fetchOwnerResults({ data: { surveyId: id } });
+          if (!active) return;
+          if (!ownerData.survey) {
+            setLoadError("Survey not found, or you don't have access to its results.");
+            setLoading(false);
+            return;
+          }
+          setSurvey(ownerData.survey as unknown as Survey);
+          setResponses((ownerData.responses as unknown as Response[]) ?? []);
+          const map: Record<string, Profile> = {};
+          ((ownerData.profiles as unknown as Profile[]) ?? []).forEach((pr) => { map[pr.id] = pr; });
+          setProfileMap(map);
+          setSavedViews((ownerData.savedViews as any) ?? []);
+          setShareTokens((ownerData.shareTokens as any) ?? []);
+          setLoading(false);
+          return;
+        } catch (err: any) {
+          lastErr = err;
+          await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
+        }
       }
+      if (!active) return;
+      console.error("[analyze] load failed", lastErr);
+      setLoadError(lastErr?.message ?? "We couldn't load this survey's responses.");
+      setLoading(false);
     })();
     return () => { active = false; };
     // Depend on user?.id (stable string) — not `user` (new object on every Supabase token refresh).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, user?.id]);
+  }, [id, user?.id, reloadKey]);
 
   const isPremium = useMemo(() => {
     // Premium features are free for now — all signed-in creators get full access.
@@ -225,7 +240,17 @@ function AnalyzePage() {
   }, [profileMap]);
 
   if (loading) return <p className="text-sm text-muted-foreground">Loading analysis…</p>;
-  if (!survey) return <p className="text-sm text-muted-foreground">Survey not found or you don't have access.</p>;
+  if (loadError || !survey) {
+    return (
+      <div className="mx-auto max-w-md rounded-xl border bg-card p-6 text-center">
+        <p className="text-sm font-medium">We couldn't load these results</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {loadError ?? "Survey not found or you don't have access."}
+        </p>
+        <Button className="mt-4" onClick={() => setReloadKey((k) => k + 1)}>Try again</Button>
+      </div>
+    );
+  }
 
   const n = filtered.length;
   const activeFilterChips = (Object.entries(filters) as [keyof Filters, string][])

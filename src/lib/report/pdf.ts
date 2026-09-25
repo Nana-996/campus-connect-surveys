@@ -20,12 +20,16 @@ import {
   fill,
   ink,
   INK,
+  measureHorizontalBars,
   MUTED,
   PAPER,
   REPORT_PALETTE,
   RULE,
   stroke,
 } from "./charts";
+
+/** Chart the owner picked on screen for a question. */
+export type ChartChoice = "bar" | "column" | "donut" | "none";
 
 export type ReportOptions = {
   mode: "full" | "summary";
@@ -36,6 +40,21 @@ export type ReportOptions = {
   includeAppendix: boolean;
   filtersLabel: string | null;
   preparedBy?: string | null;
+  /** Institution shown on the cover, when known. */
+  institution?: string | null;
+  /** Overrides the survey title as the report title on the cover. */
+  reportTitle?: string | null;
+  subtitle?: string | null;
+  /** Owner-written executive summary; replaces the auto-drafted findings. */
+  summaryText?: string | null;
+  /** Owner's on-screen chart choice, keyed by question id. */
+  chartTypes?: Record<string, ChartChoice>;
+  /** Owner's per-question interpretation, keyed by question id. */
+  commentary?: Record<string, string>;
+  /** Explicit cross-tab pairs (row question id, column question id). */
+  crossTabPairs?: Array<[string, string]>;
+  /** Questions to leave out of the report entirely. */
+  excludeQuestionIds?: string[];
 };
 
 export const DEFAULT_REPORT_OPTIONS: ReportOptions = {
@@ -47,6 +66,24 @@ export const DEFAULT_REPORT_OPTIONS: ReportOptions = {
   includeAppendix: true,
   filtersLabel: null,
 };
+
+/** Load the CampusVerify mark as a data URL so the PDF never depends on the network at draw time. */
+async function loadLogo(): Promise<string | null> {
+  if (typeof window === "undefined" || typeof fetch === "undefined") return null;
+  try {
+    const res = await fetch("/logo-mark.png");
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    return await new Promise<string | null>((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : null);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+}
 
 const VISIBILITY_TEXT: Record<string, string> = {
   campus: "Campus-specific — only members of the selected institution could see and answer it",
@@ -252,25 +289,38 @@ class Layout {
       this.doc.setFont("helvetica", "normal");
       this.doc.setFontSize(7);
       ink(this.doc, MUTED);
-      this.doc.text(`CampusVerify · ${this.title}`, this.margin, this.H - 24);
-      this.doc.text(`Page ${p} of ${total}`, this.W - this.margin, this.H - 24, { align: "right" });
+      this.doc.text(`CampusVerify · campus-verify.live · ${this.title}`, this.margin, this.H - 24);
+      this.doc.text(`Page ${p} of ${total} · ${fmtDate(new Date().toISOString())}`, this.W - this.margin, this.H - 24, {
+        align: "right",
+      });
     }
   }
 }
 
 /* ------------------------------- sections ------------------------------- */
 
-function cover(L: Layout, survey: SurveyLike, stats: SurveyStats, options: ReportOptions) {
+function cover(L: Layout, survey: SurveyLike, stats: SurveyStats, options: ReportOptions, logo: string | null) {
   const { doc } = L;
   fill(doc, REPORT_PALETTE[0]);
   doc.rect(0, 0, L.W, 190, "F");
 
-  fill(doc, "#b8c47a");
-  doc.roundedRect(L.margin, 44, 34, 34, 10, 10, "F");
-  ink(doc, REPORT_PALETTE[0]);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(17);
-  doc.text("C", L.margin + 12, 68);
+  let drewLogo = false;
+  if (logo) {
+    try {
+      doc.addImage(logo, "PNG", L.margin, 44, 34, 34);
+      drewLogo = true;
+    } catch {
+      drewLogo = false;
+    }
+  }
+  if (!drewLogo) {
+    fill(doc, "#b8c47a");
+    doc.roundedRect(L.margin, 44, 34, 34, 10, 10, "F");
+    ink(doc, REPORT_PALETTE[0]);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(17);
+    doc.text("C", L.margin + 12, 68);
+  }
 
   ink(doc, "#e8efe4");
   doc.setFont("helvetica", "bold");
@@ -283,12 +333,14 @@ function cover(L: Layout, survey: SurveyLike, stats: SurveyStats, options: Repor
   ink(doc, "#ffffff");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(24);
-  const titleLines = doc.splitTextToSize(survey.title, L.contentW).slice(0, 3);
+  const titleLines = doc.splitTextToSize(options.reportTitle || survey.title, L.contentW).slice(0, 3);
   titleLines.forEach((ln: string, i: number) => doc.text(ln, L.margin, 118 + i * 26));
 
   L.y = 210;
+  if (options.subtitle) L.text(options.subtitle, { size: 11, bold: true });
   if (survey.description) L.text(survey.description, { size: 10, color: MUTED });
   L.gap(6);
+
 
   const cards: Array<[string, string]> = [
     ["Responses analysed", String(stats.n)],
@@ -318,7 +370,15 @@ function cover(L: Layout, survey: SurveyLike, stats: SurveyStats, options: Repor
     { size: 8, color: MUTED },
   );
   if (options.preparedBy) L.text(`Prepared by ${options.preparedBy}`, { size: 8, color: MUTED });
+  if (options.institution) L.text(options.institution, { size: 8, color: MUTED });
   if (options.filtersLabel) L.text(`Filtered cut: ${options.filtersLabel}`, { size: 8, color: MUTED });
+
+  L.gap(10);
+  L.rule();
+  L.text(
+    `Confidential. Respondents are pseudonymous: no names or email addresses appear in this report, and cross-tabulated cells with fewer than ${SUPPRESS_THRESHOLD} respondents are suppressed to prevent re-identification. Intended for the named recipient.`,
+    { size: 7.5, color: MUTED },
+  );
 }
 
 function methodology(L: Layout, survey: SurveyLike, stats: SurveyStats, options: ReportOptions) {
@@ -394,9 +454,10 @@ function sampleProfile(L: Layout, stats: SurveyStats) {
   });
 }
 
-function executiveSummary(L: Layout, stats: SurveyStats) {
-  const findings = keyFindings(stats, 8);
-  if (findings.length === 0) return;
+function executiveSummary(L: Layout, stats: SurveyStats, options: ReportOptions) {
+  const written = (options.summaryText ?? "").trim();
+  const findings = written ? [] : keyFindings(stats, 8);
+  if (!written && findings.length === 0) return;
   L.newPage();
   L.sectionTitle("Executive summary");
   L.text(
@@ -404,6 +465,13 @@ function executiveSummary(L: Layout, stats: SurveyStats) {
     { size: 9, color: MUTED },
   );
   L.gap(4);
+  if (written) {
+    written.split(/\n+/).filter(Boolean).forEach((para) => {
+      L.text(para, { size: 9.5 });
+      L.gap(4);
+    });
+    return;
+  }
   findings.forEach((f) => {
     L.space(16);
     fill(L.doc, REPORT_PALETTE[2]);
@@ -488,32 +556,56 @@ function questionSection(L: Layout, qs: QuestionStats, options: ReportOptions, i
     } else {
       L.text(`All ${t.verbatims.length} verbatim responses are available in the data package (responses_long.csv).`, { size: 8, color: MUTED });
     }
+    const textNote = options.commentary?.[qs.question.id]?.trim();
+    if (textNote) {
+      L.eyebrow("Interpretation");
+      L.text(textNote, { size: 9 });
+    }
     if (!isLast) L.rule();
     return;
   }
 
-  // Closed questions: chart + frequency table
+  // Closed questions: chart + frequency table.
+  // The chart honours the owner's on-screen choice; otherwise it is picked from
+  // the shape of the data. Space is always reserved *before* drawing so a chart
+  // can never be cut in half by a page break.
   const data = qs.options.map((o) => ({ label: o.label, count: o.count }));
-  if (qs.question.type === "rating") {
-    L.space(126);
-    drawColumns(L.doc, { x: L.margin, y: L.y, w: L.contentW, h: 120, data });
-    L.y += 126;
-    if (qs.rating) {
-      L.table(
-        ["Mean", "Median", "Std. dev.", "Min", "Max", "n"],
-        [[qs.rating.mean.toFixed(2), qs.rating.median.toFixed(2), qs.rating.sd.toFixed(2), String(qs.rating.min), String(qs.rating.max), String(qs.rating.n)]],
-        { widths: Array(6).fill(L.contentW / 6), align: ["right", "right", "right", "right", "right", "right"] },
-      );
+  const chosen = options.chartTypes?.[qs.question.id];
+  const auto: ChartChoice = qs.question.type === "rating" ? "column" : data.length <= 6 ? "donut" : "bar";
+  const chart: ChartChoice = chosen && chosen !== "none" ? chosen : chosen === "none" ? "none" : auto;
+  const allZero = data.every((d) => d.count === 0);
+
+  if (chart !== "none" && !allZero) {
+    if (chart === "column") {
+      L.space(132);
+      drawColumns(L.doc, { x: L.margin, y: L.y, w: L.contentW, h: 120, data });
+      L.y += 132;
+    } else if (chart === "donut") {
+      const size = 110;
+      const h = Math.max(size, data.length * 13 + 10) + 14;
+      L.space(h);
+      drawDonut(L.doc, { x: L.margin, y: L.y, size, data, legendWidth: L.contentW - size - 20 });
+      L.y += h;
+    } else {
+      const shown = data.slice(0, 12);
+      const h = measureHorizontalBars(shown) + 14;
+      L.space(h);
+      drawHorizontalBars(L.doc, { x: L.margin, y: L.y + 4, w: L.contentW, data: shown, total: qs.answered });
+      L.y += h;
+      if (data.length > shown.length) {
+        L.text(`+ ${data.length - shown.length} further answers — see the table below.`, { size: 8, color: MUTED });
+      }
     }
-  } else if (data.length <= 6) {
-    const size = 110;
-    L.space(size + 16);
-    drawDonut(L.doc, { x: L.margin, y: L.y, size, data, legendWidth: L.contentW - size - 20 });
-    L.y += Math.max(size, data.length * 13 + 10) + 12;
-  } else {
-    const h = drawHorizontalBars(L.doc, { x: L.margin, y: L.y + 4, w: L.contentW, data: data.slice(0, 12) });
-    L.space(h + 12);
-    L.y += h + 12;
+    L.text(`n = ${qs.answered} answered`, { size: 7.5, color: MUTED });
+    L.gap(2);
+  }
+
+  if (qs.question.type === "rating" && qs.rating) {
+    L.table(
+      ["Mean", "Median", "Std. dev.", "Min", "Max", "n"],
+      [[qs.rating.mean.toFixed(2), qs.rating.median.toFixed(2), qs.rating.sd.toFixed(2), String(qs.rating.min), String(qs.rating.max), String(qs.rating.n)]],
+      { widths: Array(6).fill(L.contentW / 6), align: ["right", "right", "right", "right", "right", "right"] },
+    );
   }
 
   L.table(
@@ -524,6 +616,11 @@ function questionSection(L: Layout, qs: QuestionStats, options: ReportOptions, i
       align: ["left", "right", "right", "right"],
     },
   );
+  const note = options.commentary?.[qs.question.id]?.trim();
+  if (note) {
+    L.eyebrow("Interpretation");
+    L.text(note, { size: 9 });
+  }
   if (!isLast) L.rule();
 }
 
@@ -582,26 +679,46 @@ export async function buildResearchReport(args: {
   options: ReportOptions;
 }): Promise<Blob> {
   const { survey, stats, rows, options } = args;
-  const { default: jsPDF } = await import("jspdf");
+  const [{ default: jsPDF }, logo] = await Promise.all([import("jspdf"), loadLogo()]);
   const doc = new jsPDF({ unit: "pt", format: "a4", compress: true });
 
-  const L = new Layout(doc, survey.title);
+  const L = new Layout(doc, options.reportTitle || survey.title);
   L.paintPage();
 
-  cover(L, survey, stats, options);
+  const excluded = new Set(options.excludeQuestionIds ?? []);
+  const questions = stats.questions.filter((q) => !excluded.has(q.question.id));
+
+  cover(L, survey, stats, options, logo);
   methodology(L, survey, stats, options);
   if (options.includeSampleProfile) sampleProfile(L, stats);
-  executiveSummary(L, stats);
+  executiveSummary(L, stats, options);
 
   L.newPage();
   L.sectionTitle("Results question by question");
-  stats.questions.forEach((qs, i) => questionSection(L, qs, options, i === stats.questions.length - 1));
+  if (questions.length === 0 || stats.n === 0) {
+    L.text(
+      stats.n === 0
+        ? "No responses had been collected when this report was generated. The sections above describe the study design; results will appear here once responses come in."
+        : "No questions were selected for this report.",
+      { size: 9.5, color: MUTED },
+    );
+  }
+  questions.forEach((qs, i) => questionSection(L, qs, options, i === questions.length - 1));
 
   if (options.includeCrossTabs && options.mode === "full") {
-    const closed = stats.questions.filter((q) => q.question.type !== "text" && q.answered > 0).map((q) => q.question);
+    const byId = new Map(stats.questions.map((q) => [q.question.id, q.question]));
     const tabs: CrossTab[] = [];
-    for (let i = 0; i < closed.length - 1 && tabs.length < 6; i++) {
-      tabs.push(computeCrossTab(closed[i], closed[i + 1], rows));
+    if (options.crossTabPairs?.length) {
+      for (const [rowId, colId] of options.crossTabPairs.slice(0, 6)) {
+        const rowQ = byId.get(rowId);
+        const colQ = byId.get(colId);
+        if (rowQ && colQ) tabs.push(computeCrossTab(rowQ, colQ, rows));
+      }
+    } else {
+      const closed = questions.filter((q) => q.question.type !== "text" && q.answered > 0).map((q) => q.question);
+      for (let i = 0; i < closed.length - 1 && tabs.length < 6; i++) {
+        tabs.push(computeCrossTab(closed[i], closed[i + 1], rows));
+      }
     }
     crossTabSection(L, tabs);
   }
