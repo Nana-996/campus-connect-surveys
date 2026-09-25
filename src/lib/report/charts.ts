@@ -39,17 +39,37 @@ function truncate(doc: Doc, text: string, maxWidth: number) {
   return t.length < text.length ? `${t.slice(0, -1)}…` : t;
 }
 
-/** Horizontal bars with label + count on each row. Good for choice questions. */
+/** Wrap a label onto at most `maxLines` lines, ellipsising the final line. */
+function wrapLabel(doc: Doc, text: string, maxWidth: number, maxLines = 2): string[] {
+  const lines: string[] = doc.splitTextToSize(String(text ?? ""), maxWidth);
+  if (lines.length <= maxLines) return lines;
+  const kept = lines.slice(0, maxLines);
+  kept[maxLines - 1] = truncate(doc, `${kept[maxLines - 1]} …`, maxWidth);
+  return kept;
+}
+
+const share = (count: number, total: number) => (total > 0 ? Math.round((count / total) * 1000) / 10 : 0);
+
+/** Height a horizontal-bar chart will occupy — call before drawing to reserve space. */
+export function measureHorizontalBars(data: ChartDatum[], rowHeight = 24) {
+  return Math.max(1, data.length) * rowHeight;
+}
+
+/** Horizontal bars with wrapped label, count and percentage on each row. */
 export function drawHorizontalBars(
   doc: Doc,
-  opts: { x: number; y: number; w: number; data: ChartDatum[]; palette?: string[]; rowHeight?: number },
+  opts: {
+    x: number; y: number; w: number; data: ChartDatum[]; palette?: string[]; rowHeight?: number; total?: number;
+  },
 ): number {
   const { x, y, w, data } = opts;
   const palette = opts.palette ?? REPORT_PALETTE;
-  const rowH = opts.rowHeight ?? 18;
-  const labelW = Math.min(150, w * 0.38);
-  const barMaxW = w - labelW - 52;
+  const rowH = opts.rowHeight ?? 24;
+  const labelW = Math.min(170, w * 0.4);
+  const valueW = 62;
+  const barMaxW = w - labelW - valueW;
   const max = Math.max(1, ...data.map((d) => d.count));
+  const total = opts.total ?? data.reduce((a, b) => a + b.count, 0);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
@@ -57,17 +77,18 @@ export function drawHorizontalBars(
   data.forEach((d, i) => {
     const rowY = y + i * rowH;
     ink(doc, INK);
-    doc.text(truncate(doc, d.label, labelW - 6), x, rowY + 8);
+    const lines = wrapLabel(doc, d.label, labelW - 8, 2);
+    lines.forEach((ln, li) => doc.text(ln, x, rowY + 8 + li * 9));
     const barW = Math.max(1, (d.count / max) * barMaxW);
     fill(doc, "#efe9dd");
-    doc.roundedRect(x + labelW, rowY + 1.5, barMaxW, 9, 2, 2, "F");
+    doc.roundedRect(x + labelW, rowY + 2, barMaxW, 10, 2, 2, "F");
     fill(doc, palette[i % palette.length]);
-    doc.roundedRect(x + labelW, rowY + 1.5, barW, 9, 2, 2, "F");
+    doc.roundedRect(x + labelW, rowY + 2, barW, 10, 2, 2, "F");
     ink(doc, MUTED);
-    doc.text(String(d.count), x + labelW + barMaxW + 6, rowY + 8.5);
+    doc.text(`${d.count} · ${share(d.count, total)}%`, x + w, rowY + 9.5, { align: "right" });
   });
 
-  return data.length * rowH;
+  return measureHorizontalBars(data, rowH);
 }
 
 /** Vertical columns — good for ratings and ordered scales. */
@@ -88,16 +109,21 @@ export function drawColumns(
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
+  const total = data.reduce((a, b) => a + b.count, 0);
 
   data.forEach((d, i) => {
-    const barH = (d.count / max) * (plotH - 12);
+    const barH = (d.count / max) * (plotH - 20);
     const bx = x + i * slot + (slot - barW) / 2;
     fill(doc, palette[i % palette.length]);
     doc.roundedRect(bx, y + plotH - barH, barW, Math.max(barH, 0.8), 2, 2, "F");
     ink(doc, MUTED);
-    doc.text(String(d.count), bx + barW / 2, y + plotH - barH - 3, { align: "center" });
+    doc.setFontSize(7.5);
+    doc.text(`${d.count} · ${share(d.count, total)}%`, bx + barW / 2, y + plotH - barH - 4, { align: "center" });
     ink(doc, INK);
-    doc.text(truncate(doc, d.label, slot - 4), bx + barW / 2, y + plotH + 10, { align: "center" });
+    doc.setFontSize(8);
+    wrapLabel(doc, d.label, slot - 4, 2).forEach((ln, li) =>
+      doc.text(ln, bx + barW / 2, y + plotH + 10 + li * 9, { align: "center" }),
+    );
   });
 
   return h;
