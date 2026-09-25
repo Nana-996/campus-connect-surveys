@@ -367,7 +367,15 @@ function cover(L: Layout, survey: SurveyLike, stats: SurveyStats, options: Repor
     { size: 8, color: MUTED },
   );
   if (options.preparedBy) L.text(`Prepared by ${options.preparedBy}`, { size: 8, color: MUTED });
+  if (options.institution) L.text(options.institution, { size: 8, color: MUTED });
   if (options.filtersLabel) L.text(`Filtered cut: ${options.filtersLabel}`, { size: 8, color: MUTED });
+
+  L.gap(10);
+  L.rule();
+  L.text(
+    `Confidential. Respondents are pseudonymous: no names or email addresses appear in this report, and cross-tabulated cells with fewer than ${SUPPRESS_THRESHOLD} respondents are suppressed to prevent re-identification. Intended for the named recipient.`,
+    { size: 7.5, color: MUTED },
+  );
 }
 
 function methodology(L: Layout, survey: SurveyLike, stats: SurveyStats, options: ReportOptions) {
