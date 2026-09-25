@@ -20,6 +20,7 @@ import {
   fill,
   ink,
   INK,
+  measureHorizontalBars,
   MUTED,
   PAPER,
   REPORT_PALETTE,
@@ -552,6 +553,11 @@ function questionSection(L: Layout, qs: QuestionStats, options: ReportOptions, i
       }
     } else {
       L.text(`All ${t.verbatims.length} verbatim responses are available in the data package (responses_long.csv).`, { size: 8, color: MUTED });
+    }
+    const textNote = options.commentary?.[qs.question.id]?.trim();
+    if (textNote) {
+      L.eyebrow("Interpretation");
+      L.text(textNote, { size: 9 });
     }
     if (!isLast) L.rule();
     return;
