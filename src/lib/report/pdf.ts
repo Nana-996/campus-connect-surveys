@@ -451,9 +451,10 @@ function sampleProfile(L: Layout, stats: SurveyStats) {
   });
 }
 
-function executiveSummary(L: Layout, stats: SurveyStats) {
-  const findings = keyFindings(stats, 8);
-  if (findings.length === 0) return;
+function executiveSummary(L: Layout, stats: SurveyStats, options: ReportOptions) {
+  const written = (options.summaryText ?? "").trim();
+  const findings = written ? [] : keyFindings(stats, 8);
+  if (!written && findings.length === 0) return;
   L.newPage();
   L.sectionTitle("Executive summary");
   L.text(
@@ -461,6 +462,13 @@ function executiveSummary(L: Layout, stats: SurveyStats) {
     { size: 9, color: MUTED },
   );
   L.gap(4);
+  if (written) {
+    written.split(/\n+/).filter(Boolean).forEach((para) => {
+      L.text(para, { size: 9.5 });
+      L.gap(4);
+    });
+    return;
+  }
   findings.forEach((f) => {
     L.space(16);
     fill(L.doc, REPORT_PALETTE[2]);
