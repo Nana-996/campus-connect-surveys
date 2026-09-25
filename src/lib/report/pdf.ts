@@ -27,6 +27,9 @@ import {
   stroke,
 } from "./charts";
 
+/** Chart the owner picked on screen for a question. */
+export type ChartChoice = "bar" | "column" | "donut" | "none";
+
 export type ReportOptions = {
   mode: "full" | "summary";
   includeSampleProfile: boolean;
@@ -36,6 +39,21 @@ export type ReportOptions = {
   includeAppendix: boolean;
   filtersLabel: string | null;
   preparedBy?: string | null;
+  /** Institution shown on the cover, when known. */
+  institution?: string | null;
+  /** Overrides the survey title as the report title on the cover. */
+  reportTitle?: string | null;
+  subtitle?: string | null;
+  /** Owner-written executive summary; replaces the auto-drafted findings. */
+  summaryText?: string | null;
+  /** Owner's on-screen chart choice, keyed by question id. */
+  chartTypes?: Record<string, ChartChoice>;
+  /** Owner's per-question interpretation, keyed by question id. */
+  commentary?: Record<string, string>;
+  /** Explicit cross-tab pairs (row question id, column question id). */
+  crossTabPairs?: Array<[string, string]>;
+  /** Questions to leave out of the report entirely. */
+  excludeQuestionIds?: string[];
 };
 
 export const DEFAULT_REPORT_OPTIONS: ReportOptions = {
@@ -47,6 +65,24 @@ export const DEFAULT_REPORT_OPTIONS: ReportOptions = {
   includeAppendix: true,
   filtersLabel: null,
 };
+
+/** Load the CampusVerify mark as a data URL so the PDF never depends on the network at draw time. */
+async function loadLogo(): Promise<string | null> {
+  if (typeof window === "undefined" || typeof fetch === "undefined") return null;
+  try {
+    const res = await fetch("/logo-mark.png");
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    return await new Promise<string | null>((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : null);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+}
 
 const VISIBILITY_TEXT: Record<string, string> = {
   campus: "Campus-specific — only members of the selected institution could see and answer it",
