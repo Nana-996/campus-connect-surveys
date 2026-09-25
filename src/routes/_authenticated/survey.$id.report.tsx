@@ -165,6 +165,8 @@ function ReportBuilderPage() {
   const { user } = useAuth();
   const fetchOwnerResults = useServerFn(getOwnerSurveyResults);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
   const [exporting, setExporting] = useState(false);
   const [survey, setSurvey] = useState<Survey | null>(null);
   const [responses, setResponses] = useState<ResponseRow[]>([]);
@@ -185,31 +187,43 @@ function ReportBuilderPage() {
   useEffect(() => {
     if (!user) { setLoading(false); return; }
     let active = true;
+    setLoading(true);
+    setLoadError(null);
+    // Two quiet retries: a single dropped request should never look like
+    // "this survey has no responses".
     (async () => {
-      try {
-        const data = await fetchOwnerResults({ data: { surveyId: id } });
-        if (!active) return;
-        if (!data.survey) { setLoading(false); return; }
-        const s = data.survey as unknown as Survey;
-        const rs = (data.responses as unknown as ResponseRow[]) ?? [];
-        setSurvey(s);
-        setResponses(rs);
-        setProfiles(((data.profiles ?? []) as unknown as ProfileRow[]));
-        setReportTitle(`${s.title}`);
-        setSubtitle("Survey findings report");
-        setSummary(autoSummary(s, rs));
-        setSections(s.questions.map((q) => ({
-          qid: q.id, included: true, comment: "", chart: defaultChart(q), showRawText: false,
-        })));
-      } catch (err: any) {
-        toast.error(err?.message ?? "Couldn't load report data.");
-      } finally {
-        if (active) setLoading(false);
+      let lastErr: any = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          const data = await fetchOwnerResults({ data: { surveyId: id } });
+          if (!active) return;
+          if (!data.survey) { setLoadError("Survey not found, or you don't have access to its results."); setLoading(false); return; }
+          const s = data.survey as unknown as Survey;
+          const rs = (data.responses as unknown as ResponseRow[]) ?? [];
+          setSurvey(s);
+          setResponses(rs);
+          setProfiles(((data.profiles ?? []) as unknown as ProfileRow[]));
+          setReportTitle(`${s.title}`);
+          setSubtitle("Survey findings report");
+          setSummary(autoSummary(s, rs));
+          setSections(s.questions.map((q) => ({
+            qid: q.id, included: true, comment: "", chart: defaultChart(q), showRawText: false,
+          })));
+          setLoading(false);
+          return;
+        } catch (err: any) {
+          lastErr = err;
+          await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
+        }
       }
+      if (!active) return;
+      console.error("[report] load failed", lastErr);
+      setLoadError(lastErr?.message ?? "We couldn't load this survey's responses.");
+      setLoading(false);
     })();
     return () => { active = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, user?.id]);
+  }, [id, user?.id, reloadKey]);
 
   const qMap = useMemo(() => {
     const m: Record<string, Question> = {};
