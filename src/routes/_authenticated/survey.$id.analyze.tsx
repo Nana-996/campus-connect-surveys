@@ -240,7 +240,17 @@ function AnalyzePage() {
   }, [profileMap]);
 
   if (loading) return <p className="text-sm text-muted-foreground">Loading analysis…</p>;
-  if (!survey) return <p className="text-sm text-muted-foreground">Survey not found or you don't have access.</p>;
+  if (loadError || !survey) {
+    return (
+      <div className="mx-auto max-w-md rounded-xl border bg-card p-6 text-center">
+        <p className="text-sm font-medium">We couldn't load these results</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {loadError ?? "Survey not found or you don't have access."}
+        </p>
+        <Button className="mt-4" onClick={() => setReloadKey((k) => k + 1)}>Try again</Button>
+      </div>
+    );
+  }
 
   const n = filtered.length;
   const activeFilterChips = (Object.entries(filters) as [keyof Filters, string][])
