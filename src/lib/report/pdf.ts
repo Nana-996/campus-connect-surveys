@@ -557,28 +557,47 @@ function questionSection(L: Layout, qs: QuestionStats, options: ReportOptions, i
     return;
   }
 
-  // Closed questions: chart + frequency table
+  // Closed questions: chart + frequency table.
+  // The chart honours the owner's on-screen choice; otherwise it is picked from
+  // the shape of the data. Space is always reserved *before* drawing so a chart
+  // can never be cut in half by a page break.
   const data = qs.options.map((o) => ({ label: o.label, count: o.count }));
-  if (qs.question.type === "rating") {
-    L.space(126);
-    drawColumns(L.doc, { x: L.margin, y: L.y, w: L.contentW, h: 120, data });
-    L.y += 126;
-    if (qs.rating) {
-      L.table(
-        ["Mean", "Median", "Std. dev.", "Min", "Max", "n"],
-        [[qs.rating.mean.toFixed(2), qs.rating.median.toFixed(2), qs.rating.sd.toFixed(2), String(qs.rating.min), String(qs.rating.max), String(qs.rating.n)]],
-        { widths: Array(6).fill(L.contentW / 6), align: ["right", "right", "right", "right", "right", "right"] },
-      );
+  const chosen = options.chartTypes?.[qs.question.id];
+  const auto: ChartChoice = qs.question.type === "rating" ? "column" : data.length <= 6 ? "donut" : "bar";
+  const chart: ChartChoice = chosen && chosen !== "none" ? chosen : chosen === "none" ? "none" : auto;
+  const allZero = data.every((d) => d.count === 0);
+
+  if (chart !== "none" && !allZero) {
+    if (chart === "column") {
+      L.space(132);
+      drawColumns(L.doc, { x: L.margin, y: L.y, w: L.contentW, h: 120, data });
+      L.y += 132;
+    } else if (chart === "donut") {
+      const size = 110;
+      const h = Math.max(size, data.length * 13 + 10) + 14;
+      L.space(h);
+      drawDonut(L.doc, { x: L.margin, y: L.y, size, data, legendWidth: L.contentW - size - 20 });
+      L.y += h;
+    } else {
+      const shown = data.slice(0, 12);
+      const h = measureHorizontalBars(shown) + 14;
+      L.space(h);
+      drawHorizontalBars(L.doc, { x: L.margin, y: L.y + 4, w: L.contentW, data: shown, total: qs.answered });
+      L.y += h;
+      if (data.length > shown.length) {
+        L.text(`+ ${data.length - shown.length} further answers — see the table below.`, { size: 8, color: MUTED });
+      }
     }
-  } else if (data.length <= 6) {
-    const size = 110;
-    L.space(size + 16);
-    drawDonut(L.doc, { x: L.margin, y: L.y, size, data, legendWidth: L.contentW - size - 20 });
-    L.y += Math.max(size, data.length * 13 + 10) + 12;
-  } else {
-    const h = drawHorizontalBars(L.doc, { x: L.margin, y: L.y + 4, w: L.contentW, data: data.slice(0, 12) });
-    L.space(h + 12);
-    L.y += h + 12;
+    L.text(`n = ${qs.answered} answered`, { size: 7.5, color: MUTED });
+    L.gap(2);
+  }
+
+  if (qs.question.type === "rating" && qs.rating) {
+    L.table(
+      ["Mean", "Median", "Std. dev.", "Min", "Max", "n"],
+      [[qs.rating.mean.toFixed(2), qs.rating.median.toFixed(2), qs.rating.sd.toFixed(2), String(qs.rating.min), String(qs.rating.max), String(qs.rating.n)]],
+      { widths: Array(6).fill(L.contentW / 6), align: ["right", "right", "right", "right", "right", "right"] },
+    );
   }
 
   L.table(
@@ -589,6 +608,11 @@ function questionSection(L: Layout, qs: QuestionStats, options: ReportOptions, i
       align: ["left", "right", "right", "right"],
     },
   );
+  const note = options.commentary?.[qs.question.id]?.trim();
+  if (note) {
+    L.eyebrow("Interpretation");
+    L.text(note, { size: 9 });
+  }
   if (!isLast) L.rule();
 }
 
