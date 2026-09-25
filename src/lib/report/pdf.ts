@@ -677,26 +677,46 @@ export async function buildResearchReport(args: {
   options: ReportOptions;
 }): Promise<Blob> {
   const { survey, stats, rows, options } = args;
-  const { default: jsPDF } = await import("jspdf");
+  const [{ default: jsPDF }, logo] = await Promise.all([import("jspdf"), loadLogo()]);
   const doc = new jsPDF({ unit: "pt", format: "a4", compress: true });
 
-  const L = new Layout(doc, survey.title);
+  const L = new Layout(doc, options.reportTitle || survey.title);
   L.paintPage();
 
-  cover(L, survey, stats, options);
+  const excluded = new Set(options.excludeQuestionIds ?? []);
+  const questions = stats.questions.filter((q) => !excluded.has(q.question.id));
+
+  cover(L, survey, stats, options, logo);
   methodology(L, survey, stats, options);
   if (options.includeSampleProfile) sampleProfile(L, stats);
-  executiveSummary(L, stats);
+  executiveSummary(L, stats, options);
 
   L.newPage();
   L.sectionTitle("Results question by question");
-  stats.questions.forEach((qs, i) => questionSection(L, qs, options, i === stats.questions.length - 1));
+  if (questions.length === 0 || stats.n === 0) {
+    L.text(
+      stats.n === 0
+        ? "No responses had been collected when this report was generated. The sections above describe the study design; results will appear here once responses come in."
+        : "No questions were selected for this report.",
+      { size: 9.5, color: MUTED },
+    );
+  }
+  questions.forEach((qs, i) => questionSection(L, qs, options, i === questions.length - 1));
 
   if (options.includeCrossTabs && options.mode === "full") {
-    const closed = stats.questions.filter((q) => q.question.type !== "text" && q.answered > 0).map((q) => q.question);
+    const byId = new Map(stats.questions.map((q) => [q.question.id, q.question]));
     const tabs: CrossTab[] = [];
-    for (let i = 0; i < closed.length - 1 && tabs.length < 6; i++) {
-      tabs.push(computeCrossTab(closed[i], closed[i + 1], rows));
+    if (options.crossTabPairs?.length) {
+      for (const [rowId, colId] of options.crossTabPairs.slice(0, 6)) {
+        const rowQ = byId.get(rowId);
+        const colQ = byId.get(colId);
+        if (rowQ && colQ) tabs.push(computeCrossTab(rowQ, colQ, rows));
+      }
+    } else {
+      const closed = questions.filter((q) => q.question.type !== "text" && q.answered > 0).map((q) => q.question);
+      for (let i = 0; i < closed.length - 1 && tabs.length < 6; i++) {
+        tabs.push(computeCrossTab(closed[i], closed[i + 1], rows));
+      }
     }
     crossTabSection(L, tabs);
   }
