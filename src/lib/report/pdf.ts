@@ -47,6 +47,8 @@ export type ReportOptions = {
   subtitle?: string | null;
   /** Owner-written executive summary; replaces the auto-drafted findings. */
   summaryText?: string | null;
+  /** When false, the auto-generated key findings are omitted (default: shown when no written summary). */
+  includeKeyFindings?: boolean;
   /** Owner's on-screen chart choice, keyed by question id. */
   chartTypes?: Record<string, ChartChoice>;
   /** Owner's per-question interpretation, keyed by question id. */
@@ -456,7 +458,7 @@ function sampleProfile(L: Layout, stats: SurveyStats) {
 
 function executiveSummary(L: Layout, stats: SurveyStats, options: ReportOptions) {
   const written = (options.summaryText ?? "").trim();
-  const findings = written ? [] : keyFindings(stats, 8);
+  const findings = !written && options.includeKeyFindings !== false ? keyFindings(stats, 8) : [];
   if (!written && findings.length === 0) return;
   L.newPage();
   L.sectionTitle("Executive summary");
