@@ -289,8 +289,10 @@ class Layout {
       this.doc.setFont("helvetica", "normal");
       this.doc.setFontSize(7);
       ink(this.doc, MUTED);
-      this.doc.text(`CampusVerify · ${this.title}`, this.margin, this.H - 24);
-      this.doc.text(`Page ${p} of ${total}`, this.W - this.margin, this.H - 24, { align: "right" });
+      this.doc.text(`CampusVerify · campus-verify.live · ${this.title}`, this.margin, this.H - 24);
+      this.doc.text(`Page ${p} of ${total} · ${fmtDate(new Date().toISOString())}`, this.W - this.margin, this.H - 24, {
+        align: "right",
+      });
     }
   }
 }
