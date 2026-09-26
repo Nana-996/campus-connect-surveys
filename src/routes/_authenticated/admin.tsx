@@ -103,9 +103,9 @@ function Admin() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Admin</p>
-          <h1 className="mt-1 font-serif text-5xl leading-[0.95]">Control <em className="text-primary">center.</em></h1>
+          <h1 className="mt-1 font-serif text-5xl leading-[0.95]">Admin <em className="text-primary">tasks.</em></h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Everything in one place — schools on the platform, the people in them, their surveys and moderation.
+            Onboard schools, help students who are stuck, and handle moderation. For numbers and trends, open Analytics.
           </p>
         </div>
         <Button asChild variant="outline" size="sm">
@@ -119,7 +119,7 @@ function Admin() {
         value={section}
         onChange={setSection}
         items={[
-          { value: "overview", label: "Overview", icon: LayoutDashboard },
+          { value: "overview", label: "Start", icon: LayoutDashboard },
           { value: "schools", label: "Schools", icon: Building2 },
           { value: "users", label: "People", icon: Users },
           { value: "surveys", label: "Surveys", icon: FileText },
@@ -163,49 +163,42 @@ function useAdminSurveys() {
 
 // ---------------- Overview ----------------
 function OverviewPanel({ metrics, onGo }: { metrics: any; onGo: (s: string) => void }) {
-  const { data: users = [] } = useAdminUsers();
-  const { data: surveys = [] } = useAdminSurveys();
-  const schools = useSchools(users as any[], surveys as any[]);
-
+  const tasks = [
+    { go: "schools", icon: Building2, title: "Onboard a school", desc: "Add a university, its email domain, and send faculty invites." },
+    { go: "users", icon: Users, title: "Help a student", desc: "Find someone stuck at sign-up and fix their university, role or credits." },
+    { go: "evaluations", icon: GraduationCap, title: "Manage lecturers", desc: "Lecturer directory and evaluation forms." },
+    { go: "flags", icon: Flag, title: "Review flags", desc: `${metrics?.openFlags ?? 0} open reports waiting for a decision.` },
+    { go: "surveys", icon: FileText, title: "Moderate surveys", desc: "Pause, remove or grant tracking access to surveys." },
+    { go: "broadcast", icon: Megaphone, title: "Send an announcement", desc: "Email a group of users." },
+  ];
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
-        <StatCard label="Schools" value={schools.length} icon={Building2} hint="Universities on the platform" onClick={() => onGo("schools")} />
-        <StatCard label="People" value={metrics?.users ?? 0} icon={Users} hint="Registered accounts" onClick={() => onGo("users")} />
-        <StatCard label="Surveys" value={`${metrics?.activeSurveys ?? 0}/${metrics?.surveys ?? 0}`} icon={FileText} hint="Active of total" onClick={() => onGo("surveys")} />
-        <StatCard label="Responses 24h" value={metrics?.responses24h ?? 0} icon={MessageSquare} hint={`${metrics?.responses ?? 0} all time`} />
-        <StatCard label="Open flags" value={metrics?.openFlags ?? 0} icon={Flag} accent={(metrics?.openFlags ?? 0) > 0} hint="Needs review" onClick={() => onGo("flags")} />
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {tasks.map((t) => (
+          <button
+            key={t.go}
+            type="button"
+            onClick={() => onGo(t.go)}
+            className="flex items-start gap-3 rounded-2xl border border-foreground/15 bg-card p-4 text-left transition hover:border-primary/50 hover:shadow-sm"
+          >
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <t.icon className="h-4 w-4" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-medium">{t.title}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{t.desc}</p>
+            </div>
+            <ArrowRight className="mt-1 h-4 w-4 text-muted-foreground" />
+          </button>
+        ))}
       </div>
-
-      <section className="rounded-2xl border border-foreground/15 bg-card">
-        <div className="flex items-center justify-between gap-2 border-b border-foreground/10 px-4 py-3">
-          <h2 className="font-serif text-xl">Top schools</h2>
-          <Button size="sm" variant="ghost" className="rounded-full" onClick={() => onGo("schools")}>
-            View all <ArrowRight className="ml-1 h-3 w-3" />
-          </Button>
-        </div>
-        {schools.length === 0 ? (
-          <p className="px-4 py-8 text-center text-sm text-muted-foreground">No schools yet.</p>
-        ) : (
-          <ul className="divide-y divide-foreground/10">
-            {schools.slice(0, 5).map((s) => (
-              <li key={s.key} className="flex flex-wrap items-center gap-3 px-4 py-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                  <Building2 className="h-4 w-4" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium">{s.name}</p>
-                  <p className="truncate font-mono text-[10px] text-muted-foreground">{s.domain}</p>
-                </div>
-                <div className="flex gap-1.5 text-[10px]">
-                  <Badge variant="secondary" className="rounded-full">{s.students} students</Badge>
-                  <Badge variant="secondary" className="rounded-full">{s.surveys} surveys</Badge>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <Link
+        to="/admin-analytics"
+        className="flex items-center justify-between gap-3 rounded-2xl border border-dashed border-foreground/20 p-4 text-sm text-muted-foreground hover:border-primary/50"
+      >
+        <span className="flex items-center gap-2"><BarChart3 className="h-4 w-4 text-primary" /> Numbers, trends and growth live on the Analytics page.</span>
+        <ArrowRight className="h-4 w-4" />
+      </Link>
     </div>
   );
 }
