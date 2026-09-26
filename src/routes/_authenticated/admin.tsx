@@ -100,12 +100,19 @@ function Admin() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Admin</p>
-        <h1 className="mt-1 font-serif text-5xl leading-[0.95]">Control <em className="text-primary">center.</em></h1>
-        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          Everything in one place — schools on the platform, the people in them, their surveys and moderation.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Admin</p>
+          <h1 className="mt-1 font-serif text-5xl leading-[0.95]">Control <em className="text-primary">center.</em></h1>
+          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+            Everything in one place — schools on the platform, the people in them, their surveys and moderation.
+          </p>
+        </div>
+        <Button asChild variant="outline" size="sm">
+          <Link to="/admin-analytics">
+            <BarChart3 className="mr-2 h-4 w-4" /> Analytics
+          </Link>
+        </Button>
       </div>
 
       <SectionNav
