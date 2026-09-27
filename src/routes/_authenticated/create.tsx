@@ -112,7 +112,7 @@ function Create() {
   const [responseGoal, setResponseGoal] = useState<string>(d.responseGoal ?? "");
   const [expiresAt, setExpiresAt] = useState<string>(d.expiresAt ?? "");
   const [visibility, setVisibility] = useState<Visibility>(
-    d.visibility ?? (d.allowGeneral === false ? "campus" : "everyone"),
+    d.visibility ?? (d.allowGeneral === false && !isGeneral ? "campus" : "everyone"),
   );
   const allowGeneral = visibility === "everyone";
   const [respondentBonus, setRespondentBonus] = useState<number>(
@@ -598,7 +598,7 @@ function Create() {
           <VisibilityPicker
             value={isBoost ? "everyone" : visibility}
             onChange={setVisibility}
-            disabled={isBoost ? ["campus", "students", "private"] : []}
+            disabled={isBoost ? ["campus", "students", "private"] : isGeneral ? ["campus"] : []}
             note={
               isBoost
                 ? "Research Boost buys reach, so boosted surveys are always open to everyone."
