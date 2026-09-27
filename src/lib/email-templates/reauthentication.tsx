@@ -5,25 +5,12 @@ import {
   Container,
   Head,
   Heading,
-  Hr,
   Html,
+  Link,
   Preview,
-  Section,
   Text,
 } from '@react-email/components'
-
-import {
-  card,
-  codeStyle,
-  container,
-  footer,
-  h1,
-  kicker,
-  main,
-  masthead,
-  rule,
-  text,
-} from './theme'
+import { brand, card, codeStyle, container, footer, h1, kicker, link, main, masthead, text } from './theme'
 
 interface ReauthenticationEmailProps {
   token: string
@@ -32,23 +19,23 @@ interface ReauthenticationEmailProps {
 export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Your CampusVerify verification code</Preview>
+    <Preview>Your verification code</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Section style={card}>
-          <Text style={masthead}>CampusVerify</Text>
-          <Text style={kicker}>Identity check</Text>
-          <Heading style={h1}>Confirm it's you</Heading>
-          <Text style={text}>
-            Enter this code in CampusVerify to confirm your identity:
-          </Text>
+        <Container style={card}>
+          <Heading style={masthead}>CampusVerify</Heading>
+          <Text style={kicker}>Verified student research</Text>
+          <Heading style={h1}>Confirm reauthentication</Heading>
+          <Text style={text}>Use the code below to confirm your identity:</Text>
           <Text style={codeStyle}>{token}</Text>
-          <Hr style={rule} />
-          <Text style={footer}>
-            This code expires shortly. If you didn't request it, ignore this
-            email and consider resetting your password.
+          <Text style={{ ...footer, marginTop: '8px' }}>
+            This code will expire shortly. If you didn't request this, you can
+            safely ignore this email.
           </Text>
-        </Section>
+        </Container>
+        <Text style={{ ...footer, textAlign: 'center' as const, marginTop: '16px' }}>
+          campus-verify · <Link href="https://campus-verify.live" style={{ ...link, color: brand.muted }}>campus-verify.live</Link>
+        </Text>
       </Container>
     </Body>
   </Html>

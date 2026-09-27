@@ -6,27 +6,12 @@ import {
   Container,
   Head,
   Heading,
-  Hr,
   Html,
   Link,
   Preview,
-  Section,
   Text,
 } from '@react-email/components'
-
-import {
-  button,
-  card,
-  container,
-  footer,
-  h1,
-  kicker,
-  link,
-  main,
-  masthead,
-  rule,
-  text,
-} from './theme'
+import { brand, button, card, container, footer, h1, kicker, link, main, masthead, text } from './theme'
 
 interface SignupEmailProps {
   siteName: string
@@ -36,41 +21,44 @@ interface SignupEmailProps {
 }
 
 export const SignupEmail = ({
+  siteName,
   siteUrl,
   recipient,
   confirmationUrl,
 }: SignupEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Confirm your email to activate your CampusVerify account</Preview>
+    <Preview>Confirm your email for {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Section style={card}>
-          <Text style={masthead}>CampusVerify</Text>
+        <Container style={card}>
+          <Heading style={masthead}>CampusVerify</Heading>
           <Text style={kicker}>Verified student research</Text>
           <Heading style={h1}>Confirm your email</Heading>
           <Text style={text}>
-            Thanks for creating a CampusVerify account with{' '}
-            <strong>{recipient}</strong>. Confirm this address to activate your
-            account, claim your starting credits, and open your survey feed.
+            Thanks for signing up for{' '}
+            <Link href={siteUrl} style={link}>
+              <strong>{siteName}</strong>
+            </Link>
+            !
+          </Text>
+          <Text style={text}>
+            Please confirm your email address (
+            <Link href={`mailto:${recipient}`} style={link}>
+              {recipient}
+            </Link>
+            ) by clicking the button below:
           </Text>
           <Button style={button} href={confirmationUrl}>
-            Verify my email
+            Verify Email
           </Button>
-          <Hr style={rule} />
-          <Text style={footer}>
-            If the button doesn't work, copy this link into your browser:{' '}
-            <Link href={confirmationUrl} style={link}>
-              {confirmationUrl}
-            </Link>
+          <Text style={{ ...footer, marginTop: '28px' }}>
+            If you didn't create an account, you can safely ignore this email.
           </Text>
-          <Text style={{ ...footer, marginTop: '12px' }}>
-            Didn't create an account? You can safely ignore this email.{' '}
-            <Link href={siteUrl} style={link}>
-              campus-verify.live
-            </Link>
-          </Text>
-        </Section>
+        </Container>
+        <Text style={{ ...footer, textAlign: 'center' as const, marginTop: '16px' }}>
+          {siteName} · <Link href={siteUrl} style={{ ...link, color: brand.muted }}>{siteUrl.replace(/^https?:\/\//, '')}</Link>
+        </Text>
       </Container>
     </Body>
   </Html>

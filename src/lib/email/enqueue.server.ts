@@ -1,21 +1,9 @@
-// Server-only helper that renders a registered React Email template and queues it
-// for delivery. Used by flows that have no signed-in user (e.g. public donations),
-// which cannot call the JWT-protected /lovable/email/transactional/send route.
-import * as React from "react";
-import { render } from "@react-email/render";
-import { TEMPLATES } from "@/lib/email-templates/registry";
-
-const SITE_NAME = "campus-verify";
-const SENDER_DOMAIN = "notify.campus-verify.live";
-const FROM_DOMAIN = "campus-verify.live";
-
-function generateToken(): string {
-  const bytes = new Uint8Array(32);
-  crypto.getRandomValues(bytes);
-  return Array.from(bytes)
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
+// Server-only helper that renders a registered React Email template and sends
+// it through Lovable's managed email delivery. Used by flows that have no
+// signed-in user (e.g. public donations) and by the admin broadcast tool.
+// Delivery, retries, suppression, and unsubscribe handling are managed by
+// Lovable; this helper keeps the app's email_send_log audit trail.
+import { sendTemplateEmail } from "@/lib/email-templates/send-email";
 
 export async function enqueueTemplateEmail(input: {
   templateName: string;
@@ -23,90 +11,34 @@ export async function enqueueTemplateEmail(input: {
   templateData?: Record<string, unknown>;
   idempotencyKey?: string;
 }): Promise<{ sent: boolean; reason?: string }> {
-  const template = TEMPLATES[input.templateName];
-  if (!template) throw new Error(`Unknown email template: ${input.templateName}`);
-
-  const recipient = template.to || input.recipientEmail;
-  if (!recipient) throw new Error("recipientEmail is required");
-
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const normalized = recipient.toLowerCase();
   const messageId = crypto.randomUUID();
 
-  const { data: suppressed, error: suppressionError } = await supabaseAdmin
-    .from("suppressed_emails")
-    .select("id")
-    .eq("email", normalized)
-    .maybeSingle();
-  if (suppressionError) throw new Error("Failed to verify suppression status");
-  if (suppressed) return { sent: false, reason: "email_suppressed" };
-
-  const { data: existingToken } = await supabaseAdmin
-    .from("email_unsubscribe_tokens")
-    .select("token, used_at")
-    .eq("email", normalized)
-    .maybeSingle();
-
-  let unsubscribeToken = existingToken?.token ?? "";
-  if (!existingToken) {
-    unsubscribeToken = generateToken();
-    await supabaseAdmin
-      .from("email_unsubscribe_tokens")
-      .upsert({ token: unsubscribeToken, email: normalized }, { onConflict: "email", ignoreDuplicates: true });
-    const { data: stored } = await supabaseAdmin
-      .from("email_unsubscribe_tokens")
-      .select("token")
-      .eq("email", normalized)
-      .maybeSingle();
-    if (!stored) throw new Error("Failed to store unsubscribe token");
-    unsubscribeToken = stored.token;
-  } else if (existingToken.used_at) {
-    return { sent: false, reason: "email_suppressed" };
-  }
-
-  const element = React.createElement(template.component, input.templateData ?? {});
-  const html = await render(element);
-  const text = await render(element, { plainText: true });
-  const subject =
-    typeof template.subject === "function"
-      ? template.subject((input.templateData ?? {}) as Record<string, unknown>)
-      : template.subject;
-
-  await supabaseAdmin.from("email_send_log").insert({
-    message_id: messageId,
-    template_name: input.templateName,
-    recipient_email: recipient,
-    status: "pending",
-  });
-
-  const { error: enqueueError } = await supabaseAdmin.rpc("enqueue_email", {
-    queue_name: "transactional_emails",
-    payload: {
-      message_id: messageId,
-      to: recipient,
-      from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
-      sender_domain: SENDER_DOMAIN,
-      subject,
-      html,
-      text,
-      purpose: "transactional",
-      label: input.templateName,
-      idempotency_key: input.idempotencyKey ?? messageId,
-      unsubscribe_token: unsubscribeToken,
-      queued_at: new Date().toISOString(),
-    } as never,
-  });
-
-  if (enqueueError) {
-    await supabaseAdmin.from("email_send_log").insert({
+  const log = async (status: string, errorMessage?: string) => {
+    const { error } = await supabaseAdmin.from("email_send_log").insert({
       message_id: messageId,
       template_name: input.templateName,
-      recipient_email: recipient,
-      status: "failed",
-      error_message: "Failed to enqueue email",
+      recipient_email: input.recipientEmail,
+      status,
+      ...(errorMessage ? { error_message: errorMessage.slice(0, 1000) } : {}),
     });
-    throw new Error("Failed to enqueue email");
-  }
+    if (error) console.error("Failed to write email_send_log", { status, error });
+  };
 
-  return { sent: true };
+  try {
+    const result = await sendTemplateEmail(input.templateName, input.recipientEmail, {
+      templateData: input.templateData,
+      idempotencyKey: input.idempotencyKey ?? messageId,
+    });
+    if (result.sent) {
+      await log("sent");
+      return { sent: true };
+    }
+    await log("suppressed");
+    return { sent: false, reason: "email_suppressed" };
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    await log("failed", message);
+    throw e instanceof Error ? e : new Error(message);
+  }
 }

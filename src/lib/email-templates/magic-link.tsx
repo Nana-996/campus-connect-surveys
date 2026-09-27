@@ -6,61 +6,45 @@ import {
   Container,
   Head,
   Heading,
-  Hr,
   Html,
   Link,
   Preview,
-  Section,
   Text,
 } from '@react-email/components'
-
-import {
-  button,
-  card,
-  container,
-  footer,
-  h1,
-  kicker,
-  link,
-  main,
-  masthead,
-  rule,
-  text,
-} from './theme'
+import { brand, button, card, container, footer, h1, kicker, link, main, masthead, text } from './theme'
 
 interface MagicLinkEmailProps {
   siteName: string
   confirmationUrl: string
 }
 
-export const MagicLinkEmail = ({ confirmationUrl }: MagicLinkEmailProps) => (
+export const MagicLinkEmail = ({
+  siteName,
+  confirmationUrl,
+}: MagicLinkEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Your CampusVerify login link</Preview>
+    <Preview>Your login link for {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Section style={card}>
-          <Text style={masthead}>CampusVerify</Text>
-          <Text style={kicker}>One-time sign in</Text>
+        <Container style={card}>
+          <Heading style={masthead}>CampusVerify</Heading>
+          <Text style={kicker}>Verified student research</Text>
           <Heading style={h1}>Your login link</Heading>
           <Text style={text}>
-            Use the button below to sign in to CampusVerify. For your security
-            this link works once and expires shortly.
+            Click the button below to log in to {siteName}. This link will expire
+            shortly.
           </Text>
           <Button style={button} href={confirmationUrl}>
-            Log in to CampusVerify
+            Log In
           </Button>
-          <Hr style={rule} />
-          <Text style={footer}>
-            If the button doesn't work, copy this link into your browser:{' '}
-            <Link href={confirmationUrl} style={link}>
-              {confirmationUrl}
-            </Link>
+          <Text style={{ ...footer, marginTop: '28px' }}>
+            If you didn't request this link, you can safely ignore this email.
           </Text>
-          <Text style={{ ...footer, marginTop: '12px' }}>
-            Didn't ask to sign in? You can safely ignore this email.
-          </Text>
-        </Section>
+        </Container>
+        <Text style={{ ...footer, textAlign: 'center' as const, marginTop: '16px' }}>
+          {siteName} · <Link href="https://campus-verify.live" style={{ ...link, color: brand.muted }}>campus-verify.live</Link>
+        </Text>
       </Container>
     </Body>
   </Html>
