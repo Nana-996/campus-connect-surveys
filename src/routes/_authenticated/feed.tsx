@@ -255,6 +255,24 @@ function Feed() {
         </Link>
       </div>
 
+      <div className="mb-6 grid gap-3 sm:grid-cols-2">
+        <div className="rounded-2xl border border-foreground/15 bg-card p-4 shadow-paper">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Here to answer?</p>
+          <p className="mt-1 text-sm">
+            {isGeneral
+              ? "Pick a survey below to support real research and earn credits."
+              : "Answer surveys from your campus below to earn credits."}
+          </p>
+        </div>
+        <Link to="/my-surveys" className="rounded-2xl border border-foreground/15 bg-card p-4 shadow-paper transition hover:border-foreground/40">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Running research?</p>
+          <p className="mt-1 flex items-center gap-1 text-sm font-semibold text-primary">
+            {isGeneral ? "Go to your research and responses" : "Go to your surveys and responses"} <ArrowUpRight className="h-3.5 w-3.5" />
+          </p>
+        </Link>
+      </div>
+
+
       {fromCache && (
         <div className="mb-4 flex items-center gap-2 rounded-2xl border border-foreground/20 bg-card px-3 py-2 text-xs text-muted-foreground shadow-paper">
           <WifiOff className="h-3.5 w-3.5" />

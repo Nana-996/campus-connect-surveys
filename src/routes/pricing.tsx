@@ -45,7 +45,7 @@ function PricingPage() {
       <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Pricing</p>
       <h1 className="mt-1 font-serif text-5xl leading-[0.95]">Simple <em className="text-primary">credit</em> bundles.</h1>
       <p className="mt-4 max-w-2xl text-sm text-muted-foreground">
-        General users buy credit bundles to publish surveys. Prices are shown in USD and charged in Ghana Cedis at the live exchange rate.
+        Answering surveys is always free. General / Researcher accounts (lecturers, NGOs, companies and independent researchers) buy credit bundles to publish surveys. Students publish with credits earned by answering. Prices are shown in USD and charged in Ghana Cedis at the live exchange rate.
         {forex.usingFallback && " Rate may be slightly outdated."}
       </p>
 
