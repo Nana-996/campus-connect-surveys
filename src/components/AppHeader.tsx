@@ -96,13 +96,11 @@ export function AppHeader() {
                 <Button asChild size="sm" variant="outline" className="flex-1">
                   <Link to="/feed">Earn more</Link>
                 </Button>
-                  <Link to="/buy-credits">Buy credits</Link>
-                </Button>{isGeneral && (
-                  <Link to="/buy-credits">Buy credits</Link>
-                </Button><Button asChild size="sm" className="flex-1">
-
-                  <Link to="/buy-credits">Buy credits</Link>
-                </Button>)}
+                {isGeneral && (
+                  <Button asChild size="sm" className="flex-1">
+                    <Link to="/buy-credits">Buy credits</Link>
+                  </Button>
+                )}
               </div>
             </PopoverContent>
           </Popover>
