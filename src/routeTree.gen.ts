@@ -49,6 +49,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
+import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
 import { Route as AuthenticatedManageSurveyIdRouteImport } from './routes/_authenticated/manage.$surveyId'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
@@ -265,6 +266,11 @@ const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   path: '/lovable/email/suppression',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LovableEmailEventsRoute = LovableEmailEventsRouteImport.update({
+  id: '/lovable/email/events',
+  path: '/lovable/email/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedManageSurveyIdRoute =
   AuthenticatedManageSurveyIdRouteImport.update({
     id: '/$surveyId',
@@ -371,6 +377,7 @@ export interface FileRoutesByFullPath {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/manage/$surveyId': typeof AuthenticatedManageSurveyIdRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
   '/survey/$id/report': typeof AuthenticatedSurveyIdReportRoute
@@ -423,6 +430,7 @@ export interface FileRoutesByTo {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/manage/$surveyId': typeof AuthenticatedManageSurveyIdRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
   '/survey/$id/report': typeof AuthenticatedSurveyIdReportRoute
@@ -477,6 +485,7 @@ export interface FileRoutesById {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/manage/$surveyId': typeof AuthenticatedManageSurveyIdRoute
+  '/lovable/email/events': typeof LovableEmailEventsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
   '/_authenticated/survey/$id/report': typeof AuthenticatedSurveyIdReportRoute
@@ -531,6 +540,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/manage/$surveyId'
+    | '/lovable/email/events'
     | '/lovable/email/suppression'
     | '/survey/$id/analyze'
     | '/survey/$id/report'
@@ -583,6 +593,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/manage/$surveyId'
+    | '/lovable/email/events'
     | '/lovable/email/suppression'
     | '/survey/$id/analyze'
     | '/survey/$id/report'
@@ -636,6 +647,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/manage/$surveyId'
+    | '/lovable/email/events'
     | '/lovable/email/suppression'
     | '/_authenticated/survey/$id/analyze'
     | '/_authenticated/survey/$id/report'
@@ -678,6 +690,7 @@ export interface RootRouteChildren {
   DonateIndexRoute: typeof DonateIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  LovableEmailEventsRoute: typeof LovableEmailEventsRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicPaystackWebhookRoute: typeof ApiPublicPaystackWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -969,6 +982,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailSuppressionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lovable/email/events': {
+      id: '/lovable/email/events'
+      path: '/lovable/email/events'
+      fullPath: '/lovable/email/events'
+      preLoaderRoute: typeof LovableEmailEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/manage/$surveyId': {
       id: '/_authenticated/manage/$surveyId'
       path: '/$surveyId'
@@ -1128,6 +1148,7 @@ const rootRouteChildren: RootRouteChildren = {
   DonateIndexRoute: DonateIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  LovableEmailEventsRoute: LovableEmailEventsRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicPaystackWebhookRoute: ApiPublicPaystackWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
