@@ -213,7 +213,7 @@ function SignupPage() {
             Join<br /><em>the conversation.</em>
           </p>
           <p className="mt-6 max-w-sm text-sm opacity-80">
-            Students get verified campus-scoped surveys. General users can run public surveys too.
+            Students verify with a university email. General accounts are for anyone who wants to answer public surveys or run research of their own.
           </p>
         </div>
         <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.25em] opacity-70">
@@ -278,7 +278,7 @@ function SignupPage() {
             >
               <GraduationCap className="h-5 w-5" />
               <p className="mt-2 font-serif text-xl">Student</p>
-              <p className="text-[11px] opacity-80">Campus-scoped surveys</p>
+              <p className="text-[11px] opacity-80">Answer campus surveys or run your own research</p>
             </button>
             <button
               type="button"
@@ -290,8 +290,8 @@ function SignupPage() {
               }`}
             >
               <Globe2 className="h-5 w-5" />
-              <p className="mt-2 font-serif text-xl">General</p>
-              <p className="text-[11px] opacity-80">Public surveys</p>
+              <p className="mt-2 font-serif text-xl">General / Researcher</p>
+              <p className="text-[11px] opacity-80">Answer public surveys, or run research as a lecturer, NGO or company</p>
             </button>
           </div>
 

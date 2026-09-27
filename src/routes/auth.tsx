@@ -121,7 +121,7 @@ function AuthPage() {
         </Link>
         <div>
           <p className="font-serif text-7xl leading-[0.9]">
-            Welcome<br /><em>{isStudent ? "back to campus." : "back."}</em>
+            Welcome<br /><em>{isStudent ? "back to campus." : "back, researcher."}</em>
           </p>
           <p className="mt-6 max-w-sm text-sm opacity-80">
             {isStudent
@@ -178,8 +178,8 @@ function AuthPage() {
               }`}
             >
               <Globe2 className="h-4 w-4" />
-              <p className="mt-1 font-serif text-lg leading-none">General</p>
-              <p className="mt-1 text-[10px] uppercase tracking-wider opacity-80">public account</p>
+              <p className="mt-1 font-serif text-lg leading-none">General / Researcher</p>
+              <p className="mt-1 text-[10px] uppercase tracking-wider opacity-80">respondents &amp; researchers</p>
             </button>
           </div>
 
