@@ -9,7 +9,7 @@ import { EmailChangeEmail } from '@/lib/email-templates/email-change'
 import { ReauthenticationEmail } from '@/lib/email-templates/reauthentication'
 
 // Configuration
-const SITE_NAME = "Campus Connect Surveys"
+const SITE_NAME = "campus-verify"
 const SENDER_DOMAIN = "notify.campus-verify.live"
 const ROOT_DOMAIN = "campus-verify.live"
 const FROM_DOMAIN = "campus-verify.live"
