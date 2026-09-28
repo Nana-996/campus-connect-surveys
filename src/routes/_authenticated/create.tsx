@@ -367,6 +367,8 @@ function Create() {
           <span className="text-muted-foreground">earn more by answering surveys</span>
         )}
       </p>
+      <div className="mt-4 max-w-2xl"><PromoRedeem /></div>
+
 
 
       {lecturerId && (
