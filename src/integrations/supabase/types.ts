@@ -1447,15 +1447,6 @@ export type Database = {
       current_university_domain: { Args: never; Returns: string }
       current_user_matches_admin_email: { Args: never; Returns: boolean }
       current_year: { Args: never; Returns: string }
-      delete_email: {
-        Args: { message_id: number; queue_name: string }
-        Returns: boolean
-      }
-      email_queue_dispatch: { Args: never; Returns: undefined }
-      enqueue_email: {
-        Args: { payload: Json; queue_name: string }
-        Returns: number
-      }
       estimate_survey_reach: {
         Args: {
           _age_range?: string
@@ -1660,25 +1651,8 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      move_to_dlq: {
-        Args: {
-          dlq_name: string
-          message_id: number
-          payload: Json
-          source_queue: string
-        }
-        Returns: number
-      }
       my_referral_code: { Args: never; Returns: string }
       new_referral_code: { Args: never; Returns: string }
-      read_email_batch: {
-        Args: { batch_size: number; queue_name: string; vt: number }
-        Returns: {
-          message: Json
-          msg_id: number
-          read_ct: number
-        }[]
-      }
       refund_purchased_credits: {
         Args: {
           _amount_minor: number
@@ -1693,6 +1667,7 @@ export type Database = {
         Args: { _actual: string; _target: string }
         Returns: boolean
       }
+      transition_graduated_students: { Args: never; Returns: number }
       update_my_student_info: {
         Args: { _department: string; _index_number: string }
         Returns: undefined
