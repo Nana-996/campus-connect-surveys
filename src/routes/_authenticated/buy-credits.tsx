@@ -9,6 +9,7 @@ import { useUsdToGhs } from "@/hooks/useForex";
 import { initializePaystackCheckout, verifyPaystackCheckout } from "@/utils/paystack.functions";
 import { Coins, Sparkles, Check } from "lucide-react";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { PromoRedeem } from "@/components/PromoRedeem";
 
 export const Route = createFileRoute("/_authenticated/buy-credits")({
   component: BuyCredits,
@@ -22,6 +23,7 @@ function BuyCredits() {
   const initCheckout = useServerFn(initializePaystackCheckout);
   const verifyCheckout = useServerFn(verifyPaystackCheckout);
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [promo, setPromo] = useState<{ code: string; pct: number } | null>(null);
 
   // On return from Paystack, verify the transaction and credit the account.
   useEffect(() => {
@@ -63,6 +65,7 @@ function BuyCredits() {
           <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 text-primary" /> Answer 1 survey = +1 credit</li>
           <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 text-primary" /> Publish 1 survey = −2 credits</li>
         </ul>
+        <div className="mt-6 text-left"><PromoRedeem /></div>
         <Button asChild className="mt-6 rounded-full">
           <Link to="/feed">Go to feed</Link>
         </Button>
@@ -76,7 +79,7 @@ function BuyCredits() {
     try {
       const amountGhs = forex.toGhs(usdAmount);
       const { authorizationUrl } = await initCheckout({
-        data: { bundleId, amountGhs, originUrl: window.location.origin },
+        data: { bundleId, amountGhs, originUrl: window.location.origin, promoCode: promo?.code },
       });
       window.location.href = authorizationUrl;
     } catch (e) {
@@ -98,7 +101,7 @@ function BuyCredits() {
         </h1>
         <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-card px-3 py-1 text-xs font-semibold">
           <Coins className="h-3.5 w-3.5 text-primary" />
-          <span className="font-bold text-primary">{profile.paid_credits} credits</span>
+          <span className="font-bold text-primary">{profile.earned_credits + profile.paid_credits} credits</span>
           <span className="text-muted-foreground">· in your balance</span>
         </p>
 
@@ -106,6 +109,16 @@ function BuyCredits() {
           Prices are shown in USD and charged in Ghana Cedis at the live exchange rate.
           {forex.usingFallback && " Rate may be slightly outdated."}
         </p>
+
+        <div className="mt-6 max-w-2xl">
+          <PromoRedeem onDiscount={(code, pct) => setPromo({ code, pct })} />
+          {promo && (
+            <p className="mt-2 text-sm font-medium text-primary">
+              {promo.code}: {promo.pct}% off will be applied at checkout.{" "}
+              <button className="underline" onClick={() => setPromo(null)}>Remove</button>
+            </p>
+          )}
+        </div>
 
         <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {/* Free tier — signup bonus, non-purchasable */}
