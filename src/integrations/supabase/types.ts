@@ -541,6 +541,89 @@ export type Database = {
         }
         Relationships: []
       }
+      promo_codes: {
+        Row: {
+          bonus_credits: number
+          code: string
+          created_at: string
+          created_by: string | null
+          discount_percent: number
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          max_uses: number | null
+          note: string | null
+          uses_count: number
+        }
+        Insert: {
+          bonus_credits?: number
+          code: string
+          created_at?: string
+          created_by?: string | null
+          discount_percent?: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          note?: string | null
+          uses_count?: number
+        }
+        Update: {
+          bonus_credits?: number
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          discount_percent?: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          note?: string | null
+          uses_count?: number
+        }
+        Relationships: []
+      }
+      promo_redemptions: {
+        Row: {
+          code_id: string
+          created_at: string
+          credits_granted: number
+          discount_percent: number
+          id: string
+          kind: string
+          reference: string | null
+          user_id: string
+        }
+        Insert: {
+          code_id: string
+          created_at?: string
+          credits_granted?: number
+          discount_percent?: number
+          id?: string
+          kind: string
+          reference?: string | null
+          user_id: string
+        }
+        Update: {
+          code_id?: string
+          created_at?: string
+          credits_granted?: number
+          discount_percent?: number
+          id?: string
+          kind?: string
+          reference?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promo_redemptions_code_id_fkey"
+            columns: ["code_id"]
+            isOneToOne: false
+            referencedRelation: "promo_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       referrals: {
         Row: {
           created_at: string
@@ -1240,6 +1323,28 @@ export type Database = {
       }
     }
     Functions: {
+      _promo_check: {
+        Args: { _code: string; _user: string }
+        Returns: {
+          bonus_credits: number
+          code: string
+          created_at: string
+          created_by: string | null
+          discount_percent: number
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          max_uses: number | null
+          note: string | null
+          uses_count: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "promo_codes"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       accept_school_invite: { Args: { _token: string }; Returns: Json }
       activate_research_boost: {
         Args: { _raw?: Json; _reference: string }
@@ -1653,6 +1758,7 @@ export type Database = {
       }
       my_referral_code: { Args: never; Returns: string }
       new_referral_code: { Args: never; Returns: string }
+      redeem_promo_code: { Args: { _code: string }; Returns: Json }
       refund_purchased_credits: {
         Args: {
           _amount_minor: number
@@ -1663,6 +1769,10 @@ export type Database = {
         Returns: boolean
       }
       require_admin_user: { Args: never; Returns: string }
+      reserve_promo_discount: {
+        Args: { _code: string; _reference: string; _user: string }
+        Returns: number
+      }
       target_text_matches: {
         Args: { _actual: string; _target: string }
         Returns: boolean
