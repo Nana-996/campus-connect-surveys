@@ -14,11 +14,12 @@ export const getPaystackTestMode = createServerFn({ method: "GET" }).handler(asy
  */
 export const initializePaystackCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { bundleId: string; amountGhs: number; originUrl: string }) => {
+  .inputValidator((data: { bundleId: string; amountGhs: number; originUrl: string; promoCode?: string }) => {
     if (!data?.bundleId) throw new Error("bundleId required");
     if (!Number.isFinite(data.amountGhs) || data.amountGhs <= 0) throw new Error("Invalid GHS amount");
     if (data.amountGhs > 100000) throw new Error("Amount out of range");
     if (!/^https?:\/\//.test(data.originUrl || "")) throw new Error("Invalid origin");
+    if (data.promoCode && !/^[A-Za-z0-9_-]{3,32}$/.test(data.promoCode.trim())) throw new Error("Invalid code");
     return data;
   })
   .handler(async ({ data, context }) => {
@@ -43,10 +44,21 @@ export const initializePaystackCheckout = createServerFn({ method: "POST" })
     const minAcceptableGhs = bundle.usdAmount * 10 * 1.0;
     if (data.amountGhs < minAcceptableGhs * 0.7) throw new Error("Amount below acceptable range");
 
-    const amountGhsPesewas = Math.round(data.amountGhs * 100);
     const reference = `cv_${userId.slice(0, 8)}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    let discount = 0;
+    if (data.promoCode?.trim()) {
+      const { data: pct, error: promoErr } = await supabaseAdmin.rpc("reserve_promo_discount" as never, {
+        _code: data.promoCode.trim(),
+        _user: userId,
+        _reference: reference,
+      } as never);
+      if (promoErr) throw new Error(promoErr.message);
+      discount = Number(pct) || 0;
+    }
+    const amountGhsPesewas = Math.max(100, Math.round(data.amountGhs * (1 - discount / 100) * 100));
+
     const { error: insertErr } = await supabaseAdmin.from("paystack_purchases").insert({
       user_id: userId,
       reference,
@@ -64,7 +76,7 @@ export const initializePaystackCheckout = createServerFn({ method: "POST" })
       amountGhsPesewas,
       reference,
       callbackUrl: `${data.originUrl}/buy-credits?paystack_ref=${encodeURIComponent(reference)}`,
-      metadata: { userId, bundleId: bundle.id, credits: bundle.credits },
+      metadata: { userId, bundleId: bundle.id, credits: bundle.credits, discount },
     });
 
     return { authorizationUrl: result.authorization_url, reference };
