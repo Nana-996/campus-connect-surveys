@@ -1667,6 +1667,7 @@ export type Database = {
         Args: { _actual: string; _target: string }
         Returns: boolean
       }
+      transition_graduated_students: { Args: never; Returns: number }
       update_my_student_info: {
         Args: { _department: string; _index_number: string }
         Returns: undefined
