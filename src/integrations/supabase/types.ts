@@ -792,31 +792,40 @@ export type Database = {
       }
       schools: {
         Row: {
+          admin_user_id: string | null
           created_at: string
           created_by: string | null
           domain: string
           id: string
           is_active: boolean
           name: string
+          subscription_status: string
           updated_at: string
+          valid_until: string | null
         }
         Insert: {
+          admin_user_id?: string | null
           created_at?: string
           created_by?: string | null
           domain: string
           id?: string
           is_active?: boolean
           name: string
+          subscription_status?: string
           updated_at?: string
+          valid_until?: string | null
         }
         Update: {
+          admin_user_id?: string | null
           created_at?: string
           created_by?: string | null
           domain?: string
           id?: string
           is_active?: boolean
           name?: string
+          subscription_status?: string
           updated_at?: string
+          valid_until?: string | null
         }
         Relationships: []
       }
@@ -1694,6 +1703,7 @@ export type Database = {
       }
       is_academic_domain: { Args: { _domain: string }; Returns: boolean }
       is_alumni: { Args: { _user_id: string }; Returns: boolean }
+      is_school_subscribed: { Args: { _domain: string }; Returns: boolean }
       is_student_eligible: { Args: { _user_id?: string }; Returns: boolean }
       is_survey_invited: { Args: { _survey_id: string }; Returns: boolean }
       list_lecturer_evaluations: {
