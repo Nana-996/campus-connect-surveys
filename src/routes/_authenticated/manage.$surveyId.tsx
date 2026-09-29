@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, CheckCircle2, Circle, Download, Layers, MessageSquare } from "lucide-react";
 import { getSurveyTracking, getSurveyResponsesForManager, getSurveyQuestionsForManager, getSurveyTrackingScope } from "@/lib/manager.functions";
 import { FilterBar } from "@/components/FilterBar";
+import { neutralizeFormula } from "@/lib/csv-safe";
 
 export const Route = createFileRoute("/_authenticated/manage/$surveyId")({
   component: ManageSurveyPage,
@@ -143,7 +144,7 @@ function ManageSurveyPage() {
         header
           .map((k) => {
             const v = (r as any)[k] ?? "";
-            const s = String(v).replace(/"/g, '""');
+            const s = neutralizeFormula(v).replace(/"/g, '""');
             return /[",\n]/.test(s) ? `"${s}"` : s;
           })
           .join(","),
@@ -242,7 +243,7 @@ function ManageSurveyPage() {
                           ...questions.map((q) => r.answers?.[q.id] ?? ""),
                         ]
                           .map((v) => {
-                            const s = String(v ?? "").replace(/"/g, '""');
+                            const s = neutralizeFormula(v).replace(/"/g, '""');
                             return /[",\n]/.test(s) ? `"${s}"` : s;
                           })
                           .join(","),

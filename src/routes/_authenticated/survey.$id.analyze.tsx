@@ -22,6 +22,7 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { analyzeSentiment, classifyResponse } from "@/lib/text-analysis";
 import { SurveyExportDialog } from "@/components/SurveyExportDialog";
+import { neutralizeFormula } from "@/lib/csv-safe";
 
 type ChartType = "hbar" | "bar" | "pie" | "donut" | "line" | "area";
 const ALL_CHART_TYPES: ChartType[] = ["hbar", "bar", "pie", "donut", "line", "area"];
@@ -331,7 +332,7 @@ function AnalyzePage() {
       const p = profileMap[r.respondent_id];
       return [
         r.created_at, p?.department ?? "", p?.year ?? "", p?.country ?? "", p?.age_range ?? "",
-        ...survey.questions.map((q) => String(r.answers?.[q.id] ?? "").replace(/"/g, '""')),
+        ...survey.questions.map((q) => neutralizeFormula(r.answers?.[q.id] ?? "").replace(/"/g, '""')),
       ];
     });
     const csv = [header, ...rows].map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");
@@ -426,14 +427,14 @@ function AnalyzePage() {
       const data = aggregateQuestion(q, filtered);
       const total = data.reduce((s, x) => s + x.count, 0) || 1;
       csv = ["option,count,percent"]
-        .concat(data.map((d) => `"${d.label.replace(/"/g, '""')}",${d.count},${((d.count / total) * 100).toFixed(2)}`))
+        .concat(data.map((d) => `"${neutralizeFormula(d.label).replace(/"/g, '""')}",${d.count},${((d.count / total) * 100).toFixed(2)}`))
         .join("\n");
     } else {
       const answers = filtered
         .map((r, i) => ({ idx: i + 1, text: String(r.answers?.[q.id] ?? "").trim(), at: r.created_at }))
         .filter((a) => a.text.length > 0);
       csv = ["anonymous_id,submitted_at,answer"]
-        .concat(answers.map((a) => `${a.idx},${a.at},"${a.text.replace(/"/g, '""')}"`))
+        .concat(answers.map((a) => `${a.idx},${a.at},"${neutralizeFormula(a.text).replace(/"/g, '""')}"`))
         .join("\n");
     }
     const blob = new Blob([csv], { type: "text/csv" });

@@ -17,7 +17,9 @@ const db = supabase as unknown as { from: (t: string) => any };
 function randomCode(prefix: string) {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let s = "";
-  for (let i = 0; i < 6; i++) s += chars[Math.floor(Math.random() * chars.length)];
+  const buf = new Uint32Array(10);
+  crypto.getRandomValues(buf);
+  for (let i = 0; i < 10; i++) s += chars[buf[i] % chars.length];
   return `${prefix}${prefix ? "-" : ""}${s}`;
 }
 

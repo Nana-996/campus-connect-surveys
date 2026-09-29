@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { EXPANSION_PRICE_GHS, EXPANSION_SLOTS } from "@/lib/university-slots";
+import { safeOrigin } from "@/lib/safe-origin";
 
 /** Start a GHS purchase that adds 10 extra university picks to the caller's allowance. */
 export const initializeUniversitySlotsCheckout = createServerFn({ method: "POST" })
@@ -32,7 +33,7 @@ export const initializeUniversitySlotsCheckout = createServerFn({ method: "POST"
       email,
       amountGhsPesewas: pricePesewas,
       reference,
-      callbackUrl: `${data.originUrl}/create?slots_ref=${encodeURIComponent(reference)}`,
+      callbackUrl: `${safeOrigin(data.originUrl)}/create?slots_ref=${encodeURIComponent(reference)}`,
       metadata: { userId, slots: EXPANSION_SLOTS, kind: "university_slots" },
     });
 

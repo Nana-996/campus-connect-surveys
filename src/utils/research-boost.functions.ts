@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { getBoostTier } from "@/lib/research-boost";
+import { safeOrigin } from "@/lib/safe-origin";
 
 /**
  * Start a Research Boost purchase for an already-created (unpublished) survey.
@@ -63,7 +64,7 @@ export const initializeResearchBoostCheckout = createServerFn({ method: "POST" }
       email,
       amountGhsPesewas: pricePesewas,
       reference,
-      callbackUrl: `${data.originUrl}/create?boost_ref=${encodeURIComponent(reference)}`,
+      callbackUrl: `${safeOrigin(data.originUrl)}/create?boost_ref=${encodeURIComponent(reference)}`,
       metadata: { userId, surveyId: survey.id, boostTier: tier.id, responses: tier.responses },
     });
 

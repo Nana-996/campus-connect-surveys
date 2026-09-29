@@ -13,11 +13,12 @@ import {
   type SurveyStats,
 } from "./stats";
 import { visibilitySentence } from "./pdf";
+import { neutralizeFormula } from "@/lib/csv-safe";
 
 const BOM = "\uFEFF";
 
 function cell(value: unknown): string {
-  const s = value === null || value === undefined ? "" : String(value);
+  const s = neutralizeFormula(value);
   if (s === "") return "";
   return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }

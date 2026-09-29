@@ -48,6 +48,11 @@ export const submitLead = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+async function assertAdmin(supabase: any, userId: string) {
+  const { data, error } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
+  if (error || data !== true) throw new Error("Forbidden: admin only");
+}
+
 export type Lead = {
   id: string; kind: "school" | "demo"; full_name: string; email: string; phone: string | null;
   organization: string | null; role_title: string | null; country: string | null;
@@ -58,6 +63,7 @@ export type Lead = {
 export const listLeads = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
+    await assertAdmin(context.supabase, context.userId);
     const { data, error } = await context.supabase.from("leads" as any).select("*").order("created_at", { ascending: false }).limit(2000);
     if (error) throw new Error("Could not load leads");
     return (data ?? []) as unknown as Lead[];
@@ -73,6 +79,7 @@ export const updateLead = createServerFn({ method: "POST" })
     }).parse(d),
   )
   .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
     const patch: Record<string, unknown> = {};
     if (data.status) patch.status = data.status;
     if (data.notes !== undefined) patch.notes = data.notes || null;
