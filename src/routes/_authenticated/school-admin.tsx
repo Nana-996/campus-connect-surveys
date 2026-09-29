@@ -61,7 +61,7 @@ function SchoolAdminPage() {
       <div className="rounded-3xl border border-foreground/15 bg-card p-8 text-center">
         <ShieldAlert className="mx-auto h-8 w-8 text-destructive" />
         <p className="mt-3 font-serif text-3xl">School admins only.</p>
-        <p className="mt-1 text-sm text-muted-foreground">Ask CampusVerify to set you as your school's admin.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Sign in with the email your school registered with CampusVerify (and confirm it). If you haven't partnered yet, <a href="/schools" className="underline">register your school</a>.</p>
       </div>
     );
 
