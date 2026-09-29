@@ -1631,6 +1631,7 @@ export type Database = {
         Returns: boolean
       }
       get_my_manager_scope: { Args: never; Returns: Json }
+      get_my_school_admin_overview: { Args: never; Returns: Json }
       get_poll_results: {
         Args: { _poll_id: string }
         Returns: {
