@@ -21,6 +21,9 @@ import {
   Send,
   Inbox,
   Menu,
+  Handshake,
+  GraduationCap,
+  MonitorPlay,
 } from "lucide-react";
 
 
@@ -77,6 +80,7 @@ function Landing() {
           <a href="#how-it-works" className="hover:text-foreground">How it works</a>
           <Link to="/about" className="hover:text-foreground">About</Link>
           <a href="#faq" className="hover:text-foreground">FAQ</a>
+          <Link to="/schools" className="hover:text-foreground">Partner</Link>
           <Link to="/donate" className="hover:text-foreground">Support</Link>
         </nav>
 
@@ -126,6 +130,9 @@ function Landing() {
                 </SheetClose>
                 <SheetClose asChild>
                   <a href="#faq" className="py-2 hover:text-foreground">FAQ</a>
+                </SheetClose>
+                <SheetClose asChild>
+                  <Link to="/schools" className="py-2 hover:text-foreground">Partner</Link>
                 </SheetClose>
                 <SheetClose asChild>
                   <Link to="/donate" className="py-2 hover:text-foreground">Support</Link>
