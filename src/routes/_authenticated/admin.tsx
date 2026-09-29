@@ -14,10 +14,11 @@ import { toast } from "sonner";
 import {
   ShieldAlert, Check, Trash2, Power, UserPlus, UserMinus, Flag, FlagOff, Plus,
   GraduationCap, BarChart3, ClipboardList, LayoutDashboard, Building2, Users,
-  FileText, Ban, ArrowRight, MessageSquare, Link2, Pencil, X, Megaphone, Ticket,
+  FileText, Ban, ArrowRight, MessageSquare, Link2, Pencil, X, Megaphone, Ticket, Inbox,
 } from "lucide-react";
 import { BroadcastPanel } from "@/components/BroadcastPanel";
 import { PromoCodesPanel } from "@/components/PromoCodesPanel";
+import { LeadsPanel } from "@/components/LeadsPanel";
 import { PLATFORM_META, PlatformIcon } from "@/components/SocialLinks";
 
 import {
@@ -131,6 +132,7 @@ function Admin() {
           { value: "links", label: "Links", icon: Link2 },
           { value: "broadcast", label: "Broadcast", icon: Megaphone },
           { value: "promos", label: "Promo codes", icon: Ticket },
+          { value: "leads", label: "Leads", icon: Inbox },
         ]}
       />
 
@@ -150,6 +152,7 @@ function Admin() {
         {section === "links" && <SocialLinksPanel />}
         {section === "broadcast" && <BroadcastPanel />}
         {section === "promos" && <PromoCodesPanel />}
+        {section === "leads" && <LeadsPanel />}
 
       </div>
     </div>
