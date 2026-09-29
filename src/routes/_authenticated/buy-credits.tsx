@@ -10,6 +10,7 @@ import { initializePaystackCheckout, verifyPaystackCheckout } from "@/utils/pays
 import { Coins, Sparkles, Check } from "lucide-react";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { PromoRedeem } from "@/components/PromoRedeem";
+import { TopupRequest } from "@/components/TopupRequest";
 
 export const Route = createFileRoute("/_authenticated/buy-credits")({
   component: BuyCredits,
@@ -66,6 +67,7 @@ function BuyCredits() {
           <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 text-primary" /> Publish 1 survey = −2 credits</li>
         </ul>
         <div className="mt-6 text-left"><PromoRedeem /></div>
+        <div className="mt-4"><TopupRequest /></div>
         <Button asChild className="mt-6 rounded-full">
           <Link to="/feed">Go to feed</Link>
         </Button>

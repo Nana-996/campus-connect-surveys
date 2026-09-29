@@ -47,6 +47,45 @@ export type Database = {
         }
         Relationships: []
       }
+      credit_topup_requests: {
+        Row: {
+          amount: number
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          id: string
+          reason: string
+          school_domain: string
+          status: string
+          student_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          id?: string
+          reason: string
+          school_domain: string
+          status?: string
+          student_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          id?: string
+          reason?: string
+          school_domain?: string
+          status?: string
+          student_id?: string
+        }
+        Relationships: []
+      }
       disposable_domains: {
         Row: {
           created_at: string
@@ -1798,11 +1837,20 @@ export type Database = {
         }
         Returns: boolean
       }
+      request_credit_topup: {
+        Args: { _amount: number; _reason: string }
+        Returns: string
+      }
       require_admin_user: { Args: never; Returns: string }
       reserve_promo_discount: {
         Args: { _code: string; _reference: string; _user: string }
         Returns: number
       }
+      school_admin_decide_topup: {
+        Args: { _approve: boolean; _id: string; _note?: string }
+        Returns: Json
+      }
+      school_admin_list_topups: { Args: never; Returns: Json }
       target_text_matches: {
         Args: { _actual: string; _target: string }
         Returns: boolean
