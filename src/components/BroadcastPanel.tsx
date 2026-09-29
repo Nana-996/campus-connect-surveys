@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Copy, Download, Megaphone, RefreshCw, Mail, Send, Loader2 } from "lucide-react";
 import { getBroadcastAudience, sendBroadcastEmail } from "@/lib/admin.functions";
+import { neutralizeFormula } from "@/lib/csv-safe";
 
 type Filters = {
   userType: "all" | "student" | "general";
@@ -33,7 +34,8 @@ Quick update from CampusVerify.
 — The CampusVerify team
 https://campus-verify.live`;
 
-function csvEscape(value: string) {
+function csvEscape(raw: string) {
+  const value = neutralizeFormula(raw);
   return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
 }
 

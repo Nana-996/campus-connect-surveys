@@ -66,7 +66,7 @@ function ThankYouPage() {
             Gift received
           </p>
           <h1 className="mt-1 font-serif text-5xl leading-[0.95]">
-            Thank you{result.donorName ? `, ${result.donorName.split(" ")[0]}` : ""}.
+            Thank you.
           </h1>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
             Your {result.frequency === "monthly" ? "monthly pledge" : "gift"} of{" "}

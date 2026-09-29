@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { isValidDonationAmount, type DonationFrequency } from "@/lib/donations";
+import { safeOrigin } from "@/lib/safe-origin";
 
 type StartInput = {
   amountGhs: number;
@@ -46,7 +47,7 @@ export const startDonation = createServerFn({ method: "POST" })
       email: data.donorEmail,
       amountGhsPesewas: amountPesewas,
       reference,
-      callbackUrl: `${data.originUrl}/donate/thank-you?ref=${encodeURIComponent(reference)}`,
+      callbackUrl: `${safeOrigin(data.originUrl)}/donate/thank-you?ref=${encodeURIComponent(reference)}`,
       metadata: { kind: "donation", frequency: data.frequency, donorName: data.donorName },
       ...(planCode ? { planCode } : {}),
     });
@@ -137,7 +138,5 @@ export const completeDonation = createServerFn({ method: "POST" })
       amountLabel,
       frequency: paid.frequency as DonationFrequency,
       receiptNumber: paid.receipt_number ?? "",
-      donorName: paid.donor_name,
-      donorEmail: paid.donor_email,
     };
   });

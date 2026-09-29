@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { getBundleByBundleId } from "@/lib/credit-bundles";
+import { safeOrigin } from "@/lib/safe-origin";
 
 export const getPaystackTestMode = createServerFn({ method: "GET" }).handler(async () => {
   const key = process.env.PAYSTACK_SECRET_KEY || "";
@@ -75,7 +76,7 @@ export const initializePaystackCheckout = createServerFn({ method: "POST" })
       email,
       amountGhsPesewas,
       reference,
-      callbackUrl: `${data.originUrl}/buy-credits?paystack_ref=${encodeURIComponent(reference)}`,
+      callbackUrl: `${safeOrigin(data.originUrl)}/buy-credits?paystack_ref=${encodeURIComponent(reference)}`,
       metadata: { userId, bundleId: bundle.id, credits: bundle.credits, discount },
     });
 

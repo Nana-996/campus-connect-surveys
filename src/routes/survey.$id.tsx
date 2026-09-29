@@ -31,6 +31,7 @@ import { getOwnerSurveyResults } from "@/lib/survey-owner.functions";
 import { cacheSurvey, getCachedSurvey, enqueueResponse } from "@/lib/offline-store";
 import { syncQueuedResponses } from "@/lib/offline-sync";
 import {
+import { neutralizeFormula } from "@/lib/csv-safe";
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
   PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, RadarChart, Radar,
   PolarGrid, PolarAngleAxis, PolarRadiusAxis, Legend,
@@ -403,11 +404,11 @@ function SurveyPage() {
 
   const exportCSV = () => {
     if (!survey || !responses) return;
-    const header = ["respondent_id", "submitted_at", ...survey.questions.map((q) => q.text.replace(/"/g, '""'))];
+    const header = ["respondent_id", "submitted_at", ...survey.questions.map((q) => neutralizeFormula(q.text).replace(/"/g, '""'))];
     const rows = responses.map((r) => [
       r.respondent_id,
       r.created_at,
-      ...survey.questions.map((q) => String(r.answers?.[q.id] ?? "").replace(/"/g, '""')),
+      ...survey.questions.map((q) => neutralizeFormula(r.answers?.[q.id] ?? "").replace(/"/g, '""')),
     ]);
     const csv = [header, ...rows].map((row) => row.map((c) => `"${c}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });

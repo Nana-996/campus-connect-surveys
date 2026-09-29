@@ -7,11 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { listLeads, updateLead, type Lead } from "@/lib/leads.functions";
+import { neutralizeFormula } from "@/lib/csv-safe";
 
 const STATUSES = ["new", "contacted", "won", "lost"] as const;
 
 function csvCell(v: unknown) {
-  const s = String(v ?? "");
+  const s = neutralizeFormula(v);
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
