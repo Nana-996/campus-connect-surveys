@@ -10,7 +10,8 @@ import { VisibilityBadge } from "@/components/VisibilityBadge";
 import { VisibilityControl } from "@/components/VisibilityControl";
 import type { Visibility } from "@/lib/visibility";
 
-import { Users, Eye, ArrowUpRight, BarChart3, Share2, Trash2 } from "lucide-react";
+import { Users, Eye, ArrowUpRight, BarChart3, Share2, Trash2, ShieldCheck } from "lucide-react";
+import { SupervisorReviewBadge, SupervisorReviewPanel } from "@/components/SupervisorReview";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -113,6 +114,7 @@ function MySurveys() {
                   <h3 className="mt-2 font-serif text-3xl leading-tight">{s.title}</h3>
                   <p className="mt-1 text-xs opacity-70">{s.questions?.length ?? 0} questions</p>
                   <VisibilityBadge visibility={s.visibility} full className="mt-2" />
+                  <SupervisorReviewBadge surveyId={s.id} />
                 </div>
                 <div className="rounded-full bg-background/50 px-3 py-1 text-xs font-bold inline-flex items-center gap-1">
                   <Users className="h-3 w-3" /> {s.response_count}
@@ -136,6 +138,14 @@ function MySurveys() {
                   className="rounded-full border-foreground/30 bg-background/40"
                 >
                   <Share2 className="mr-1 h-3.5 w-3.5" /> Share
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setReviewOpen((curr) => (curr === s.id ? null : s.id))}
+                  className="rounded-full border-foreground/30 bg-background/40"
+                >
+                  <ShieldCheck className="mr-1 h-3.5 w-3.5" /> Supervisor
                 </Button>
                 <Button
                   size="sm"
