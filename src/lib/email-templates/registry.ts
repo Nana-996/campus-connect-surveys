@@ -2,6 +2,7 @@ import type { ComponentType } from 'react'
 import { template as donationReceiptTemplate } from './donation-receipt'
 import { template as broadcastTemplate } from './broadcast'
 import { template as newLeadTemplate } from './new-lead'
+import { template as creditsGrantedTemplate } from './credits-granted'
 
 
 export interface TemplateEntry {
@@ -25,5 +26,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'donation-receipt': donationReceiptTemplate,
   'broadcast': broadcastTemplate,
   'new-lead': newLeadTemplate,
+  'credits-granted': creditsGrantedTemplate,
 }
 
