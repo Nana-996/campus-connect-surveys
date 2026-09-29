@@ -1448,6 +1448,16 @@ export type Database = {
           token: string
         }[]
       }
+      admin_list_school_subscriptions: {
+        Args: never
+        Returns: {
+          admin_email: string
+          domain: string
+          name: string
+          subscription_status: string
+          valid_until: string
+        }[]
+      }
       admin_list_schools: {
         Args: never
         Returns: {
@@ -1518,6 +1528,15 @@ export type Database = {
       admin_set_school_active: {
         Args: { _active: boolean; _domain: string }
         Returns: boolean
+      }
+      admin_set_school_subscription: {
+        Args: {
+          _admin_email: string
+          _domain: string
+          _status: string
+          _valid_until: string
+        }
+        Returns: undefined
       }
       admin_set_survey_active: {
         Args: { _active: boolean; _survey_id: string }

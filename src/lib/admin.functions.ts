@@ -354,6 +354,42 @@ export const setSchoolActive = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const listSchoolSubscriptions = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase.rpc("admin_list_school_subscriptions" as any);
+    if (error) genericError(error);
+    return (data ?? []) as {
+      domain: string; name: string; subscription_status: string;
+      valid_until: string | null; admin_email: string | null;
+    }[];
+  });
+
+export const setSchoolSubscription = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .inputValidator((d: unknown) =>
+    z.object({
+      domain: z.string().min(3).max(253),
+      status: z.enum(["trial", "active", "expired"]),
+      validUntil: z.string().max(40).nullable(),
+      adminEmail: z.string().trim().max(255).email().or(z.literal("")),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase.rpc("admin_set_school_subscription" as any, {
+      _domain: data.domain.toLowerCase(),
+      _status: data.status,
+      _valid_until: data.validUntil,
+      _admin_email: data.adminEmail,
+    });
+    if (error) {
+      const msg = /No account found|School not found|Invalid status/i.test(error.message) ? error.message : "Could not save";
+      console.error("[admin:set_school_subscription]", error);
+      throw new Error(msg);
+    }
+    return { ok: true };
+  });
+
 export const createSchoolInvite = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
   .inputValidator((d: unknown) =>
