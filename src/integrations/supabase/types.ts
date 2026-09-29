@@ -1059,6 +1059,56 @@ export type Database = {
           },
         ]
       }
+      survey_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          creator_id: string
+          decided_at: string | null
+          expires_at: string
+          id: string
+          status: string
+          supervisor_email: string
+          supervisor_name: string | null
+          survey_id: string
+          token: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          creator_id: string
+          decided_at?: string | null
+          expires_at?: string
+          id?: string
+          status?: string
+          supervisor_email: string
+          supervisor_name?: string | null
+          survey_id: string
+          token?: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          creator_id?: string
+          decided_at?: string | null
+          expires_at?: string
+          id?: string
+          status?: string
+          supervisor_email?: string
+          supervisor_name?: string | null
+          survey_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_reviews_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       survey_share_tokens: {
         Row: {
           created_at: string
@@ -1724,6 +1774,7 @@ export type Database = {
           year: string
         }[]
       }
+      get_survey_review: { Args: { _token: string }; Returns: Json }
       get_survey_share_card: { Args: { _survey_id: string }; Returns: Json }
       get_survey_tracking_scope: { Args: { _survey_id: string }; Returns: Json }
       get_university_survey_tracking: {
@@ -1841,6 +1892,10 @@ export type Database = {
         Args: { _amount: number; _reason: string }
         Returns: string
       }
+      request_survey_review: {
+        Args: { _email: string; _name?: string; _survey_id: string }
+        Returns: string
+      }
       require_admin_user: { Args: never; Returns: string }
       reserve_promo_discount: {
         Args: { _code: string; _reference: string; _user: string }
@@ -1851,6 +1906,10 @@ export type Database = {
         Returns: Json
       }
       school_admin_list_topups: { Args: never; Returns: Json }
+      submit_survey_review: {
+        Args: { _approve: boolean; _comment?: string; _token: string }
+        Returns: Json
+      }
       target_text_matches: {
         Args: { _actual: string; _target: string }
         Returns: boolean

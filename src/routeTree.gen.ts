@@ -46,6 +46,7 @@ import { Route as DonateIndexRouteImport } from './routes/donate.index'
 import { Route as DonateThankYouRouteImport } from './routes/donate.thank-you'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as RTokenRouteImport } from './routes/r.$token'
+import { Route as ReviewTokenRouteImport } from './routes/review.$token'
 import { Route as SurveyIdRouteImport } from './routes/survey.$id'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
@@ -248,6 +249,11 @@ const RTokenRoute = RTokenRouteImport.update({
   path: '/r/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReviewTokenRoute = ReviewTokenRouteImport.update({
+  id: '/review/$token',
+  path: '/review/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SurveyIdRoute = SurveyIdRouteImport.update({
   id: '/survey/$id',
   path: '/survey/$id',
@@ -346,6 +352,7 @@ export interface FileRoutesByFullPath {
   '/donate/thank-you': typeof DonateThankYouRoute
   '/invite/$token': typeof InviteTokenRoute
   '/r/$token': typeof RTokenRoute
+  '/review/$token': typeof ReviewTokenRoute
   '/survey/$id': typeof SurveyIdRoute
   '/donate/': typeof DonateIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -395,6 +402,7 @@ export interface FileRoutesByTo {
   '/donate/thank-you': typeof DonateThankYouRoute
   '/invite/$token': typeof InviteTokenRoute
   '/r/$token': typeof RTokenRoute
+  '/review/$token': typeof ReviewTokenRoute
   '/survey/$id': typeof SurveyIdRoute
   '/donate': typeof DonateIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -446,6 +454,7 @@ export interface FileRoutesById {
   '/donate/thank-you': typeof DonateThankYouRoute
   '/invite/$token': typeof InviteTokenRoute
   '/r/$token': typeof RTokenRoute
+  '/review/$token': typeof ReviewTokenRoute
   '/survey/$id': typeof SurveyIdRoute
   '/donate/': typeof DonateIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -497,6 +506,7 @@ export interface FileRouteTypes {
     | '/donate/thank-you'
     | '/invite/$token'
     | '/r/$token'
+    | '/review/$token'
     | '/survey/$id'
     | '/donate/'
     | '/.lovable/oauth/consent'
@@ -546,6 +556,7 @@ export interface FileRouteTypes {
     | '/donate/thank-you'
     | '/invite/$token'
     | '/r/$token'
+    | '/review/$token'
     | '/survey/$id'
     | '/donate'
     | '/.lovable/oauth/consent'
@@ -596,6 +607,7 @@ export interface FileRouteTypes {
     | '/donate/thank-you'
     | '/invite/$token'
     | '/r/$token'
+    | '/review/$token'
     | '/survey/$id'
     | '/donate/'
     | '/.lovable/oauth/consent'
@@ -635,6 +647,7 @@ export interface RootRouteChildren {
   DonateThankYouRoute: typeof DonateThankYouRoute
   InviteTokenRoute: typeof InviteTokenRoute
   RTokenRoute: typeof RTokenRoute
+  ReviewTokenRoute: typeof ReviewTokenRoute
   SurveyIdRoute: typeof SurveyIdRoute
   DonateIndexRoute: typeof DonateIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
@@ -907,6 +920,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/review/$token': {
+      id: '/review/$token'
+      path: '/review/$token'
+      fullPath: '/review/$token'
+      preLoaderRoute: typeof ReviewTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/survey/$id': {
       id: '/survey/$id'
       path: '/survey/$id'
@@ -1062,6 +1082,7 @@ const rootRouteChildren: RootRouteChildren = {
   DonateThankYouRoute: DonateThankYouRoute,
   InviteTokenRoute: InviteTokenRoute,
   RTokenRoute: RTokenRoute,
+  ReviewTokenRoute: ReviewTokenRoute,
   SurveyIdRoute: SurveyIdRoute,
   DonateIndexRoute: DonateIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
