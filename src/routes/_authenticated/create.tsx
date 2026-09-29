@@ -248,9 +248,7 @@ function Create() {
   const baseTierCost = isGeneral ? TIERS[tier].cost * 2 : TIERS[tier].cost;
   // Respondent bonus credits are funded by the platform — never charged to the creator.
   const totalCost = baseTierCost;
-  const spendable = isGeneral
-    ? (profile?.earned_credits ?? 0) + (profile?.paid_credits ?? 0)
-    : (profile?.earned_credits ?? 0);
+  const spendable = (profile?.earned_credits ?? 0) + (profile?.paid_credits ?? 0);
   const canAffordTotal = spendable >= totalCost;
 
 

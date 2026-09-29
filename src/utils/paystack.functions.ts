@@ -29,21 +29,26 @@ export const initializePaystackCheckout = createServerFn({ method: "POST" })
 
     const { supabase, userId, claims } = context;
 
-    // Ensure this is a general user — students earn credits, they don't buy.
+    // General users pay full price. Students from schools that are NOT onboarded pay half.
+    // Students from onboarded schools get credits through their school and can't buy.
     const { data: profile } = await supabase
       .from("profiles")
       .select("user_type")
       .eq("id", userId)
       .maybeSingle();
-    if (profile?.user_type !== "general") throw new Error("Credit purchases are only available for general users");
+    let priceFactor = 1;
+    if (profile?.user_type === "student") {
+      const { data: onboarded } = await supabase.rpc("my_school_onboarded" as never);
+      if (onboarded) throw new Error("Your school covers your credits — ask your school admin for a top-up.");
+      priceFactor = 0.5;
+    } else if (profile?.user_type !== "general") {
+      throw new Error("Credit purchases are not available for this account");
+    }
+    const usdPrice = bundle.usdAmount * priceFactor;
 
     const email = (claims as { email?: string } | null)?.email;
     if (!email) throw new Error("No email on session");
 
-    // Re-derive GHS server-side upper bound so a malicious client can't underpay too badly.
-    // We accept the client's rate but cap deviation to +/-30% vs a floor of 10 GHS/USD.
-    // Price is derived server-side from the live USD→GHS rate (+5% buffer);
-    // the client amount may only be higher, never lower.
     let serverRate = 0;
     try {
       const r = await fetch("https://api.exchangerate-api.com/v4/latest/USD");
@@ -52,7 +57,7 @@ export const initializePaystackCheckout = createServerFn({ method: "POST" })
     // Never charge more than the price shown. If the live rate is unavailable, fall back to a
     // conservative floor (10 GHS/USD) so checkout still works. Reject only clear underpayment.
     const rateOk = serverRate > 5 && serverRate < 100;
-    const floorGhs = bundle.usdAmount * (rateOk ? serverRate * 0.85 : 10);
+    const floorGhs = usdPrice * (rateOk ? serverRate * 0.85 : 10);
     if (data.amountGhs < floorGhs) {
       throw new Error("Prices have changed — please refresh the page to see the latest price.");
     }
@@ -77,7 +82,7 @@ export const initializePaystackCheckout = createServerFn({ method: "POST" })
       reference,
       bundle_id: bundle.id,
       credits: bundle.credits,
-      amount_usd: bundle.usdAmount,
+      amount_usd: usdPrice,
       amount_ghs_kobo: amountGhsPesewas,
       status: "pending",
     });
