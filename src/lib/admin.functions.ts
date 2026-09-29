@@ -85,6 +85,7 @@ export const grantCreditsToUser = createServerFn({ method: "POST" })
       wallet: z.literal("earned"),
       amount: z.number().int().min(-1000).max(1000),
       reason: z.string().min(1).max(200).default("admin_grant"),
+      notify: z.boolean().optional(),
     }).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -94,7 +95,27 @@ export const grantCreditsToUser = createServerFn({ method: "POST" })
       _reason: data.reason,
     });
     if (error) genericError(error);
-    return result as { ok: true; balance: number };
+    const r = result as { ok: true; balance: number; wallet: string; delta: number };
+    let emailed = false;
+    if (data.notify && r?.delta > 0) {
+      try {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { data: u } = await supabaseAdmin.auth.admin.getUserById(data.userId);
+        const { data: prof } = await supabaseAdmin.from("profiles").select("full_name").eq("id", data.userId).maybeSingle();
+        const to = u?.user?.email;
+        if (to) {
+          const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
+          await sendTemplateEmail("credits-granted", to, {
+            templateData: {
+              name: prof?.full_name?.split(" ")[0], amount: r.delta, balance: r.balance,
+              reason: data.reason === "manual" ? undefined : data.reason, expires: r.wallet === "earned",
+            },
+          });
+          emailed = true;
+        }
+      } catch (e) { console.error("[grant:email]", e); }
+    }
+    return { ...r, emailed };
   });
 
 export const setUserFlag = createServerFn({ method: "POST" })

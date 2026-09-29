@@ -791,14 +791,7 @@ function UsersPanel() {
                 </td>
                 <td className="px-3 py-2">
                   <div className="flex flex-wrap justify-end gap-1">
-                    <Button size="sm" variant="outline" onClick={async () => {
-                      const v = prompt("Grant earned credits (negative to deduct):", "5");
-                      if (!v) return;
-                      const n = parseInt(v, 10);
-                      if (!Number.isFinite(n)) return;
-                      await grant({ data: { userId: u.id, wallet: "earned", amount: n, reason: "manual" } });
-                      toast.success("Credits updated"); refresh();
-                    }}>Credits</Button>
+                    <GrantCreditsButton user={u} onDone={refresh} />
                     <Button size="sm" variant="outline" onClick={async () => {
                       const reason = u.is_flagged ? undefined : prompt("Flag reason:", "abuse") ?? "abuse";
                       await flag({ data: { userId: u.id, flagged: !u.is_flagged, reason } });
@@ -1462,6 +1455,39 @@ function SocialLinksPanel() {
         ))}
         {links.length === 0 && <li className="px-4 py-6 text-center text-sm text-muted-foreground">No links yet.</li>}
       </ul>
+    </div>
+  );
+}
+
+function GrantCreditsButton({ user, onDone }: { user: any; onDone: () => void }) {
+  const grant = useServerFn(grantCreditsToUser);
+  const [open, setOpen] = useState(false);
+  const [amount, setAmount] = useState("10");
+  const [reason, setReason] = useState("");
+  const [notify, setNotify] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const submit = async () => {
+    const n = parseInt(amount, 10);
+    if (!Number.isFinite(n) || n === 0 || Math.abs(n) > 1000) return toast.error("Enter an amount between -1000 and 1000");
+    setBusy(true);
+    try {
+      const r: any = await grant({ data: { userId: user.id, wallet: "earned", amount: n, reason: reason.trim() || "manual", notify } });
+      toast.success(`Balance now ${r.balance}${r.emailed ? " · email sent" : ""}`);
+      setOpen(false); setReason(""); onDone();
+    } catch (e) { toast.error(e instanceof Error ? e.message : "Could not update credits"); }
+    finally { setBusy(false); }
+  };
+  if (!open) return <Button size="sm" variant="outline" onClick={() => setOpen(true)}>Credits</Button>;
+  return (
+    <div className="flex w-full flex-col gap-2 rounded-xl border border-foreground/15 bg-card p-3 text-left sm:w-72">
+      <p className="text-xs font-semibold">Grant credits to {user.full_name || "user"}</p>
+      <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Amount (negative deducts)" />
+      <Input value={reason} maxLength={160} onChange={(e) => setReason(e.target.value)} placeholder="Reason (shown in email & history)" />
+      <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={notify} onChange={(e) => setNotify(e.target.checked)} /> Email the user</label>
+      <div className="flex gap-2">
+        <Button size="sm" disabled={busy} onClick={submit}>{busy ? "Saving…" : "Grant"}</Button>
+        <Button size="sm" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+      </div>
     </div>
   );
 }
