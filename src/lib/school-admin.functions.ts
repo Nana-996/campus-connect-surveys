@@ -12,6 +12,7 @@ export type SchoolAdminOverview = {
 export const getMySchoolAdminOverview = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
+    await context.supabase.rpc("claim_school_admin" as any);
     const { data, error } = await context.supabase.rpc("get_my_school_admin_overview" as any);
     if (error) {
       console.error("[school-admin]", error);
