@@ -11,6 +11,7 @@ import { Coins, Sparkles, Check } from "lucide-react";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { PromoRedeem } from "@/components/PromoRedeem";
 import { TopupRequest } from "@/components/TopupRequest";
+import { useSchoolOnboarded, STUDENT_PRICE_FACTOR } from "@/hooks/useSchoolOnboarded";
 
 export const Route = createFileRoute("/_authenticated/buy-credits")({
   component: BuyCredits,
@@ -21,6 +22,9 @@ function BuyCredits() {
   const navigate = useNavigate();
   const isGeneral = profile?.user_type === "general";
   const forex = useUsdToGhs();
+  const { onboarded, loading: onboardLoading } = useSchoolOnboarded();
+  const isStudent = profile?.user_type === "student";
+  const factor = isStudent ? STUDENT_PRICE_FACTOR : 1;
   const initCheckout = useServerFn(initializePaystackCheckout);
   const verifyCheckout = useServerFn(verifyPaystackCheckout);
   const [loadingId, setLoadingId] = useState<string | null>(null);
@@ -54,8 +58,9 @@ function BuyCredits() {
   }, [verifyCheckout, refreshProfile]);
 
   if (!profile) return null;
+  if (isStudent && onboardLoading) return null;
 
-  if (!isGeneral) {
+  if (!isGeneral && !(isStudent && !onboarded)) {
     return (
       <div className="mx-auto max-w-xl py-12 text-center">
         <Sparkles className="mx-auto h-8 w-8 text-primary" />
@@ -79,7 +84,7 @@ function BuyCredits() {
     if (usdAmount <= 0) return;
     setLoadingId(bundleId);
     try {
-      const amountGhs = forex.toGhs(usdAmount);
+      const amountGhs = forex.toGhs(usdAmount * factor);
       const { authorizationUrl } = await initCheckout({
         data: { bundleId, amountGhs, originUrl: window.location.origin, promoCode: promo?.code },
       });
@@ -112,6 +117,16 @@ function BuyCredits() {
           {forex.usingFallback && " Rate may be slightly outdated."}
         </p>
 
+        {isStudent && (
+          <div className="mt-6 max-w-2xl rounded-2xl border-2 border-primary/40 bg-primary/5 p-4 text-sm">
+            <p className="font-semibold text-primary">Student price: you pay half.</p>
+            <p className="mt-1 text-muted-foreground">
+              Your school isn't on CampusVerify yet, so you can buy credits at 50% off. You still keep your sign-up
+              credits and can keep earning by answering surveys. Surveys cost you the student price.
+            </p>
+          </div>
+        )}
+
         <div className="mt-6 max-w-2xl">
           <PromoRedeem onDiscount={(code, pct) => setPromo({ code, pct })} />
           {promo && (
@@ -141,7 +156,7 @@ function BuyCredits() {
           </div>
 
           {PAID_BUNDLES.map((b) => {
-            const ghs = forex.toGhs(b.usdAmount);
+            const ghs = forex.toGhs(b.usdAmount * factor);
             return (
               <div
                 key={b.id}
@@ -160,7 +175,10 @@ function BuyCredits() {
                 <p className="mt-1 text-xs uppercase tracking-wider text-muted-foreground">credits</p>
 
                 <div className="mt-5">
-                  <p className="font-serif text-2xl">${b.usdAmount.toFixed(2)}</p>
+                  <p className="font-serif text-2xl">
+                    {isStudent && <span className="mr-2 text-base text-muted-foreground line-through">${b.usdAmount.toFixed(2)}</span>}
+                    ${(b.usdAmount * factor).toFixed(2)}
+                  </p>
                   <p className="text-[11px] text-muted-foreground">
                     ≈ GHS {ghs}
                     {forex.loading && " …"}
@@ -189,10 +207,10 @@ function BuyCredits() {
         <div className="mt-10 rounded-3xl border border-foreground/15 bg-card p-6 text-sm">
           <h3 className="font-serif text-xl">What credits cost to publish</h3>
           <ul className="mt-2 space-y-1 text-muted-foreground">
-            <li>· Basic — 2 credits</li>
-            <li>· Targeted — 6 credits</li>
-            <li>· Boosted — 16 credits</li>
-            <li>· Pro — 30 credits</li>
+            <li>· Basic — {isStudent ? 1 : 2} credits</li>
+            <li>· Targeted — {isStudent ? 3 : 6} credits</li>
+            <li>· Boosted — {isStudent ? 8 : 16} credits</li>
+            <li>· Pro — {isStudent ? 15 : 30} credits</li>
           </ul>
           <p className="mt-3 text-xs text-muted-foreground">
             Payments are processed securely by Paystack in Ghana Cedis. Refunds available within 30 days — contact support.

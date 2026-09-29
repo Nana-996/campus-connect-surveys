@@ -1932,6 +1932,7 @@ export type Database = {
         }
       }
       my_referral_code: { Args: never; Returns: string }
+      my_school_onboarded: { Args: never; Returns: boolean }
       new_referral_code: { Args: never; Returns: string }
       redeem_promo_code: { Args: { _code: string }; Returns: Json }
       refund_purchased_credits: {

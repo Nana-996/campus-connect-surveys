@@ -56,7 +56,8 @@ export function spendableCredits(
   earned: number,
   paid: number,
 ): number {
-  return userType === "general" ? earned + paid : earned;
+  void userType;
+  return earned + paid;
 }
 
 export function canAfford(
