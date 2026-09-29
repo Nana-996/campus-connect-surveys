@@ -50,7 +50,6 @@ export const bootstrapFirstAdmin = createServerFn({ method: "POST" })
     // further admins are granted only by existing admins.
     void context;
     throw new Error("Admin setup is closed. Ask an existing admin to grant access.");
-    return { ok: true };
   });
 
 // ---------- Metrics ----------
