@@ -882,6 +882,7 @@ export type Database = {
       }
       schools: {
         Row: {
+          admin_email: string | null
           admin_user_id: string | null
           created_at: string
           created_by: string | null
@@ -894,6 +895,7 @@ export type Database = {
           valid_until: string | null
         }
         Insert: {
+          admin_email?: string | null
           admin_user_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -906,6 +908,7 @@ export type Database = {
           valid_until?: string | null
         }
         Update: {
+          admin_email?: string | null
           admin_user_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -1709,6 +1712,7 @@ export type Database = {
         Returns: boolean
       }
       claim_referral: { Args: { _code: string }; Returns: Json }
+      claim_school_admin: { Args: never; Returns: number }
       credit_paystack_purchase: {
         Args: { _raw: Json; _reference: string }
         Returns: undefined
