@@ -3,6 +3,7 @@ import { CREDIT_BUNDLES, PAID_BUNDLES } from "@/lib/credit-bundles";
 import { BOOST_TIERS } from "@/lib/research-boost";
 import { useUsdToGhs } from "@/hooks/useForex";
 import { useAuth } from "@/lib/auth";
+import { useSchoolOnboarded, STUDENT_PRICE_FACTOR } from "@/hooks/useSchoolOnboarded";
 import { Button } from "@/components/ui/button";
 import { Check, Coins, Sparkles, Target } from "lucide-react";
 
@@ -31,9 +32,13 @@ const GENERAL_COSTS = [
 function PricingPage() {
   const { profile } = useAuth();
   const forex = useUsdToGhs();
+  const { onboarded, loading } = useSchoolOnboarded();
+  const isStudent = profile?.user_type === "student";
+  const factor = isStudent ? STUDENT_PRICE_FACTOR : 1;
 
-  // Verified students should never see this page — redirect them into the app.
-  if (profile?.user_type === "student") {
+  // Students from onboarded schools never see pricing — their school covers them.
+  if (isStudent && loading) return null;
+  if (isStudent && onboarded) {
     return <StudentFreeNotice />;
   }
 
@@ -48,6 +53,18 @@ function PricingPage() {
         Answering surveys is always free. General / Researcher accounts (lecturers, NGOs, companies and independent researchers) buy credit bundles to publish surveys. Students publish with credits earned by answering. Prices are shown in USD and charged in Ghana Cedis at the live exchange rate.
         {forex.usingFallback && " Rate may be slightly outdated."}
       </p>
+
+      {isStudent && (
+        <div className="mt-6 max-w-2xl rounded-2xl border-2 border-primary/40 bg-primary/5 p-4 text-sm">
+          <p className="font-semibold text-primary">Students pay half.</p>
+          <p className="mt-1 text-muted-foreground">
+            Your school isn't on CampusVerify yet, so every credit pack is 50% off for you. You keep your sign-up
+            credits, can still earn credits by answering surveys, and publish at the student price (Basic 1, Targeted 3,
+            Boosted 8, Pro 15 credits).
+          </p>
+          <Button asChild className="mt-3 rounded-full" size="sm"><Link to="/buy-credits">Buy credits</Link></Button>
+        </div>
+      )}
 
       <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {/* Free */}
@@ -68,7 +85,7 @@ function PricingPage() {
         </div>
 
         {PAID_BUNDLES.map((b) => {
-          const ghs = forex.toGhs(b.usdAmount);
+          const ghs = forex.toGhs(b.usdAmount * factor);
           return (
             <div
               key={b.id}
@@ -86,7 +103,10 @@ function PricingPage() {
               <p className="mt-4 font-serif text-5xl leading-none text-primary">{b.credits}</p>
               <p className="mt-1 text-xs uppercase tracking-wider text-muted-foreground">credits</p>
               <div className="mt-5">
-                <p className="font-serif text-2xl">${b.usdAmount.toFixed(2)}</p>
+                <p className="font-serif text-2xl">
+                  {isStudent && <span className="mr-2 text-base text-muted-foreground line-through">${b.usdAmount.toFixed(2)}</span>}
+                  ${(b.usdAmount * factor).toFixed(2)}
+                </p>
                 <p className="text-[11px] text-muted-foreground">≈ GHS {ghs}{forex.loading && " …"}</p>
                 <p className="mt-0.5 text-[10px] text-muted-foreground/80">Price includes exchange rate adjustment</p>
               </div>
@@ -100,7 +120,7 @@ function PricingPage() {
         })}
       </div>
 
-      <div className="mt-12 rounded-3xl border border-foreground/15 bg-card p-6">
+      {!isStudent && <div className="mt-12 rounded-3xl border border-foreground/15 bg-card p-6">
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Publishing cost — General users</p>
         <h3 className="mt-1 font-serif text-2xl">Buy &amp; publish</h3>
         <p className="mt-2 text-xs text-muted-foreground">General users get a 5-credit signup bonus, then top up with the bundles above.</p>
@@ -112,7 +132,7 @@ function PricingPage() {
             </li>
           ))}
         </ul>
-      </div>
+      </div>}
 
       <div className="mt-12 rounded-3xl border-2 border-primary/40 bg-primary/5 p-6">
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary">Research Boost</p>

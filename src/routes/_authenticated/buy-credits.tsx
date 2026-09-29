@@ -207,10 +207,10 @@ function BuyCredits() {
         <div className="mt-10 rounded-3xl border border-foreground/15 bg-card p-6 text-sm">
           <h3 className="font-serif text-xl">What credits cost to publish</h3>
           <ul className="mt-2 space-y-1 text-muted-foreground">
-            <li>· Basic — 2 credits</li>
-            <li>· Targeted — 6 credits</li>
-            <li>· Boosted — 16 credits</li>
-            <li>· Pro — 30 credits</li>
+            <li>· Basic — {isStudent ? 1 : 2} credits</li>
+            <li>· Targeted — {isStudent ? 3 : 6} credits</li>
+            <li>· Boosted — {isStudent ? 8 : 16} credits</li>
+            <li>· Pro — {isStudent ? 15 : 30} credits</li>
           </ul>
           <p className="mt-3 text-xs text-muted-foreground">
             Payments are processed securely by Paystack in Ghana Cedis. Refunds available within 30 days — contact support.
