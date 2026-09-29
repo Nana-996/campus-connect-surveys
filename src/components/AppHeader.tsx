@@ -1,3 +1,4 @@
+import { useSchoolOnboarded } from "@/hooks/useSchoolOnboarded";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
@@ -12,6 +13,8 @@ export function AppHeader() {
   const { profile, signOut } = useAuth();
   const navigate = useNavigate();
   const isGeneral = profile?.user_type === "general";
+  const { onboarded, loading: onbLoading } = useSchoolOnboarded();
+  const canBuy = isGeneral || (profile?.user_type === "student" && !onboarded && !onbLoading);
   const earned = profile?.earned_credits ?? 0;
   const paid = profile?.paid_credits ?? 0;
   const totalCredits = earned + paid;
@@ -96,7 +99,7 @@ export function AppHeader() {
                 <Button asChild size="sm" variant="outline" className="flex-1">
                   <Link to="/feed">Earn more</Link>
                 </Button>
-                {isGeneral && (
+                {canBuy && (
                   <Button asChild size="sm" className="flex-1">
                     <Link to="/buy-credits">Buy credits</Link>
                   </Button>
