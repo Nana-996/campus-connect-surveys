@@ -126,12 +126,12 @@
   "resolutions": {
     "dompurify": "^3.4.13",
     "ws": "^8.18.3",
-    "fast-uri": "^3.1.5",
+    "fast-uri": "^3.1.6",
     "minimatch/brace-expansion": "1.1.18",
     "glob/minimatch/brace-expansion": "5.0.9",
     "@typescript-eslint/typescript-estree/minimatch/brace-expansion": "5.0.9",
     "filelist/minimatch/brace-expansion": "2.1.4",
-    "js-yaml": "^4.3.1",
+    "js-yaml": "^4.3.2",
     "@hono/node-server": "^2.1.0",
     "@tanstack/router-core": "1.171.15"
   },
