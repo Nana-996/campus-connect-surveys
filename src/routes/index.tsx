@@ -368,6 +368,7 @@ function Landing() {
               <li><Link to="/auth" className="hover:text-primary">Log in</Link></li>
               <li><Link to="/donate" className="hover:text-primary">Donate</Link></li>
               <li><Link to="/schools" className="hover:text-primary">Partner with us</Link></li>
+              <li><Link to="/school-admin" className="hover:text-primary">School admin login</Link></li>
               <li><Link to="/demo" className="hover:text-primary">Request a demo</Link></li>
 
             </ul>
