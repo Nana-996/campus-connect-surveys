@@ -229,6 +229,38 @@ function Landing() {
           </Tile>
         </section>
 
+        {/* Partner with us — stationery card */}
+        <section id="partner" className="mt-12 scroll-mt-20">
+          <div className="relative rounded-3xl border border-border bg-accent p-8 text-center shadow-paper sm:p-12">
+            {/* Corner accents */}
+            <div className="absolute top-3 left-3 h-3 w-3 border-t border-l border-highlight/40" />
+            <div className="absolute bottom-3 right-3 h-3 w-3 border-b border-r border-highlight/40" />
+
+            <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <Handshake className="h-5 w-5" />
+            </div>
+            <h2 className="mt-4 font-serif text-2xl italic leading-tight text-primary sm:text-3xl">
+              Bring CampusVerify to your institution
+            </h2>
+            <p className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-muted-foreground">
+              Schools, departments and research partners can onboard their students, request a guided demo, and get verified survey reach across their campus.
+            </p>
+
+            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+              <Link to="/schools">
+                <Button className="w-full rounded-full bg-primary px-6 text-primary-foreground hover:bg-primary/90 sm:w-auto">
+                  <GraduationCap className="mr-2 h-4 w-4" /> Partner as a school
+                </Button>
+              </Link>
+              <Link to="/demo">
+                <Button variant="outline" className="w-full rounded-full border-primary/40 bg-card px-6 hover:bg-card/70 sm:w-auto">
+                  <MonitorPlay className="mr-2 h-4 w-4" /> Request a demo
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+
         {/* Donation CTA — stationery card */}
         <section className="mt-12 scroll-mt-20">
           <div className="relative rounded-3xl border border-border bg-card p-8 text-center shadow-paper sm:p-12">
@@ -335,6 +367,8 @@ function Landing() {
               <li><Link to="/signup" className="hover:text-primary">Sign up</Link></li>
               <li><Link to="/auth" className="hover:text-primary">Log in</Link></li>
               <li><Link to="/donate" className="hover:text-primary">Donate</Link></li>
+              <li><Link to="/schools" className="hover:text-primary">Partner with us</Link></li>
+              <li><Link to="/demo" className="hover:text-primary">Request a demo</Link></li>
 
             </ul>
           </div>
