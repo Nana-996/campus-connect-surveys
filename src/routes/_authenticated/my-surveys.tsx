@@ -45,6 +45,7 @@ function MySurveys() {
   const [shareOpen, setShareOpen] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Survey | null>(null);
   const [audienceOpen, setAudienceOpen] = useState<string | null>(null);
+  const [reviewOpen, setReviewOpen] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
   const shareUrl = (id: string) =>
@@ -164,6 +165,7 @@ function MySurveys() {
                   <Trash2 className="mr-1 h-3.5 w-3.5" /> Delete
                 </Button>
               </div>
+              {reviewOpen === s.id && <SupervisorReviewPanel surveyId={s.id} title={s.title} />}
               {audienceOpen === s.id && (
                 <VisibilityControl
                   className="mt-3"
