@@ -46,11 +46,10 @@ function genericError(e: any): never {
 export const bootstrapFirstAdmin = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    // Only the configured owner email may claim the first admin role.
-    const { data: isOwner, error: ownerErr } = await context.supabase.rpc("current_user_matches_admin_email" as any);
-    if (ownerErr || isOwner !== true) throw new Error("Forbidden");
-    const { error } = await context.supabase.rpc("bootstrap_first_admin");
-    if (error) genericError(error);
+    // Self-service admin bootstrap is disabled: an administrator already exists and
+    // further admins are granted only by existing admins.
+    void context;
+    throw new Error("Admin setup is closed. Ask an existing admin to grant access.");
     return { ok: true };
   });
 
