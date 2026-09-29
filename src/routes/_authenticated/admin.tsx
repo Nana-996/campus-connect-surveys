@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { SchoolSubscriptionsPanel } from "@/components/SchoolSubscriptionsPanel";
 import { useMemo, useState } from "react";
 import { FilterBar } from "@/components/FilterBar";
 import { SectionNav } from "@/components/SectionNav";
