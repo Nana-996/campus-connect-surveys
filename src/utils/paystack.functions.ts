@@ -42,8 +42,16 @@ export const initializePaystackCheckout = createServerFn({ method: "POST" })
 
     // Re-derive GHS server-side upper bound so a malicious client can't underpay too badly.
     // We accept the client's rate but cap deviation to +/-30% vs a floor of 10 GHS/USD.
-    const minAcceptableGhs = bundle.usdAmount * 10 * 1.0;
-    if (data.amountGhs < minAcceptableGhs * 0.7) throw new Error("Amount below acceptable range");
+    // Price is derived server-side from the live USD→GHS rate (+5% buffer);
+    // the client amount may only be higher, never lower.
+    let serverRate = 0;
+    try {
+      const r = await fetch("https://api.exchangerate-api.com/v4/latest/USD");
+      if (r.ok) serverRate = Number((await r.json())?.rates?.GHS) || 0;
+    } catch { /* fall through */ }
+    if (!(serverRate > 5 && serverRate < 100)) throw new Error("Pricing temporarily unavailable, please try again");
+    const serverGhs = Math.round(bundle.usdAmount * serverRate * 1.05 * 100) / 100;
+    data.amountGhs = Math.max(serverGhs, Math.min(data.amountGhs, serverGhs * 1.1));
 
     const reference = `cv_${userId.slice(0, 8)}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

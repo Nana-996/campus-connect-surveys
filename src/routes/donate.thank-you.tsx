@@ -80,7 +80,7 @@ function ThankYouPage() {
             <p className="font-serif text-2xl">{result.receiptNumber || "Issuing…"}</p>
             <p className="mt-3 flex items-start gap-2 text-xs text-muted-foreground">
               <Mail className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-              We've emailed your tax receipt to {result.donorEmail}. Keep it for your records — it can take a couple of
+              We've emailed your tax receipt to the address you gave. Keep it for your records — it can take a couple of
               minutes to arrive.
             </p>
           </div>
