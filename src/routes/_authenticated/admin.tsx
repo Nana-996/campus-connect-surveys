@@ -135,7 +135,12 @@ function Admin() {
 
       <div>
         {section === "overview" && <OverviewPanel metrics={metrics} onGo={setSection} />}
-        {section === "schools" && <SchoolsPanel />}
+        {section === "schools" && (
+          <div className="space-y-6">
+            <SchoolsPanel />
+            <SchoolSubscriptionsPanel />
+          </div>
+        )}
         {section === "users" && <UsersPanel />}
         {section === "surveys" && <SurveysPanel />}
         {section === "evaluations" && <EvaluationsPanel />}
