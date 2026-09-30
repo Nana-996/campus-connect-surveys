@@ -29,7 +29,7 @@ export const Route = createFileRoute("/about")({
       {
         property: "og:description",
         content:
-          "How CampusVerify uses academic email verification, row-level security, and a credit economy to deliver trustworthy student surveys.",
+          "How CampusVerify combines verified audiences, strong data protection, and a credit economy to deliver trustworthy research surveys.",
       },
     ],
     links: [
@@ -107,8 +107,8 @@ function AboutPage() {
             <em className="text-primary">trustworthy research.</em>
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
-            CampusVerify is a final-year project that helps university students run honest,
-            verified surveys without paying for panels. This page documents the problem we
+            CampusVerify began as a final-year project and now helps students, professional researchers,
+            organisations, and communities run honest surveys. This page documents the problem we
             tackled, the system we built, and the design decisions we made — at the level of
             detail an academic evaluator needs.
           </p>
@@ -134,7 +134,7 @@ function AboutPage() {
         <Section
           id="solution"
           eyebrow="The solution"
-          title="A credit-powered feed of verified classmates."
+          title="A credit-powered feed of relevant respondents."
         >
           <p>
             CampusVerify gates participation on a <strong className="text-foreground">verified
@@ -305,7 +305,7 @@ function AboutPage() {
         <section className="mt-16 rounded-3xl border border-foreground/15 bg-card p-8 text-center sm:p-12">
           <Sparkles className="mx-auto h-6 w-6 text-primary" />
           <h2 className="mt-3 font-serif text-3xl tracking-tight">
-            Try it the way a student would.
+            Try the full research loop.
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
             The best evaluation is hands-on. Create a free account, run a survey, and read the

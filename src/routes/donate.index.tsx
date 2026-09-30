@@ -25,12 +25,12 @@ export const Route = createFileRoute("/donate/")({
       {
         name: "description",
         content:
-          "Pledge GHS 5, 25, 50, 250 or any amount you wish — once or monthly — to keep verified student research free on CampusVerify. Every gift gets an emailed tax receipt.",
+          "Pledge GHS 5, 25, 50, 250 or any amount you wish — once or monthly — to keep trustworthy research accessible on CampusVerify. Every gift gets an emailed tax receipt.",
       },
       { property: "og:title", content: "Donate — Keep campus research free | CampusVerify" },
       {
         property: "og:description",
-        content: "Support verified student research in Ghana. One-time or monthly pledges, with an instant tax receipt.",
+        content: "Support trustworthy, accessible research in Ghana. One-time or monthly pledges, with an instant tax receipt.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://campus-verify.live/donate" },
@@ -93,15 +93,15 @@ function DonatePage() {
             Keep campus research <em className="text-primary">free</em>.
           </h1>
           <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
-            CampusVerify exists so a student with a questionnaire and no budget can still reach verified respondents.
+            CampusVerify exists so researchers with important questions can reach relevant respondents, regardless of budget.
             Donations pay for email verification, response incentives and the servers that keep it honest.
           </p>
 
           <ul className="mt-8 space-y-4">
             {[
-              { icon: BadgeCheck, title: "Verification stays free", body: "Every student account is checked against a real academic domain." },
-              { icon: HeartHandshake, title: "Students get paid to help", body: "Response credits reward the students who answer other people's research." },
-              { icon: ShieldCheck, title: "No ads, ever", body: "Your gift is why we never sell student data or attention." },
+              { icon: BadgeCheck, title: "Verification stays free", body: "Academic identities are checked while every respondent uses a registered account." },
+              { icon: HeartHandshake, title: "Respondents are rewarded", body: "Response credits recognise people who give thoughtful answers to research." },
+              { icon: ShieldCheck, title: "No ads, ever", body: "Your gift is why we never sell user data or attention." },
             ].map((item) => (
               <li key={item.title} className="flex gap-3">
                 <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground">

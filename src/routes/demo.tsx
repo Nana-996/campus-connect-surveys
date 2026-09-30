@@ -7,7 +7,7 @@ export const Route = createFileRoute("/demo")({
       { title: "Request a demo — CampusVerify" },
       { name: "description", content: "Book a walkthrough of CampusVerify for your research team, NGO, company or department." },
       { property: "og:title", content: "Request a CampusVerify demo" },
-      { property: "og:description", content: "See how CampusVerify collects verified survey responses from real students and researchers." },
+      { property: "og:description", content: "See how CampusVerify helps students, professional researchers, and organisations collect relevant survey responses." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
