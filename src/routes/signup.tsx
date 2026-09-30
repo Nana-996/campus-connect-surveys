@@ -1,7 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -24,6 +22,8 @@ const signupSearchSchema = z.object({ school: z.string().trim().max(100).regex(/
 
 export const Route = createFileRoute("/signup")({
   validateSearch: signupSearchSchema,
+  loaderDeps: ({ search }) => ({ school: search.school }),
+  loader: ({ deps }) => deps.school ? getSchoolPartnership({ data: { slug: deps.school } }) : null,
   component: SignupPage,
   head: () => ({
     meta: [
@@ -50,14 +50,8 @@ const GRAD_YEARS = Array.from({ length: 7 }, (_, i) => String(new Date().getFull
 function SignupPage() {
   const navigate = useNavigate();
   const search = Route.useSearch();
+  const partnerSchool = Route.useLoaderData();
   const { user, loading } = useAuth();
-  const fetchSchool = useServerFn(getSchoolPartnership);
-  const { data: partnerSchool, isPending: schoolPending } = useQuery({
-    queryKey: ["school-partnership", search.school],
-    queryFn: () => fetchSchool({ data: { slug: search.school ?? "" } }),
-    enabled: Boolean(search.school),
-    staleTime: 10 * 60_000,
-  });
 
   const [userType, setUserType] = useState<"student" | "general">("student");
   const [fullName, setFullName] = useState("");
@@ -266,7 +260,11 @@ function SignupPage() {
               <div><p className="font-semibold">Official school joining link</p><p className="mt-1 text-muted-foreground">Use your @{partnerSchool.domain} email to receive 50 welcome credits under your school's plan.</p></div>
             </div>
           )}
-          {search.school && schoolPending && <p className="mt-4 text-sm text-muted-foreground">Confirming school partnership…</p>}
+          {search.school && !partnerSchool && (
+            <div className="mt-4 border-y border-destructive/30 bg-destructive/5 py-4 text-sm text-destructive">
+              This school partnership link is unavailable. You can still create a regular account below.
+            </div>
+          )}
 
           {signupNotice && (
             <div className="mt-4 space-y-3 rounded-2xl border border-primary/30 bg-primary/10 px-4 py-4 text-sm">
