@@ -67,7 +67,7 @@ function SchoolJoinPage() {
           <aside className="border border-primary-foreground/25 bg-primary-foreground/8 p-6 sm:p-8">
             <p className="font-serif text-3xl">Your student access includes</p>
             <ul className="mt-6 space-y-5">
-              <li className="flex gap-4"><Coins className="mt-0.5 h-6 w-6 shrink-0 text-highlight" /><div><p className="font-semibold">50 welcome credits</p><p className="mt-1 text-sm opacity-75">Start publishing surveys through your school's active plan.</p></div></li>
+              <li className="flex gap-4"><Coins className="mt-0.5 h-6 w-6 shrink-0 text-highlight" /><div><p className="font-semibold">50 permanent welcome credits</p><p className="mt-1 text-sm opacity-75">Start publishing surveys through your school's active plan.</p></div></li>
               <li className="flex gap-4"><ShieldCheck className="mt-0.5 h-6 w-6 shrink-0 text-highlight" /><div><p className="font-semibold">Verified participation</p><p className="mt-1 text-sm opacity-75">Academic email checks reduce duplicate and unreliable responses.</p></div></li>
               <li className="flex gap-4"><GraduationCap className="mt-0.5 h-6 w-6 shrink-0 text-highlight" /><div><p className="font-semibold">Research built for campus</p><p className="mt-1 text-sm opacity-75">Create studies, reach eligible students and monitor your responses.</p></div></li>
             </ul>

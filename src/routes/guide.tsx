@@ -255,7 +255,7 @@ const SlideAccountTypes = () => {
       bullets: [
         "Sign up with your university email (.edu / .ac.xx)",
         "Add department, year of study, index number",
-        "Receive 10 free credits on first verified login",
+        "Receive 10 permanent credits on first verified login, or 50 through an active partner school",
         "Can publish surveys AND answer surveys",
       ],
       cta: "If you have a school email — choose this.",
@@ -386,7 +386,7 @@ const SlideCredits = () => {
       <H dark>Answer surveys → earn credits → publish your own.</H>
       <Sub dark>
         Every answered survey rewards you. Every survey you publish costs credits — more credits means more reach and more responses.
-        You start with <strong>10 free credits</strong> as a verified student.
+        Verified students start with <strong>10 permanent credits</strong>, or <strong>50 permanent credits</strong> when their academic email matches an active partner school. General/Researcher accounts start with <strong>5 permanent credits</strong>.
       </Sub>
       <div className="mt-10 grid w-full grid-cols-4 gap-4">
         {tiers.map((t, i) => (
@@ -401,7 +401,7 @@ const SlideCredits = () => {
         ))}
       </div>
       <motion.p variants={fadeUp} custom={7} className="mt-6 text-sm italic" style={{ color: C.mutedDark, fontFamily: SERIF }}>
-        Earned credits expire after 30 days — keep them flowing by answering regularly.
+        Sign-up credits never expire. Credits earned later by answering surveys expire after 30 days, so keep them flowing by answering regularly.
       </motion.p>
     </SlideShell>
   );
