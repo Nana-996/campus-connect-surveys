@@ -37,6 +37,10 @@ const requireAdmin = createMiddleware({ type: "function" })
     throw new Error("Forbidden: admin only");
   });
 
+export const verifySuperAdminAccess = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async () => ({ authorized: true as const }));
+
 function genericError(e: any): never {
   console.error("[admin]", e);
   const msg = String(e?.message ?? "");

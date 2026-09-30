@@ -37,6 +37,8 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: "A credit-powered survey platform for students, professional researchers, organisations, and community respondents." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:image", content: "https://campus-verify.live/logo-mark.png" },
+      { name: "twitter:image", content: "https://campus-verify.live/logo-mark.png" },
       { property: "og:url", content: "https://campus-verify.live/" },
     ],
     links: [{ rel: "canonical", href: "https://campus-verify.live/" }],
@@ -195,7 +197,7 @@ function Landing() {
             )}
           </div>
           <p className="mt-4 text-xs text-muted-foreground">
-            Students get 10 free credits. General accounts get 5.
+            Students get 10 permanent credits, partner-school students get 50, and General/Researcher accounts get 5.
           </p>
         </section>
 

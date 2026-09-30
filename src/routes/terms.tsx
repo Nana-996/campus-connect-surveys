@@ -8,6 +8,8 @@ export const Route = createFileRoute("/terms")({
       { name: "description", content: "The CampusVerify terms of service: account eligibility, credit rules, survey conduct, payments, refunds and termination." },
       { property: "og:title", content: "Terms of Service — CampusVerify" },
       { property: "og:description", content: "Read the CampusVerify terms covering accounts, credits, survey conduct, payments and account termination." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { property: "og:url", content: "https://campus-verify.live/terms" },
     ],
     links: [{ rel: "canonical", href: "https://campus-verify.live/terms" }],
@@ -25,7 +27,7 @@ function TermsPage() {
         <section>
           <h2 className="font-serif text-2xl">1. Who you're contracting with</h2>
           <p>
-            CampusVerify is operated by <strong>Vibe Tribe Organisation</strong> ("CampusVerify", "we", "us"). By creating an account or using the service, you agree to these Terms. If you don't agree, don't use the service.
+            CampusVerify is operated in Ghana by <strong>Vibe Tribe Organisation</strong> ("CampusVerify", "we", "us"). By creating an account or using the service, you agree to these Terms. If you don't agree, don't use the service.
           </p>
         </section>
         <section>
@@ -39,13 +41,13 @@ function TermsPage() {
         <section>
           <h2 className="font-serif text-2xl">4. Credits, payments, and Merchant of Record</h2>
           <p>
-            Students earn credits by answering surveys. General users may purchase credit bundles. <strong>Our order process is conducted by our online reseller Paystack. Paystack is the Merchant of Record for all our orders. Paystack provides payment processing, customer service inquiries, and handles returns.</strong>
+            Students earn credits by answering surveys. General/Researcher users may purchase credit bundles. New non-partner student accounts receive 10 permanent sign-up credits, General/Researcher accounts receive 5, and students whose academic email matches an active partner school receive 50. <strong>Our order process is conducted by Paystack, which processes payments for CampusVerify.</strong>
           </p>
           <p>
-            By purchasing credits, you also agree to Paystack's <a href="https://paystack.com/terms" target="_blank" rel="noopener noreferrer" className="underline">Buyer Terms</a>, which govern payment, billing, tax, invoicing, and refund mechanics. Prices are shown in USD for comparison; checkout is charged in Ghana Cedis at the live exchange rate. Credits are delivered to your balance after Paystack confirms payment.
+            By purchasing credits, you also agree to Paystack's <a href="https://paystack.com/terms" target="_blank" rel="noopener noreferrer" className="underline">terms</a>, which govern its payment processing. Prices are shown in USD for comparison; checkout is charged in Ghana Cedis at the displayed exchange rate. Credits are delivered to your balance after Paystack confirms payment.
           </p>
           <p>
-            Refunds are handled under our <Link to="/refund-policy" className="underline">Refund Policy</Link>. Earned (non-purchased) credits expire 30 days after issue. Purchased credits do not expire.
+            All payments are final and non-refundable, except where a refund is required by applicable law. See our <Link to="/refund-policy" className="underline">Refund Policy</Link>. Sign-up credits and purchased credits do not expire. Credits earned by answering surveys remain subject to the expiry period shown in the app.
           </p>
         </section>
         <section>
@@ -82,7 +84,7 @@ function TermsPage() {
         </section>
         <section>
           <h2 className="font-serif text-2xl">13. Contact</h2>
-          <p>Questions? Reach Vibe Tribe Organisation through the support channel inside the app.</p>
+          <p>Questions? Email Vibe Tribe Organisation at <a href="mailto:nanadjan996@gmail.com" className="underline">nanadjan996@gmail.com</a>.</p>
         </section>
       </div>
     </div>

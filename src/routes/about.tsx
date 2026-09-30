@@ -107,7 +107,7 @@ function AboutPage() {
             <em className="text-primary">trustworthy research.</em>
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
-            CampusVerify began as a final-year project and now helps students, professional researchers,
+            CampusVerify is a published research platform that helps students, professional researchers,
             organisations, and communities run honest surveys. This page documents the problem we
             tackled, the system we built, and the design decisions we made — at the level of
             detail an academic evaluator needs.
@@ -325,7 +325,7 @@ function AboutPage() {
       </main>
 
       <footer className="border-t border-foreground/10 py-8 text-center text-xs text-muted-foreground">
-        CampusVerify · An academic project · <Link to="/privacy" className="underline">Privacy</Link>{" "}
+        CampusVerify · Operated by Vibe Tribe Organisation, Ghana · <Link to="/privacy" className="underline">Privacy</Link>{" "}
         · <Link to="/terms" className="underline">Terms</Link>
       </footer>
     </div>

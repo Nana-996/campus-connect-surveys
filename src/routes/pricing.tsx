@@ -161,9 +161,9 @@ function PricingPage() {
       <div className="mt-10 rounded-3xl border border-foreground/15 bg-card p-6 text-sm">
         <h3 className="font-serif text-xl">Billing &amp; refunds</h3>
         <p className="mt-2 text-muted-foreground">
-          Payments are processed securely by Paystack in Ghana Cedis. Research Boosts are
-          non-refundable once activated, including if the response quota isn't filled before the
-          boost expires. See our{" "}
+          Payments are processed securely by Paystack in Ghana Cedis. All credit purchases and
+          Research Boost payments are final and non-refundable, including if a response quota is
+          not filled, except where applicable law requires otherwise. See our{" "}
           <Link to="/refund-policy" className="underline">Refund Policy</Link> and{" "}
           <Link to="/terms" className="underline">Terms of Service</Link> for details.
         </p>
@@ -179,7 +179,8 @@ function StudentFreeNotice() {
       <Sparkles className="mx-auto h-8 w-8 text-primary" />
       <h1 className="mt-3 font-serif text-4xl">CampusVerify is free for students</h1>
       <ul className="mx-auto mt-5 max-w-sm space-y-2 text-left text-sm text-muted-foreground">
-        <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 text-primary" /> Start with 5 free credits</li>
+        <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 text-primary" /> Start with 10 permanent credits</li>
+        <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 text-primary" /> Partner-school students start with 50 permanent credits</li>
         <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 text-primary" /> Earn credits by answering campus surveys</li>
         <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 text-primary" /> Answer 1 survey = +1 credit</li>
         <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 text-primary" /> Publish 1 survey = −2 credits</li>

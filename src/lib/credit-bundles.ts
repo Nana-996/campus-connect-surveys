@@ -12,10 +12,10 @@ export const CREDIT_BUNDLES: CreditBundle[] = [
   {
     id: "free",
     label: "Free",
-    tagline: "Start exploring",
-    credits: 5,
+    tagline: "Included at sign-up",
+    credits: 10,
     usdAmount: 0,
-    features: ["5 free credits on signup", "Try before you buy", "No card required"],
+    features: ["10 for students", "5 for General/Researcher accounts", "50 for partner-school students", "Never expire"],
   },
   {
     id: "starter",
