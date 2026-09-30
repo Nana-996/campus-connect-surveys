@@ -1,5 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
+import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -10,13 +13,17 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowUpRight, GraduationCap, Globe2 } from "lucide-react";
+import { ArrowUpRight, BadgeCheck, GraduationCap, Globe2 } from "lucide-react";
 
 import { InterestTagInput, type InterestEntry } from "@/components/InterestTagInput";
 import { ResendVerification } from "@/components/ResendVerification";
 import { AGE_RANGES, COUNTRIES, YEAR_OPTIONS, DEPARTMENT_SUGGESTIONS } from "@/lib/interests";
+import { getSchoolPartnership } from "@/lib/school-partnership.functions";
+
+const signupSearchSchema = z.object({ school: z.string().trim().max(100).regex(/^[a-z0-9-]+$/).optional() });
 
 export const Route = createFileRoute("/signup")({
+  validateSearch: signupSearchSchema,
   component: SignupPage,
   head: () => ({
     meta: [
@@ -42,7 +49,15 @@ const GRAD_YEARS = Array.from({ length: 7 }, (_, i) => String(new Date().getFull
 
 function SignupPage() {
   const navigate = useNavigate();
+  const search = Route.useSearch();
   const { user, loading } = useAuth();
+  const fetchSchool = useServerFn(getSchoolPartnership);
+  const { data: partnerSchool, isPending: schoolPending } = useQuery({
+    queryKey: ["school-partnership", search.school],
+    queryFn: () => fetchSchool({ data: { slug: search.school ?? "" } }),
+    enabled: Boolean(search.school),
+    staleTime: 10 * 60_000,
+  });
 
   const [userType, setUserType] = useState<"student" | "general">("student");
   const [fullName, setFullName] = useState("");
@@ -63,6 +78,12 @@ function SignupPage() {
   const [signupNotice, setSignupNotice] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!partnerSchool) return;
+    setUserType("student");
+    setUniversityName(partnerSchool.name);
+  }, [partnerSchool]);
 
   const validateEmail = (value: string) => {
     const domain = value.trim().split("@")[1]?.toLowerCase().trim() ?? "";
@@ -85,6 +106,12 @@ function SignupPage() {
     setFormError(null);
     setSignupNotice(null);
     const domain = email.trim().split("@")[1]?.toLowerCase().trim() ?? "";
+    if (partnerSchool && domain !== partnerSchool.domain && !domain.endsWith(`.${partnerSchool.domain}`)) {
+      const message = `Use your ${partnerSchool.name} academic email ending in @${partnerSchool.domain}.`;
+      setFormError(message);
+      toast.error(message);
+      return;
+    }
     if (userType === "student" && !ACADEMIC_RE.test(domain)) {
       const message = `"${domain}" isn't recognized as a university domain. Use an academic email ending in .edu, .edu.xx (e.g. .edu.gh, .edu.ng), or .ac.xx (e.g. .ac.uk).`;
       setFormError(message);
@@ -230,8 +257,16 @@ function SignupPage() {
           </Link>
           <h1 className="font-serif text-5xl leading-[0.95]">Create account.</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Pick the account type that fits you.
+            {partnerSchool ? `Join ${partnerSchool.name} on CampusVerify.` : "Pick the account type that fits you."}
           </p>
+
+          {partnerSchool && (
+            <div className="mt-4 flex items-start gap-3 border-y border-primary/25 bg-primary/5 py-4 text-sm">
+              <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+              <div><p className="font-semibold">Official school joining link</p><p className="mt-1 text-muted-foreground">Use your @{partnerSchool.domain} email to receive 50 welcome credits under your school's plan.</p></div>
+            </div>
+          )}
+          {search.school && schoolPending && <p className="mt-4 text-sm text-muted-foreground">Confirming school partnership…</p>}
 
           {signupNotice && (
             <div className="mt-4 space-y-3 rounded-2xl border border-primary/30 bg-primary/10 px-4 py-4 text-sm">
@@ -270,7 +305,8 @@ function SignupPage() {
                 setEmailError(null);
                 validateEmail(email);
               }}
-              className={`rounded-2xl border-2 p-4 text-left transition ${
+              disabled={Boolean(partnerSchool)}
+              className={`rounded-2xl border-2 p-4 text-left transition disabled:cursor-default ${
                 userType === "student"
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-foreground/15 bg-card hover:border-foreground/40"
@@ -283,6 +319,7 @@ function SignupPage() {
             <button
               type="button"
               onClick={() => { setUserType("general"); setEmailError(null); }}
+              disabled={Boolean(partnerSchool)}
               className={`rounded-2xl border-2 p-4 text-left transition ${
                 userType === "general"
                   ? "border-primary bg-primary text-primary-foreground"
@@ -308,7 +345,7 @@ function SignupPage() {
               <Input id="email" type="email" required value={email}
                 onChange={(e) => { setEmail(e.target.value); setFormError(null); validateEmail(e.target.value); }}
                 onBlur={(e) => validateEmail(e.target.value)}
-                placeholder={userType === "student" ? "you@yourschool.edu" : "you@example.com"}
+                placeholder={partnerSchool ? `you@${partnerSchool.domain}` : userType === "student" ? "you@yourschool.edu" : "you@example.com"}
                 className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"
                 aria-invalid={!!emailError}
               />
@@ -336,9 +373,10 @@ function SignupPage() {
                     required
                     value={universityName}
                     onChange={(e) => { setUniversityName(e.target.value); setFormError(null); }}
+                    readOnly={Boolean(partnerSchool)}
                     placeholder="e.g. University of Ghana"
                     maxLength={120}
-                    className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"
+                    className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card read-only:bg-secondary"
                   />
                 </div>
                 <div>

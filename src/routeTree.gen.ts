@@ -47,6 +47,7 @@ import { Route as BlogStudentSurveyQuestionsGuideRouteImport } from './routes/bl
 import { Route as DonateIndexRouteImport } from './routes/donate.index'
 import { Route as DonateThankYouRouteImport } from './routes/donate.thank-you'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
+import { Route as JoinSchoolSlugRouteImport } from './routes/join.$schoolSlug'
 import { Route as RTokenRouteImport } from './routes/r.$token'
 import { Route as ReviewTokenRouteImport } from './routes/review.$token'
 import { Route as SurveyIdRouteImport } from './routes/survey.$id'
@@ -256,6 +257,11 @@ const InviteTokenRoute = InviteTokenRouteImport.update({
   path: '/invite/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const JoinSchoolSlugRoute = JoinSchoolSlugRouteImport.update({
+  id: '/join/$schoolSlug',
+  path: '/join/$schoolSlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RTokenRoute = RTokenRouteImport.update({
   id: '/r/$token',
   path: '/r/$token',
@@ -365,6 +371,7 @@ export interface FileRoutesByFullPath {
   '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
   '/donate/thank-you': typeof DonateThankYouRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/join/$schoolSlug': typeof JoinSchoolSlugRoute
   '/r/$token': typeof RTokenRoute
   '/review/$token': typeof ReviewTokenRoute
   '/survey/$id': typeof SurveyIdRoute
@@ -417,6 +424,7 @@ export interface FileRoutesByTo {
   '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
   '/donate/thank-you': typeof DonateThankYouRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/join/$schoolSlug': typeof JoinSchoolSlugRoute
   '/r/$token': typeof RTokenRoute
   '/review/$token': typeof ReviewTokenRoute
   '/survey/$id': typeof SurveyIdRoute
@@ -471,6 +479,7 @@ export interface FileRoutesById {
   '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
   '/donate/thank-you': typeof DonateThankYouRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/join/$schoolSlug': typeof JoinSchoolSlugRoute
   '/r/$token': typeof RTokenRoute
   '/review/$token': typeof ReviewTokenRoute
   '/survey/$id': typeof SurveyIdRoute
@@ -525,6 +534,7 @@ export interface FileRouteTypes {
     | '/blog/student-survey-questions-guide'
     | '/donate/thank-you'
     | '/invite/$token'
+    | '/join/$schoolSlug'
     | '/r/$token'
     | '/review/$token'
     | '/survey/$id'
@@ -577,6 +587,7 @@ export interface FileRouteTypes {
     | '/blog/student-survey-questions-guide'
     | '/donate/thank-you'
     | '/invite/$token'
+    | '/join/$schoolSlug'
     | '/r/$token'
     | '/review/$token'
     | '/survey/$id'
@@ -630,6 +641,7 @@ export interface FileRouteTypes {
     | '/blog/student-survey-questions-guide'
     | '/donate/thank-you'
     | '/invite/$token'
+    | '/join/$schoolSlug'
     | '/r/$token'
     | '/review/$token'
     | '/survey/$id'
@@ -672,6 +684,7 @@ export interface RootRouteChildren {
   BlogStudentSurveyQuestionsGuideRoute: typeof BlogStudentSurveyQuestionsGuideRoute
   DonateThankYouRoute: typeof DonateThankYouRoute
   InviteTokenRoute: typeof InviteTokenRoute
+  JoinSchoolSlugRoute: typeof JoinSchoolSlugRoute
   RTokenRoute: typeof RTokenRoute
   ReviewTokenRoute: typeof ReviewTokenRoute
   SurveyIdRoute: typeof SurveyIdRoute
@@ -953,6 +966,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InviteTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/join/$schoolSlug': {
+      id: '/join/$schoolSlug'
+      path: '/join/$schoolSlug'
+      fullPath: '/join/$schoolSlug'
+      preLoaderRoute: typeof JoinSchoolSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/r/$token': {
       id: '/r/$token'
       path: '/r/$token'
@@ -1123,6 +1143,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogStudentSurveyQuestionsGuideRoute: BlogStudentSurveyQuestionsGuideRoute,
   DonateThankYouRoute: DonateThankYouRoute,
   InviteTokenRoute: InviteTokenRoute,
+  JoinSchoolSlugRoute: JoinSchoolSlugRoute,
   RTokenRoute: RTokenRoute,
   ReviewTokenRoute: ReviewTokenRoute,
   SurveyIdRoute: SurveyIdRoute,
