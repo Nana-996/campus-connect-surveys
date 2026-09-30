@@ -590,7 +590,7 @@ function SurveyPage() {
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground">Share this survey</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Send the link to friends, classmates or your group chat — the explainer travels with it, and you can rewrite it in your own words.
+                Send the link to friends, colleagues or your group chat — the explainer travels with it, and you can rewrite it in your own words.
               </p>
             </div>
             <ShareMessageEditor

@@ -31,10 +31,12 @@ export const Route = createFileRoute("/")({
   component: Landing,
   head: () => ({
     meta: [
-      { title: "CampusVerify — Real research, real classmates, real fast" },
-      { name: "description", content: "Run surveys with verified students from your campus or the wider public. Free to use — earn credits by answering surveys, spend them to publish your own." },
-      { property: "og:title", content: "CampusVerify — Surveys for verified students" },
-      { property: "og:description", content: "A credit-powered survey feed for verified university students. Publish in seconds, get real answers from your campus." },
+      { title: "CampusVerify — Real research, real responses, real fast" },
+      { name: "description", content: "Create surveys, reach verified student and public audiences, and earn credits by answering research from the community." },
+      { property: "og:title", content: "CampusVerify — Verified research and surveys" },
+      { property: "og:description", content: "A credit-powered survey platform for students, professional researchers, organisations, and community respondents." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { property: "og:url", content: "https://campus-verify.live/" },
     ],
     links: [{ rel: "canonical", href: "https://campus-verify.live/" }],
@@ -162,13 +164,13 @@ function Landing() {
         {/* Hero — one promise only */}
         <section className="flex flex-col items-center py-16 text-center sm:py-24">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-foreground/15 bg-card px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground shadow-paper">
-            <BookOpen className="h-3 w-3" /> For students & researchers
+            <BookOpen className="h-3 w-3" /> For every kind of researcher
           </span>
           <h1 className="mt-6 max-w-3xl font-serif text-5xl leading-[0.95] tracking-tight sm:text-7xl">
-            This is where university students and researchers <em className="text-primary">help each other</em> get research responses.
+            This is where researchers and respondents <em className="text-primary">help each other</em> turn questions into insight.
           </h1>
           <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-            Publish a survey, answer a few in return, and watch real responses roll in from verified classmates.
+            Publish a survey, answer a few in return, and watch real responses roll in from relevant respondents.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             {isSignedIn ? (
@@ -208,7 +210,7 @@ function Landing() {
               Write your questions, set who can respond, and hit publish.
             </Step>
             <Step n="02" icon={<Inbox />} title="Answer a few surveys">
-              Earn credits by helping other students with their research.
+              Earn credits by helping others with their research.
             </Step>
             <Step n="03" icon={<BarChart3 />} title="Collect real responses">
               Watch verified respondents fill your survey — no bots, no randoms.
@@ -218,8 +220,8 @@ function Landing() {
 
         {/* Why this works — three proof points */}
         <section className="mt-4 grid gap-4 sm:grid-cols-3">
-          <Tile icon={<BadgeCheck />} title="Verified students only" tone="card">
-            Every student account is tied to a real university email.
+          <Tile icon={<BadgeCheck />} title="Verified, relevant people" tone="card">
+            Student identities are academically verified, while wider studies can reach registered community respondents.
           </Tile>
           <Tile icon={<Scale />} title="Fair credit exchange" tone="accent">
             Earn credits by answering. Spend them to publish your own surveys.
@@ -277,7 +279,7 @@ function Landing() {
               Keep CampusVerify independent
             </h2>
             <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">
-              We rely on the community to keep this a private, secure, ad-free space for campus research. Every contribution supports student-led surveys.
+              We rely on the community to keep this a private, secure, ad-free space for trustworthy research. Every contribution supports researchers and respondents.
             </p>
 
             <div className="mt-8 flex flex-col items-center gap-4">
@@ -314,8 +316,8 @@ function Landing() {
             <Faq q="How do credits work?">
               You spend credits to publish and earn 1 credit for each quality response you give.
             </Faq>
-            <Faq q="Can I target specific students?">
-              Yes — filter by department, year, country, age range, and interests.
+            <Faq q="Can I target a specific audience?">
+              Yes — target academic groups by department and year, or wider audiences by country, age range, and interests.
             </Faq>
             <Faq q="Is my data private?">
               Creators see responses, not identities beyond what your questions ask. See our{" "}
@@ -354,7 +356,7 @@ function Landing() {
           <div className="sm:col-span-2">
             <p className="font-serif text-3xl text-primary">CampusVerify</p>
             <p className="mt-2 max-w-xs text-xs text-muted-foreground">
-              A credit-powered survey feed for verified university students and the curious general public.
+              A credit-powered survey platform for students, professional researchers, organisations, and community respondents.
             </p>
             <SocialLinks className="mt-4" />
           </div>
@@ -404,7 +406,7 @@ function Landing() {
         </div>
         <div className="border-t border-foreground/10 py-6 text-center">
           <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
-            © {new Date().getFullYear()} CampusVerify — made on campus
+            © {new Date().getFullYear()} CampusVerify — built for trustworthy research
           </p>
         </div>
       </footer>

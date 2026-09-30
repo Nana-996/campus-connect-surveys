@@ -42,7 +42,7 @@ export const Route = createFileRoute("/pitch")({
   head: () => ({
     meta: [
       { title: "CampusVerify — Pitch Deck" },
-      { name: "description", content: "The verified student research network. A premium pitch deck for CampusVerify." },
+      { name: "description", content: "The verified research and survey network. A premium pitch deck for CampusVerify." },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -186,7 +186,7 @@ const Slide1 = () => (
       className="mt-10 text-2xl"
       style={{ color: C.muted, fontFamily: SANS, fontWeight: 300 }}
     >
-      CampusVerify — the verified student research network.
+      CampusVerify — the verified research and survey network.
     </motion.p>
     <motion.div
       variants={fadeUp}

@@ -191,7 +191,7 @@ const SlideWelcome = () => (
       Welcome to <span style={{ color: C.lime, fontStyle: "italic" }}>CampusVerify</span>.
     </motion.h1>
     <motion.p variants={fadeUp} custom={2} className="mt-8 max-w-2xl text-2xl" style={{ color: C.muted, fontFamily: SANS, fontWeight: 300 }}>
-      A short guide to onboarding, earning credits, publishing surveys, and getting real responses from real students.
+      A short guide to onboarding, earning credits, publishing surveys, and getting real responses from relevant people.
     </motion.p>
     <motion.div variants={fadeUp} custom={3} className="mt-12 flex items-center gap-3 text-xs uppercase tracking-[0.3em]" style={{ color: C.muted, fontFamily: SANS }}>
       <PlayCircle className="h-4 w-4" style={{ color: C.lime }} /> Press → to begin · F for fullscreen
@@ -215,7 +215,7 @@ const SlideWhyNotForms = () => {
       <H dark>The school chose CampusVerify because forms aren't enough anymore.</H>
       <Sub dark>
         Google Forms is a great input box. It is not a respondent network. CampusVerify gives the university a closed,
-        verified pool of student researchers so the data your peers collect is actually trustworthy.
+        verified pool of students and a registered wider community so the data researchers collect is actually trustworthy.
       </Sub>
       <div className="mt-10 w-full max-w-6xl overflow-hidden rounded-2xl border" style={{ borderColor: C.lineDark, background: "rgba(26,58,42,0.04)" }}>
         <div className="grid grid-cols-[1.4fr_1.4fr_1fr] text-xs font-bold uppercase tracking-[0.22em]" style={{ color: C.green, background: "rgba(26,58,42,0.08)" }}>

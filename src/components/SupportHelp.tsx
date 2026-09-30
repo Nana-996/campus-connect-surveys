@@ -92,8 +92,8 @@ export function SupportCard({
               Need help or have feedback?
             </h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              Join the CampusVerify student support group on WhatsApp. Get
-              answers from the team and fellow students in minutes.
+              Join the CampusVerify support group on WhatsApp. Get answers
+              from the team and fellow researchers in minutes.
             </p>
 
             <div className="mt-4 flex flex-wrap items-center gap-2">

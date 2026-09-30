@@ -20,7 +20,7 @@ export const Route = createFileRoute("/donate/thank-you")({
         content: "Your donation to CampusVerify is confirmed and your tax receipt is on its way by email.",
       },
       { property: "og:title", content: "Thank you for your gift — CampusVerify" },
-      { property: "og:description", content: "Your donation keeps verified student research free. Receipt emailed." },
+      { property: "og:description", content: "Your donation keeps trustworthy research accessible. Receipt emailed." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -71,8 +71,8 @@ function ThankYouPage() {
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
             Your {result.frequency === "monthly" ? "monthly pledge" : "gift"} of{" "}
             <strong className="text-foreground">{result.amountLabel}</strong>
-            {result.frequency === "monthly" ? " per month" : ""} keeps verified campus research free for students who
-            can't pay for responses.
+            {result.frequency === "monthly" ? " per month" : ""} keeps trustworthy research accessible to people who
+            cannot pay for responses.
           </p>
 
           <div className="mt-8 rounded-xl border border-border bg-background p-5 text-left">
