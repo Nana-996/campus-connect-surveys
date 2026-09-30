@@ -37,6 +37,8 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: "A credit-powered survey platform for students, professional researchers, organisations, and community respondents." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:image", content: "https://campus-verify.live/logo-mark.png" },
+      { name: "twitter:image", content: "https://campus-verify.live/logo-mark.png" },
       { property: "og:url", content: "https://campus-verify.live/" },
     ],
     links: [{ rel: "canonical", href: "https://campus-verify.live/" }],
@@ -195,7 +197,7 @@ function Landing() {
             )}
           </div>
           <p className="mt-4 text-xs text-muted-foreground">
-            Students get 10 free credits. General accounts get 5.
+            Students get 10 permanent credits, partner-school students get 50, and General/Researcher accounts get 5.
           </p>
         </section>
 
@@ -381,6 +383,7 @@ function Landing() {
               <li><Link to="/pricing" className="hover:text-primary">Pricing</Link></li>
               <li><Link to="/terms" className="hover:text-primary">Terms of Service</Link></li>
               <li><Link to="/privacy" className="hover:text-primary">Privacy Policy</Link></li>
+              <li><Link to="/privacy-audit" className="hover:text-primary">Privacy &amp; Security Audit</Link></li>
               <li><Link to="/refund-policy" className="hover:text-primary">Refund Policy</Link></li>
               <li><Link to="/forgot-password" className="hover:text-primary">Forgot password</Link></li>
             </ul>
@@ -400,7 +403,7 @@ function Landing() {
                 </a>
               </li>
               <li><Link to="/guide" className="hover:text-primary">User Guide</Link></li>
-              <li><Link to="/pitch" className="hover:text-primary">About CampusVerify</Link></li>
+              <li><a href="mailto:nanadjan996@gmail.com" className="hover:text-primary">Email Support</a></li>
             </ul>
           </div>
         </div>

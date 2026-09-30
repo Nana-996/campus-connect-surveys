@@ -22,6 +22,7 @@ import { Route as McpRouteImport } from './routes/mcp'
 import { Route as PitchRouteImport } from './routes/pitch'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PrivacyAuditRouteImport } from './routes/privacy-audit'
 import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SchoolsRouteImport } from './routes/schools'
@@ -125,6 +126,11 @@ const PricingRoute = PricingRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyAuditRoute = PrivacyAuditRouteImport.update({
+  id: '/privacy-audit',
+  path: '/privacy-audit',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RefundPolicyRoute = RefundPolicyRouteImport.update({
@@ -353,6 +359,7 @@ export interface FileRoutesByFullPath {
   '/pitch': typeof PitchRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
+  '/privacy-audit': typeof PrivacyAuditRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/schools': typeof SchoolsRoute
@@ -407,6 +414,7 @@ export interface FileRoutesByTo {
   '/pitch': typeof PitchRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
+  '/privacy-audit': typeof PrivacyAuditRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/schools': typeof SchoolsRoute
@@ -463,6 +471,7 @@ export interface FileRoutesById {
   '/pitch': typeof PitchRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
+  '/privacy-audit': typeof PrivacyAuditRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/schools': typeof SchoolsRoute
@@ -519,6 +528,7 @@ export interface FileRouteTypes {
     | '/pitch'
     | '/pricing'
     | '/privacy'
+    | '/privacy-audit'
     | '/refund-policy'
     | '/reset-password'
     | '/schools'
@@ -573,6 +583,7 @@ export interface FileRouteTypes {
     | '/pitch'
     | '/pricing'
     | '/privacy'
+    | '/privacy-audit'
     | '/refund-policy'
     | '/reset-password'
     | '/schools'
@@ -628,6 +639,7 @@ export interface FileRouteTypes {
     | '/pitch'
     | '/pricing'
     | '/privacy'
+    | '/privacy-audit'
     | '/refund-policy'
     | '/reset-password'
     | '/schools'
@@ -684,6 +696,7 @@ export interface RootRouteChildren {
   PitchRoute: typeof PitchRoute
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
+  PrivacyAuditRoute: typeof PrivacyAuditRoute
   RefundPolicyRoute: typeof RefundPolicyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SchoolsRoute: typeof SchoolsRoute
@@ -802,6 +815,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy-audit': {
+      id: '/privacy-audit'
+      path: '/privacy-audit'
+      fullPath: '/privacy-audit'
+      preLoaderRoute: typeof PrivacyAuditRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/refund-policy': {
@@ -1150,6 +1170,7 @@ const rootRouteChildren: RootRouteChildren = {
   PitchRoute: PitchRoute,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
+  PrivacyAuditRoute: PrivacyAuditRoute,
   RefundPolicyRoute: RefundPolicyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SchoolsRoute: SchoolsRoute,

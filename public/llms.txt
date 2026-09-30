@@ -2,7 +2,7 @@
 
 > A credit-powered survey platform connecting researchers with verified university students and the general public for honest, campus-scoped responses.
 
-CampusVerify helps students and general users run surveys with verified respondents. Students sign up with an academic email and get campus-scoped feeds; general users run public surveys. Credits are earned by answering and spent to publish.
+CampusVerify helps students, professional researchers, organisations, and community respondents run and answer relevant surveys. Students sign up with an academic email and get campus-scoped feeds; General/Researcher users can conduct research or participate in public surveys. Non-partner students receive 10 permanent sign-up credits, General/Researcher accounts receive 5, and partner-school students receive 50. Credits are earned by answering and spent to publish.
 
 ## Pages
 
@@ -15,3 +15,5 @@ CampusVerify helps students and general users run surveys with verified responde
 
 - [Privacy Policy](/privacy): How we handle your data.
 - [Terms of Service](/terms): Terms governing use of the platform.
+- [Privacy & Security Audit](/privacy-audit): Verified safeguards, data flows, and current limitations.
+- [Refund Policy](/refund-policy): All-sales-final policy and legally required exceptions.

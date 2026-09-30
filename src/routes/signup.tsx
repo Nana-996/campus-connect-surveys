@@ -257,7 +257,7 @@ function SignupPage() {
           {partnerSchool && (
             <div className="mt-4 flex items-start gap-3 border-y border-primary/25 bg-primary/5 py-4 text-sm">
               <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-              <div><p className="font-semibold">Official school joining link</p><p className="mt-1 text-muted-foreground">Use your @{partnerSchool.domain} email to receive 50 welcome credits under your school's plan.</p></div>
+              <div><p className="font-semibold">Official school joining link</p><p className="mt-1 text-muted-foreground">Use your @{partnerSchool.domain} email to receive 50 permanent welcome credits under your school's plan.</p></div>
             </div>
           )}
           {search.school && !partnerSchool && (

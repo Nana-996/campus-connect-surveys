@@ -39,7 +39,7 @@ export function TopupRequest() {
       ) : (
         <div className="mt-3 space-y-2">
           <Input type="number" min={1} max={100} value={amount} onChange={(e) => setAmount(Math.max(1, Math.min(100, Number(e.target.value) || 1)))} className="w-28" />
-          <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Why do you need them? e.g. final-year project survey" maxLength={500} />
+          <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Why do you need them? e.g. a large research survey" maxLength={500} />
           <Button size="sm" disabled={busy || reason.trim().length < 3} onClick={submit}>Send request</Button>
         </div>
       )}

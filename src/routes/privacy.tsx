@@ -8,6 +8,8 @@ export const Route = createFileRoute("/privacy")({
       { name: "description", content: "How CampusVerify collects, stores and protects student and respondent data, and how survey answers stay anonymous." },
       { property: "og:title", content: "Privacy Policy — CampusVerify" },
       { property: "og:description", content: "Data we collect, how survey answers stay anonymous, and the controls you have over your CampusVerify account." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { property: "og:url", content: "https://campus-verify.live/privacy" },
     ],
     links: [{ rel: "canonical", href: "https://campus-verify.live/privacy" }],
@@ -25,7 +27,7 @@ function PrivacyPage() {
         <section>
           <h2 className="font-serif text-2xl">1. Who we are</h2>
           <p>
-            CampusVerify is a service operated by <strong>Vibe Tribe Organisation</strong> ("we", "us", "our").
+            CampusVerify is a service operated in Ghana by <strong>Vibe Tribe Organisation</strong> ("we", "us", "our").
             For the personal data described in this notice, Vibe Tribe Organisation acts as the <strong>data controller</strong>.
             Our payment processor, Paystack, acts as the Merchant of Record and is a separate data controller for payment data it collects directly from you at checkout.
           </p>
@@ -44,7 +46,7 @@ function PrivacyPage() {
           <h2 className="font-serif text-2xl">3. Who we share data with</h2>
           <ul className="list-disc pl-5 space-y-1">
             <li><strong>Supabase</strong> — database, authentication, and storage infrastructure.</li>
-            <li><strong>Paystack</strong> — our Merchant of Record for all paid transactions. Paystack handles billing, tax, invoicing, refund requests, and chargebacks, and receives the personal data needed for those activities (name, email, billing address, payment details). See Paystack's <a href="https://paystack.com/privacy" target="_blank" rel="noopener noreferrer" className="underline">privacy policy</a>.</li>
+            <li><strong>Paystack</strong> — processes payments and receives the personal data needed for checkout and payment handling. See Paystack's <a href="https://paystack.com/privacy" target="_blank" rel="noopener noreferrer" className="underline">privacy policy</a>.</li>
             <li><strong>Google</strong> — for users who choose Sign in with Google.</li>
             <li><strong>Professional advisers and authorities</strong> — where required by law.</li>
           </ul>
@@ -62,7 +64,7 @@ function PrivacyPage() {
         </section>
         <section>
           <h2 className="font-serif text-2xl">5. Security</h2>
-          <p>Row-level security policies restrict data access per user, passwords are hashed by Supabase, and traffic is encrypted in transit. We monitor for suspicious behaviour and flag accounts that appear to abuse the credit system.</p>
+          <p>Access controls restrict data by user, passwords are securely hashed by our authentication provider, and traffic is encrypted in transit. We monitor for suspicious behaviour and flag accounts that appear to abuse the credit system. Read our <Link to="/privacy-audit" className="underline">Privacy &amp; Security Audit</Link> for the controls and limitations we verified.</p>
         </section>
         <section>
           <h2 className="font-serif text-2xl">6. Your rights</h2>
@@ -88,7 +90,7 @@ function PrivacyPage() {
         </section>
         <section>
           <h2 className="font-serif text-2xl">11. Contact</h2>
-          <p>Privacy questions? Reach Vibe Tribe Organisation through the support channel inside the app.</p>
+          <p>Privacy questions? Email Vibe Tribe Organisation at <a href="mailto:nanadjan996@gmail.com" className="underline">nanadjan996@gmail.com</a>.</p>
         </section>
       </div>
     </div>

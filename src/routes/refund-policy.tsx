@@ -5,9 +5,11 @@ export const Route = createFileRoute("/refund-policy")({
   head: () => ({
     meta: [
       { title: "Refund Policy — CampusVerify" },
-      { name: "description", content: "30-day money-back guarantee on CampusVerify credit purchases, processed by Paystack." },
+      { name: "description", content: "CampusVerify payments are final and non-refundable, except where applicable law requires otherwise." },
       { property: "og:title", content: "Refund Policy — CampusVerify" },
-      { property: "og:description", content: "30-day money-back guarantee on CampusVerify credit purchases, processed by Paystack." },
+      { property: "og:description", content: "All CampusVerify purchases and paid services are final, subject to rights that applicable law does not allow us to exclude." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { property: "og:url", content: "https://campus-verify.live/refund-policy" },
     ],
     links: [{ rel: "canonical", href: "https://campus-verify.live/refund-policy" }],
@@ -19,45 +21,28 @@ function RefundPolicyPage() {
     <div className="mx-auto max-w-3xl px-6 py-12">
       <Link to="/" className="text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground">← Back home</Link>
       <h1 className="mt-6 font-serif text-5xl leading-[0.95]">Refund <em className="text-primary">Policy</em></h1>
-      <p className="mt-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">Last updated: {new Date().getFullYear()}</p>
+      <p className="mt-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">Last updated: September 2026</p>
 
       <div className="prose prose-sm mt-8 max-w-none space-y-6 text-sm leading-relaxed">
         <section>
-          <h2 className="font-serif text-2xl">1. 30-day money-back guarantee</h2>
-          <p>
-            CampusVerify, operated by <strong>Vibe Tribe Organisation</strong>, offers a <strong>30-day money-back guarantee</strong> on credit-bundle purchases. If you're not satisfied, you can request a full refund within 30 days of your order date.
-          </p>
+          <h2 className="font-serif text-2xl">1. All payments are final</h2>
+          <p>CampusVerify, operated in Ghana by <strong>Vibe Tribe Organisation</strong>, does not offer refunds for credit bundles, Research Boosts, university slots, donations, subscriptions, or any other paid service once payment is completed.</p>
         </section>
         <section>
-          <h2 className="font-serif text-2xl">2. How refunds are processed</h2>
-          <p>
-            Our payment processor, <strong>Paystack</strong>, is the Merchant of Record for all CampusVerify orders. Paystack handles all billing, customer service inquiries, and refunds.
-          </p>
-          <p>
-            To request a refund, contact our support team with the email address you used at checkout and your Paystack transaction reference. We'll help you raise the request with Paystack.
-          </p>
+          <h2 className="font-serif text-2xl">2. Credits and Research Boosts</h2>
+          <p>Unused credits are not redeemable for cash. A Research Boost is not refundable if it is activated, underperforms, expires, or does not reach its response target. Sign-up credits are permanent but have no cash value.</p>
         </section>
         <section>
-          <h2 className="font-serif text-2xl">3. What happens to your credits</h2>
-          <p>
-            When a refund is issued, any unspent credits from that purchase are removed from your balance. If you have already spent some of the credits, the corresponding portion may be deducted from future purchases or the refund amount adjusted, in line with Paystack's refund policy.
-          </p>
+          <h2 className="font-serif text-2xl">3. Payment errors</h2>
+          <p>If you were charged more than once for the same order, charged without receiving the purchased service, or believe a payment was unauthorized, email us with your account email and Paystack reference so we can investigate the payment record.</p>
         </section>
         <section>
-          <h2 className="font-serif text-2xl">4. Earned credits</h2>
-          <p>
-            Credits earned by students for answering surveys are free promotional credits, are not purchased, and are not refundable for cash. They expire 30 days after issue.
-          </p>
+          <h2 className="font-serif text-2xl">4. Rights preserved by law</h2>
+          <p>This policy does not exclude or limit a refund, reversal, or other remedy that applicable Ghanaian law or another law governing your purchase requires and does not permit us to exclude.</p>
         </section>
         <section>
-          <h2 className="font-serif text-2xl">5. Processing time</h2>
-          <p>
-            Once approved, refunds are returned to the original payment method by Paystack, typically within 5–10 business days depending on your bank.
-          </p>
-        </section>
-        <section>
-          <h2 className="font-serif text-2xl">6. Contact</h2>
-          <p>Questions about a refund? Reach Vibe Tribe Organisation through the support channel inside the app.</p>
+          <h2 className="font-serif text-2xl">5. Contact</h2>
+          <p>Email Vibe Tribe Organisation at <a href="mailto:nanadjan996@gmail.com" className="underline">nanadjan996@gmail.com</a>.</p>
         </section>
       </div>
     </div>

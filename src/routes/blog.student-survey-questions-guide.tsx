@@ -53,7 +53,7 @@ export const Route = createFileRoute("/blog/student-survey-questions-guide")({
               acceptedAnswer: {
                 "@type": "Answer",
                 text:
-                  "Strongest-performing topics on CampusVerify are sleep & wellbeing, study habits, AI use in coursework, dating & social life, money & part-time work, campus food, mental health support, career plans, and political/social attitudes. These are the topics students actually want to share opinions on.",
+                  "Choose a topic your intended respondents understand and care about, then keep the scope narrow enough for clear, useful answers.",
               },
             },
             {

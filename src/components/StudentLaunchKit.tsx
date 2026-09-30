@@ -9,7 +9,7 @@ import { siteUrl } from "@/lib/site";
 type Props = { school: { name: string; domain: string; joinSlug: string } };
 
 const announcementFor = (name: string, url: string) =>
-  `${name} is now officially partnered with CampusVerify.\n\nStudents can join with their ${name} academic email, receive 50 welcome credits, answer verified surveys and run their own research.\n\nCreate your student account: ${url}`;
+  `${name} is now officially partnered with CampusVerify.\n\nStudents can join with their ${name} academic email, receive 50 permanent welcome credits, answer verified surveys and run their own research.\n\nCreate your student account: ${url}`;
 
 async function copy(text: string, success: string) {
   await navigator.clipboard.writeText(text);
@@ -46,7 +46,7 @@ export function StudentLaunchKit({ school }: Props) {
       ctx.fillText("research network is here.", 800, 565);
       ctx.font = "500 36px Arial, sans-serif";
       ctx.fillText("Scan to create your verified student account", 800, 675);
-      ctx.fillText("and receive 50 welcome credits.", 800, 725);
+      ctx.fillText("and receive 50 permanent welcome credits.", 800, 725);
       const image = new Image();
       image.src = qr;
       await image.decode();
