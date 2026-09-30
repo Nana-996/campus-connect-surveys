@@ -178,7 +178,7 @@ function OverviewPanel({ metrics, onGo }: { metrics: any; onGo: (s: string) => v
     { go: "users", icon: Users, title: "Help a student", desc: "Find someone stuck at sign-up and fix their university, role or credits." },
     { go: "evaluations", icon: GraduationCap, title: "Manage lecturers", desc: "Lecturer directory and evaluation forms." },
     { go: "flags", icon: Flag, title: "Review flags", desc: `${metrics?.openFlags ?? 0} open reports waiting for a decision.` },
-    { go: "surveys", icon: FileText, title: "Moderate surveys", desc: "Pause, remove or grant tracking access to surveys." },
+    { go: "surveys", icon: FileText, title: "Moderate surveys", desc: "Pause or remove surveys, or send a progress invitation on an owner's behalf." },
     { go: "broadcast", icon: Megaphone, title: "Send an announcement", desc: "Email a group of users." },
   ];
   return (

@@ -17,7 +17,7 @@ export const Route = createFileRoute("/_authenticated/admin-analytics")({
   head: () => ({
     meta: [
       { title: "Analytics — CampusVerify Admin" },
-      { name: "description", content: "Read-only platform analytics for CampusVerify administrators." },
+      { name: "description", content: "Private, read-only platform analytics for the CampusVerify app owner." },
       { name: "robots", content: "noindex" },
     ],
   }),

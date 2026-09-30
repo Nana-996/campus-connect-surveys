@@ -49,8 +49,9 @@ export const submitLead = createServerFn({ method: "POST" })
   });
 
 async function assertAdmin(supabase: any, userId: string) {
-  const { data, error } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
-  if (error || data !== true) throw new Error("Forbidden: admin only");
+  void userId;
+  const { data, error } = await supabase.rpc("current_user_matches_admin_email");
+  if (error || data !== true) throw new Error("Forbidden: app owner only");
 }
 
 export type Lead = {

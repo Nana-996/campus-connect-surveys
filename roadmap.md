@@ -13,8 +13,8 @@
 - [ ] Verify build and affected public pages.
 
 ## Account-specific corrections — 2026-09-30
-- [ ] Tell non-partner students how to request a school partnership through an administrator.
-- [ ] Correct progress-access guidance to require an email invitation from the survey owner.
-- [ ] Restrict the admin console and its actions to the app owner.
-- [ ] Make sign-in and credit wording specific to the selected account type.
+- [x] Tell non-partner students how to request a school partnership through an administrator.
+- [x] Correct progress-access guidance to require an email invitation from the survey owner.
+- [x] Restrict the admin console and its actions to the app owner.
+- [x] Make sign-in and credit wording specific to the selected account type.
 - [ ] Verify the corrected access states and wording.
