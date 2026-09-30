@@ -179,7 +179,7 @@ function StudentFreeNotice() {
       <Sparkles className="mx-auto h-8 w-8 text-primary" />
       <h1 className="mt-3 font-serif text-4xl">CampusVerify is free for students</h1>
       <ul className="mx-auto mt-5 max-w-sm space-y-2 text-left text-sm text-muted-foreground">
-        <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 text-primary" /> Start with 10 permanent credits</li>
+        <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 text-primary" /> Non-partner students start with 10 permanent credits</li>
         <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 text-primary" /> Partner-school students start with 50 permanent credits</li>
         <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 text-primary" /> Earn credits by answering campus surveys</li>
         <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 text-primary" /> Answer 1 survey = +1 credit</li>
