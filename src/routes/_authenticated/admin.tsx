@@ -934,11 +934,23 @@ function SurveysPanel() {
                   <Link to="/manage/$surveyId" params={{ surveyId: s.id }}>
                     <Button size="sm" variant="outline"><BarChart3 className="h-3 w-3" /></Button>
                   </Link>
-                  <Button size="sm" variant="outline" onClick={async () => {
-                    const email = prompt("Faculty member email:", "");
-                    if (!email) return;
-                    await grantTracking({ data: { surveyId: s.id, email } });
-                    toast.success("Tracking access granted"); refresh();
+                  <Button size="sm" variant="outline" title="Give faculty access" aria-label="Give faculty access" onClick={async () => {
+                    const email = prompt("Faculty member email (they must already have a verified CampusVerify account):", "");
+                    if (!email?.trim()) return;
+                    const clean = email.trim().toLowerCase();
+                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean)) { toast.error("That doesn't look like a valid email address."); return; }
+                    try {
+                      const res = await grantTracking({ data: { surveyId: s.id, email: clean } });
+                      const who = res?.faculty?.full_name || res?.faculty?.email || clean;
+                      toast.success(`Tracking access granted to ${who}. They can open it from the Manage page.`);
+                      refresh();
+                      qc.invalidateQueries({ queryKey: ["admin", "survey-tracking-access", s.id] });
+                    } catch (e: any) {
+                      const msg = String(e?.message ?? "");
+                      toast.error(/No verified user/i.test(msg)
+                        ? "No verified account uses that email yet. Ask them to sign up and confirm their email first."
+                        : msg || "Could not grant access.");
+                    }
                   }}><Briefcase className="h-3 w-3" /></Button>
                   <SurveyTrackingAccessButton surveyId={s.id} />
                   <Button size="sm" variant="outline" onClick={async () => {

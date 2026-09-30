@@ -39,6 +39,11 @@ const requireAdmin = createMiddleware({ type: "function" })
 
 function genericError(e: any): never {
   console.error("[admin]", e);
+  const msg = String(e?.message ?? "");
+  // Pass through safe, user-actionable messages raised by our own RPCs.
+  if (/^(No verified user|Survey not found|Forbidden|Not authenticated)/i.test(msg)) {
+    throw new Error(msg);
+  }
   throw new Error("Database operation failed");
 }
 
