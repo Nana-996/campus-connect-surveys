@@ -10,7 +10,8 @@ import { VisibilityBadge } from "@/components/VisibilityBadge";
 import { VisibilityControl } from "@/components/VisibilityControl";
 import type { Visibility } from "@/lib/visibility";
 
-import { Users, Eye, ArrowUpRight, BarChart3, Share2, Trash2, ShieldCheck } from "lucide-react";
+import { Users, Eye, ArrowUpRight, BarChart3, Share2, Trash2, ShieldCheck, KeyRound } from "lucide-react";
+import { SurveyAccessPanel } from "@/components/SurveyAccessPanel";
 import { SupervisorReviewBadge, SupervisorReviewPanel } from "@/components/SupervisorReview";
 import {
   AlertDialog,
@@ -46,6 +47,7 @@ function MySurveys() {
   const [deleteTarget, setDeleteTarget] = useState<Survey | null>(null);
   const [audienceOpen, setAudienceOpen] = useState<string | null>(null);
   const [reviewOpen, setReviewOpen] = useState<string | null>(null);
+  const [accessOpen, setAccessOpen] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
   const shareUrl = (id: string) =>
@@ -151,6 +153,14 @@ function MySurveys() {
                 <Button
                   size="sm"
                   variant="outline"
+                  onClick={() => setAccessOpen((curr) => (curr === s.id ? null : s.id))}
+                  className="rounded-full border-foreground/30 bg-background/40"
+                >
+                  <KeyRound className="mr-1 h-3.5 w-3.5" /> Progress access
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
                   onClick={() => setAudienceOpen((curr) => (curr === s.id ? null : s.id))}
                   className="rounded-full border-foreground/30 bg-background/40"
                 >
@@ -166,6 +176,7 @@ function MySurveys() {
                 </Button>
               </div>
               {reviewOpen === s.id && <SupervisorReviewPanel surveyId={s.id} title={s.title} />}
+              {accessOpen === s.id && <SurveyAccessPanel className="mt-3" surveyId={s.id} />}
               {audienceOpen === s.id && (
                 <VisibilityControl
                   className="mt-3"

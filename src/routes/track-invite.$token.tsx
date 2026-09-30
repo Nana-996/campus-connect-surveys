@@ -79,7 +79,7 @@ function TrackInvite() {
         <>
           <p className="text-muted-foreground">You need a CampusVerify account with the invited email to accept.</p>
           <a href={`/auth?next=${encodeURIComponent(next)}`}><Button className="w-full rounded-full">Sign in to accept</Button></a>
-          <a href={`/signup?next=${encodeURIComponent(next)}`} className="block text-xs text-primary underline">New here? Create an account</a>
+          <a href="/signup" className="block text-xs text-primary underline">New here? Create an account, then reopen the link in your email.</a>
         </>
       )}
     </Shell>
