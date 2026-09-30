@@ -453,10 +453,10 @@ const Slide5 = () => (
             Targeted
           </div>
           <h3 className="mt-3 text-2xl leading-tight" style={{ fontFamily: SERIF }}>
-            Drug adherence among Health Sciences students
+            Learning support across a target cohort
           </h3>
           <div className="mt-3 flex flex-wrap gap-2">
-            {["Pharmacy", "Year 3–4", "12 questions"].map((t) => (
+            {["Target department", "Selected years", "12 questions"].map((t) => (
               <span key={t} className="rounded-md border px-2 py-0.5 text-xs" style={{ borderColor: C.lineDark, color: C.green }}>{t}</span>
             ))}
           </div>
@@ -808,11 +808,11 @@ const Slide10 = () => {
 /* ============ SLIDE — Faculty Tracking ============ */
 const SlideFaculty = () => {
   const rows = [
-    { name: "Ama Mensah", dept: "Pharmacy · Y4", idx: "PHA/2021/0142", status: "Responded", when: "2h ago" },
-    { name: "Kwame Boateng", dept: "Pharmacy · Y4", idx: "PHA/2021/0157", status: "Responded", when: "5h ago" },
-    { name: "Akosua Nyarko", dept: "Pharmacy · Y4", idx: "PHA/2021/0166", status: "Pending", when: "—" },
-    { name: "Yaw Ofori", dept: "Pharmacy · Y3", idx: "PHA/2022/0089", status: "Pending", when: "—" },
-    { name: "Esi Adjei", dept: "Pharmacy · Y4", idx: "PHA/2021/0178", status: "Responded", when: "1d ago" },
+    { name: "Participant 01", dept: "Department A · Y4", idx: "ID-001", status: "Responded", when: "2h ago" },
+    { name: "Participant 02", dept: "Department A · Y4", idx: "ID-002", status: "Responded", when: "5h ago" },
+    { name: "Participant 03", dept: "Department A · Y4", idx: "ID-003", status: "Pending", when: "—" },
+    { name: "Participant 04", dept: "Department A · Y3", idx: "ID-004", status: "Pending", when: "—" },
+    { name: "Participant 05", dept: "Department A · Y4", idx: "ID-005", status: "Responded", when: "1d ago" },
   ];
   return (
     <SlideShell bg="cream">
@@ -833,8 +833,8 @@ const SlideFaculty = () => {
         {/* mock tracking table */}
         <motion.div variants={fadeUp} custom={2} className="col-span-3 overflow-hidden rounded-2xl border" style={{ borderColor: C.lineDark, background: "rgba(255,255,255,0.6)" }}>
           <div className="flex items-center justify-between px-5 py-3 text-xs font-bold uppercase tracking-[0.22em]" style={{ background: C.green, color: C.lime, fontFamily: SANS }}>
-            <span>Survey · Drug Adherence Y3–Y4</span>
-            <span>62 / 80 responded</span>
+            <span>Illustrative progress view</span>
+            <span>Sample data</span>
           </div>
           <table className="w-full text-[13px]" style={{ fontFamily: SANS }}>
             <thead style={{ background: "rgba(26,58,42,0.06)" }}>
