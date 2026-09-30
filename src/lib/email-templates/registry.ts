@@ -3,6 +3,7 @@ import { template as donationReceiptTemplate } from './donation-receipt'
 import { template as broadcastTemplate } from './broadcast'
 import { template as newLeadTemplate } from './new-lead'
 import { template as creditsGrantedTemplate } from './credits-granted'
+import { inviteTemplate as surveyAccessInvite, noticeTemplate as surveyAccessNotice } from './survey-access'
 
 
 export interface TemplateEntry {
@@ -27,5 +28,7 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'broadcast': broadcastTemplate,
   'new-lead': newLeadTemplate,
   'credits-granted': creditsGrantedTemplate,
+  'survey-access-invite': surveyAccessInvite,
+  'survey-access-owner-notice': surveyAccessNotice,
 }
 
