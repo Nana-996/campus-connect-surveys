@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
+import { verifySuperAdminAccess } from "@/lib/admin.functions";
 import {
   ArrowLeft,
   ArrowRight,
@@ -44,6 +47,10 @@ export const Route = createFileRoute("/pitch")({
       { title: "CampusVerify — Pitch Deck" },
       { name: "description", content: "The verified research and survey network. A premium pitch deck for CampusVerify." },
       { name: "robots", content: "noindex" },
+      { property: "og:title", content: "CampusVerify — Private Pitch Deck" },
+      { property: "og:description", content: "Private CampusVerify presentation for the super administrator." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
 });
@@ -269,7 +276,7 @@ const Slide3 = () => (
         {
           icon: GraduationCap,
           tag: "Student account",
-          credits: "10 free credits on join",
+          credits: "10 permanent credits on join",
           details: [
             "Verified .edu / .ac.xx university email",
             "Department (searchable), year of study",
@@ -280,7 +287,7 @@ const Slide3 = () => (
         {
           icon: Users,
           tag: "General public account",
-          credits: "5 free credits on join",
+          credits: "5 permanent credits on join",
           details: [
             "Any email address",
             "Country and age range",
@@ -329,7 +336,7 @@ const Slide3 = () => (
       className="mt-8 text-sm uppercase tracking-[0.3em]"
       style={{ color: C.lime, fontFamily: SANS }}
     >
-      Every account is tied to a verified identity. No bots. No randoms.
+      Every account requires a confirmed email. Student accounts add academic-domain verification. No open, random-link responses.
     </motion.p>
   </SlideShell>
 );
@@ -337,7 +344,7 @@ const Slide3 = () => (
 /* ============ SLIDE 4 — Credit economy ============ */
 const Slide4 = () => {
   const stages = [
-    { n: 1, t: "Sign up", d: "Receive 10 free credits" },
+    { n: 1, t: "Sign up", d: "Receive 10 student, 5 General, or 50 partner-school credits — permanently" },
     { n: 2, t: "Answer surveys", d: "Earn 1 credit per response" },
     { n: 3, t: "Publish", d: "Spend credits, choose a tier" },
     { n: 4, t: "Export", d: "Real-time responses → PDF report" },
@@ -673,7 +680,7 @@ const Slide8 = () => {
         <div className="flex items-center gap-3">
           <ShieldCheck className="h-6 w-6" style={{ color: C.lime }} />
           <p className="text-lg" style={{ fontFamily: SERIF, fontStyle: "italic" }}>
-            100% verified accounts. 0 third-party ad trackers. Built to meet GDPR-adjacent standards from day one.
+            Confirmed-email accounts. 0 third-party ad trackers. Documented privacy and security controls with transparent limitations.
           </p>
         </div>
       </motion.div>
@@ -744,7 +751,7 @@ const Slide10 = () => {
       icon: FlaskConical,
       tag: "The researcher",
       role: "Student creator",
-      story: "A final-year Pharmacy student at a Ghanaian university needs 80 verified responses for their dissertation on drug adherence among peers. They publish a Targeted survey scoped to Health Sciences, Years 3–4. 80 responses in 48 hours. PDF report exported. Supervisor approves.",
+      story: "A student researcher needs responses from a defined academic cohort. They publish a Targeted survey, monitor progress, analyse the results, and export a report for review.",
     },
     {
       icon: Smartphone,
@@ -986,7 +993,7 @@ const SlideQuality = () => {
     { icon: Award, t: "Quality score per response", d: "Auto-computed from completion time, straight-lining, open-text length. Low-quality responses can be excluded from analysis." },
     { icon: ShieldCheck, t: "Anonymous by default", d: "Respondents opt in to share identity. Identified respondents are visible to faculty trackers but never to peers." },
     { icon: Link2, t: "Shareable referral links", d: "Each survey gets a private link with a token. Off-platform recipients verify before answering — no spoofing." },
-    { icon: Trophy, t: "Earned vs purchased credits", d: "Two-wallet ledger keeps the economy honest. Expiry on bonus grants prevents hoarding." },
+    { icon: Trophy, t: "Earned vs purchased credits", d: "Two-wallet ledger keeps the economy clear. Sign-up and purchased credits are permanent; response-earned credits expire after 30 days." },
   ];
   return (
     <SlideShell bg="green">
@@ -1072,15 +1079,15 @@ const SlideAdvantage = () => {
 /* ============ SLIDE 11 — Vision ============ */
 const Slide11 = () => {
   const roadmap = [
-    { when: "Now · 2026", what: "Closed beta — single-institution pilot, Ghana" },
-    { when: "Q4 · 2026", what: "Multi-university rollout — Ghana-first expansion" },
+    { when: "Now · 2026", what: "Published platform serving students, researchers, organisations, and community respondents" },
+    { when: "Next", what: "Grow university partnerships and research participation across Ghana" },
     { when: "2027", what: "Pan-African network — lecturer evaluations, peer polls, institutional API" },
     { when: "2028", what: "Open research platform — white-label for university research departments" },
   ];
   const ctas = [
     { icon: Handshake, t: "Partner with us", d: "Bring CampusVerify to your university." },
     { icon: DollarSign, t: "Invest", d: "Help us scale across West Africa." },
-    { icon: Rocket, t: "Try it", d: "your-domain.com" },
+    { icon: Rocket, t: "Try it", d: "campus-verify.live" },
   ];
   return (
     <SlideShell bg="green">
@@ -1160,6 +1167,12 @@ const SLIDES = [
 ];
 
 function PitchDeck() {
+  const verifyAccess = useServerFn(verifySuperAdminAccess);
+  const { isLoading, error } = useQuery({
+    queryKey: ["pitch", "super-admin-access"],
+    queryFn: () => verifyAccess(),
+    retry: false,
+  });
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(1);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -1195,6 +1208,13 @@ function PitchDeck() {
 
   const Current = useMemo(() => SLIDES[index].render, [index]);
   const progress = ((index + 1) / total) * 100;
+
+  if (isLoading) {
+    return <div className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-foreground">Checking access…</div>;
+  }
+  if (error) {
+    return <div className="flex min-h-screen items-center justify-center bg-background px-6 text-center"><div><ShieldCheck className="mx-auto h-8 w-8 text-primary" /><h1 className="mt-3 font-serif text-3xl text-foreground">Private presentation</h1><p className="mt-2 text-sm text-muted-foreground">Sign in with the super-admin account to view this page.</p></div></div>;
+  }
 
   return (
     <div
