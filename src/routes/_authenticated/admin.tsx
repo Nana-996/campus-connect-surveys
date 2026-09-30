@@ -83,17 +83,17 @@ function Admin() {
   if (isLoading) return <p className="text-sm text-muted-foreground">Loading…</p>;
   if (error) {
     const msg = (error as any)?.message ?? "";
-    const isForbidden = /forbidden|admin only/i.test(msg);
+    const isForbidden = /forbidden|owner only/i.test(msg);
     return (
       <div className="rounded-3xl border border-foreground/15 bg-card p-8 text-center">
         <ShieldAlert className="mx-auto h-8 w-8 text-destructive" />
         <p className="mt-3 font-serif text-3xl">
-          {isForbidden ? "Admins only." : "Couldn't load admin."}
+          {isForbidden ? "Private administration area." : "Couldn't load administration."}
         </p>
         <p className="mt-1 text-sm text-muted-foreground">
           {isForbidden
-            ? "Your account doesn't have the admin role on this deployment."
-            : msg || "Unknown error."}
+            ? "Only the CampusVerify app owner can open this page."
+            : /verify app-owner access/i.test(msg) ? "We couldn't confirm app-owner access. Please try again." : msg || "Unknown error."}
         </p>
       </div>
     );
@@ -103,10 +103,10 @@ function Admin() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Admin</p>
-          <h1 className="mt-1 font-serif text-5xl leading-[0.95]">Admin <em className="text-primary">tasks.</em></h1>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">App owner</p>
+          <h1 className="mt-1 font-serif text-5xl leading-[0.95]">Platform <em className="text-primary">administration.</em></h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Onboard schools, help students who are stuck, and handle moderation. For numbers and trends, open Analytics.
+            Manage school partnerships, support users, and handle platform moderation. For numbers and trends, open Analytics.
           </p>
         </div>
         <Button asChild variant="outline" size="sm">

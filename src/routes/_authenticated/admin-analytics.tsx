@@ -24,15 +24,15 @@ export const Route = createFileRoute("/_authenticated/admin-analytics")({
 });
 
 function ErrorCard({ message, onRetry }: { message: string; onRetry?: () => void }) {
-  const forbidden = /forbidden|admin only/i.test(message);
+  const forbidden = /forbidden|owner only/i.test(message);
   return (
     <div className="rounded-3xl border border-foreground/15 bg-card p-8 text-center">
       <ShieldAlert className="mx-auto h-8 w-8 text-destructive" />
       <p className="mt-3 font-serif text-3xl">
-        {forbidden ? "Admins only." : "Couldn't load analytics."}
+        {forbidden ? "Private administration area." : "Couldn't load analytics."}
       </p>
       <p className="mt-1 text-sm text-muted-foreground">
-        {forbidden ? "Your account doesn't have the admin role." : message}
+        {forbidden ? "Only the CampusVerify app owner can open this page." : /verify app-owner access/i.test(message) ? "We couldn't confirm app-owner access. Please try again." : message}
       </p>
       {onRetry && !forbidden && (
         <Button className="mt-4" variant="outline" onClick={onRetry}>

@@ -36,7 +36,9 @@ function ManagePage() {
       <div className="rounded-3xl border border-foreground/15 bg-card p-8 text-center">
         <ShieldAlert className="mx-auto h-8 w-8 text-destructive" />
         <p className="mt-3 font-serif text-3xl">Managers only.</p>
-        <p className="mt-1 text-sm text-muted-foreground">Ask the platform owner to grant faculty or survey tracking access.</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          To follow a survey's progress, ask its owner to invite your registered CampusVerify email address.
+        </p>
       </div>
     );
   }

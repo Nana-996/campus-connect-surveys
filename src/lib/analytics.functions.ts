@@ -9,24 +9,12 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 const requireAdmin = createMiddleware({ type: "function" })
   .middleware([requireSupabaseAuth])
   .server(async ({ next, context }) => {
-    const { data } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "admin" as any,
-    });
-    if (data) return next();
-
-    const { data: roles } = await context.supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", context.userId);
-    if ((roles ?? []).some((r: any) => r.role === "admin")) return next();
-
-    const { data: emailAdmin } = await context.supabase.rpc(
+    const { data: isAppOwner, error } = await context.supabase.rpc(
       "current_user_matches_admin_email" as any,
     );
-    if (emailAdmin) return next();
-
-    throw new Error("Forbidden: admin only");
+    if (isAppOwner) return next();
+    if (error) throw new Error("Could not verify app-owner access");
+    throw new Error("Forbidden: app owner only");
   });
 
 const DAY = 86_400_000;

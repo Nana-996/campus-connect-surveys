@@ -6,35 +6,15 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 const requireAdmin = createMiddleware({ type: "function" })
   .middleware([requireSupabaseAuth])
   .server(async ({ next, context }) => {
-    // Use only the authenticated user's client for the gate, so admin access
-    // does not depend on a service-role key being configured on Vercel.
-    const { data, error } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "admin" as any,
-    });
-    if (data) return next();
-
-    // Some self-hosted/PostgREST deployments can fail enum RPC calls while
-    // table reads still work. The self-read policy allows users to see only
-    // their own role rows, so this fallback cannot grant another user access.
-    const { data: roles, error: roleError } = await context.supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", context.userId);
-    if (!roleError && (roles ?? []).some((r: any) => r.role === "admin")) {
-      return next();
-    }
-
-    const { data: emailAdmin, error: emailAdminError } = await context.supabase.rpc(
+    const { data: isAppOwner, error } = await context.supabase.rpc(
       "current_user_matches_admin_email" as any,
     );
-    if (emailAdmin) return next();
-
-    if (error || roleError || emailAdminError) {
-      console.error("[admin:gate]", error ?? roleError ?? emailAdminError);
-      throw new Error("Could not verify admin role");
+    if (isAppOwner) return next();
+    if (error) {
+      console.error("[admin:gate]", error);
+      throw new Error("Could not verify app-owner access");
     }
-    throw new Error("Forbidden: admin only");
+    throw new Error("Forbidden: app owner only");
   });
 
 export const verifySuperAdminAccess = createServerFn({ method: "GET" })
