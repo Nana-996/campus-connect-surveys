@@ -2,12 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { ShieldAlert, Users, FileText, Building2, CalendarClock, Coins } from "lucide-react";
+import { ShieldAlert, Users, FileText, Building2, CalendarClock, Coins, Megaphone } from "lucide-react";
 import { TopupQueue } from "@/components/TopupQueue";
 import { getMySchoolAdminOverview } from "@/lib/school-admin.functions";
 import { StatCard } from "@/components/StatCard";
 import { SectionNav } from "@/components/SectionNav";
 import { Input } from "@/components/ui/input";
+import { StudentLaunchKit } from "@/components/StudentLaunchKit";
 
 export const Route = createFileRoute("/_authenticated/school-admin")({
   head: () => ({
@@ -94,12 +95,15 @@ function SchoolAdminPage() {
           { value: "surveys", label: "Surveys", icon: FileText },
           { value: "departments", label: "Departments", icon: Building2 },
           { value: "requests", label: "Credit requests", icon: Coins },
+          { value: "launch", label: "Launch kit", icon: Megaphone },
         ]}
         value={tab}
         onChange={setTab}
       />
 
       {tab === "requests" && <TopupQueue />}
+
+      {tab === "launch" && <StudentLaunchKit school={{ name: data.school.name, domain: data.school.domain, joinSlug: data.school.joinSlug }} />}
 
       {tab === "students" && (
         <div className="space-y-3">

@@ -889,6 +889,7 @@ export type Database = {
           domain: string
           id: string
           is_active: boolean
+          join_slug: string
           name: string
           subscription_status: string
           updated_at: string
@@ -902,6 +903,7 @@ export type Database = {
           domain: string
           id?: string
           is_active?: boolean
+          join_slug: string
           name: string
           subscription_status?: string
           updated_at?: string
@@ -915,6 +917,7 @@ export type Database = {
           domain?: string
           id?: string
           is_active?: boolean
+          join_slug?: string
           name?: string
           subscription_status?: string
           updated_at?: string
@@ -1803,6 +1806,7 @@ export type Database = {
         }[]
       }
       get_school_invite: { Args: { _token: string }; Returns: Json }
+      get_school_partnership: { Args: { _slug: string }; Returns: Json }
       get_shared_dashboard: { Args: { _token: string }; Returns: Json }
       get_survey_questions_for_tracker: {
         Args: { _survey_id: string }
@@ -1962,6 +1966,10 @@ export type Database = {
         Returns: Json
       }
       school_admin_list_topups: { Args: never; Returns: Json }
+      school_join_slug: {
+        Args: { _domain: string; _name: string }
+        Returns: string
+      }
       submit_survey_review: {
         Args: { _approve: boolean; _comment?: string; _token: string }
         Returns: Json
