@@ -170,7 +170,7 @@ function Landing() {
             This is where researchers and respondents <em className="text-primary">help each other</em> turn questions into insight.
           </h1>
           <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-            Publish a survey, answer a few in return, and watch real responses roll in from verified people.
+            Publish a survey, answer a few in return, and watch real responses roll in from relevant respondents.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             {isSignedIn ? (

@@ -23,7 +23,7 @@ export const Route = createFileRoute("/about")({
       {
         name: "description",
         content:
-          "An academic overview of CampusVerify: the problem, the solution, system architecture, security model, and credit economy that power campus-scoped surveys.",
+          "An overview of CampusVerify: the problem, the solution, system architecture, security model, and credit economy behind trustworthy surveys.",
       },
       { property: "og:title", content: "About CampusVerify — Project overview" },
       {
@@ -103,7 +103,7 @@ function AboutPage() {
             <GraduationCap className="h-3 w-3" /> Project overview
           </span>
           <h1 className="mt-5 font-serif text-5xl leading-[0.95] tracking-tight sm:text-6xl">
-            A campus-scoped survey platform built for{" "}
+            A verified survey platform built for{" "}
             <em className="text-primary">trustworthy research.</em>
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
@@ -115,7 +115,7 @@ function AboutPage() {
         </section>
 
         {/* Problem */}
-        <Section id="problem" eyebrow="The problem" title="Student research is broken in two ways.">
+        <Section id="problem" eyebrow="The problem" title="Good research is difficult in two ways.">
           <p>
             <strong className="text-foreground">Data quality.</strong> Free survey tools allow
             anyone to respond. A dissertation about engineering students at a Ghanaian
@@ -124,9 +124,8 @@ function AboutPage() {
           </p>
           <p>
             <strong className="text-foreground">Access &amp; cost.</strong> Paid panels are
-            unaffordable for undergraduates, and social-media recruiting depends on the
-            researcher's personal network. Students with smaller networks systematically get
-            less data.
+            unaffordable for many independent and student researchers, while social-media recruiting depends on the
+            researcher's personal network. People with smaller networks systematically get less data.
           </p>
         </Section>
 
@@ -137,11 +136,10 @@ function AboutPage() {
           title="A credit-powered feed of relevant respondents."
         >
           <p>
-            CampusVerify gates participation on a <strong className="text-foreground">verified
-            academic email</strong> (<code>.edu</code>, <code>.edu.gh</code>, <code>.ac.uk</code>,{" "}
-            etc.). The email's domain defines a student's campus, and surveys are scoped to
-            that campus by default. Researchers can also opt-in to a wider public audience for
-            general-interest studies.
+            CampusVerify combines <strong className="text-foreground">academically verified student accounts</strong>{" "}
+            with registered General/Researcher accounts for lecturers, NGOs, companies, independent researchers,
+            and community respondents. Student surveys can remain campus-scoped, while wider studies can reach
+            the public audience.
           </p>
           <p>
             Instead of money, the platform runs on a{" "}
@@ -159,12 +157,12 @@ function AboutPage() {
         >
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <Pillar icon={ShieldCheck} title="Identity verification">
-              Sign-up requires an academic email and confirmation link. We never auto-sign-in;
-              the email must be verified before the account is usable.
+              Every account requires email confirmation. Student status additionally requires a recognised academic
+              email, while General/Researcher accounts support wider research and participation.
             </Pillar>
             <Pillar icon={Users} title="Campus scoping">
-              Email domain maps to a university. Default audience for any survey is "only your
-              campus", protecting both relevance and respondent privacy.
+              Academic email domains map students to their institution. Researchers can target that verified campus
+              audience or choose a wider public audience when the study calls for it.
             </Pillar>
             <Pillar icon={Coins} title="Credit economy">
               Publishing costs credits; answering earns them. This funds the platform without
@@ -266,7 +264,7 @@ function AboutPage() {
             </li>
             <li>
               <strong className="text-foreground">PWA installable.</strong> The app ships a
-              manifest and icons; students can install it to their home screen.
+              manifest and icons; users can install it to their home screen.
             </li>
           </ul>
         </Section>
