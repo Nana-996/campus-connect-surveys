@@ -28,9 +28,9 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Log in — CampusVerify" },
-      { name: "description", content: "Log in to CampusVerify as a verified student or general user to access your survey feed, credits, and responses." },
+      { name: "description", content: "Log in to your CampusVerify student or General/Researcher account to access surveys, credits, and responses." },
       { property: "og:title", content: "Log in — CampusVerify" },
-      { property: "og:description", content: "Sign in to CampusVerify to access your campus or public survey feed and earned credits." },
+      { property: "og:description", content: "Sign in to CampusVerify to access surveys, credits, and responses for your account type." },
       { property: "og:url", content: "https://campus-verify.live/auth" },
     ],
     links: [{ rel: "canonical", href: "https://campus-verify.live/auth" }],
@@ -121,17 +121,17 @@ function AuthPage() {
         </Link>
         <div>
           <p className="font-serif text-7xl leading-[0.9]">
-            Welcome<br /><em>{isStudent ? "back to campus." : "back, researcher."}</em>
+            Welcome<br /><em>{isStudent ? "back, student." : "back."}</em>
           </p>
           <p className="mt-6 max-w-sm text-sm opacity-80">
             {isStudent
-              ? "Pick up where you left off — your campus feed, your credits, your responses."
-              : "Pick up where you left off — public surveys, your credits, your responses."}
+              ? "Pick up where you left off — student surveys, credits, and responses."
+              : "Pick up where you left off — surveys, credits, and responses for your research or participation."}
           </p>
         </div>
         <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.25em] opacity-70">
           <span>vol. 01</span>
-          <span>{isStudent ? "verified students only" : "general public"}</span>
+          <span>{isStudent ? "student account" : "general / researcher account"}</span>
         </div>
       </div>
 
@@ -240,7 +240,7 @@ function AuthPage() {
               </div>
             )}
             <Button type="submit" className="h-12 w-full rounded-full bg-primary text-base" disabled={submitting}>
-              {submitting ? "Please wait…" : `Log in as ${isStudent ? "Student" : "General"}`}
+              {submitting ? "Please wait…" : `Log in as ${isStudent ? "Student" : "General / Researcher"}`}
               <ArrowUpRight className="ml-1 h-4 w-4" />
             </Button>
           </form>

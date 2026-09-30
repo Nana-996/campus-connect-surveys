@@ -64,9 +64,9 @@ function BuyCredits() {
     return (
       <div className="mx-auto max-w-xl py-12 text-center">
         <Sparkles className="mx-auto h-8 w-8 text-primary" />
-        <h1 className="mt-3 font-serif text-4xl">CampusVerify is free for students</h1>
+        <h1 className="mt-3 font-serif text-4xl">Your partner-school credits</h1>
         <ul className="mx-auto mt-5 max-w-sm space-y-2 text-left text-sm text-muted-foreground">
-          <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 text-primary" /> Start with 50 permanent partner-school credits</li>
+          <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 text-primary" /> Your partner-school account starts with 50 permanent credits</li>
           <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 text-primary" /> Earn credits by answering campus surveys</li>
           <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 text-primary" /> Answer 1 survey = +1 credit</li>
           <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 text-primary" /> Publish 1 survey = −2 credits</li>
@@ -95,7 +95,12 @@ function BuyCredits() {
     }
   };
 
-  const freeBundle = CREDIT_BUNDLES.find((b) => b.id === "free")!;
+  const freeBundle = CREDIT_BUNDLES.find((b) => b.id === "free");
+  if (!freeBundle) return null;
+  const signupCredits = isStudent ? 10 : 5;
+  const signupDescription = isStudent
+    ? "Your non-partner student account received 10 permanent sign-up credits."
+    : "Your General / Researcher account received 5 permanent sign-up credits.";
 
   return (
     <div>
@@ -119,10 +124,14 @@ function BuyCredits() {
 
         {isStudent && (
           <div className="mt-6 max-w-2xl rounded-2xl border-2 border-primary/40 bg-primary/5 p-4 text-sm">
-            <p className="font-semibold text-primary">Student price: you pay half.</p>
+            <p className="font-semibold text-primary">Your student price is 50% off.</p>
             <p className="mt-1 text-muted-foreground">
-              Your school isn't on CampusVerify yet, so you can buy credits at 50% off. You still keep your sign-up
-              credits and can keep earning by answering surveys. Surveys cost you the student price.
+              Your school has not partnered with CampusVerify yet. You received 10 permanent sign-up credits and can
+              buy more at the student price or earn them by answering surveys.
+            </p>
+            <p className="mt-2 text-muted-foreground">
+              To explore a school partnership, ask a school administrator to contact the CampusVerify app owner at{" "}
+              <a className="font-semibold text-foreground underline" href="mailto:nanadjan996@gmail.com">nanadjan996@gmail.com</a>.
             </p>
           </div>
         )}
@@ -142,16 +151,15 @@ function BuyCredits() {
           <div className="relative rounded-3xl border-2 border-dashed border-foreground/20 bg-card p-6 shadow-paper">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">{freeBundle.tagline}</p>
             <h2 className="mt-1 font-serif text-3xl">{freeBundle.label}</h2>
-            <p className="mt-4 font-serif text-5xl leading-none text-primary">{freeBundle.credits}</p>
+            <p className="mt-4 font-serif text-5xl leading-none text-primary">{signupCredits}</p>
             <p className="mt-1 text-xs uppercase tracking-wider text-muted-foreground">credits</p>
             <div className="mt-5">
               <p className="font-serif text-2xl">Free</p>
               <p className="text-[11px] text-muted-foreground">On signup</p>
             </div>
             <ul className="mt-4 space-y-1.5 text-xs text-muted-foreground">
-              {freeBundle.features?.map((f) => (
-                <li key={f} className="flex items-start gap-1.5"><Check className="mt-0.5 h-3 w-3 text-primary" /> {f}</li>
-              ))}
+              <li className="flex items-start gap-1.5"><Check className="mt-0.5 h-3 w-3 text-primary" /> {signupDescription}</li>
+              <li className="flex items-start gap-1.5"><Check className="mt-0.5 h-3 w-3 text-primary" /> Never expires</li>
             </ul>
           </div>
 
