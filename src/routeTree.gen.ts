@@ -51,6 +51,7 @@ import { Route as JoinSchoolSlugRouteImport } from './routes/join.$schoolSlug'
 import { Route as RTokenRouteImport } from './routes/r.$token'
 import { Route as ReviewTokenRouteImport } from './routes/review.$token'
 import { Route as SurveyIdRouteImport } from './routes/survey.$id'
+import { Route as TrackInviteTokenRouteImport } from './routes/track-invite.$token'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as AuthenticatedManageSurveyIdRouteImport } from './routes/_authenticated/manage.$surveyId'
@@ -277,6 +278,11 @@ const SurveyIdRoute = SurveyIdRouteImport.update({
   path: '/survey/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrackInviteTokenRoute = TrackInviteTokenRouteImport.update({
+  id: '/track-invite/$token',
+  path: '/track-invite/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   id: '/.lovable/oauth/consent',
   path: '/.lovable/oauth/consent',
@@ -375,6 +381,7 @@ export interface FileRoutesByFullPath {
   '/r/$token': typeof RTokenRoute
   '/review/$token': typeof ReviewTokenRoute
   '/survey/$id': typeof SurveyIdRoute
+  '/track-invite/$token': typeof TrackInviteTokenRoute
   '/donate/': typeof DonateIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -428,6 +435,7 @@ export interface FileRoutesByTo {
   '/r/$token': typeof RTokenRoute
   '/review/$token': typeof ReviewTokenRoute
   '/survey/$id': typeof SurveyIdRoute
+  '/track-invite/$token': typeof TrackInviteTokenRoute
   '/donate': typeof DonateIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -483,6 +491,7 @@ export interface FileRoutesById {
   '/r/$token': typeof RTokenRoute
   '/review/$token': typeof ReviewTokenRoute
   '/survey/$id': typeof SurveyIdRoute
+  '/track-invite/$token': typeof TrackInviteTokenRoute
   '/donate/': typeof DonateIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -538,6 +547,7 @@ export interface FileRouteTypes {
     | '/r/$token'
     | '/review/$token'
     | '/survey/$id'
+    | '/track-invite/$token'
     | '/donate/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -591,6 +601,7 @@ export interface FileRouteTypes {
     | '/r/$token'
     | '/review/$token'
     | '/survey/$id'
+    | '/track-invite/$token'
     | '/donate'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -645,6 +656,7 @@ export interface FileRouteTypes {
     | '/r/$token'
     | '/review/$token'
     | '/survey/$id'
+    | '/track-invite/$token'
     | '/donate/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
@@ -688,6 +700,7 @@ export interface RootRouteChildren {
   RTokenRoute: typeof RTokenRoute
   ReviewTokenRoute: typeof ReviewTokenRoute
   SurveyIdRoute: typeof SurveyIdRoute
+  TrackInviteTokenRoute: typeof TrackInviteTokenRoute
   DonateIndexRoute: typeof DonateIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -994,6 +1007,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SurveyIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/track-invite/$token': {
+      id: '/track-invite/$token'
+      path: '/track-invite/$token'
+      fullPath: '/track-invite/$token'
+      preLoaderRoute: typeof TrackInviteTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/.lovable/oauth/consent': {
       id: '/.lovable/oauth/consent'
       path: '/.lovable/oauth/consent'
@@ -1147,6 +1167,7 @@ const rootRouteChildren: RootRouteChildren = {
   RTokenRoute: RTokenRoute,
   ReviewTokenRoute: ReviewTokenRoute,
   SurveyIdRoute: SurveyIdRoute,
+  TrackInviteTokenRoute: TrackInviteTokenRoute,
   DonateIndexRoute: DonateIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
