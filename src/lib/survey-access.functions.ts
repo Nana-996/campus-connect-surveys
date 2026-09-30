@@ -1,18 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { isAppOwnerClaims } from "@/lib/app-owner";
 
 // Progress-access invitations. The survey owner invites people by email; the
 // super admin may invite on any survey (owner is notified). Invitees confirm
 // via an emailed link and must be signed in with the invited email address.
 
 const SITE = "https://campus-verify.live";
-
-async function isAdmin(supabase: any, userId: string) {
-  void userId;
-  const { data: byEmail } = await supabase.rpc("current_user_matches_admin_email");
-  return !!byEmail;
-}
 
 async function authorize(context: any, surveyId: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -23,7 +18,7 @@ async function authorize(context: any, surveyId: string) {
     .maybeSingle();
   if (!survey) throw new Error("Survey not found.");
   const owner = survey.creator_id === context.userId;
-  const admin = owner ? false : await isAdmin(context.supabase, context.userId);
+  const admin = owner ? false : isAppOwnerClaims(context.claims as Record<string, unknown>);
   if (!owner && !admin) throw new Error("Only the survey owner can manage access.");
   return { supabaseAdmin, survey, owner, admin };
 }

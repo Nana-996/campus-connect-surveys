@@ -1,5 +1,6 @@
 import { createServerFn, createMiddleware } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { isAppOwnerClaims } from "@/lib/app-owner";
 
 /**
  * Read-only analytics. This module NEVER writes: every query is a SELECT or a
@@ -9,11 +10,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 const requireAdmin = createMiddleware({ type: "function" })
   .middleware([requireSupabaseAuth])
   .server(async ({ next, context }) => {
-    const { data: isAppOwner, error } = await context.supabase.rpc(
-      "current_user_matches_admin_email" as any,
-    );
-    if (isAppOwner) return next();
-    if (error) throw new Error("Could not verify app-owner access");
+    if (isAppOwnerClaims(context.claims as Record<string, unknown>)) return next();
     throw new Error("Forbidden: app owner only");
   });
 

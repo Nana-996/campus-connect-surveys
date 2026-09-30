@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { isAppOwnerClaims } from "@/lib/app-owner";
 
 const opt = (n: number) => z.string().trim().max(n).optional().transform((v) => (v ? v : null));
 
@@ -48,10 +49,8 @@ export const submitLead = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-async function assertAdmin(supabase: any, userId: string) {
-  void userId;
-  const { data, error } = await supabase.rpc("current_user_matches_admin_email");
-  if (error || data !== true) throw new Error("Forbidden: app owner only");
+function assertAdmin(claims: Record<string, unknown>) {
+  if (!isAppOwnerClaims(claims)) throw new Error("Forbidden: app owner only");
 }
 
 export type Lead = {
@@ -64,7 +63,7 @@ export type Lead = {
 export const listLeads = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertAdmin(context.supabase, context.userId);
+    assertAdmin(context.claims as Record<string, unknown>);
     const { data, error } = await context.supabase.from("leads" as any).select("*").order("created_at", { ascending: false }).limit(2000);
     if (error) throw new Error("Could not load leads");
     return (data ?? []) as unknown as Lead[];
@@ -80,7 +79,7 @@ export const updateLead = createServerFn({ method: "POST" })
     }).parse(d),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.supabase, context.userId);
+    assertAdmin(context.claims as Record<string, unknown>);
     const patch: Record<string, unknown> = {};
     if (data.status) patch.status = data.status;
     if (data.notes !== undefined) patch.notes = data.notes || null;
