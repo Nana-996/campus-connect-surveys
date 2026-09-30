@@ -239,44 +239,8 @@ export const deleteSurvey = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-export const grantSurveyTrackingAccess = createServerFn({ method: "POST" })
-  .middleware([requireAdmin])
-  .inputValidator((d: unknown) =>
-    z.object({ surveyId: z.string().uuid(), email: z.string().email().max(254) }).parse(d),
-  )
-  .handler(async ({ data, context }) => {
-    const { data: row, error } = await context.supabase.rpc("admin_grant_survey_tracking_access_by_email" as any, {
-      _survey_id: data.surveyId,
-      _email: data.email.trim().toLowerCase(),
-    });
-    if (error) genericError(error);
-    return { ok: true, faculty: Array.isArray(row) ? row[0] : row };
-  });
-
-export const revokeSurveyTrackingAccess = createServerFn({ method: "POST" })
-  .middleware([requireAdmin])
-  .inputValidator((d: unknown) =>
-    z.object({ surveyId: z.string().uuid(), facultyUserId: z.string().uuid() }).parse(d),
-  )
-  .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.rpc("admin_revoke_survey_tracking_access" as any, {
-      _survey_id: data.surveyId,
-      _faculty_user_id: data.facultyUserId,
-    });
-    if (error) genericError(error);
-    return { ok: true };
-  });
-
-export const listSurveyTrackingAccess = createServerFn({ method: "POST" })
-  .middleware([requireAdmin])
-  .inputValidator((d: unknown) => z.object({ surveyId: z.string().uuid() }).parse(d))
-  .handler(async ({ data, context }) => {
-    const { data: rows, error } = await context.supabase.rpc("admin_list_survey_tracking_access" as any, {
-      _survey_id: data.surveyId,
-    });
-    if (error) genericError(error);
-    return rows ?? [];
-  });
+// Progress access is managed by survey owners (and admins on their behalf)
+// through src/lib/survey-access.functions.ts.
 
 // ---------- Disposable domains ----------
 export const listDisposableDomains = createServerFn({ method: "GET" })

@@ -34,9 +34,6 @@ import {
   listAdminSurveys,
   setSurveyActive,
   deleteSurvey,
-  grantSurveyTrackingAccess,
-  revokeSurveyTrackingAccess,
-  listSurveyTrackingAccess,
   listDisposableDomains,
   addDisposableDomain,
   removeDisposableDomain,
@@ -61,6 +58,7 @@ import {
   listLecturerEvaluations,
 } from "@/lib/lecturers.functions";
 import { Briefcase } from "lucide-react";
+import { SurveyAccessPanel } from "@/components/SurveyAccessPanel";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: Admin,
@@ -894,7 +892,6 @@ function SurveysPanel() {
   const fetchSurveys = useServerFn(listAdminSurveys);
   const setActive = useServerFn(setSurveyActive);
   const remove = useServerFn(deleteSurvey);
-  const grantTracking = useServerFn(grantSurveyTrackingAccess);
   const { data: surveys = [] } = useQuery({ queryKey: ["admin", "surveys"], queryFn: () => fetchSurveys() });
   const refresh = () => qc.invalidateQueries({ queryKey: ["admin", "surveys"] });
 
@@ -934,24 +931,6 @@ function SurveysPanel() {
                   <Link to="/manage/$surveyId" params={{ surveyId: s.id }}>
                     <Button size="sm" variant="outline"><BarChart3 className="h-3 w-3" /></Button>
                   </Link>
-                  <Button size="sm" variant="outline" title="Give faculty access" aria-label="Give faculty access" onClick={async () => {
-                    const email = prompt("Faculty member email (they must already have a verified CampusVerify account):", "");
-                    if (!email?.trim()) return;
-                    const clean = email.trim().toLowerCase();
-                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean)) { toast.error("That doesn't look like a valid email address."); return; }
-                    try {
-                      const res = await grantTracking({ data: { surveyId: s.id, email: clean } });
-                      const who = res?.faculty?.full_name || res?.faculty?.email || clean;
-                      toast.success(`Tracking access granted to ${who}. They can open it from the Manage page.`);
-                      refresh();
-                      qc.invalidateQueries({ queryKey: ["admin", "survey-tracking-access", s.id] });
-                    } catch (e: any) {
-                      const msg = String(e?.message ?? "");
-                      toast.error(/No verified user/i.test(msg)
-                        ? "No verified account uses that email yet. Ask them to sign up and confirm their email first."
-                        : msg || "Could not grant access.");
-                    }
-                  }}><Briefcase className="h-3 w-3" /></Button>
                   <SurveyTrackingAccessButton surveyId={s.id} />
                   <Button size="sm" variant="outline" onClick={async () => {
                     await setActive({ data: { surveyId: s.id, active: !s.is_active } });
@@ -974,48 +953,18 @@ function SurveysPanel() {
 }
 
 function SurveyTrackingAccessButton({ surveyId }: { surveyId: string }) {
-  const listAccess = useServerFn(listSurveyTrackingAccess);
-  const revokeAccess = useServerFn(revokeSurveyTrackingAccess);
-  const qc = useQueryClient();
   const [open, setOpen] = useState(false);
-  const { data: grants = [], isLoading } = useQuery({
-    queryKey: ["admin", "survey-tracking-access", surveyId],
-    queryFn: () => listAccess({ data: { surveyId } }),
-    enabled: open,
-  });
-
   if (!open) {
-    return <Button size="sm" variant="outline" onClick={() => setOpen(true)}><UserMinus className="h-3 w-3" /></Button>;
+    return (
+      <Button size="sm" variant="outline" title="Progress access (owner is notified)" aria-label="Progress access" onClick={() => setOpen(true)}>
+        <Briefcase className="h-3 w-3" />
+      </Button>
+    );
   }
-
   return (
-    <div className="w-72 rounded-2xl border border-foreground/15 bg-background p-3 text-left shadow-sm">
-      <div className="mb-2 flex items-center justify-between gap-2">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Faculty access</p>
-        <Button size="sm" variant="ghost" onClick={() => setOpen(false)}>Close</Button>
-      </div>
-      {isLoading ? (
-        <p className="text-xs text-muted-foreground">Loading…</p>
-      ) : grants.length === 0 ? (
-        <p className="text-xs text-muted-foreground">No faculty assigned.</p>
-      ) : (
-        <ul className="space-y-2">
-          {grants.map((g: any) => (
-            <li key={g.user_id} className="flex items-center justify-between gap-2 text-xs">
-              <div className="min-w-0">
-                <p className="truncate font-medium">{g.full_name || g.email}</p>
-                <p className="truncate text-[10px] text-muted-foreground">{g.email}</p>
-              </div>
-              <Button size="sm" variant="outline" onClick={async () => {
-                await revokeAccess({ data: { surveyId, facultyUserId: g.user_id } });
-                toast.success("Tracking access revoked");
-                qc.invalidateQueries({ queryKey: ["admin", "survey-tracking-access", surveyId] });
-                qc.invalidateQueries({ queryKey: ["admin", "surveys"] });
-              }}><Trash2 className="h-3 w-3" /></Button>
-            </li>
-          ))}
-        </ul>
-      )}
+    <div className="w-80">
+      <SurveyAccessPanel surveyId={surveyId} asAdmin />
+      <Button size="sm" variant="ghost" className="mt-1" onClick={() => setOpen(false)}>Close</Button>
     </div>
   );
 }
