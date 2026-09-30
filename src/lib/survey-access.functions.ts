@@ -9,8 +9,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 const SITE = "https://campus-verify.live";
 
 async function isAdmin(supabase: any, userId: string) {
-  const { data } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
-  if (data) return true;
+  void userId;
   const { data: byEmail } = await supabase.rpc("current_user_matches_admin_email");
   return !!byEmail;
 }

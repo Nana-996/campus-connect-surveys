@@ -8,6 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Coins, Home, PlusCircle, FolderOpen, User, LogOut, BarChart3, Briefcase, Shield, GraduationCap, GraduationCap as EarnIcon, Wallet } from "lucide-react";
 import { getMyManagerScope } from "@/lib/manager.functions";
 import { getMyFacultyScope } from "@/lib/faculty.functions";
+import { verifySuperAdminAccess } from "@/lib/admin.functions";
 
 export function AppHeader() {
   const { profile, signOut } = useAuth();
@@ -21,6 +22,7 @@ export function AppHeader() {
 
   const fetchScope = useServerFn(getMyManagerScope);
   const fetchFacultyScope = useServerFn(getMyFacultyScope);
+  const verifyOwner = useServerFn(verifySuperAdminAccess);
   const { data: scope } = useQuery({
     queryKey: ["mgr", "scope"],
     queryFn: () => fetchScope(),
@@ -33,8 +35,14 @@ export function AppHeader() {
     retry: false,
     staleTime: 60_000,
   });
+  const { data: ownerAccess } = useQuery({
+    queryKey: ["app-owner", "access"],
+    queryFn: () => verifyOwner(),
+    retry: false,
+    staleTime: 60_000,
+  });
   const showManager = !!scope?.canAccess;
-  const isAdmin = !!scope?.isAdmin;
+  const isAdmin = ownerAccess?.authorized === true;
   const isFaculty = !!facScope?.isFaculty;
 
 
