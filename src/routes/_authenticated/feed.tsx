@@ -272,7 +272,7 @@ function Feed() {
           </p>
         </Link>
       </div>
-      {user && <WelcomeTour userId={user.id} isGeneral={isGeneral} credits={(profile as any)?.credits ?? null} />}
+      {user && <WelcomeTour userId={user.id} isGeneral={isGeneral} credits={profile ? (profile.earned_credits ?? 0) + (profile.paid_credits ?? 0) : null} />}
 
 
       {fromCache && (
