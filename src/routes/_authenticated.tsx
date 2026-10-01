@@ -9,10 +9,10 @@ export const Route = createFileRoute("/_authenticated")({
   errorComponent: AuthedError,
 });
 
-function AuthedError({ error, reset }: { error: Error; reset: () => void }) {
+function AuthedError({ error, reset }: import("@tanstack/react-router").ErrorComponentProps) {
   const router = useRouter();
   const navigate = useNavigate();
-  const msg = error?.message ?? "";
+  const msg = error instanceof Error ? error.message : String(error ?? "");
   const isAuth = /permission denied|jwt|unauthor|401|403|expired/i.test(msg);
   return (
     <div className="flex min-h-screen items-center justify-center px-6 text-center">
