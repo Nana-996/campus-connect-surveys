@@ -880,6 +880,60 @@ export type Database = {
           },
         ]
       }
+      school_survey_tracking_grants: {
+        Row: {
+          created_at: string
+          department: string | null
+          granted_by: string
+          id: string
+          recipient_user_id: string
+          revoked_at: string | null
+          school_id: string
+          scope: string
+          survey_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          department?: string | null
+          granted_by: string
+          id?: string
+          recipient_user_id: string
+          revoked_at?: string | null
+          school_id: string
+          scope: string
+          survey_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          department?: string | null
+          granted_by?: string
+          id?: string
+          recipient_user_id?: string
+          revoked_at?: string | null
+          school_id?: string
+          scope?: string
+          survey_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_survey_tracking_grants_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_survey_tracking_grants_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       schools: {
         Row: {
           admin_email: string | null
@@ -1832,6 +1886,18 @@ export type Database = {
       }
       get_my_manager_scope: { Args: never; Returns: Json }
       get_my_school_admin_overview: { Args: never; Returns: Json }
+      get_my_school_tracking_roster: {
+        Args: { _survey_id: string }
+        Returns: {
+          department: string
+          index_number: string
+          response_status: string
+        }[]
+      }
+      get_my_school_tracking_scope: {
+        Args: { _survey_id: string }
+        Returns: Json
+      }
       get_poll_results: {
         Args: { _poll_id: string }
         Returns: {
@@ -1922,6 +1988,21 @@ export type Database = {
           title: string
         }[]
       }
+      list_my_school_tracking_grants: {
+        Args: never
+        Returns: {
+          creator_name: string
+          department: string
+          expires_at: string
+          is_active: boolean
+          response_count: number
+          response_goal: number
+          school_name: string
+          scope: string
+          survey_id: string
+          title: string
+        }[]
+      }
       list_universities: {
         Args: never
         Returns: {
@@ -1999,10 +2080,32 @@ export type Database = {
         Args: { _approve: boolean; _id: string; _note?: string }
         Returns: Json
       }
+      school_admin_grant_survey_tracking: {
+        Args: {
+          _department?: string
+          _recipient_email: string
+          _scope: string
+          _survey_id: string
+        }
+        Returns: string
+      }
       school_admin_list_topups: { Args: never; Returns: Json }
+      school_admin_revoke_survey_tracking: {
+        Args: { _grant_id: string }
+        Returns: undefined
+      }
+      school_admin_tracking_overview: { Args: never; Returns: Json }
+      school_domain_matches: {
+        Args: { _actual: string; _school: string }
+        Returns: boolean
+      }
       school_join_slug: {
         Args: { _domain: string; _name: string }
         Returns: string
+      }
+      school_survey_is_linked: {
+        Args: { _school_domain: string; _survey_id: string }
+        Returns: boolean
       }
       submit_survey_review: {
         Args: { _approve: boolean; _comment?: string; _token: string }

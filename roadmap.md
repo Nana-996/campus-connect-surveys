@@ -25,3 +25,10 @@
 - [x] Add overview, people and schools, surveys, and revenue and credits views.
 - [x] Add readable charts, operational watchlists, and CSV export.
 - [x] Keep the page read-only and restricted to the app owner.
+
+## School-assisted survey tracking — 2026-10-01
+- [x] Add revocable department and university-wide grants for active partner-school administrators.
+- [x] Restrict grants to registered, confirmed same-school accounts and school-linked surveys.
+- [x] Derive eligible student rosters from survey audience rules.
+- [ ] Add school administrator grant controls and recipient tracking views.
+- [ ] Verify privacy-safe status, export, revocation, and mobile layouts.
