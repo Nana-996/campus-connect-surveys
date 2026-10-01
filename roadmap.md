@@ -32,7 +32,3 @@
 - [x] Derive eligible student rosters from survey audience rules.
 - [ ] Add school administrator grant controls and recipient tracking views.
 - [ ] Verify privacy-safe status, export, revocation, and mobile layouts.
-
-## Participation selector visual refresh — 2026-10-01
-- [x] Recreate the four-option selector with the supplied CampusVerify logo and cream/green styling.
-- [x] Verify the refreshed selector on desktop and phone layouts.
