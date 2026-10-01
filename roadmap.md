@@ -18,3 +18,10 @@
 - [x] Restrict the admin console and its actions to the app owner.
 - [x] Make sign-in and credit wording specific to the selected account type.
 - [x] Verify the corrected access states and wording.
+
+## Super-admin analytics upgrade — 2026-10-01
+- [x] Replace capped-list estimates with full-platform reporting.
+- [x] Add 7, 30, 90-day and all-time comparisons.
+- [x] Add overview, people and schools, surveys, and revenue and credits views.
+- [x] Add readable charts, operational watchlists, and CSV export.
+- [x] Keep the page read-only and restricted to the app owner.
