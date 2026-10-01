@@ -25,7 +25,7 @@ export const VISIBILITY_META: Record<Visibility, VisibilityMeta> = {
   },
   students: {
     id: "students",
-    label: "All students",
+    label: "Students",
     short: "Students",
     who: "Any verified student on CampusVerify, from any institution",
     detail:
@@ -43,7 +43,7 @@ export const VISIBILITY_META: Record<Visibility, VisibilityMeta> = {
   },
   private: {
     id: "private",
-    label: "Private · invite-only",
+    label: "Private · invite only",
     short: "Invite only",
     who: "Only the people you invite by email",
     detail:

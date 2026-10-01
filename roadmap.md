@@ -35,4 +35,4 @@
 
 ## Participation selector visual refresh — 2026-10-01
 - [x] Recreate the four-option selector with the supplied CampusVerify logo and cream/green styling.
-- [ ] Verify the refreshed selector on desktop and phone layouts.
+- [x] Verify the refreshed selector on desktop and phone layouts.
