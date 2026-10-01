@@ -90,7 +90,7 @@ function PrivacyPage() {
         </section>
         <section>
           <h2 className="font-serif text-2xl">11. Contact</h2>
-          <p>Privacy questions? Email Vibe Tribe Organisation at <a href="mailto:nanadjan996@gmail.com" className="underline">nanadjan996@gmail.com</a>.</p>
+          <p>Privacy questions? Email Vibe Tribe Organisation at <a href="mailto:hello@campus-verify.live" className="underline">hello@campus-verify.live</a>.</p>
         </section>
       </div>
     </div>
