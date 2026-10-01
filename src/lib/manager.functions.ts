@@ -57,6 +57,60 @@ export const listUniversitySurveys = createServerFn({ method: "GET" })
     }>;
   });
 
+export type SchoolTrackingGrant = {
+  survey_id: string;
+  title: string;
+  creator_name: string;
+  response_count: number;
+  response_goal: number;
+  is_active: boolean;
+  expires_at: string;
+  scope: "department" | "university";
+  department: string | null;
+  school_name: string;
+};
+
+export const listMySchoolTrackingGrants = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase.rpc("list_my_school_tracking_grants" as any);
+    if (error) fail(error, "list_my_school_tracking_grants");
+    return (data ?? []) as SchoolTrackingGrant[];
+  });
+
+export const getMySchoolTrackingScope = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ surveyId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: scope, error } = await context.supabase.rpc("get_my_school_tracking_scope" as any, { _survey_id: data.surveyId });
+    if (error) fail(error, "get_my_school_tracking_scope");
+    return scope as {
+      hasGrant: boolean;
+      surveyId?: string;
+      title?: string;
+      creatorName?: string;
+      universityDomain?: string;
+      responseCount?: number;
+      responseGoal?: number;
+      scope?: "department" | "university";
+      department?: string | null;
+      schoolName?: string;
+    };
+  });
+
+export const getMySchoolTrackingRoster = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ surveyId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: rows, error } = await context.supabase.rpc("get_my_school_tracking_roster" as any, { _survey_id: data.surveyId });
+    if (error) fail(error, "get_my_school_tracking_roster");
+    return (rows ?? []) as Array<{
+      index_number: string;
+      department: string | null;
+      response_status: "not_started" | "responding" | "responded";
+    }>;
+  });
+
 export const getSurveyTracking = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ surveyId: z.string().uuid() }).parse(d))
