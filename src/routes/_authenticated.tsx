@@ -9,7 +9,7 @@ export const Route = createFileRoute("/_authenticated")({
   errorComponent: AuthedError,
 });
 
-function AuthedError({ error, reset }: { error: Error; reset: () => void }) {
+function AuthedError({ error, reset }: import("@tanstack/react-router").ErrorComponentProps) {
   const router = useRouter();
   const navigate = useNavigate();
   const msg = error?.message ?? "";
