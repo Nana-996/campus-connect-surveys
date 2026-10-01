@@ -8,6 +8,7 @@ import { tagLabel, ageLabel, AGE_RANGES, COUNTRIES, INTEREST_TAGS } from "@/lib/
 import { cacheFeed, getCachedFeed } from "@/lib/offline-store";
 import { VisibilityBadge } from "@/components/VisibilityBadge";
 import { DonateNudge } from "@/components/DonateNudge";
+import { WelcomeTour } from "@/components/WelcomeTour";
 
 type Survey = {
   id: string;
@@ -271,6 +272,7 @@ function Feed() {
           </p>
         </Link>
       </div>
+      {user && <WelcomeTour userId={user.id} isGeneral={isGeneral} credits={profile ? (profile.earned_credits ?? 0) + (profile.paid_credits ?? 0) : null} />}
 
 
       {fromCache && (
@@ -370,16 +372,14 @@ function Feed() {
               <p className="mt-3 font-serif text-3xl">
                 {filteredOut
                   ? "Nothing matches those filters."
-                  : isGeneral
-                    ? "No open surveys right now."
-                    : "A quiet day on campus."}
+                  : "No open surveys right now."}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
                 {filteredOut
                   ? `${surveys.length} survey${surveys.length === 1 ? "" : "s"} available — try widening or clearing your filters.`
                   : isGeneral
-                    ? "Check back soon, or publish the first one yourself."
-                    : `No surveys on ${profile?.university_name ?? "your campus"} yet. Be the spark — publish the first one.`}
+                    ? "You've seen every survey open to you. Check back soon, or publish your own."
+                    : `This feed shows surveys from ${profile?.university_name ?? "your campus"} plus surveys open to everyone. None are open right now — check back soon, or publish your own.`}
               </p>
               <div className="mt-5 flex items-center justify-center gap-2">
                 {filteredOut && (
