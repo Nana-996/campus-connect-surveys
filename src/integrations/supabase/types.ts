@@ -1696,6 +1696,9 @@ export type Database = {
           user_type: string
         }[]
       }
+      admin_platform_analytics:
+        | { Args: { _days?: number }; Returns: Json }
+        | { Args: { _days: number; _owner_email: string }; Returns: Json }
       admin_remove_disposable_domain: {
         Args: { _domain: string }
         Returns: boolean
