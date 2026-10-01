@@ -73,7 +73,7 @@ function PrivacyAuditPage() {
 
         <section className="mt-10 border-t border-border pt-8">
           <h2 className="font-serif text-3xl">Contact and review</h2>
-          <p className="mt-3 text-muted-foreground">Operator: Vibe Tribe Organisation, Ghana. Privacy or security questions can be sent to <a className="underline" href="mailto:nanadjan996@gmail.com">nanadjan996@gmail.com</a>.</p>
+          <p className="mt-3 text-muted-foreground">Operator: Vibe Tribe Organisation, Ghana. Privacy or security questions can be sent to <a className="underline" href="mailto:hello@campus-verify.live">hello@campus-verify.live</a>.</p>
           <Button asChild className="mt-6 rounded-full"><Link to="/privacy">Read the Privacy Policy</Link></Button>
         </section>
       </main>

@@ -403,7 +403,7 @@ function Landing() {
                 </a>
               </li>
               <li><Link to="/guide" className="hover:text-primary">User Guide</Link></li>
-              <li><a href="mailto:nanadjan996@gmail.com" className="hover:text-primary">Email Support</a></li>
+              <li><a href="mailto:hello@campus-verify.live" className="hover:text-primary">Email Support</a></li>
             </ul>
           </div>
         </div>
