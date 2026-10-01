@@ -1,4 +1,5 @@
 import { createServerFn, createMiddleware } from "@tanstack/react-start";
+import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { isAppOwnerClaims } from "@/lib/app-owner";
 
@@ -14,129 +15,41 @@ const requireAdmin = createMiddleware({ type: "function" })
     throw new Error("Forbidden: app owner only");
   });
 
-const DAY = 86_400_000;
+export type AnalyticsPeriod = 0 | 7 | 30 | 90;
 
-function daysAgo(n: number) {
-  return new Date(Date.now() - n * DAY);
-}
-
-function bucketByDay(dates: (string | null | undefined)[], days: number) {
-  const out: { day: string; count: number }[] = [];
-  const index = new Map<string, number>();
-  for (let i = days - 1; i >= 0; i--) {
-    const key = new Date(Date.now() - i * DAY).toISOString().slice(0, 10);
-    index.set(key, out.length);
-    out.push({ day: key, count: 0 });
-  }
-  for (const d of dates) {
-    if (!d) continue;
-    const key = new Date(d).toISOString().slice(0, 10);
-    const i = index.get(key);
-    if (i !== undefined) out[i]!.count += 1;
-  }
-  return out;
-}
-
-function topCounts(values: (string | null | undefined)[], limit = 8) {
-  const map = new Map<string, number>();
-  for (const v of values) {
-    const key = (v ?? "").trim();
-    if (!key) continue;
-    map.set(key, (map.get(key) ?? 0) + 1);
-  }
-  return [...map.entries()]
-    .map(([label, count]) => ({ label, count }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, limit);
-}
+export type AdminAnalyticsData = {
+  generatedAt: string;
+  period: { days: AnalyticsPeriod; start: string; end: string; bucket: "day" | "month" };
+  summary: {
+    totalUsers: number; newUsers: number; previousNewUsers: number | null;
+    activeUsers: number; previousActiveUsers: number | null; students: number; general: number;
+    totalSurveys: number; newSurveys: number; previousNewSurveys: number | null;
+    liveSurveys: number; responses: number; previousResponses: number | null; totalResponses: number;
+    completedTargets: number; goalCompletion: number; partnerSchools: number;
+    participatingSchools: number; openFlags: number; stalledSurveys: number; expiringSoon: number;
+  };
+  trend: { period: string; signups: number; surveys: number; responses: number; revenueGhs: number }[];
+  accountTypes: { label: string; count: number }[];
+  schools: { label: string; domain: string; users: number; surveys: number; responses: number; partner: boolean }[];
+  surveyTiers: { label: string; count: number }[];
+  surveyVisibility: { label: string; count: number }[];
+  credits: { issued: number; spent: number; earnedBalance: number; paidBalance: number; sold: number; byReason: { label: string; issued: number; spent: number }[] };
+  revenue: { ghs: number; previousGhs: number | null; transactions: number; bySource: { label: string; ghs: number; transactions: number }[] };
+  expiringSoon: { id: string; title: string; expires_at: string; response_count: number; response_goal: number }[];
+  stalled: { id: string; title: string; created_at: string; creator_name: string | null; university_domain: string }[];
+};
 
 export const getAdminAnalytics = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
-  .handler(async ({ context }) => {
-    const sb = context.supabase;
-
-    const [metricsRes, usersRes, surveysRes, ledgerRes] = await Promise.all([
-      sb.rpc("admin_dashboard_metrics" as any),
-      sb.rpc("admin_list_users" as any, { _search: undefined }),
-      sb.rpc("admin_list_surveys" as any, {}),
-      sb
-        .from("credit_ledger")
-        .select("wallet, delta, reason, created_at")
-        .gte("created_at", daysAgo(30).toISOString())
-        .limit(5000),
-    ]);
-
-    const metrics = (metricsRes.data ?? {}) as Record<string, number>;
-    const users = (usersRes.data ?? []) as any[];
-    const surveys = (surveysRes.data ?? []) as any[];
-    const ledger = (ledgerRes.data ?? []) as any[];
-
-    const now = Date.now();
-    const soon = now + 3 * DAY;
-
-    const activeSurveys = surveys.filter(
-      (s) => s.is_active && (!s.expires_at || new Date(s.expires_at).getTime() > now),
-    );
-    const expired = surveys.filter(
-      (s) => s.expires_at && new Date(s.expires_at).getTime() <= now,
-    );
-    const expiringSoon = activeSurveys
-      .filter((s) => s.expires_at && new Date(s.expires_at).getTime() <= soon)
-      .sort((a, b) => +new Date(a.expires_at) - +new Date(b.expires_at))
-      .slice(0, 12);
-    const stalled = activeSurveys
-      .filter((s) => (s.response_count ?? 0) === 0)
-      .sort((a, b) => +new Date(a.created_at) - +new Date(b.created_at))
-      .slice(0, 12);
-
-    const totalResponses = surveys.reduce((a, s) => a + (s.response_count ?? 0), 0);
-    const totalGoal = surveys.reduce((a, s) => a + (s.response_goal ?? 0), 0);
-
-    const creditsIssued = ledger
-      .filter((l) => (l.delta ?? 0) > 0)
-      .reduce((a, l) => a + l.delta, 0);
-    const creditsSpent = ledger
-      .filter((l) => (l.delta ?? 0) < 0)
-      .reduce((a, l) => a - l.delta, 0);
-
-    return {
-      generatedAt: new Date().toISOString(),
-      totals: {
-        users: metrics.users ?? users.length,
-        students: users.filter((u) => u.user_type === "student").length,
-        general: users.filter((u) => u.user_type !== "student").length,
-        flagged: users.filter((u) => u.is_flagged).length,
-        surveys: surveys.length,
-        activeSurveys: activeSurveys.length,
-        expiredSurveys: expired.length,
-        responses: metrics.responses ?? totalResponses,
-        responses24h: metrics.responses24h ?? 0,
-        openFlags: metrics.openFlags ?? 0,
-        goalCompletion: totalGoal ? Math.round((totalResponses / totalGoal) * 100) : 0,
-      },
-      signupsByDay: bucketByDay(users.map((u) => u.created_at), 30),
-      surveysByDay: bucketByDay(surveys.map((s) => s.created_at), 30),
-      topUniversities: topCounts(users.map((u) => u.university_name)),
-      byTier: topCounts(surveys.map((s) => s.tier), 10),
-      credits: {
-        issued30d: creditsIssued,
-        spent30d: creditsSpent,
-        earnedBalance: users.reduce((a, u) => a + (u.earned_credits ?? 0), 0),
-        paidBalance: users.reduce((a, u) => a + (u.paid_credits ?? 0), 0),
-      },
-      expiringSoon: expiringSoon.map((s) => ({
-        id: s.id,
-        title: s.title,
-        expires_at: s.expires_at,
-        response_count: s.response_count ?? 0,
-        response_goal: s.response_goal ?? 0,
-      })),
-      stalled: stalled.map((s) => ({
-        id: s.id,
-        title: s.title,
-        created_at: s.created_at,
-        creator_name: s.creator_name,
-        university_domain: s.university_domain,
-      })),
-    };
+  .inputValidator((input: { days: AnalyticsPeriod }) => z.object({ days: z.union([z.literal(0), z.literal(7), z.literal(30), z.literal(90)]) }).parse(input))
+  .handler(async ({ data, context }) => {
+    const ownerEmail = String((context.claims as Record<string, unknown>)?.email ?? "").toLowerCase();
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: report, error } = await supabaseAdmin.rpc("admin_platform_analytics" as never, {
+      _days: data.days,
+      _owner_email: ownerEmail,
+    } as never);
+    if (error) throw new Error(error.message);
+    if (!report) throw new Error("No analytics data returned.");
+    return report as AdminAnalyticsData;
   });
