@@ -23,10 +23,18 @@ function NotFoundComponent() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-primary">404</h1>
-        <p className="mt-2 text-sm text-muted-foreground">This page doesn't exist.</p>
-        <Link to="/" className="mt-6 inline-flex rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
-          Go home
-        </Link>
+        <p className="mt-2 text-sm text-muted-foreground">This page doesn't exist. The link may be old or mistyped.</p>
+        <div className="mt-6 flex flex-wrap justify-center gap-2">
+          <Link to="/feed" className="inline-flex rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
+            Go to the feed
+          </Link>
+          <Link to="/guide" className="inline-flex rounded-md border border-border px-4 py-2 text-sm font-medium">
+            Read the guide
+          </Link>
+          <Link to="/" className="inline-flex rounded-md border border-border px-4 py-2 text-sm font-medium">
+            Home
+          </Link>
+        </div>
       </div>
     </div>
   );
