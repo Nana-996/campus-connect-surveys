@@ -619,10 +619,12 @@ function Create() {
             <div className="flex items-center gap-2">
               <Zap className="h-4 w-4 text-primary" />
               <h2 className="font-serif text-2xl leading-tight">Reward your responders</h2>
+              <InfoTip label="About respondent rewards">
+                Pro perk — give each respondent extra credits on top of the standard +1 for completing your
+                survey. Higher rewards attract more responses faster. Max +3 bonus credits per response, and
+                the reward pool is funded by CampusVerify — nothing extra is deducted from your balance.
+              </InfoTip>
             </div>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Pro perk — give each respondent extra credits on top of the standard +1 for completing your survey. Higher rewards attract more responses faster.
-            </p>
             <div className="mt-4 grid grid-cols-4 gap-2">
               {[0, 1, 2, 3].map((n) => (
                 <button
