@@ -1853,6 +1853,10 @@ export type Database = {
         Args: { _survey_id: string; _user_id?: string }
         Returns: boolean
       }
+      canonical_university_name: {
+        Args: { _domain: string; _typed: string }
+        Returns: string
+      }
       claim_referral: { Args: { _code: string }; Returns: Json }
       claim_school_admin: { Args: never; Returns: number }
       credit_paystack_purchase: {
