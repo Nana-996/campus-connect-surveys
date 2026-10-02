@@ -256,7 +256,9 @@ function FactRow({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-function SourceLink({ to, icon, title, text }: { to: string; icon: React.ReactNode; title: string; text: string }) {
+type SourcePath = "/about" | "/pricing" | "/privacy" | "/privacy-audit" | "/schools" | "/blog/academic-research-surveys";
+
+function SourceLink({ to, icon, title, text }: { to: SourcePath; icon: React.ReactNode; title: string; text: string }) {
   return (
     <Link to={to} className="group rounded-2xl border border-foreground/15 bg-card p-5 shadow-paper transition hover:border-primary/40">
       <div className="text-primary [&>svg]:h-5 [&>svg]:w-5">{icon}</div>
