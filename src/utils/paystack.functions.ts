@@ -15,10 +15,8 @@ export const getPaystackTestMode = createServerFn({ method: "GET" }).handler(asy
  */
 export const initializePaystackCheckout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { bundleId: string; amountGhs: number; originUrl: string; promoCode?: string }) => {
+  .inputValidator((data: { bundleId: string; originUrl: string; promoCode?: string }) => {
     if (!data?.bundleId) throw new Error("bundleId required");
-    if (!Number.isFinite(data.amountGhs) || data.amountGhs <= 0) throw new Error("Invalid GHS amount");
-    if (data.amountGhs > 100000) throw new Error("Amount out of range");
     if (!/^https?:\/\//.test(data.originUrl || "")) throw new Error("Invalid origin");
     if (data.promoCode && !/^[A-Za-z0-9_-]{3,32}$/.test(data.promoCode.trim())) throw new Error("Invalid code");
     return data;
@@ -73,7 +71,7 @@ export const initializePaystackCheckout = createServerFn({ method: "POST" })
       if (promoErr) throw new Error(promoErr.message);
       discount = Number(pct) || 0;
     }
-    const amountGhsPesewas = Math.max(100, Math.round(data.amountGhs * (1 - discount / 100) * 100));
+    const amountGhsPesewas = Math.max(100, Math.round(serverAmountGhs * (1 - discount / 100) * 100));
 
     const { error: insertErr } = await supabaseAdmin.from("paystack_purchases").insert({
       user_id: userId,
