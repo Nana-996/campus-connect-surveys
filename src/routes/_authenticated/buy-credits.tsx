@@ -131,7 +131,7 @@ function BuyCredits() {
             </p>
             <p className="mt-2 text-muted-foreground">
               To explore a school partnership, ask a school administrator to contact the CampusVerify app owner at{" "}
-              <a className="font-semibold text-foreground underline" href="mailto:hello@campus-verify.live">hello@campus-verify.live</a>.
+              <a className="font-semibold text-foreground underline" href="mailto:campusverify996@gmail.com">campusverify996@gmail.com</a>.
             </p>
           </div>
         )}

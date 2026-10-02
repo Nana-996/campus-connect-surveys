@@ -84,7 +84,7 @@ function TermsPage() {
         </section>
         <section>
           <h2 className="font-serif text-2xl">13. Contact</h2>
-          <p>Questions? Email Vibe Tribe Organisation at <a href="mailto:hello@campus-verify.live" className="underline">hello@campus-verify.live</a>.</p>
+          <p>Questions? Email Vibe Tribe Organisation at <a href="mailto:campusverify996@gmail.com" className="underline">campusverify996@gmail.com</a>.</p>
         </section>
       </div>
     </div>
