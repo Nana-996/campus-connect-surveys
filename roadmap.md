@@ -42,4 +42,4 @@
 - [x] Enrich homepage metadata and add an indexable "Who it's for" section.
 - [x] Polish pricing, about, and schools page metadata with target terms and canonicals.
 - [x] Add new articles to sitemap.xml and expand llms.txt.
-- [ ] Verify build and new pages render correctly.
+- [x] Verify build and new pages render correctly.
