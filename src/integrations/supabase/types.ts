@@ -86,6 +86,21 @@ export type Database = {
         }
         Relationships: []
       }
+      cron_config: {
+        Row: {
+          key: string
+          value: string
+        }
+        Insert: {
+          key: string
+          value: string
+        }
+        Update: {
+          key?: string
+          value?: string
+        }
+        Relationships: []
+      }
       disposable_domains: {
         Row: {
           created_at: string
@@ -976,6 +991,42 @@ export type Database = {
           subscription_status?: string
           updated_at?: string
           valid_until?: string | null
+        }
+        Relationships: []
+      }
+      search_console_settings: {
+        Row: {
+          id: boolean
+          site_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          id?: boolean
+          site_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          id?: boolean
+          site_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      search_console_snapshots: {
+        Row: {
+          id: boolean
+          refreshed_at: string
+          snapshot: Json
+        }
+        Insert: {
+          id?: boolean
+          refreshed_at?: string
+          snapshot: Json
+        }
+        Update: {
+          id?: boolean
+          refreshed_at?: string
+          snapshot?: Json
         }
         Relationships: []
       }

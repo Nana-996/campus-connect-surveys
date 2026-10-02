@@ -43,3 +43,11 @@
 - [x] Polish pricing, about, and schools page metadata with target terms and canonicals.
 - [x] Add new articles to sitemap.xml and expand llms.txt.
 - [x] Verify build and new pages render correctly.
+
+## Search Console integration — 2026-10-02
+- [x] Link the Google Search Console connection to the project.
+- [x] Add owner-only settings and snapshot tables with server-only access.
+- [x] Add owner-gated server functions: status, property selection, manual refresh.
+- [x] Add a daily cron route and schedule for automatic snapshot refreshes.
+- [x] Build the owner-only Search visibility page and link it from the admin page.
+- [ ] Owner opens /admin-search and presses "Refresh now" to pull the first snapshot.

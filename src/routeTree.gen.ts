@@ -33,6 +33,7 @@ import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin-analytics'
+import { Route as AuthenticatedAdminSearchRouteImport } from './routes/_authenticated/admin-search'
 import { Route as AuthenticatedBuyCreditsRouteImport } from './routes/_authenticated/buy-credits'
 import { Route as AuthenticatedCreateRouteImport } from './routes/_authenticated/create'
 import { Route as AuthenticatedFacultyRouteImport } from './routes/_authenticated/faculty'
@@ -63,6 +64,7 @@ import { Route as AuthenticatedManageSurveyIdRouteImport } from './routes/_authe
 import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
 import { Route as AuthenticatedSurveyIdAnalyzeRouteImport } from './routes/_authenticated/survey.$id.analyze'
 import { Route as AuthenticatedSurveyIdReportRouteImport } from './routes/_authenticated/survey.$id.report'
+import { Route as ApiPublicCronSearchConsoleRefreshRouteImport } from './routes/api/public/cron/search-console-refresh'
 import { Route as ApiPublicPaystackWebhookRouteImport } from './routes/api/public/paystack/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -188,6 +190,12 @@ const AuthenticatedAdminAnalyticsRoute =
   AuthenticatedAdminAnalyticsRouteImport.update({
     id: '/admin-analytics',
     path: '/admin-analytics',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedAdminSearchRoute =
+  AuthenticatedAdminSearchRouteImport.update({
+    id: '/admin-search',
+    path: '/admin-search',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedBuyCreditsRoute = AuthenticatedBuyCreditsRouteImport.update({
@@ -351,6 +359,12 @@ const AuthenticatedSurveyIdReportRoute =
     path: '/survey/$id/report',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const ApiPublicCronSearchConsoleRefreshRoute =
+  ApiPublicCronSearchConsoleRefreshRouteImport.update({
+    id: '/api/public/cron/search-console-refresh',
+    path: '/api/public/cron/search-console-refresh',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicPaystackWebhookRoute =
   ApiPublicPaystackWebhookRouteImport.update({
     id: '/api/public/paystack/webhook',
@@ -398,6 +412,7 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/admin-analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin-search': typeof AuthenticatedAdminSearchRoute
   '/buy-credits': typeof AuthenticatedBuyCreditsRoute
   '/create': typeof AuthenticatedCreateRoute
   '/faculty': typeof AuthenticatedFacultyRoute
@@ -428,6 +443,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
   '/survey/$id/report': typeof AuthenticatedSurveyIdReportRoute
+  '/api/public/cron/search-console-refresh': typeof ApiPublicCronSearchConsoleRefreshRoute
   '/api/public/paystack/webhook': typeof ApiPublicPaystackWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -457,6 +473,7 @@ export interface FileRoutesByTo {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/admin-analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin-search': typeof AuthenticatedAdminSearchRoute
   '/buy-credits': typeof AuthenticatedBuyCreditsRoute
   '/create': typeof AuthenticatedCreateRoute
   '/faculty': typeof AuthenticatedFacultyRoute
@@ -487,6 +504,7 @@ export interface FileRoutesByTo {
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
   '/survey/$id/report': typeof AuthenticatedSurveyIdReportRoute
+  '/api/public/cron/search-console-refresh': typeof ApiPublicCronSearchConsoleRefreshRoute
   '/api/public/paystack/webhook': typeof ApiPublicPaystackWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -518,6 +536,7 @@ export interface FileRoutesById {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/admin-analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/_authenticated/admin-search': typeof AuthenticatedAdminSearchRoute
   '/_authenticated/buy-credits': typeof AuthenticatedBuyCreditsRoute
   '/_authenticated/create': typeof AuthenticatedCreateRoute
   '/_authenticated/faculty': typeof AuthenticatedFacultyRoute
@@ -548,6 +567,7 @@ export interface FileRoutesById {
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/_authenticated/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
   '/_authenticated/survey/$id/report': typeof AuthenticatedSurveyIdReportRoute
+  '/api/public/cron/search-console-refresh': typeof ApiPublicCronSearchConsoleRefreshRoute
   '/api/public/paystack/webhook': typeof ApiPublicPaystackWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -579,6 +599,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin'
     | '/admin-analytics'
+    | '/admin-search'
     | '/buy-credits'
     | '/create'
     | '/faculty'
@@ -609,6 +630,7 @@ export interface FileRouteTypes {
     | '/lovable/email/events'
     | '/survey/$id/analyze'
     | '/survey/$id/report'
+    | '/api/public/cron/search-console-refresh'
     | '/api/public/paystack/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -638,6 +660,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin'
     | '/admin-analytics'
+    | '/admin-search'
     | '/buy-credits'
     | '/create'
     | '/faculty'
@@ -668,6 +691,7 @@ export interface FileRouteTypes {
     | '/lovable/email/events'
     | '/survey/$id/analyze'
     | '/survey/$id/report'
+    | '/api/public/cron/search-console-refresh'
     | '/api/public/paystack/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -698,6 +722,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/_authenticated/admin'
     | '/_authenticated/admin-analytics'
+    | '/_authenticated/admin-search'
     | '/_authenticated/buy-credits'
     | '/_authenticated/create'
     | '/_authenticated/faculty'
@@ -728,6 +753,7 @@ export interface FileRouteTypes {
     | '/lovable/email/events'
     | '/_authenticated/survey/$id/analyze'
     | '/_authenticated/survey/$id/report'
+    | '/api/public/cron/search-console-refresh'
     | '/api/public/paystack/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -773,6 +799,7 @@ export interface RootRouteChildren {
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   LovableEmailEventsRoute: typeof LovableEmailEventsRoute
+  ApiPublicCronSearchConsoleRefreshRoute: typeof ApiPublicCronSearchConsoleRefreshRoute
   ApiPublicPaystackWebhookRoute: typeof ApiPublicPaystackWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -947,6 +974,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-analytics'
       fullPath: '/admin-analytics'
       preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/admin-search': {
+      id: '/_authenticated/admin-search'
+      path: '/admin-search'
+      fullPath: '/admin-search'
+      preLoaderRoute: typeof AuthenticatedAdminSearchRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/buy-credits': {
@@ -1159,6 +1193,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSurveyIdReportRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/api/public/cron/search-console-refresh': {
+      id: '/api/public/cron/search-console-refresh'
+      path: '/api/public/cron/search-console-refresh'
+      fullPath: '/api/public/cron/search-console-refresh'
+      preLoaderRoute: typeof ApiPublicCronSearchConsoleRefreshRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/paystack/webhook': {
       id: '/api/public/paystack/webhook'
       path: '/api/public/paystack/webhook'
@@ -1204,6 +1245,7 @@ const AuthenticatedManageRouteWithChildren =
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
+  AuthenticatedAdminSearchRoute: typeof AuthenticatedAdminSearchRoute
   AuthenticatedBuyCreditsRoute: typeof AuthenticatedBuyCreditsRoute
   AuthenticatedCreateRoute: typeof AuthenticatedCreateRoute
   AuthenticatedFacultyRoute: typeof AuthenticatedFacultyRoute
@@ -1222,6 +1264,7 @@ interface AuthenticatedRouteChildren {
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
+  AuthenticatedAdminSearchRoute: AuthenticatedAdminSearchRoute,
   AuthenticatedBuyCreditsRoute: AuthenticatedBuyCreditsRoute,
   AuthenticatedCreateRoute: AuthenticatedCreateRoute,
   AuthenticatedFacultyRoute: AuthenticatedFacultyRoute,
@@ -1281,6 +1324,8 @@ const rootRouteChildren: RootRouteChildren = {
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   LovableEmailEventsRoute: LovableEmailEventsRoute,
+  ApiPublicCronSearchConsoleRefreshRoute:
+    ApiPublicCronSearchConsoleRefreshRoute,
   ApiPublicPaystackWebhookRoute: ApiPublicPaystackWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,

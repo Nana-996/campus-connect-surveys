@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import {
   ShieldAlert, Check, Trash2, Power, UserPlus, UserMinus, Flag, FlagOff, Plus,
   GraduationCap, BarChart3, ClipboardList, LayoutDashboard, Building2, Users,
-  FileText, Ban, ArrowRight, MessageSquare, Link2, Pencil, X, Megaphone, Ticket, Inbox,
+  FileText, Ban, ArrowRight, MessageSquare, Link2, Pencil, X, Megaphone, Ticket, Inbox, Search,
 } from "lucide-react";
 import { BroadcastPanel } from "@/components/BroadcastPanel";
 import { PromoCodesPanel } from "@/components/PromoCodesPanel";
@@ -109,11 +109,18 @@ function Admin() {
             Manage school partnerships, support users, and handle platform moderation. For numbers and trends, open Analytics.
           </p>
         </div>
-        <Button asChild variant="outline" size="sm">
-          <Link to="/admin-analytics">
-            <BarChart3 className="mr-2 h-4 w-4" /> Analytics
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button asChild variant="outline" size="sm">
+            <Link to="/admin-search">
+              <Search className="mr-2 h-4 w-4" /> Search
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="sm">
+            <Link to="/admin-analytics">
+              <BarChart3 className="mr-2 h-4 w-4" /> Analytics
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <SectionNav
