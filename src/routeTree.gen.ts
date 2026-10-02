@@ -42,6 +42,7 @@ import { Route as AuthenticatedMySurveysRouteImport } from './routes/_authentica
 import { Route as AuthenticatedPollsRouteImport } from './routes/_authenticated/polls'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedSchoolAdminRouteImport } from './routes/_authenticated/school-admin'
+import { Route as AuthenticatedSchoolTrackingRouteImport } from './routes/_authenticated/school-tracking'
 import { Route as AuthenticatedWorkspaceRouteImport } from './routes/_authenticated/workspace'
 import { Route as BlogStudentPerceptionSurveysRouteImport } from './routes/blog.student-perception-surveys'
 import { Route as BlogStudentSurveyQuestionsGuideRouteImport } from './routes/blog.student-survey-questions-guide'
@@ -232,6 +233,12 @@ const AuthenticatedSchoolAdminRoute =
     path: '/school-admin',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedSchoolTrackingRoute =
+  AuthenticatedSchoolTrackingRouteImport.update({
+    id: '/school-tracking',
+    path: '/school-tracking',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedWorkspaceRoute = AuthenticatedWorkspaceRouteImport.update({
   id: '/workspace',
   path: '/workspace',
@@ -379,6 +386,7 @@ export interface FileRoutesByFullPath {
   '/polls': typeof AuthenticatedPollsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/school-admin': typeof AuthenticatedSchoolAdminRoute
+  '/school-tracking': typeof AuthenticatedSchoolTrackingRoute
   '/workspace': typeof AuthenticatedWorkspaceRoute
   '/blog/student-perception-surveys': typeof BlogStudentPerceptionSurveysRoute
   '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
@@ -434,6 +442,7 @@ export interface FileRoutesByTo {
   '/polls': typeof AuthenticatedPollsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/school-admin': typeof AuthenticatedSchoolAdminRoute
+  '/school-tracking': typeof AuthenticatedSchoolTrackingRoute
   '/workspace': typeof AuthenticatedWorkspaceRoute
   '/blog/student-perception-surveys': typeof BlogStudentPerceptionSurveysRoute
   '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
@@ -491,6 +500,7 @@ export interface FileRoutesById {
   '/_authenticated/polls': typeof AuthenticatedPollsRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/school-admin': typeof AuthenticatedSchoolAdminRoute
+  '/_authenticated/school-tracking': typeof AuthenticatedSchoolTrackingRoute
   '/_authenticated/workspace': typeof AuthenticatedWorkspaceRoute
   '/blog/student-perception-surveys': typeof BlogStudentPerceptionSurveysRoute
   '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
@@ -548,6 +558,7 @@ export interface FileRouteTypes {
     | '/polls'
     | '/profile'
     | '/school-admin'
+    | '/school-tracking'
     | '/workspace'
     | '/blog/student-perception-surveys'
     | '/blog/student-survey-questions-guide'
@@ -603,6 +614,7 @@ export interface FileRouteTypes {
     | '/polls'
     | '/profile'
     | '/school-admin'
+    | '/school-tracking'
     | '/workspace'
     | '/blog/student-perception-surveys'
     | '/blog/student-survey-questions-guide'
@@ -659,6 +671,7 @@ export interface FileRouteTypes {
     | '/_authenticated/polls'
     | '/_authenticated/profile'
     | '/_authenticated/school-admin'
+    | '/_authenticated/school-tracking'
     | '/_authenticated/workspace'
     | '/blog/student-perception-surveys'
     | '/blog/student-survey-questions-guide'
@@ -957,6 +970,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSchoolAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/school-tracking': {
+      id: '/_authenticated/school-tracking'
+      path: '/school-tracking'
+      fullPath: '/school-tracking'
+      preLoaderRoute: typeof AuthenticatedSchoolTrackingRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/workspace': {
       id: '/_authenticated/workspace'
       path: '/workspace'
@@ -1130,6 +1150,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedPollsRoute: typeof AuthenticatedPollsRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedSchoolAdminRoute: typeof AuthenticatedSchoolAdminRoute
+  AuthenticatedSchoolTrackingRoute: typeof AuthenticatedSchoolTrackingRoute
   AuthenticatedWorkspaceRoute: typeof AuthenticatedWorkspaceRoute
   AuthenticatedSurveyIdAnalyzeRoute: typeof AuthenticatedSurveyIdAnalyzeRoute
   AuthenticatedSurveyIdReportRoute: typeof AuthenticatedSurveyIdReportRoute
@@ -1147,6 +1168,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedPollsRoute: AuthenticatedPollsRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedSchoolAdminRoute: AuthenticatedSchoolAdminRoute,
+  AuthenticatedSchoolTrackingRoute: AuthenticatedSchoolTrackingRoute,
   AuthenticatedWorkspaceRoute: AuthenticatedWorkspaceRoute,
   AuthenticatedSurveyIdAnalyzeRoute: AuthenticatedSurveyIdAnalyzeRoute,
   AuthenticatedSurveyIdReportRoute: AuthenticatedSurveyIdReportRoute,

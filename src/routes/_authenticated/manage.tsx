@@ -39,6 +39,9 @@ function ManagePage() {
         <p className="mt-1 text-sm text-muted-foreground">
           To follow a survey's progress, ask its owner to invite your registered CampusVerify email address.
         </p>
+        <Link to="/school-tracking" className="mt-3 inline-block text-sm font-semibold text-primary underline">
+          View surveys your school assigned to you
+        </Link>
       </div>
     );
   }
@@ -53,6 +56,7 @@ function ManagePage() {
         <p className="mt-2 text-sm text-muted-foreground">
           See who has responded, who is pending, and progress by department or year for surveys you can track.
         </p>
+        <Link to="/school-tracking" className="mt-2 inline-block text-sm font-semibold text-primary underline">School-assigned surveys</Link>
       </div>
 
       {/* Mobile: card list (Track always visible) */}
