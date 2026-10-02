@@ -2,8 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { ShieldAlert, Users, FileText, Building2, CalendarClock, Coins, Megaphone } from "lucide-react";
+import { ShieldAlert, Users, FileText, Building2, CalendarClock, Coins, Megaphone, ListChecks } from "lucide-react";
 import { TopupQueue } from "@/components/TopupQueue";
+import { SchoolSurveyTrackingPanel } from "@/components/SchoolSurveyTrackingPanel";
 import { getMySchoolAdminOverview } from "@/lib/school-admin.functions";
 import { StatCard } from "@/components/StatCard";
 import { SectionNav } from "@/components/SectionNav";
@@ -94,6 +95,7 @@ function SchoolAdminPage() {
           { value: "students", label: "Students", icon: Users },
           { value: "surveys", label: "Surveys", icon: FileText },
           { value: "departments", label: "Departments", icon: Building2 },
+          { value: "tracking", label: "Survey tracking", icon: ListChecks },
           { value: "requests", label: "Credit requests", icon: Coins },
           { value: "launch", label: "Launch kit", icon: Megaphone },
         ]}
@@ -102,6 +104,8 @@ function SchoolAdminPage() {
       />
 
       {tab === "requests" && <TopupQueue />}
+
+      {tab === "tracking" && <SchoolSurveyTrackingPanel />}
 
       {tab === "launch" && <StudentLaunchKit school={{ name: data.school.name, domain: data.school.domain, joinSlug: data.school.joinSlug }} />}
 
