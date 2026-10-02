@@ -32,3 +32,7 @@
 - [x] Derive eligible student rosters from survey audience rules.
 - [ ] Add school administrator grant controls and recipient tracking views.
 - [ ] Verify privacy-safe status, export, revocation, and mobile layouts.
+
+## Main contact email — 2026-10-02
+- [x] Use campusverify996@gmail.com across support, legal, partnership, donation, and project documentation.
+- [x] Keep the administrator identity separate from the public contact address.
