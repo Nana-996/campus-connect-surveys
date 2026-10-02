@@ -57,4 +57,4 @@
 - [x] Expand llms.txt with full URLs, citation guidance, product boundaries, and primary sources.
 - [x] Enrich Organization, WebSite, SoftwareApplication, and FAQ structured data.
 - [x] Add the facts page to public navigation and sitemap discovery.
-- [ ] Verify the page, metadata, structured data, sitemap, and mobile layout.
+- [x] Verify the page, metadata, structured data, sitemap, and mobile layout.
