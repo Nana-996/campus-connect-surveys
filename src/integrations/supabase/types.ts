@@ -86,6 +86,21 @@ export type Database = {
         }
         Relationships: []
       }
+      cron_config: {
+        Row: {
+          key: string
+          value: string
+        }
+        Insert: {
+          key: string
+          value: string
+        }
+        Update: {
+          key?: string
+          value?: string
+        }
+        Relationships: []
+      }
       disposable_domains: {
         Row: {
           created_at: string

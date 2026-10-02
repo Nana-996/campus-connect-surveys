@@ -190,6 +190,14 @@ export const getSearchConsoleStatus = createServerFn({ method: "GET" })
     }
 
     const siteUrl = (selected ?? matches[0]?.siteUrl) as string;
+    // Keep the daily cron job's shared secret in sync (service-role only table).
+    const cronSecret = process.env.CRON_SECRET;
+    if (cronSecret) {
+      await supabaseAdmin
+        .from("cron_config")
+        .upsert({ key: "search_console_refresh", value: cronSecret } as never)
+        .then(({ error }) => { if (error) console.error("[search-console] cron secret sync failed:", error.message); });
+    }
     const { data: row } = await supabaseAdmin
       .from("search_console_snapshots")
       .select("snapshot")
