@@ -56,6 +56,7 @@ function ManagePage() {
         <p className="mt-2 text-sm text-muted-foreground">
           See who has responded, who is pending, and progress by department or year for surveys you can track.
         </p>
+        <Link to="/school-tracking" className="mt-2 inline-block text-sm font-semibold text-primary underline">School-assigned surveys</Link>
       </div>
 
       {/* Mobile: card list (Track always visible) */}
