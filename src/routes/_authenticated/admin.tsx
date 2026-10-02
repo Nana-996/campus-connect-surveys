@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import {
   ShieldAlert, Check, Trash2, Power, UserPlus, UserMinus, Flag, FlagOff, Plus,
   GraduationCap, BarChart3, ClipboardList, LayoutDashboard, Building2, Users,
-  FileText, Ban, ArrowRight, MessageSquare, Link2, Pencil, X, Megaphone, Ticket, Inbox,
+  FileText, Ban, ArrowRight, MessageSquare, Link2, Pencil, X, Megaphone, Ticket, Inbox, Search,
 } from "lucide-react";
 import { BroadcastPanel } from "@/components/BroadcastPanel";
 import { PromoCodesPanel } from "@/components/PromoCodesPanel";
