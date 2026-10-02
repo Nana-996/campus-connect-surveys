@@ -25,6 +25,7 @@ import {
 } from "@/utils/university-slots.functions";
 import { FREE_UNIVERSITY_PICKS } from "@/lib/university-slots";
 import { InterestTagInput, type InterestEntry } from "@/components/InterestTagInput";
+import { InfoTip } from "@/components/InfoTip";
 import { AudienceBuilder, type AudienceValue, type CriterionKey } from "@/components/AudienceBuilder";
 import { VisibilityPicker } from "@/components/VisibilityPicker";
 import type { Visibility } from "@/lib/visibility";
@@ -409,11 +410,15 @@ function Create() {
           <h2 className="sr-only">Publishing tier</h2>
           {isBoost ? (
             <>
-              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Research Boost package</Label>
-              <p className="mt-1 text-[11px] text-muted-foreground">
-                Pay in cedis and CampusVerify pushes your survey to the top of the feed for the exact
-                population you pick below, until your paid response quota is filled (or {BOOST_DAYS} days pass).
-              </p>
+              <Label className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Research Boost package
+                <InfoTip label="How Research Boost works">
+                  Pay in cedis and CampusVerify pushes your survey to the top of the feed for the exact
+                  population you pick below, until your paid response quota is filled (or {BOOST_DAYS} days pass).
+                  Every package includes a guaranteed slot at the top of matching feeds, auto-closes the moment
+                  the quota is filled, and uses no credits.
+                </InfoTip>
+              </Label>
               <div className="mt-2 grid gap-3 sm:grid-cols-4">
                 {BOOST_TIERS.map((b) => {
                   const active = boostTier === b.id;
@@ -438,19 +443,18 @@ function Create() {
                   );
                 })}
               </div>
-              <div className="mt-3 rounded-xl border border-foreground/10 bg-card p-3 text-xs">
-                <p className="font-semibold">{selectedBoost.label} boost includes:</p>
-                <ul className="mt-1 grid gap-0.5 text-muted-foreground sm:grid-cols-2">
-                  <li>· Guaranteed slot at the top of matching feeds</li>
-                  <li>· Quota of {selectedBoost.responses} responses from your chosen population</li>
-                  <li>· Auto-closes the moment the quota is filled</li>
-                  <li>· Runs for up to {BOOST_DAYS} days · no credits used</li>
-                </ul>
-              </div>
             </>
           ) : (
             <>
-          <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Publishing tier</Label>
+          <Label className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Publishing tier
+            <InfoTip label={`What ${selected.label} includes`}>
+              <span className="mb-1 block font-semibold text-foreground">{selected.label} includes:</span>
+              <ul className="grid gap-0.5">
+                {selected.features.map((f) => <li key={f}>· {f}</li>)}
+              </ul>
+            </InfoTip>
+          </Label>
           <div className="mt-2 grid gap-3 sm:grid-cols-4">
             {TIER_ORDER.map((t) => {
               const T = TIERS[t];
@@ -479,18 +483,9 @@ function Create() {
                   </div>
                   <p className="mt-0.5 text-[11px] opacity-80">{T.tagline}</p>
                   <p className="mt-3 text-xs font-bold">{isGeneral ? T.cost * 2 : T.cost} credits</p>
-                  <ul className="mt-2 space-y-0.5 text-[11px] opacity-80">
-                    {T.features.slice(0, 2).map((f) => <li key={f}>· {f}</li>)}
-                  </ul>
                 </button>
               );
             })}
-          </div>
-          <div className="mt-3 rounded-xl bg-card border border-foreground/10 p-3 text-xs">
-            <p className="font-semibold">{selected.label} includes:</p>
-            <ul className="mt-1 grid gap-0.5 sm:grid-cols-2 text-muted-foreground">
-              {selected.features.map((f) => <li key={f}>· {f}</li>)}
-            </ul>
           </div>
             </>
           )}
@@ -532,9 +527,11 @@ function Create() {
 
 
           <div className="border-t border-foreground/10 pt-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Limits (optional)</p>
-            <p className="mt-1 text-[11px] text-muted-foreground">
-              Auto-closes when either limit is reached. Ultimate cap: 6 months from publish.
+            <p className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Limits (optional)
+              <InfoTip label="How limits work">
+                The survey auto-closes when either limit is reached. Ultimate cap: 6 months from publish.
+              </InfoTip>
             </p>
             <div className="mt-3 grid grid-cols-2 gap-3">
               {!isBoost && (
@@ -565,7 +562,12 @@ function Create() {
               </div>
             </div>
             <div className="mt-4">
-              <Label htmlFor="speed-trap" className="text-xs">Speed trap · minimum seconds before submit</Label>
+              <Label htmlFor="speed-trap" className="inline-flex items-center gap-1.5 text-xs">
+                Speed trap · minimum seconds before submit
+                <InfoTip label="About the speed trap">
+                  Anti-farming: responses submitted faster than this earn no credits and are silently flagged for review. Respondents don't see the threshold. Default 15s; set 0 to disable.
+                </InfoTip>
+              </Label>
               <Input
                 id="speed-trap"
                 type="number"
@@ -575,9 +577,6 @@ function Create() {
                 onChange={(e) => setMinResponseSeconds(e.target.value)}
                 placeholder="15"
               />
-              <p className="mt-1 text-[11px] text-muted-foreground">
-                Anti-farming: responses submitted faster than this earn no credits and are silently flagged for review. Respondents don't see the threshold. Default 15s; set 0 to disable.
-              </p>
             </div>
             <div className="mt-4 rounded-2xl border border-foreground/15 bg-background/60 p-3">
               <label htmlFor="allow-response-download" className="flex cursor-pointer items-start gap-3">
@@ -589,9 +588,11 @@ function Create() {
                   onChange={(e) => setAllowResponseDownload(e.target.checked)}
                 />
                 <span>
-                  <span className="text-sm font-semibold">Allow respondents to download a copy of their response</span>
-                  <span className="mt-1 block text-[11px] text-muted-foreground">
-                    After submitting, each respondent can download a branded PDF of their own answers only. Off by default.
+                  <span className="inline-flex items-center gap-1.5 text-sm font-semibold">
+                    Allow respondents to download a copy of their response
+                    <InfoTip label="About response downloads">
+                      After submitting, each respondent can download a branded PDF of their own answers only. Off by default.
+                    </InfoTip>
                   </span>
                 </span>
               </label>
@@ -618,10 +619,12 @@ function Create() {
             <div className="flex items-center gap-2">
               <Zap className="h-4 w-4 text-primary" />
               <h2 className="font-serif text-2xl leading-tight">Reward your responders</h2>
+              <InfoTip label="About respondent rewards">
+                Pro perk — give each respondent extra credits on top of the standard +1 for completing your
+                survey. Higher rewards attract more responses faster. Max +3 bonus credits per response, and
+                the reward pool is funded by CampusVerify — nothing extra is deducted from your balance.
+              </InfoTip>
             </div>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Pro perk — give each respondent extra credits on top of the standard +1 for completing your survey. Higher rewards attract more responses faster.
-            </p>
             <div className="mt-4 grid grid-cols-4 gap-2">
               {[0, 1, 2, 3].map((n) => (
                 <button
@@ -649,9 +652,6 @@ function Create() {
                 {bonusTotal > 0 ? `+${bonusTotal} bonus credits` : "no extra credits"}
               </span>
             </div>
-            <p className="mt-2 text-[11px] text-muted-foreground">
-              Max +3 bonus credits per response. This reward pool ({respondentBonus} × {goalNum} response goal = {bonusTotal} credits) is funded by CampusVerify — nothing extra is deducted from your balance.
-            </p>
 
           </div>
         )}
