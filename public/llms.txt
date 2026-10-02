@@ -11,6 +11,14 @@ CampusVerify helps students, professional researchers, organisations, and commun
 - [Sign up](/signup): Create a Student or General account.
 - [Forgot password](/forgot-password): Request a password reset email.
 
+## Guides & articles
+
+- [How to Do a Survey for Academic Research](/blog/academic-research-surveys): Step-by-step guide from research question to reliable responses.
+- [Choosing an Online Survey Tool for Research](/blog/choosing-an-online-survey-tool): Respondent verification, audience targeting, data quality, and cost compared.
+- [Paid Surveys for Students: How Research Credits Work](/blog/paid-surveys-for-students): How students earn credits by answering verified surveys.
+- [Student Survey Questions Guide](/blog/student-survey-questions-guide): Question templates for student surveys.
+- [Student Perception Surveys](/blog/student-perception-surveys): Measuring teaching quality, campus climate, and support.
+
 ## Legal
 
 - [Privacy Policy](/privacy): How we handle your data.

@@ -29,6 +29,9 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/refund-policy", changefreq: "monthly", priority: "0.4" },
           { path: "/blog/student-survey-questions-guide", changefreq: "monthly", priority: "0.8" },
           { path: "/blog/student-perception-surveys", changefreq: "monthly", priority: "0.8" },
+          { path: "/blog/academic-research-surveys", changefreq: "monthly", priority: "0.8" },
+          { path: "/blog/choosing-an-online-survey-tool", changefreq: "monthly", priority: "0.8" },
+          { path: "/blog/paid-surveys-for-students", changefreq: "monthly", priority: "0.8" },
         ];
 
         // Fetch published surveys for dynamic /survey/$id entries.
