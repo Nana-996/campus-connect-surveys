@@ -33,6 +33,7 @@ import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin-analytics'
+import { Route as AuthenticatedAdminSearchRouteImport } from './routes/_authenticated/admin-search'
 import { Route as AuthenticatedBuyCreditsRouteImport } from './routes/_authenticated/buy-credits'
 import { Route as AuthenticatedCreateRouteImport } from './routes/_authenticated/create'
 import { Route as AuthenticatedFacultyRouteImport } from './routes/_authenticated/faculty'
@@ -189,6 +190,12 @@ const AuthenticatedAdminAnalyticsRoute =
   AuthenticatedAdminAnalyticsRouteImport.update({
     id: '/admin-analytics',
     path: '/admin-analytics',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedAdminSearchRoute =
+  AuthenticatedAdminSearchRouteImport.update({
+    id: '/admin-search',
+    path: '/admin-search',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedBuyCreditsRoute = AuthenticatedBuyCreditsRouteImport.update({
@@ -405,6 +412,7 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/admin-analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin-search': typeof AuthenticatedAdminSearchRoute
   '/buy-credits': typeof AuthenticatedBuyCreditsRoute
   '/create': typeof AuthenticatedCreateRoute
   '/faculty': typeof AuthenticatedFacultyRoute
@@ -465,6 +473,7 @@ export interface FileRoutesByTo {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/admin-analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin-search': typeof AuthenticatedAdminSearchRoute
   '/buy-credits': typeof AuthenticatedBuyCreditsRoute
   '/create': typeof AuthenticatedCreateRoute
   '/faculty': typeof AuthenticatedFacultyRoute
@@ -527,6 +536,7 @@ export interface FileRoutesById {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/admin-analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/_authenticated/admin-search': typeof AuthenticatedAdminSearchRoute
   '/_authenticated/buy-credits': typeof AuthenticatedBuyCreditsRoute
   '/_authenticated/create': typeof AuthenticatedCreateRoute
   '/_authenticated/faculty': typeof AuthenticatedFacultyRoute
@@ -589,6 +599,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin'
     | '/admin-analytics'
+    | '/admin-search'
     | '/buy-credits'
     | '/create'
     | '/faculty'
@@ -649,6 +660,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin'
     | '/admin-analytics'
+    | '/admin-search'
     | '/buy-credits'
     | '/create'
     | '/faculty'
@@ -710,6 +722,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/_authenticated/admin'
     | '/_authenticated/admin-analytics'
+    | '/_authenticated/admin-search'
     | '/_authenticated/buy-credits'
     | '/_authenticated/create'
     | '/_authenticated/faculty'
@@ -961,6 +974,13 @@ declare module '@tanstack/react-router' {
       path: '/admin-analytics'
       fullPath: '/admin-analytics'
       preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/admin-search': {
+      id: '/_authenticated/admin-search'
+      path: '/admin-search'
+      fullPath: '/admin-search'
+      preLoaderRoute: typeof AuthenticatedAdminSearchRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/buy-credits': {
@@ -1225,6 +1245,7 @@ const AuthenticatedManageRouteWithChildren =
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
+  AuthenticatedAdminSearchRoute: typeof AuthenticatedAdminSearchRoute
   AuthenticatedBuyCreditsRoute: typeof AuthenticatedBuyCreditsRoute
   AuthenticatedCreateRoute: typeof AuthenticatedCreateRoute
   AuthenticatedFacultyRoute: typeof AuthenticatedFacultyRoute
@@ -1243,6 +1264,7 @@ interface AuthenticatedRouteChildren {
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
+  AuthenticatedAdminSearchRoute: AuthenticatedAdminSearchRoute,
   AuthenticatedBuyCreditsRoute: AuthenticatedBuyCreditsRoute,
   AuthenticatedCreateRoute: AuthenticatedCreateRoute,
   AuthenticatedFacultyRoute: AuthenticatedFacultyRoute,
