@@ -57,10 +57,12 @@ function MetricCard({ icon: Icon, label, value, previous, invert }: {
   );
 }
 
+type TableRow = { clicks: number; impressions: number; ctr: number; position: number } & Record<string, unknown>;
+
 function DataTable({ title, icon: Icon, rows, nameKey }: {
   title: string;
   icon: typeof Globe;
-  rows: { clicks: number; impressions: number; ctr: number; position: number }[] & Record<string, unknown>[];
+  rows: TableRow[];
   nameKey: string;
 }) {
   return (
