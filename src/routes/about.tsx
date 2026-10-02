@@ -19,18 +19,19 @@ export const Route = createFileRoute("/about")({
   component: AboutPage,
   head: () => ({
     meta: [
-      { title: "About CampusVerify — Project overview & architecture" },
+      { title: "About CampusVerify — Verified survey research platform" },
       {
         name: "description",
         content:
-          "An overview of CampusVerify: the problem, the solution, system architecture, security model, and credit economy behind trustworthy surveys.",
+          "How CampusVerify works: verified student respondents, a fair credit economy, audience targeting, and the security model behind trustworthy academic research surveys.",
       },
-      { property: "og:title", content: "About CampusVerify — Project overview" },
+      { property: "og:title", content: "About CampusVerify — Verified survey research platform" },
       {
         property: "og:description",
         content:
           "How CampusVerify combines verified audiences, strong data protection, and a credit economy to deliver trustworthy research surveys.",
       },
+      { property: "og:url", content: "https://campus-verify.live/about" },
     ],
     links: [
       { rel: "canonical", href: "https://campus-verify.live/about" },

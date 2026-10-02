@@ -44,6 +44,9 @@ import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedSchoolAdminRouteImport } from './routes/_authenticated/school-admin'
 import { Route as AuthenticatedSchoolTrackingRouteImport } from './routes/_authenticated/school-tracking'
 import { Route as AuthenticatedWorkspaceRouteImport } from './routes/_authenticated/workspace'
+import { Route as BlogAcademicResearchSurveysRouteImport } from './routes/blog.academic-research-surveys'
+import { Route as BlogChoosingAnOnlineSurveyToolRouteImport } from './routes/blog.choosing-an-online-survey-tool'
+import { Route as BlogPaidSurveysForStudentsRouteImport } from './routes/blog.paid-surveys-for-students'
 import { Route as BlogStudentPerceptionSurveysRouteImport } from './routes/blog.student-perception-surveys'
 import { Route as BlogStudentSurveyQuestionsGuideRouteImport } from './routes/blog.student-survey-questions-guide'
 import { Route as DonateIndexRouteImport } from './routes/donate.index'
@@ -244,6 +247,24 @@ const AuthenticatedWorkspaceRoute = AuthenticatedWorkspaceRouteImport.update({
   path: '/workspace',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const BlogAcademicResearchSurveysRoute =
+  BlogAcademicResearchSurveysRouteImport.update({
+    id: '/blog/academic-research-surveys',
+    path: '/blog/academic-research-surveys',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const BlogChoosingAnOnlineSurveyToolRoute =
+  BlogChoosingAnOnlineSurveyToolRouteImport.update({
+    id: '/blog/choosing-an-online-survey-tool',
+    path: '/blog/choosing-an-online-survey-tool',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const BlogPaidSurveysForStudentsRoute =
+  BlogPaidSurveysForStudentsRouteImport.update({
+    id: '/blog/paid-surveys-for-students',
+    path: '/blog/paid-surveys-for-students',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const BlogStudentPerceptionSurveysRoute =
   BlogStudentPerceptionSurveysRouteImport.update({
     id: '/blog/student-perception-surveys',
@@ -388,6 +409,9 @@ export interface FileRoutesByFullPath {
   '/school-admin': typeof AuthenticatedSchoolAdminRoute
   '/school-tracking': typeof AuthenticatedSchoolTrackingRoute
   '/workspace': typeof AuthenticatedWorkspaceRoute
+  '/blog/academic-research-surveys': typeof BlogAcademicResearchSurveysRoute
+  '/blog/choosing-an-online-survey-tool': typeof BlogChoosingAnOnlineSurveyToolRoute
+  '/blog/paid-surveys-for-students': typeof BlogPaidSurveysForStudentsRoute
   '/blog/student-perception-surveys': typeof BlogStudentPerceptionSurveysRoute
   '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
   '/donate/thank-you': typeof DonateThankYouRoute
@@ -444,6 +468,9 @@ export interface FileRoutesByTo {
   '/school-admin': typeof AuthenticatedSchoolAdminRoute
   '/school-tracking': typeof AuthenticatedSchoolTrackingRoute
   '/workspace': typeof AuthenticatedWorkspaceRoute
+  '/blog/academic-research-surveys': typeof BlogAcademicResearchSurveysRoute
+  '/blog/choosing-an-online-survey-tool': typeof BlogChoosingAnOnlineSurveyToolRoute
+  '/blog/paid-surveys-for-students': typeof BlogPaidSurveysForStudentsRoute
   '/blog/student-perception-surveys': typeof BlogStudentPerceptionSurveysRoute
   '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
   '/donate/thank-you': typeof DonateThankYouRoute
@@ -502,6 +529,9 @@ export interface FileRoutesById {
   '/_authenticated/school-admin': typeof AuthenticatedSchoolAdminRoute
   '/_authenticated/school-tracking': typeof AuthenticatedSchoolTrackingRoute
   '/_authenticated/workspace': typeof AuthenticatedWorkspaceRoute
+  '/blog/academic-research-surveys': typeof BlogAcademicResearchSurveysRoute
+  '/blog/choosing-an-online-survey-tool': typeof BlogChoosingAnOnlineSurveyToolRoute
+  '/blog/paid-surveys-for-students': typeof BlogPaidSurveysForStudentsRoute
   '/blog/student-perception-surveys': typeof BlogStudentPerceptionSurveysRoute
   '/blog/student-survey-questions-guide': typeof BlogStudentSurveyQuestionsGuideRoute
   '/donate/thank-you': typeof DonateThankYouRoute
@@ -560,6 +590,9 @@ export interface FileRouteTypes {
     | '/school-admin'
     | '/school-tracking'
     | '/workspace'
+    | '/blog/academic-research-surveys'
+    | '/blog/choosing-an-online-survey-tool'
+    | '/blog/paid-surveys-for-students'
     | '/blog/student-perception-surveys'
     | '/blog/student-survey-questions-guide'
     | '/donate/thank-you'
@@ -616,6 +649,9 @@ export interface FileRouteTypes {
     | '/school-admin'
     | '/school-tracking'
     | '/workspace'
+    | '/blog/academic-research-surveys'
+    | '/blog/choosing-an-online-survey-tool'
+    | '/blog/paid-surveys-for-students'
     | '/blog/student-perception-surveys'
     | '/blog/student-survey-questions-guide'
     | '/donate/thank-you'
@@ -673,6 +709,9 @@ export interface FileRouteTypes {
     | '/_authenticated/school-admin'
     | '/_authenticated/school-tracking'
     | '/_authenticated/workspace'
+    | '/blog/academic-research-surveys'
+    | '/blog/choosing-an-online-survey-tool'
+    | '/blog/paid-surveys-for-students'
     | '/blog/student-perception-surveys'
     | '/blog/student-survey-questions-guide'
     | '/donate/thank-you'
@@ -718,6 +757,9 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  BlogAcademicResearchSurveysRoute: typeof BlogAcademicResearchSurveysRoute
+  BlogChoosingAnOnlineSurveyToolRoute: typeof BlogChoosingAnOnlineSurveyToolRoute
+  BlogPaidSurveysForStudentsRoute: typeof BlogPaidSurveysForStudentsRoute
   BlogStudentPerceptionSurveysRoute: typeof BlogStudentPerceptionSurveysRoute
   BlogStudentSurveyQuestionsGuideRoute: typeof BlogStudentSurveyQuestionsGuideRoute
   DonateThankYouRoute: typeof DonateThankYouRoute
@@ -984,6 +1026,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWorkspaceRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/blog/academic-research-surveys': {
+      id: '/blog/academic-research-surveys'
+      path: '/blog/academic-research-surveys'
+      fullPath: '/blog/academic-research-surveys'
+      preLoaderRoute: typeof BlogAcademicResearchSurveysRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/choosing-an-online-survey-tool': {
+      id: '/blog/choosing-an-online-survey-tool'
+      path: '/blog/choosing-an-online-survey-tool'
+      fullPath: '/blog/choosing-an-online-survey-tool'
+      preLoaderRoute: typeof BlogChoosingAnOnlineSurveyToolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/paid-surveys-for-students': {
+      id: '/blog/paid-surveys-for-students'
+      path: '/blog/paid-surveys-for-students'
+      fullPath: '/blog/paid-surveys-for-students'
+      preLoaderRoute: typeof BlogPaidSurveysForStudentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/blog/student-perception-surveys': {
       id: '/blog/student-perception-surveys'
       path: '/blog/student-perception-surveys'
@@ -1202,6 +1265,9 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  BlogAcademicResearchSurveysRoute: BlogAcademicResearchSurveysRoute,
+  BlogChoosingAnOnlineSurveyToolRoute: BlogChoosingAnOnlineSurveyToolRoute,
+  BlogPaidSurveysForStudentsRoute: BlogPaidSurveysForStudentsRoute,
   BlogStudentPerceptionSurveysRoute: BlogStudentPerceptionSurveysRoute,
   BlogStudentSurveyQuestionsGuideRoute: BlogStudentSurveyQuestionsGuideRoute,
   DonateThankYouRoute: DonateThankYouRoute,

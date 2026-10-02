@@ -31,8 +31,8 @@ export const Route = createFileRoute("/")({
   component: Landing,
   head: () => ({
     meta: [
-      { title: "CampusVerify — Real research, real responses, real fast" },
-      { name: "description", content: "Create surveys, reach verified student and public audiences, and earn credits by answering research from the community." },
+      { title: "CampusVerify — Verified survey platform for academic research" },
+      { name: "description", content: "The survey platform for academic research: create surveys, reach verified student respondents and research participants, and earn credits by answering community research." },
       { property: "og:title", content: "CampusVerify — Verified research and surveys" },
       { property: "og:description", content: "A credit-powered survey platform for students, professional researchers, organisations, and community respondents." },
       { property: "og:type", content: "website" },
@@ -231,6 +231,40 @@ function Landing() {
           <Tile icon={<NotebookPen />} title="Built for real research" tone="card">
             Clean exports, targeting, and honest data you can actually use.
           </Tile>
+        </section>
+
+        {/* Who uses CampusVerify — indexable audience copy */}
+        <section className="mt-12 rounded-3xl border border-foreground/15 bg-card p-8 shadow-paper sm:p-12">
+          <div className="text-center">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Who it's for</p>
+            <h2 className="mt-2 font-serif text-3xl leading-[0.95] sm:text-4xl">One survey platform, four kinds of researcher</h2>
+          </div>
+          <div className="mt-10 grid gap-6 sm:grid-cols-2">
+            <div>
+              <h3 className="font-serif text-xl text-primary">Students</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                Run academic research surveys for course projects, theses, and dissertations. Sign up with your academic email, answer surveys to earn credits, and reach verified student respondents at your campus or beyond.
+              </p>
+            </div>
+            <div>
+              <h3 className="font-serif text-xl text-primary">Professional researchers</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                Collect research participants for studies that need a defined, verified audience. Target by campus, department, year of study, country, age range, and interests — and export clean data for analysis.
+              </p>
+            </div>
+            <div>
+              <h3 className="font-serif text-xl text-primary">Organisations</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                NGOs, companies, and institutions use CampusVerify to run public surveys and campus research with verified respondents — from programme feedback to market and community research.
+              </p>
+            </div>
+            <div>
+              <h3 className="font-serif text-xl text-primary">Community respondents</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                Anyone can join as a General account to answer public surveys, earn research credits, and take part in studies that shape real decisions.
+              </p>
+            </div>
+          </div>
         </section>
 
         {/* Partner with us — stationery card */}

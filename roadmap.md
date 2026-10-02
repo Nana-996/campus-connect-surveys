@@ -36,3 +36,10 @@
 ## Main contact email — 2026-10-02
 - [x] Use campusverify996@gmail.com across support, legal, partnership, donation, and project documentation.
 - [x] Keep the administrator identity separate from the public contact address.
+
+## Search visibility — 2026-10-02
+- [x] Add three blog articles targeting researched low-competition keywords.
+- [x] Enrich homepage metadata and add an indexable "Who it's for" section.
+- [x] Polish pricing, about, and schools page metadata with target terms and canonicals.
+- [x] Add new articles to sitemap.xml and expand llms.txt.
+- [x] Verify build and new pages render correctly.
