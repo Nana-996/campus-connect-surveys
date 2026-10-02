@@ -109,11 +109,12 @@ export const requestPasswordReset = createServerFn({ method: "POST" })
       // so confirm the address first.
       const authUrl = redirectTo.replace(/\/reset-password.*$/, "/auth");
       await post("resend", authUrl, { type: "signup", email });
-      return { outcome: "confirmation_sent" };
+      return { outcome: "unknown" };
     }
 
     await post("recover", redirectTo, { email, gotrue_meta_security: {} });
 
-    return { outcome: confirmed === true ? "reset_sent" : "unknown" };
+    // Always return the same generic outcome so account status is never revealed.
+    return { outcome: "unknown" };
   });
 

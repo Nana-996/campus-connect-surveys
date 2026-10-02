@@ -54,13 +54,11 @@ export const initializePaystackCheckout = createServerFn({ method: "POST" })
       const r = await fetch("https://api.exchangerate-api.com/v4/latest/USD");
       if (r.ok) serverRate = Number((await r.json())?.rates?.GHS) || 0;
     } catch { /* fall through */ }
-    // Never charge more than the price shown. If the live rate is unavailable, fall back to a
-    // conservative floor (10 GHS/USD) so checkout still works. Reject only clear underpayment.
+    // The charged amount is always derived on the server (live rate + 5% buffer, matching
+    // the displayed price). The client-supplied amount is never used for billing.
     const rateOk = serverRate > 5 && serverRate < 100;
-    const floorGhs = usdPrice * (rateOk ? serverRate * 0.85 : 10);
-    if (data.amountGhs < floorGhs) {
-      throw new Error("Prices have changed — please refresh the page to see the latest price.");
-    }
+    if (!rateOk) throw new Error("Pricing is temporarily unavailable — please try again shortly.");
+    const serverAmountGhs = Math.round(usdPrice * serverRate * 1.05 * 100) / 100;
 
     const reference = `cv_${userId.slice(0, 8)}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
