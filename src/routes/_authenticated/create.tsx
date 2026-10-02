@@ -25,6 +25,7 @@ import {
 } from "@/utils/university-slots.functions";
 import { FREE_UNIVERSITY_PICKS } from "@/lib/university-slots";
 import { InterestTagInput, type InterestEntry } from "@/components/InterestTagInput";
+import { InfoTip } from "@/components/InfoTip";
 import { AudienceBuilder, type AudienceValue, type CriterionKey } from "@/components/AudienceBuilder";
 import { VisibilityPicker } from "@/components/VisibilityPicker";
 import type { Visibility } from "@/lib/visibility";
@@ -409,11 +410,15 @@ function Create() {
           <h2 className="sr-only">Publishing tier</h2>
           {isBoost ? (
             <>
-              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Research Boost package</Label>
-              <p className="mt-1 text-[11px] text-muted-foreground">
-                Pay in cedis and CampusVerify pushes your survey to the top of the feed for the exact
-                population you pick below, until your paid response quota is filled (or {BOOST_DAYS} days pass).
-              </p>
+              <Label className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Research Boost package
+                <InfoTip label="How Research Boost works">
+                  Pay in cedis and CampusVerify pushes your survey to the top of the feed for the exact
+                  population you pick below, until your paid response quota is filled (or {BOOST_DAYS} days pass).
+                  Every package includes a guaranteed slot at the top of matching feeds, auto-closes the moment
+                  the quota is filled, and uses no credits.
+                </InfoTip>
+              </Label>
               <div className="mt-2 grid gap-3 sm:grid-cols-4">
                 {BOOST_TIERS.map((b) => {
                   const active = boostTier === b.id;
