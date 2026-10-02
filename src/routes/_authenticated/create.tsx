@@ -443,19 +443,18 @@ function Create() {
                   );
                 })}
               </div>
-              <div className="mt-3 rounded-xl border border-foreground/10 bg-card p-3 text-xs">
-                <p className="font-semibold">{selectedBoost.label} boost includes:</p>
-                <ul className="mt-1 grid gap-0.5 text-muted-foreground sm:grid-cols-2">
-                  <li>· Guaranteed slot at the top of matching feeds</li>
-                  <li>· Quota of {selectedBoost.responses} responses from your chosen population</li>
-                  <li>· Auto-closes the moment the quota is filled</li>
-                  <li>· Runs for up to {BOOST_DAYS} days · no credits used</li>
-                </ul>
-              </div>
             </>
           ) : (
             <>
-          <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Publishing tier</Label>
+          <Label className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Publishing tier
+            <InfoTip label={`What ${selected.label} includes`}>
+              <span className="mb-1 block font-semibold text-foreground">{selected.label} includes:</span>
+              <ul className="grid gap-0.5">
+                {selected.features.map((f) => <li key={f}>· {f}</li>)}
+              </ul>
+            </InfoTip>
+          </Label>
           <div className="mt-2 grid gap-3 sm:grid-cols-4">
             {TIER_ORDER.map((t) => {
               const T = TIERS[t];
