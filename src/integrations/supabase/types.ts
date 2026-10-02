@@ -979,6 +979,42 @@ export type Database = {
         }
         Relationships: []
       }
+      search_console_settings: {
+        Row: {
+          id: boolean
+          site_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          id?: boolean
+          site_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          id?: boolean
+          site_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      search_console_snapshots: {
+        Row: {
+          id: boolean
+          refreshed_at: string
+          snapshot: Json
+        }
+        Insert: {
+          id?: boolean
+          refreshed_at?: string
+          snapshot: Json
+        }
+        Update: {
+          id?: boolean
+          refreshed_at?: string
+          snapshot?: Json
+        }
+        Relationships: []
+      }
       social_links: {
         Row: {
           created_at: string
