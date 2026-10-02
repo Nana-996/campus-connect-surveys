@@ -16,6 +16,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AdminSetupRouteImport } from './routes/admin-setup'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DemoRouteImport } from './routes/demo'
+import { Route as FactsRouteImport } from './routes/facts'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as GuideRouteImport } from './routes/guide'
 import { Route as McpRouteImport } from './routes/mcp'
@@ -102,6 +103,11 @@ const AuthRoute = AuthRouteImport.update({
 const DemoRoute = DemoRouteImport.update({
   id: '/demo',
   path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FactsRoute = FactsRouteImport.update({
+  id: '/facts',
+  path: '/facts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -394,6 +400,7 @@ export interface FileRoutesByFullPath {
   '/admin-setup': typeof AdminSetupRoute
   '/auth': typeof AuthRoute
   '/demo': typeof DemoRoute
+  '/facts': typeof FactsRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/guide': typeof GuideRoute
   '/index': typeof Char91indexChar93Route
@@ -455,6 +462,7 @@ export interface FileRoutesByTo {
   '/admin-setup': typeof AdminSetupRoute
   '/auth': typeof AuthRoute
   '/demo': typeof DemoRoute
+  '/facts': typeof FactsRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/guide': typeof GuideRoute
   '/index': typeof Char91indexChar93Route
@@ -518,6 +526,7 @@ export interface FileRoutesById {
   '/admin-setup': typeof AdminSetupRoute
   '/auth': typeof AuthRoute
   '/demo': typeof DemoRoute
+  '/facts': typeof FactsRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/guide': typeof GuideRoute
   '/index': typeof Char91indexChar93Route
@@ -581,6 +590,7 @@ export interface FileRouteTypes {
     | '/admin-setup'
     | '/auth'
     | '/demo'
+    | '/facts'
     | '/forgot-password'
     | '/guide'
     | '/index'
@@ -642,6 +652,7 @@ export interface FileRouteTypes {
     | '/admin-setup'
     | '/auth'
     | '/demo'
+    | '/facts'
     | '/forgot-password'
     | '/guide'
     | '/index'
@@ -704,6 +715,7 @@ export interface FileRouteTypes {
     | '/admin-setup'
     | '/auth'
     | '/demo'
+    | '/facts'
     | '/forgot-password'
     | '/guide'
     | '/index'
@@ -767,6 +779,7 @@ export interface RootRouteChildren {
   AdminSetupRoute: typeof AdminSetupRoute
   AuthRoute: typeof AuthRoute
   DemoRoute: typeof DemoRoute
+  FactsRoute: typeof FactsRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   GuideRoute: typeof GuideRoute
   Char91indexChar93Route: typeof Char91indexChar93Route
@@ -855,6 +868,13 @@ declare module '@tanstack/react-router' {
       path: '/demo'
       fullPath: '/demo'
       preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/facts': {
+      id: '/facts'
+      path: '/facts'
+      fullPath: '/facts'
+      preLoaderRoute: typeof FactsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -1291,6 +1311,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminSetupRoute: AdminSetupRoute,
   AuthRoute: AuthRoute,
   DemoRoute: DemoRoute,
+  FactsRoute: FactsRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   GuideRoute: GuideRoute,
   Char91indexChar93Route: Char91indexChar93Route,
