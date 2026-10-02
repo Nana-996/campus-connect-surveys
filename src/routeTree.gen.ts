@@ -63,6 +63,7 @@ import { Route as AuthenticatedManageSurveyIdRouteImport } from './routes/_authe
 import { Route as LovableEmailEventsRouteImport } from './routes/lovable/email/events'
 import { Route as AuthenticatedSurveyIdAnalyzeRouteImport } from './routes/_authenticated/survey.$id.analyze'
 import { Route as AuthenticatedSurveyIdReportRouteImport } from './routes/_authenticated/survey.$id.report'
+import { Route as ApiPublicCronSearchConsoleRefreshRouteImport } from './routes/api/public/cron/search-console-refresh'
 import { Route as ApiPublicPaystackWebhookRouteImport } from './routes/api/public/paystack/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -351,6 +352,12 @@ const AuthenticatedSurveyIdReportRoute =
     path: '/survey/$id/report',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const ApiPublicCronSearchConsoleRefreshRoute =
+  ApiPublicCronSearchConsoleRefreshRouteImport.update({
+    id: '/api/public/cron/search-console-refresh',
+    path: '/api/public/cron/search-console-refresh',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicPaystackWebhookRoute =
   ApiPublicPaystackWebhookRouteImport.update({
     id: '/api/public/paystack/webhook',
@@ -428,6 +435,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
   '/survey/$id/report': typeof AuthenticatedSurveyIdReportRoute
+  '/api/public/cron/search-console-refresh': typeof ApiPublicCronSearchConsoleRefreshRoute
   '/api/public/paystack/webhook': typeof ApiPublicPaystackWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -487,6 +495,7 @@ export interface FileRoutesByTo {
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
   '/survey/$id/report': typeof AuthenticatedSurveyIdReportRoute
+  '/api/public/cron/search-console-refresh': typeof ApiPublicCronSearchConsoleRefreshRoute
   '/api/public/paystack/webhook': typeof ApiPublicPaystackWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -548,6 +557,7 @@ export interface FileRoutesById {
   '/lovable/email/events': typeof LovableEmailEventsRoute
   '/_authenticated/survey/$id/analyze': typeof AuthenticatedSurveyIdAnalyzeRoute
   '/_authenticated/survey/$id/report': typeof AuthenticatedSurveyIdReportRoute
+  '/api/public/cron/search-console-refresh': typeof ApiPublicCronSearchConsoleRefreshRoute
   '/api/public/paystack/webhook': typeof ApiPublicPaystackWebhookRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -609,6 +619,7 @@ export interface FileRouteTypes {
     | '/lovable/email/events'
     | '/survey/$id/analyze'
     | '/survey/$id/report'
+    | '/api/public/cron/search-console-refresh'
     | '/api/public/paystack/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -668,6 +679,7 @@ export interface FileRouteTypes {
     | '/lovable/email/events'
     | '/survey/$id/analyze'
     | '/survey/$id/report'
+    | '/api/public/cron/search-console-refresh'
     | '/api/public/paystack/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -728,6 +740,7 @@ export interface FileRouteTypes {
     | '/lovable/email/events'
     | '/_authenticated/survey/$id/analyze'
     | '/_authenticated/survey/$id/report'
+    | '/api/public/cron/search-console-refresh'
     | '/api/public/paystack/webhook'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -773,6 +786,7 @@ export interface RootRouteChildren {
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   LovableEmailEventsRoute: typeof LovableEmailEventsRoute
+  ApiPublicCronSearchConsoleRefreshRoute: typeof ApiPublicCronSearchConsoleRefreshRoute
   ApiPublicPaystackWebhookRoute: typeof ApiPublicPaystackWebhookRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -1159,6 +1173,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSurveyIdReportRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/api/public/cron/search-console-refresh': {
+      id: '/api/public/cron/search-console-refresh'
+      path: '/api/public/cron/search-console-refresh'
+      fullPath: '/api/public/cron/search-console-refresh'
+      preLoaderRoute: typeof ApiPublicCronSearchConsoleRefreshRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/paystack/webhook': {
       id: '/api/public/paystack/webhook'
       path: '/api/public/paystack/webhook'
@@ -1281,6 +1302,8 @@ const rootRouteChildren: RootRouteChildren = {
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   LovableEmailEventsRoute: LovableEmailEventsRoute,
+  ApiPublicCronSearchConsoleRefreshRoute:
+    ApiPublicCronSearchConsoleRefreshRoute,
   ApiPublicPaystackWebhookRoute: ApiPublicPaystackWebhookRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
