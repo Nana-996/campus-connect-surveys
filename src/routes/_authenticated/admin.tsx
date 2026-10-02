@@ -109,11 +109,18 @@ function Admin() {
             Manage school partnerships, support users, and handle platform moderation. For numbers and trends, open Analytics.
           </p>
         </div>
-        <Button asChild variant="outline" size="sm">
-          <Link to="/admin-analytics">
-            <BarChart3 className="mr-2 h-4 w-4" /> Analytics
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button asChild variant="outline" size="sm">
+            <Link to="/admin-search">
+              <Search className="mr-2 h-4 w-4" /> Search
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="sm">
+            <Link to="/admin-analytics">
+              <BarChart3 className="mr-2 h-4 w-4" /> Analytics
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <SectionNav
