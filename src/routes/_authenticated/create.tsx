@@ -562,7 +562,12 @@ function Create() {
               </div>
             </div>
             <div className="mt-4">
-              <Label htmlFor="speed-trap" className="text-xs">Speed trap · minimum seconds before submit</Label>
+              <Label htmlFor="speed-trap" className="inline-flex items-center gap-1.5 text-xs">
+                Speed trap · minimum seconds before submit
+                <InfoTip label="About the speed trap">
+                  Anti-farming: responses submitted faster than this earn no credits and are silently flagged for review. Respondents don't see the threshold. Default 15s; set 0 to disable.
+                </InfoTip>
+              </Label>
               <Input
                 id="speed-trap"
                 type="number"
@@ -572,9 +577,6 @@ function Create() {
                 onChange={(e) => setMinResponseSeconds(e.target.value)}
                 placeholder="15"
               />
-              <p className="mt-1 text-[11px] text-muted-foreground">
-                Anti-farming: responses submitted faster than this earn no credits and are silently flagged for review. Respondents don't see the threshold. Default 15s; set 0 to disable.
-              </p>
             </div>
             <div className="mt-4 rounded-2xl border border-foreground/15 bg-background/60 p-3">
               <label htmlFor="allow-response-download" className="flex cursor-pointer items-start gap-3">
@@ -586,9 +588,11 @@ function Create() {
                   onChange={(e) => setAllowResponseDownload(e.target.checked)}
                 />
                 <span>
-                  <span className="text-sm font-semibold">Allow respondents to download a copy of their response</span>
-                  <span className="mt-1 block text-[11px] text-muted-foreground">
-                    After submitting, each respondent can download a branded PDF of their own answers only. Off by default.
+                  <span className="inline-flex items-center gap-1.5 text-sm font-semibold">
+                    Allow respondents to download a copy of their response
+                    <InfoTip label="About response downloads">
+                      After submitting, each respondent can download a branded PDF of their own answers only. Off by default.
+                    </InfoTip>
                   </span>
                 </span>
               </label>
