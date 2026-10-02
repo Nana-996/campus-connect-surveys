@@ -43,6 +43,15 @@ export const inviteSurveyTracker = createServerFn({ method: "POST" })
     const ownerEmail = await emailOf(supabaseAdmin, survey.creator_id);
     if (data.email === ownerEmail) throw new Error("The survey owner already has access.");
 
+    // Invitations may only go to registered, email-confirmed accounts — never to
+    // arbitrary addresses — so the feature can't be used to send unsolicited mail.
+    const { data: recipientId } = await supabaseAdmin.rpc("registered_user_id_by_email" as never, {
+      _email: data.email,
+    } as never);
+    if (!recipientId) {
+      throw new Error("That email address isn't registered on CampusVerify yet. Ask them to sign up and confirm their email first.");
+    }
+
     // Revoke older pending invites for the same email, then create a fresh one.
     await supabaseAdmin
       .from("survey_access_invites" as any)

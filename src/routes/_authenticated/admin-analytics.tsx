@@ -151,7 +151,14 @@ function downloadCsv(data: AdminAnalyticsData, periodLabel: string) {
     ["Revenue source", "GHS", "Transactions"], ...data.revenue.bySource.map((r) => [r.label, r.ghs, r.transactions]), [],
     ["Credit reason", "Issued", "Spent"], ...data.credits.byReason.map((r) => [r.label, r.issued, r.spent]),
   ];
-  const csv = rows.map((row) => row.map((cell) => `"${String(cell ?? "").replaceAll('"', '""')}"`).join(",")).join("\n");
+  // Neutralize spreadsheet formula characters so user-supplied values (e.g. school
+  // names from signup) can never execute as formulas when the CSV is opened.
+  const safeCell = (cell: string | number | boolean | null) => {
+    let s = String(cell ?? "");
+    if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
+    return `"${s.replaceAll('"', '""')}"`;
+  };
+  const csv = rows.map((row) => row.map(safeCell).join(",")).join("\n");
   const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
   const link = document.createElement("a");
   link.href = url;

@@ -2114,6 +2114,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      registered_user_id_by_email: { Args: { _email: string }; Returns: string }
       request_credit_topup: {
         Args: { _amount: number; _reason: string }
         Returns: string

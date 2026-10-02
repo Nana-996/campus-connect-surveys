@@ -84,9 +84,8 @@ function BuyCredits() {
     if (usdAmount <= 0) return;
     setLoadingId(bundleId);
     try {
-      const amountGhs = forex.toGhs(usdAmount * factor);
       const { authorizationUrl } = await initCheckout({
-        data: { bundleId, amountGhs, originUrl: window.location.origin, promoCode: promo?.code },
+        data: { bundleId, originUrl: window.location.origin, promoCode: promo?.code },
       });
       window.location.href = authorizationUrl;
     } catch (e) {
