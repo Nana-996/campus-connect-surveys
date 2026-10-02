@@ -7,3 +7,4 @@
 ## Search Console integration
 - Search visibility data lives in `search_console_settings`/`search_console_snapshots` (service-role only); all Google calls go through the connector gateway in `src/lib/search-console.functions.ts`, owner-gated via `isAppOwnerClaims`, with the runtime list-then-select property workflow — never hardcode a GSC property.
 - The daily refresh is pg_cron job `search-console-refresh` POSTing to `/api/public/cron/search-console-refresh` with the `x-cron-secret` header stored in `cron_config`; the secret is re-synced whenever the owner opens the status function.
+- Public entity data is canonicalized in root Organization/WebSite JSON-LD and `/facts` SoftwareApplication schema; `llms.txt` points machine readers to evidence pages so product claims stay consistent.

@@ -83,6 +83,7 @@ function Landing() {
         <nav className="hidden items-center gap-6 text-xs font-semibold uppercase tracking-wider text-muted-foreground sm:flex">
           <a href="#how-it-works" className="hover:text-foreground">How it works</a>
           <Link to="/about" className="hover:text-foreground">About</Link>
+          <Link to="/facts" className="hover:text-foreground">Facts</Link>
           <a href="#faq" className="hover:text-foreground">FAQ</a>
           <Link to="/schools" className="hover:text-foreground">Partner</Link>
           <Link to="/donate" className="hover:text-foreground">Support</Link>
@@ -131,6 +132,9 @@ function Landing() {
                 </SheetClose>
                 <SheetClose asChild>
                   <Link to="/about" className="py-2 hover:text-foreground">About</Link>
+                </SheetClose>
+                <SheetClose asChild>
+                  <Link to="/facts" className="py-2 hover:text-foreground">Facts</Link>
                 </SheetClose>
                 <SheetClose asChild>
                   <a href="#faq" className="py-2 hover:text-foreground">FAQ</a>
@@ -400,7 +404,8 @@ function Landing() {
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Product</p>
             <ul className="mt-3 space-y-2 text-sm">
               <li><a href="#how-it-works" className="hover:text-primary">How it works</a></li>
-              <li><a href="#about" className="hover:text-primary">About</a></li>
+              <li><Link to="/about" className="hover:text-primary">About</Link></li>
+              <li><Link to="/facts" className="hover:text-primary">Platform facts</Link></li>
               <li><a href="#faq" className="hover:text-primary">FAQ</a></li>
               <li><Link to="/signup" className="hover:text-primary">Sign up</Link></li>
               <li><Link to="/auth" className="hover:text-primary">Log in</Link></li>

@@ -51,3 +51,10 @@
 - [x] Add a daily cron route and schedule for automatic snapshot refreshes.
 - [x] Build the owner-only Search visibility page and link it from the admin page.
 - [ ] Owner opens /admin-search and presses "Refresh now" to pull the first snapshot.
+
+## AI discovery — 2026-10-02
+- [x] Publish a canonical CampusVerify facts page with supported product and organization claims.
+- [x] Expand llms.txt with full URLs, citation guidance, product boundaries, and primary sources.
+- [x] Enrich Organization, WebSite, SoftwareApplication, and FAQ structured data.
+- [x] Add the facts page to public navigation and sitemap discovery.
+- [x] Verify the page, metadata, structured data, sitemap, and mobile layout.

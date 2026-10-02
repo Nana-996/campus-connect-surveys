@@ -76,8 +76,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:title", content: "CampusVerify — Verified research and surveys" },
       { property: "og:description", content: "A survey platform for students, professional researchers, organisations, and community respondents." },
       { name: "twitter:description", content: "A survey platform for students, professional researchers, organisations, and community respondents." },
-      { property: "og:image", content: "https://campus-verify.live/logo-mark.png" },
-      { name: "twitter:image", content: "https://campus-verify.live/logo-mark.png" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "CampusVerify" },
@@ -101,9 +99,29 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Organization",
+          "@id": "https://campus-verify.live/#organization",
           name: "CampusVerify",
           url: "https://campus-verify.live",
-          logo: "https://campus-verify.live/favicon.png",
+          logo: {
+            "@type": "ImageObject",
+            url: "https://campus-verify.live/logo-mark.png",
+          },
+          description: "A credit-powered survey platform for academic, professional, organisational, and community research.",
+          parentOrganization: {
+            "@type": "Organization",
+            name: "Vibe Tribe Organisation",
+            address: {
+              "@type": "PostalAddress",
+              addressCountry: "GH",
+            },
+          },
+          areaServed: "Worldwide",
+          contactPoint: {
+            "@type": "ContactPoint",
+            contactType: "customer support",
+            email: "campusverify996@gmail.com",
+            availableLanguage: "English",
+          },
         }),
       },
       {
@@ -111,8 +129,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "WebSite",
+          "@id": "https://campus-verify.live/#website",
           name: "CampusVerify",
           url: "https://campus-verify.live",
+          description: "Verified research surveys for students, researchers, organisations, and community respondents.",
+          publisher: { "@id": "https://campus-verify.live/#organization" },
+          inLanguage: "en",
         }),
       },
     ],
