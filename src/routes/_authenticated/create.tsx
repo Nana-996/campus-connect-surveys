@@ -483,18 +483,9 @@ function Create() {
                   </div>
                   <p className="mt-0.5 text-[11px] opacity-80">{T.tagline}</p>
                   <p className="mt-3 text-xs font-bold">{isGeneral ? T.cost * 2 : T.cost} credits</p>
-                  <ul className="mt-2 space-y-0.5 text-[11px] opacity-80">
-                    {T.features.slice(0, 2).map((f) => <li key={f}>· {f}</li>)}
-                  </ul>
                 </button>
               );
             })}
-          </div>
-          <div className="mt-3 rounded-xl bg-card border border-foreground/10 p-3 text-xs">
-            <p className="font-semibold">{selected.label} includes:</p>
-            <ul className="mt-1 grid gap-0.5 sm:grid-cols-2 text-muted-foreground">
-              {selected.features.map((f) => <li key={f}>· {f}</li>)}
-            </ul>
           </div>
             </>
           )}
@@ -536,9 +527,11 @@ function Create() {
 
 
           <div className="border-t border-foreground/10 pt-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Limits (optional)</p>
-            <p className="mt-1 text-[11px] text-muted-foreground">
-              Auto-closes when either limit is reached. Ultimate cap: 6 months from publish.
+            <p className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Limits (optional)
+              <InfoTip label="How limits work">
+                The survey auto-closes when either limit is reached. Ultimate cap: 6 months from publish.
+              </InfoTip>
             </p>
             <div className="mt-3 grid grid-cols-2 gap-3">
               {!isBoost && (
