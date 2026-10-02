@@ -652,9 +652,6 @@ function Create() {
                 {bonusTotal > 0 ? `+${bonusTotal} bonus credits` : "no extra credits"}
               </span>
             </div>
-            <p className="mt-2 text-[11px] text-muted-foreground">
-              Max +3 bonus credits per response. This reward pool ({respondentBonus} × {goalNum} response goal = {bonusTotal} credits) is funded by CampusVerify — nothing extra is deducted from your balance.
-            </p>
 
           </div>
         )}
