@@ -4,13 +4,15 @@ import { LeadForm } from "@/components/LeadForm";
 export const Route = createFileRoute("/schools")({
   head: () => ({
     meta: [
-      { title: "Bring CampusVerify to your school — CampusVerify" },
-      { name: "description", content: "Register your school's interest in CampusVerify: verified campus surveys, student credits and a school admin portal." },
-      { property: "og:title", content: "Bring CampusVerify to your school" },
+      { title: "Partner your school with CampusVerify — Verified campus surveys" },
+      { name: "description", content: "Register your school for CampusVerify: verified student respondents for campus research, student survey credits, and a school admin portal with response tracking." },
+      { property: "og:title", content: "Partner your school with CampusVerify" },
       { property: "og:description", content: "Register your school's interest in verified campus research on CampusVerify." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://campus-verify.live/schools" },
       { name: "twitter:card", content: "summary" },
     ],
+    links: [{ rel: "canonical", href: "https://campus-verify.live/schools" }],
   }),
   component: SchoolsPage,
 });
