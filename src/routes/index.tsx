@@ -187,21 +187,21 @@ function Landing() {
               </Link>
             ) : (
               <>
-                <Link to="/signup">
+                <Link to="/pricing">
                   <Button size="lg" className="h-12 rounded-full bg-primary px-7 text-base">
-                    Get started free <ArrowUpRight className="ml-1 h-4 w-4" />
+                    Get responses for your study <ArrowUpRight className="ml-1 h-4 w-4" />
                   </Button>
                 </Link>
-                <Link to="/auth">
+                <Link to="/signup">
                   <Button size="lg" variant="outline" className="h-12 rounded-full border-foreground/30 px-7 text-base">
-                    I already belong here
+                    Join free to answer surveys
                   </Button>
                 </Link>
               </>
             )}
           </div>
-          <p className="mt-4 text-xs text-muted-foreground">
-            Students get 10 permanent credits, partner-school students get 50, and General/Researcher accounts get 5.
+          <p className="mt-4 max-w-xl text-xs text-muted-foreground">
+            Researchers: Research Boost delivers 50 targeted responses from GHS 10, up to 500 for GHS 50, aimed at the audience you choose.
           </p>
         </section>
 

@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      conversion_events: {
+        Row: {
+          created_at: string
+          detail: string | null
+          event: string
+          id: string
+          source: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          detail?: string | null
+          event: string
+          id?: string
+          source?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          detail?: string | null
+          event?: string
+          id?: string
+          source?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       credit_ledger: {
         Row: {
           created_at: string
@@ -319,6 +346,7 @@ export type Database = {
       }
       leads: {
         Row: {
+          contact_preference: string | null
           country: string | null
           created_at: string
           email: string
@@ -330,11 +358,13 @@ export type Database = {
           organization: string | null
           phone: string | null
           role_title: string | null
+          sample_size: string | null
           status: string
           student_count: string | null
           updated_at: string
         }
         Insert: {
+          contact_preference?: string | null
           country?: string | null
           created_at?: string
           email: string
@@ -346,11 +376,13 @@ export type Database = {
           organization?: string | null
           phone?: string | null
           role_title?: string | null
+          sample_size?: string | null
           status?: string
           student_count?: string | null
           updated_at?: string
         }
         Update: {
+          contact_preference?: string | null
           country?: string | null
           created_at?: string
           email?: string
@@ -362,6 +394,7 @@ export type Database = {
           organization?: string | null
           phone?: string | null
           role_title?: string | null
+          sample_size?: string | null
           status?: string
           student_count?: string | null
           updated_at?: string

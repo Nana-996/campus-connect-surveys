@@ -115,6 +115,9 @@ function PricingPage() {
                   <li key={f} className="flex items-start gap-1.5"><Check className="mt-0.5 h-3 w-3 text-primary" /> {f}</li>
                 ))}
               </ul>
+              <Button asChild className="mt-5 w-full rounded-full">
+                <a href={profile ? "/buy-credits" : "/auth?as=general&next=%2Fbuy-credits"}>Buy credits</a>
+              </Button>
             </div>
           );
         })}
