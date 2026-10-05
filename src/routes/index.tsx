@@ -106,6 +106,19 @@ function Landing() {
             )}
           </div>
 
+          {/* Mobile auth shortcut — keeps Log in visible without opening the menu */}
+          <div className="flex items-center gap-1 sm:hidden">
+            {isSignedIn ? (
+              <Link to="/feed">
+                <Button size="sm" className="rounded-full bg-primary px-4">Feed</Button>
+              </Link>
+            ) : (
+              <Link to="/auth">
+                <Button size="sm" variant="outline" className="rounded-full px-4">Log in</Button>
+              </Link>
+            )}
+          </div>
+
           {/* Mobile hamburger */}
           <Sheet>
             <SheetTrigger asChild>
