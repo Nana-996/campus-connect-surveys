@@ -55,6 +55,7 @@ import { Route as DonateIndexRouteImport } from './routes/donate.index'
 import { Route as DonateThankYouRouteImport } from './routes/donate.thank-you'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as JoinSchoolSlugRouteImport } from './routes/join.$schoolSlug'
+import { Route as PSlugRouteImport } from './routes/p.$slug'
 import { Route as RTokenRouteImport } from './routes/r.$token'
 import { Route as ReviewTokenRouteImport } from './routes/review.$token'
 import { Route as SurveyIdRouteImport } from './routes/survey.$id'
@@ -311,6 +312,11 @@ const JoinSchoolSlugRoute = JoinSchoolSlugRouteImport.update({
   path: '/join/$schoolSlug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PSlugRoute = PSlugRouteImport.update({
+  id: '/p/$slug',
+  path: '/p/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RTokenRoute = RTokenRouteImport.update({
   id: '/r/$token',
   path: '/r/$token',
@@ -439,6 +445,7 @@ export interface FileRoutesByFullPath {
   '/donate/thank-you': typeof DonateThankYouRoute
   '/invite/$token': typeof InviteTokenRoute
   '/join/$schoolSlug': typeof JoinSchoolSlugRoute
+  '/p/$slug': typeof PSlugRoute
   '/r/$token': typeof RTokenRoute
   '/review/$token': typeof ReviewTokenRoute
   '/survey/$id': typeof SurveyIdRoute
@@ -501,6 +508,7 @@ export interface FileRoutesByTo {
   '/donate/thank-you': typeof DonateThankYouRoute
   '/invite/$token': typeof InviteTokenRoute
   '/join/$schoolSlug': typeof JoinSchoolSlugRoute
+  '/p/$slug': typeof PSlugRoute
   '/r/$token': typeof RTokenRoute
   '/review/$token': typeof ReviewTokenRoute
   '/survey/$id': typeof SurveyIdRoute
@@ -565,6 +573,7 @@ export interface FileRoutesById {
   '/donate/thank-you': typeof DonateThankYouRoute
   '/invite/$token': typeof InviteTokenRoute
   '/join/$schoolSlug': typeof JoinSchoolSlugRoute
+  '/p/$slug': typeof PSlugRoute
   '/r/$token': typeof RTokenRoute
   '/review/$token': typeof ReviewTokenRoute
   '/survey/$id': typeof SurveyIdRoute
@@ -629,6 +638,7 @@ export interface FileRouteTypes {
     | '/donate/thank-you'
     | '/invite/$token'
     | '/join/$schoolSlug'
+    | '/p/$slug'
     | '/r/$token'
     | '/review/$token'
     | '/survey/$id'
@@ -691,6 +701,7 @@ export interface FileRouteTypes {
     | '/donate/thank-you'
     | '/invite/$token'
     | '/join/$schoolSlug'
+    | '/p/$slug'
     | '/r/$token'
     | '/review/$token'
     | '/survey/$id'
@@ -754,6 +765,7 @@ export interface FileRouteTypes {
     | '/donate/thank-you'
     | '/invite/$token'
     | '/join/$schoolSlug'
+    | '/p/$slug'
     | '/r/$token'
     | '/review/$token'
     | '/survey/$id'
@@ -804,6 +816,7 @@ export interface RootRouteChildren {
   DonateThankYouRoute: typeof DonateThankYouRoute
   InviteTokenRoute: typeof InviteTokenRoute
   JoinSchoolSlugRoute: typeof JoinSchoolSlugRoute
+  PSlugRoute: typeof PSlugRoute
   RTokenRoute: typeof RTokenRoute
   ReviewTokenRoute: typeof ReviewTokenRoute
   SurveyIdRoute: typeof SurveyIdRoute
@@ -1143,6 +1156,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JoinSchoolSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/p/$slug': {
+      id: '/p/$slug'
+      path: '/p/$slug'
+      fullPath: '/p/$slug'
+      preLoaderRoute: typeof PSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/r/$token': {
       id: '/r/$token'
       path: '/r/$token'
@@ -1337,6 +1357,7 @@ const rootRouteChildren: RootRouteChildren = {
   DonateThankYouRoute: DonateThankYouRoute,
   InviteTokenRoute: InviteTokenRoute,
   JoinSchoolSlugRoute: JoinSchoolSlugRoute,
+  PSlugRoute: PSlugRoute,
   RTokenRoute: RTokenRoute,
   ReviewTokenRoute: ReviewTokenRoute,
   SurveyIdRoute: SurveyIdRoute,
