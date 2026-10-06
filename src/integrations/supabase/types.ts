@@ -437,6 +437,77 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_referrals: {
+        Row: {
+          created_at: string
+          partner_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          partner_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          partner_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_referrals_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partners: {
+        Row: {
+          clicks: number
+          contact: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          last_paid_at: string | null
+          milestones_paid: number
+          name: string
+          partner_email: string
+          reward_note: string | null
+          slug: string
+          target_paying: number
+        }
+        Insert: {
+          clicks?: number
+          contact?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_paid_at?: string | null
+          milestones_paid?: number
+          name: string
+          partner_email: string
+          reward_note?: string | null
+          slug: string
+          target_paying?: number
+        }
+        Update: {
+          clicks?: number
+          contact?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_paid_at?: string | null
+          milestones_paid?: number
+          name?: string
+          partner_email?: string
+          reward_note?: string | null
+          slug?: string
+          target_paying?: number
+        }
+        Relationships: []
+      }
       payment_transactions: {
         Row: {
           amount_minor: number
@@ -1890,6 +1961,7 @@ export type Database = {
         Args: { _domain: string; _typed: string }
         Returns: string
       }
+      claim_partner_referral: { Args: { _slug: string }; Returns: string }
       claim_referral: { Args: { _code: string }; Returns: Json }
       claim_school_admin: { Args: never; Returns: number }
       credit_paystack_purchase: {
@@ -2141,6 +2213,8 @@ export type Database = {
       my_referral_code: { Args: never; Returns: string }
       my_school_onboarded: { Args: never; Returns: boolean }
       new_referral_code: { Args: never; Returns: string }
+      partner_stats: { Args: { _partner_id: string }; Returns: Json }
+      record_partner_click: { Args: { _slug: string }; Returns: boolean }
       redeem_promo_code: { Args: { _code: string }; Returns: Json }
       refund_purchased_credits: {
         Args: {

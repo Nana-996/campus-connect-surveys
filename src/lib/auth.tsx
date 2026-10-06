@@ -3,6 +3,7 @@ import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { markActive, clearActivity, isSessionStale, startSession, getLastLogin } from "@/lib/session-activity";
 import { clearStoredReferralCode, storedReferralCode } from "@/lib/referral";
+import { clearPartnerSlug, storedPartnerSlug } from "@/lib/partner-ref";
 
 
 export type Profile = {
@@ -177,6 +178,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!error && result?.reason !== "no_profile") clearStoredReferralCode();
     })();
   }, [session?.user?.id, profile?.id]);
+
+  // Attribute a partner link visit to the new account (server allows only
+  // recently created accounts, once).
+  useEffect(() => {
+    if (!session?.user?.id) return;
+    const slug = storedPartnerSlug();
+    if (!slug) return;
+    void supabase.rpc("claim_partner_referral" as never, { _slug: slug } as never).then(({ error }) => {
+      if (!error) clearPartnerSlug();
+    });
+  }, [session?.user?.id]);
 
 
   useEffect(() => {

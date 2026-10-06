@@ -34,6 +34,7 @@ import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin-analytics'
+import { Route as AuthenticatedAdminPartnersRouteImport } from './routes/_authenticated/admin-partners'
 import { Route as AuthenticatedAdminSearchRouteImport } from './routes/_authenticated/admin-search'
 import { Route as AuthenticatedBuyCreditsRouteImport } from './routes/_authenticated/buy-credits'
 import { Route as AuthenticatedCreateRouteImport } from './routes/_authenticated/create'
@@ -41,6 +42,7 @@ import { Route as AuthenticatedFacultyRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedFeedRouteImport } from './routes/_authenticated/feed'
 import { Route as AuthenticatedManageRouteImport } from './routes/_authenticated/manage'
 import { Route as AuthenticatedMySurveysRouteImport } from './routes/_authenticated/my-surveys'
+import { Route as AuthenticatedPartnerRouteImport } from './routes/_authenticated/partner'
 import { Route as AuthenticatedPollsRouteImport } from './routes/_authenticated/polls'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedSchoolAdminRouteImport } from './routes/_authenticated/school-admin'
@@ -55,6 +57,7 @@ import { Route as DonateIndexRouteImport } from './routes/donate.index'
 import { Route as DonateThankYouRouteImport } from './routes/donate.thank-you'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as JoinSchoolSlugRouteImport } from './routes/join.$schoolSlug'
+import { Route as PSlugRouteImport } from './routes/p.$slug'
 import { Route as RTokenRouteImport } from './routes/r.$token'
 import { Route as ReviewTokenRouteImport } from './routes/review.$token'
 import { Route as SurveyIdRouteImport } from './routes/survey.$id'
@@ -198,6 +201,12 @@ const AuthenticatedAdminAnalyticsRoute =
     path: '/admin-analytics',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedAdminPartnersRoute =
+  AuthenticatedAdminPartnersRouteImport.update({
+    id: '/admin-partners',
+    path: '/admin-partners',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAdminSearchRoute =
   AuthenticatedAdminSearchRouteImport.update({
     id: '/admin-search',
@@ -232,6 +241,11 @@ const AuthenticatedManageRoute = AuthenticatedManageRouteImport.update({
 const AuthenticatedMySurveysRoute = AuthenticatedMySurveysRouteImport.update({
   id: '/my-surveys',
   path: '/my-surveys',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedPartnerRoute = AuthenticatedPartnerRouteImport.update({
+  id: '/partner',
+  path: '/partner',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedPollsRoute = AuthenticatedPollsRouteImport.update({
@@ -309,6 +323,11 @@ const InviteTokenRoute = InviteTokenRouteImport.update({
 const JoinSchoolSlugRoute = JoinSchoolSlugRouteImport.update({
   id: '/join/$schoolSlug',
   path: '/join/$schoolSlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PSlugRoute = PSlugRouteImport.update({
+  id: '/p/$slug',
+  path: '/p/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RTokenRoute = RTokenRouteImport.update({
@@ -419,6 +438,7 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/admin-analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin-partners': typeof AuthenticatedAdminPartnersRoute
   '/admin-search': typeof AuthenticatedAdminSearchRoute
   '/buy-credits': typeof AuthenticatedBuyCreditsRoute
   '/create': typeof AuthenticatedCreateRoute
@@ -426,6 +446,7 @@ export interface FileRoutesByFullPath {
   '/feed': typeof AuthenticatedFeedRoute
   '/manage': typeof AuthenticatedManageRouteWithChildren
   '/my-surveys': typeof AuthenticatedMySurveysRoute
+  '/partner': typeof AuthenticatedPartnerRoute
   '/polls': typeof AuthenticatedPollsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/school-admin': typeof AuthenticatedSchoolAdminRoute
@@ -439,6 +460,7 @@ export interface FileRoutesByFullPath {
   '/donate/thank-you': typeof DonateThankYouRoute
   '/invite/$token': typeof InviteTokenRoute
   '/join/$schoolSlug': typeof JoinSchoolSlugRoute
+  '/p/$slug': typeof PSlugRoute
   '/r/$token': typeof RTokenRoute
   '/review/$token': typeof ReviewTokenRoute
   '/survey/$id': typeof SurveyIdRoute
@@ -481,6 +503,7 @@ export interface FileRoutesByTo {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/admin-analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin-partners': typeof AuthenticatedAdminPartnersRoute
   '/admin-search': typeof AuthenticatedAdminSearchRoute
   '/buy-credits': typeof AuthenticatedBuyCreditsRoute
   '/create': typeof AuthenticatedCreateRoute
@@ -488,6 +511,7 @@ export interface FileRoutesByTo {
   '/feed': typeof AuthenticatedFeedRoute
   '/manage': typeof AuthenticatedManageRouteWithChildren
   '/my-surveys': typeof AuthenticatedMySurveysRoute
+  '/partner': typeof AuthenticatedPartnerRoute
   '/polls': typeof AuthenticatedPollsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/school-admin': typeof AuthenticatedSchoolAdminRoute
@@ -501,6 +525,7 @@ export interface FileRoutesByTo {
   '/donate/thank-you': typeof DonateThankYouRoute
   '/invite/$token': typeof InviteTokenRoute
   '/join/$schoolSlug': typeof JoinSchoolSlugRoute
+  '/p/$slug': typeof PSlugRoute
   '/r/$token': typeof RTokenRoute
   '/review/$token': typeof ReviewTokenRoute
   '/survey/$id': typeof SurveyIdRoute
@@ -545,6 +570,7 @@ export interface FileRoutesById {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/admin-analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/_authenticated/admin-partners': typeof AuthenticatedAdminPartnersRoute
   '/_authenticated/admin-search': typeof AuthenticatedAdminSearchRoute
   '/_authenticated/buy-credits': typeof AuthenticatedBuyCreditsRoute
   '/_authenticated/create': typeof AuthenticatedCreateRoute
@@ -552,6 +578,7 @@ export interface FileRoutesById {
   '/_authenticated/feed': typeof AuthenticatedFeedRoute
   '/_authenticated/manage': typeof AuthenticatedManageRouteWithChildren
   '/_authenticated/my-surveys': typeof AuthenticatedMySurveysRoute
+  '/_authenticated/partner': typeof AuthenticatedPartnerRoute
   '/_authenticated/polls': typeof AuthenticatedPollsRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/school-admin': typeof AuthenticatedSchoolAdminRoute
@@ -565,6 +592,7 @@ export interface FileRoutesById {
   '/donate/thank-you': typeof DonateThankYouRoute
   '/invite/$token': typeof InviteTokenRoute
   '/join/$schoolSlug': typeof JoinSchoolSlugRoute
+  '/p/$slug': typeof PSlugRoute
   '/r/$token': typeof RTokenRoute
   '/review/$token': typeof ReviewTokenRoute
   '/survey/$id': typeof SurveyIdRoute
@@ -609,6 +637,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin'
     | '/admin-analytics'
+    | '/admin-partners'
     | '/admin-search'
     | '/buy-credits'
     | '/create'
@@ -616,6 +645,7 @@ export interface FileRouteTypes {
     | '/feed'
     | '/manage'
     | '/my-surveys'
+    | '/partner'
     | '/polls'
     | '/profile'
     | '/school-admin'
@@ -629,6 +659,7 @@ export interface FileRouteTypes {
     | '/donate/thank-you'
     | '/invite/$token'
     | '/join/$schoolSlug'
+    | '/p/$slug'
     | '/r/$token'
     | '/review/$token'
     | '/survey/$id'
@@ -671,6 +702,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin'
     | '/admin-analytics'
+    | '/admin-partners'
     | '/admin-search'
     | '/buy-credits'
     | '/create'
@@ -678,6 +710,7 @@ export interface FileRouteTypes {
     | '/feed'
     | '/manage'
     | '/my-surveys'
+    | '/partner'
     | '/polls'
     | '/profile'
     | '/school-admin'
@@ -691,6 +724,7 @@ export interface FileRouteTypes {
     | '/donate/thank-you'
     | '/invite/$token'
     | '/join/$schoolSlug'
+    | '/p/$slug'
     | '/r/$token'
     | '/review/$token'
     | '/survey/$id'
@@ -734,6 +768,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/_authenticated/admin'
     | '/_authenticated/admin-analytics'
+    | '/_authenticated/admin-partners'
     | '/_authenticated/admin-search'
     | '/_authenticated/buy-credits'
     | '/_authenticated/create'
@@ -741,6 +776,7 @@ export interface FileRouteTypes {
     | '/_authenticated/feed'
     | '/_authenticated/manage'
     | '/_authenticated/my-surveys'
+    | '/_authenticated/partner'
     | '/_authenticated/polls'
     | '/_authenticated/profile'
     | '/_authenticated/school-admin'
@@ -754,6 +790,7 @@ export interface FileRouteTypes {
     | '/donate/thank-you'
     | '/invite/$token'
     | '/join/$schoolSlug'
+    | '/p/$slug'
     | '/r/$token'
     | '/review/$token'
     | '/survey/$id'
@@ -804,6 +841,7 @@ export interface RootRouteChildren {
   DonateThankYouRoute: typeof DonateThankYouRoute
   InviteTokenRoute: typeof InviteTokenRoute
   JoinSchoolSlugRoute: typeof JoinSchoolSlugRoute
+  PSlugRoute: typeof PSlugRoute
   RTokenRoute: typeof RTokenRoute
   ReviewTokenRoute: typeof ReviewTokenRoute
   SurveyIdRoute: typeof SurveyIdRoute
@@ -996,6 +1034,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/admin-partners': {
+      id: '/_authenticated/admin-partners'
+      path: '/admin-partners'
+      fullPath: '/admin-partners'
+      preLoaderRoute: typeof AuthenticatedAdminPartnersRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin-search': {
       id: '/_authenticated/admin-search'
       path: '/admin-search'
@@ -1043,6 +1088,13 @@ declare module '@tanstack/react-router' {
       path: '/my-surveys'
       fullPath: '/my-surveys'
       preLoaderRoute: typeof AuthenticatedMySurveysRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/partner': {
+      id: '/_authenticated/partner'
+      path: '/partner'
+      fullPath: '/partner'
+      preLoaderRoute: typeof AuthenticatedPartnerRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/polls': {
@@ -1141,6 +1193,13 @@ declare module '@tanstack/react-router' {
       path: '/join/$schoolSlug'
       fullPath: '/join/$schoolSlug'
       preLoaderRoute: typeof JoinSchoolSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/$slug': {
+      id: '/p/$slug'
+      path: '/p/$slug'
+      fullPath: '/p/$slug'
+      preLoaderRoute: typeof PSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/r/$token': {
@@ -1265,6 +1324,7 @@ const AuthenticatedManageRouteWithChildren =
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
+  AuthenticatedAdminPartnersRoute: typeof AuthenticatedAdminPartnersRoute
   AuthenticatedAdminSearchRoute: typeof AuthenticatedAdminSearchRoute
   AuthenticatedBuyCreditsRoute: typeof AuthenticatedBuyCreditsRoute
   AuthenticatedCreateRoute: typeof AuthenticatedCreateRoute
@@ -1272,6 +1332,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedFeedRoute: typeof AuthenticatedFeedRoute
   AuthenticatedManageRoute: typeof AuthenticatedManageRouteWithChildren
   AuthenticatedMySurveysRoute: typeof AuthenticatedMySurveysRoute
+  AuthenticatedPartnerRoute: typeof AuthenticatedPartnerRoute
   AuthenticatedPollsRoute: typeof AuthenticatedPollsRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedSchoolAdminRoute: typeof AuthenticatedSchoolAdminRoute
@@ -1284,6 +1345,7 @@ interface AuthenticatedRouteChildren {
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
+  AuthenticatedAdminPartnersRoute: AuthenticatedAdminPartnersRoute,
   AuthenticatedAdminSearchRoute: AuthenticatedAdminSearchRoute,
   AuthenticatedBuyCreditsRoute: AuthenticatedBuyCreditsRoute,
   AuthenticatedCreateRoute: AuthenticatedCreateRoute,
@@ -1291,6 +1353,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedFeedRoute: AuthenticatedFeedRoute,
   AuthenticatedManageRoute: AuthenticatedManageRouteWithChildren,
   AuthenticatedMySurveysRoute: AuthenticatedMySurveysRoute,
+  AuthenticatedPartnerRoute: AuthenticatedPartnerRoute,
   AuthenticatedPollsRoute: AuthenticatedPollsRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedSchoolAdminRoute: AuthenticatedSchoolAdminRoute,
@@ -1337,6 +1400,7 @@ const rootRouteChildren: RootRouteChildren = {
   DonateThankYouRoute: DonateThankYouRoute,
   InviteTokenRoute: InviteTokenRoute,
   JoinSchoolSlugRoute: JoinSchoolSlugRoute,
+  PSlugRoute: PSlugRoute,
   RTokenRoute: RTokenRoute,
   ReviewTokenRoute: ReviewTokenRoute,
   SurveyIdRoute: SurveyIdRoute,
