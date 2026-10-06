@@ -116,6 +116,9 @@ function Admin() {
             </Link>
           </Button>
           <Button asChild variant="outline" size="sm">
+            <Link to="/admin-partners">Partners</Link>
+          </Button>
+          <Button asChild variant="outline" size="sm">
             <Link to="/admin-analytics">
               <BarChart3 className="mr-2 h-4 w-4" /> Analytics
             </Link>
