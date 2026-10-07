@@ -18,7 +18,8 @@ import {
   type SurveyLike,
 } from "@/lib/report/stats";
 import { DEFAULT_REPORT_OPTIONS, safeFileName, type ReportOptions } from "@/lib/report/pdf";
-import { downloadBlob, downloadCsv, responsesWideCsv } from "@/lib/report/csv";
+import { downloadBlob, downloadCsv, readableResponseRows, responsesReadableCsv } from "@/lib/report/csv";
+import { Switch } from "@/components/ui/switch";
 
 type Kind = "report" | "summary" | "package" | "csv";
 
@@ -45,7 +46,7 @@ const KINDS: Array<{ id: Kind; icon: any; title: string; blurb: string }> = [
     id: "csv",
     icon: FileSpreadsheet,
     title: "Responses only (CSV)",
-    blurb: "One row per response with demographics and answers, Excel-safe encoding.",
+    blurb: "Easy-to-read sheet: numbered respondents, clear dates and the full question wording as column headers.",
   },
 ];
 
@@ -73,6 +74,7 @@ export function SurveyExportDialog({
   const [includeCrossTabs, setIncludeCrossTabs] = useState(true);
   const [includeSampleProfile, setIncludeSampleProfile] = useState(true);
   const [includeAppendix, setIncludeAppendix] = useState(true);
+  const [includeGraphs, setIncludeGraphs] = useState(true);
 
   // WebMCP Challenge addition: honour an agent-prepared export request for
   // this survey. It only opens and pre-selects the format — the human presses
@@ -95,6 +97,14 @@ export function SurveyExportDialog({
   const activeRows = useFilters && filtersLabel ? rows : allRows;
   const base = useMemo(() => safeFileName(survey.title), [survey.title]);
 
+  const preview = useMemo(() => {
+    if (!open) return null;
+    const { header, body } = readableResponseRows({ survey, rows: activeRows, profiles });
+    const stats = computeSurveyStats(survey, activeRows, profiles, allRows.length);
+    const chartQ = stats.questions.find((q) => q.question.type !== "text" && q.answered > 0) ?? null;
+    return { header, body: body.slice(0, 3), chartQ };
+  }, [open, survey, activeRows, profiles, allRows.length]);
+
   const run = async () => {
     setBusy(true);
     const toastId = toast.loading("Preparing your export…");
@@ -105,7 +115,7 @@ export function SurveyExportDialog({
 
       if (kind === "csv") {
         downloadCsv(
-          responsesWideCsv({ survey, stats, rows: activeRows, profiles, filtersLabel: label }),
+          responsesReadableCsv({ survey, stats, rows: activeRows, profiles, filtersLabel: label }),
           `${base}_responses_${stamp}.csv`,
         );
       } else if (kind === "package") {
@@ -137,6 +147,9 @@ export function SurveyExportDialog({
                 filtersLabel: label,
                 preparedBy,
               };
+        if (!includeGraphs) {
+          options.chartTypes = Object.fromEntries(survey.questions.map((q) => [q.id, "none" as const]));
+        }
         const blob = await buildResearchReport({ survey, stats, rows: activeRows, options });
         downloadBlob(blob, `${base}_${kind === "summary" ? "summary" : "report"}_${stamp}.pdf`);
       }
@@ -203,6 +216,16 @@ export function SurveyExportDialog({
             </span>
           </label>
 
+          {(kind === "report" || kind === "summary") && (
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-foreground/15 bg-background p-2.5">
+              <span className="text-xs">
+                <span className="block font-semibold">Include graphs</span>
+                <span className="text-muted-foreground">{includeGraphs ? "Charts with a frequency table under each." : "Compact frequency tables only (count and percent)."}</span>
+              </span>
+              <Switch checked={includeGraphs} onCheckedChange={setIncludeGraphs} aria-label="Include graphs" />
+            </div>
+          )}
+
           {kind !== "csv" && (
             <label className="flex items-start gap-2 text-xs">
               <Checkbox checked={includeSampleProfile} onCheckedChange={(v) => setIncludeSampleProfile(!!v)} disabled={kind === "package"} />
@@ -245,6 +268,54 @@ export function SurveyExportDialog({
             {activeRows.length} response{activeRows.length === 1 ? "" : "s"} will be included.
           </p>
         </div>
+
+        {preview && (
+          <div className="space-y-2 rounded-2xl border border-foreground/15 p-3">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Preview</p>
+            {(kind === "csv" || kind === "package") && (
+              preview.body.length === 0 ? (
+                <p className="text-xs text-muted-foreground">No responses to show yet.</p>
+              ) : (
+                <div className="max-h-48 overflow-auto rounded-lg border border-foreground/10">
+                  <table className="w-max min-w-full text-[11px]">
+                    <thead className="sticky top-0 bg-secondary">
+                      <tr>{preview.header.map((h, i) => <th key={i} className="max-w-[180px] truncate px-2 py-1 text-left font-semibold" title={h}>{h}</th>)}</tr>
+                    </thead>
+                    <tbody>
+                      {preview.body.map((r, ri) => (
+                        <tr key={ri} className="border-t border-foreground/10">
+                          {r.map((c, ci) => <td key={ci} className="max-w-[180px] truncate px-2 py-1" title={String(c)}>{String(c)}</td>)}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )
+            )}
+            {(kind === "report" || kind === "summary") && (
+              preview.chartQ ? (
+                <div className="space-y-1.5">
+                  <p className="text-xs font-semibold">Q{preview.chartQ.index}. {preview.chartQ.question.text}</p>
+                  {preview.chartQ.options.slice(0, 5).map((o) => (
+                    <div key={o.label} className="flex items-center gap-2 text-[11px]">
+                      <span className="w-28 shrink-0 truncate" title={o.label}>{o.label}</span>
+                      {includeGraphs && (
+                        <span className="h-2.5 flex-1 overflow-hidden rounded-full bg-secondary">
+                          <span className="block h-full rounded-full bg-primary" style={{ width: `${o.pctAnswered}%` }} />
+                        </span>
+                      )}
+                      <span className="ml-auto w-16 shrink-0 text-right tabular-nums text-muted-foreground">{o.count} · {o.pctAnswered}%</span>
+                    </div>
+                  ))}
+                  <p className="text-[11px] text-muted-foreground">Each question in the PDF looks like this{includeGraphs ? ", with a chart" : ", as a table only"}.</p>
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">No closed-question answers to chart yet.</p>
+              )
+            )}
+            {kind === "package" && <p className="text-[11px] text-muted-foreground">The ZIP also has the easy-to-read sheet above, analysis files and a codebook.</p>}
+          </div>
+        )}
 
         <DialogFooter>
           <Button variant="ghost" onClick={() => setOpen(false)} disabled={busy} className="rounded-full">Cancel</Button>
