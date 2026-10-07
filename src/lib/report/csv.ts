@@ -187,7 +187,8 @@ export function readmeText({ survey, stats, filtersLabel }: PackageArgs): string
     ``,
     `Files`,
     `-----`,
-    `responses_wide.csv    One row per response. Use the codebook to map q1, q2 ... to questions.`,
+    `responses_readable.csv Easy-to-read sheet: numbered respondents, clear dates, full question wording.`,
+    `responses_wide.csv    One row per response for analysis software. Use the codebook to map q1, q2 ... to questions.`,
     `responses_long.csv    Tidy format (one row per respondent x question) for R / Python / Stata.`,
     `codebook.csv          Variable names, full question wording, types, allowed values, missingness.`,
     `summary_tables.csv    Frequencies, percentages, rating statistics and text themes per question.`,
@@ -213,6 +214,7 @@ export function readmeText({ survey, stats, filtersLabel }: PackageArgs): string
 export async function buildDataPackage(args: PackageArgs): Promise<Blob> {
   const { zipSync, strToU8 } = await import("fflate");
   const files: Record<string, Uint8Array> = {
+    "responses_readable.csv": strToU8(responsesReadableCsv(args)),
     "responses_wide.csv": strToU8(responsesWideCsv(args)),
     "responses_long.csv": strToU8(responsesLongCsv(args)),
     "codebook.csv": strToU8(codebookCsv(args)),
@@ -224,4 +226,42 @@ export async function buildDataPackage(args: PackageArgs): Promise<Blob> {
   };
   const zipped = zipSync(files, { level: 6 });
   return new Blob([zipped as unknown as BlobPart], { type: "application/zip" });
+}
+
+/** Human-friendly date, e.g. "11 Aug 2026, 7:35 PM". */
+export function readableDate(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return String(iso);
+  return d.toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "numeric", minute: "2-digit", hour12: true });
+}
+
+/** Rows for the readable spreadsheet: header + one row per response, oldest first. */
+export function readableResponseRows({ survey, rows, profiles }: Omit<PackageArgs, "stats" | "filtersLabel"> & { stats?: SurveyStats }) {
+  const header = [
+    "Respondent",
+    "Submitted",
+    "Time taken (min)",
+    ...DEMO_COLUMNS.map(([, name]) => name.replace("_", " ").replace(/^./, (c) => c.toUpperCase())),
+    ...survey.questions.map((q, i) => `Q${i + 1}. ${q.text}`),
+  ];
+  const sorted = [...rows].sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)));
+  const pad = String(sorted.length).length < 3 ? 3 : String(sorted.length).length;
+  const body = sorted.map((r, i) => {
+    const p = profiles[r.respondent_id];
+    return [
+      `Respondent #${String(i + 1).padStart(pad, "0")}`,
+      readableDate(r.created_at),
+      r.duration_ms ? (r.duration_ms / 60000).toFixed(1) : "",
+      ...DEMO_COLUMNS.map(([key]) => (p?.[key] as string | null | undefined) ?? ""),
+      ...survey.questions.map((q) => answerOf(r, q.id)),
+    ];
+  });
+  return { header, body };
+}
+
+/** Readable responses CSV: real question wording, numbered respondents, clear dates. */
+export function responsesReadableCsv(args: PackageArgs): string {
+  const { header, body } = readableResponseRows(args);
+  return toCsv([header, ...body]);
 }
