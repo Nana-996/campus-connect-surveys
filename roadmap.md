@@ -34,7 +34,7 @@
 - [ ] Verify privacy-safe status, export, revocation, and mobile layouts.
 
 ## Main contact email — 2026-10-02
-- [x] Use campusverify996@gmail.com across support, legal, partnership, donation, and project documentation.
+- [x] Use founder@campus-verify.live across support, legal, partnership, donation, and project documentation.
 - [x] Keep the administrator identity separate from the public contact address.
 
 ## Search visibility — 2026-10-02
@@ -58,3 +58,8 @@
 - [x] Enrich Organization, WebSite, SoftwareApplication, and FAQ structured data.
 - [x] Add the facts page to public navigation and sitemap discovery.
 - [x] Verify the page, metadata, structured data, sitemap, and mobile layout.
+
+## Official email update — 2026-10-08
+- [x] Update contact pages, public facts, and documentation to the official founder email.
+- [x] Update auth and transactional senders and default replies, preserving lead-specific replies and owner login.
+- [ ] Verify contact links and outgoing email settings.

@@ -96,7 +96,7 @@ export function SupportCard({
               from the team and fellow researchers in minutes.
             </p>
             <p className="mt-2 text-sm text-muted-foreground">
-              Prefer email? <a className="underline" href="mailto:campusverify996@gmail.com">campusverify996@gmail.com</a>
+              Prefer email? <a className="underline" href="mailto:founder@campus-verify.live">founder@campus-verify.live</a>
             </p>
 
             <div className="mt-4 flex flex-wrap items-center gap-2">

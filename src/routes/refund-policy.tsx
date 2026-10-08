@@ -42,7 +42,7 @@ function RefundPolicyPage() {
         </section>
         <section>
           <h2 className="font-serif text-2xl">5. Contact</h2>
-          <p>Email Vibe Tribe Organisation at <a href="mailto:campusverify996@gmail.com" className="underline">campusverify996@gmail.com</a>.</p>
+          <p>Email Vibe Tribe Organisation at <a href="mailto:founder@campus-verify.live" className="underline">founder@campus-verify.live</a>.</p>
         </section>
       </div>
     </div>
