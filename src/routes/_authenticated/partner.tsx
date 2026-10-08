@@ -29,7 +29,7 @@ function PartnerPortal() {
       <div className="mx-auto max-w-xl p-8">
         <h1 className="font-serif text-3xl">Partner dashboard</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          This account isn't linked to a partnership. Sign in with the email you shared with CampusVerify, or contact campusverify996@gmail.com.
+          This account isn't linked to a partnership. Sign in with the email you shared with CampusVerify, or contact founder@campus-verify.live.
         </p>
       </div>
     );

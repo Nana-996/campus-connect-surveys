@@ -70,7 +70,7 @@ const faq = [
   {
     question: "Who operates CampusVerify?",
     answer:
-      "CampusVerify is operated by Vibe Tribe Organisation in Ghana. Its official website is campus-verify.live and its main contact email is campusverify996@gmail.com.",
+      "CampusVerify is operated by Vibe Tribe Organisation in Ghana. Its official website is campus-verify.live and its main contact email is founder@campus-verify.live.",
   },
 ];
 
@@ -198,7 +198,7 @@ function FactsPage() {
             <FactRow label="Operator" value="Vibe Tribe Organisation" />
             <FactRow label="Country" value="Ghana" />
             <FactRow label="Official website" value={<a href="https://campus-verify.live" className="font-semibold text-primary underline">campus-verify.live</a>} />
-            <FactRow label="Contact" value={<a href="mailto:campusverify996@gmail.com" className="font-semibold text-primary underline">campusverify996@gmail.com</a>} />
+            <FactRow label="Contact" value={<a href="mailto:founder@campus-verify.live" className="font-semibold text-primary underline">founder@campus-verify.live</a>} />
             <FactRow label="Availability" value="Published web application" />
           </dl>
         </section>
@@ -238,7 +238,7 @@ function FactsPage() {
           <p className="mt-3 max-w-xl text-sm leading-relaxed opacity-80">
             Journalists, institutions, researchers, directories, and AI services can contact the CampusVerify team for clarification.
           </p>
-          <a href="mailto:campusverify996@gmail.com" className="mt-6 inline-flex rounded-full bg-highlight px-5 py-2.5 text-sm font-semibold text-highlight-foreground">
+          <a href="mailto:founder@campus-verify.live" className="mt-6 inline-flex rounded-full bg-highlight px-5 py-2.5 text-sm font-semibold text-highlight-foreground">
             Email CampusVerify
           </a>
         </section>

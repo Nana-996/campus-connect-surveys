@@ -114,7 +114,7 @@ export function BroadcastPanel() {
     if (mode === "all") {
       if (recipients.length === 0) return toast.error("No recipients match these filters.");
       const ok = window.confirm(
-        `Send "${subject}" to ${recipients.length} recipient(s) from noreply@campus-verify.live?`,
+        `Send "${subject}" to ${recipients.length} recipient(s) from founder@campus-verify.live?`,
       );
       if (!ok) return;
     }
@@ -269,7 +269,7 @@ export function BroadcastPanel() {
         </p>
         <p className="mt-2 text-sm text-muted-foreground">
           Delivers through your own sending domain as{" "}
-          <span className="font-medium text-foreground">CampusVerify &lt;noreply@campus-verify.live&gt;</span>.
+          <span className="font-medium text-foreground">CampusVerify &lt;founder@campus-verify.live&gt;</span>.
           Each message is branded, includes a one-click unsubscribe link, and skips suppressed addresses.
           Up to 500 recipients per send.
         </p>

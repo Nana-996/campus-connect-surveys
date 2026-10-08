@@ -11,10 +11,10 @@ Make CampusVerify’s public information match the confirmed operating rules, re
 - Keep the confirmed response-rate claim, remove the “strongest-performing topics” claim, and remove final-year/academic-project framing throughout shared pages.
 - Replace the temporary social-preview image reference with a stable CampusVerify-owned asset or omit it where a valid absolute image is unavailable.
 - Add a public privacy and security audit that documents verified controls, data flows, limitations, and the audit date without claiming formal certification. Link it from the Privacy Policy and update the pitch claim to match the audit.
-- Identify Vibe Tribe Organisation as the Ghana-based operator and use `campusverify996@gmail.com` as the main contact address on legal/support pages.
+- Identify Vibe Tribe Organisation as the Ghana-based operator and use `founder@campus-verify.live` as the main contact address on legal/support pages.
 
 ## Email note
-`notify.campus-verify.live` is verified for sending CampusVerify emails, but it is not an inbox. Messages sent to an address on that subdomain are not automatically received anywhere. The app uses `campusverify996@gmail.com` as its main incoming contact address.
+`notify.campus-verify.live` is verified for sending CampusVerify emails, but it is not an inbox. Messages sent to an address on that subdomain are not automatically received anywhere. The app uses `founder@campus-verify.live` as its main incoming contact address.
 
 ## Technical details
 - Apply the credit expiry correction through a database migration, including the current `handle_new_user` function and relevant sign-up ledger rows; no page-load seeding.

@@ -119,7 +119,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           contactPoint: {
             "@type": "ContactPoint",
             contactType: "customer support",
-            email: "campusverify996@gmail.com",
+            email: "founder@campus-verify.live",
             availableLanguage: "English",
           },
         }),

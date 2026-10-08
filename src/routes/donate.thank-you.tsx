@@ -103,7 +103,7 @@ function ThankYouPage() {
           </span>
           <h1 className="mt-6 font-serif text-4xl">We couldn't confirm that gift.</h1>
           <p className="mt-3 text-sm text-muted-foreground">
-            No charge has been recorded. If money left your account, email campusverify996@gmail.com with your reference and we'll investigate it
+            No charge has been recorded. If money left your account, email founder@campus-verify.live with your reference and we'll investigate it
             out.
           </p>
           <Button asChild className="mt-6 rounded-full">
