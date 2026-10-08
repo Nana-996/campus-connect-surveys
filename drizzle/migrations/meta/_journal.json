@@ -15,6 +15,13 @@
       "when": 1791284743561,
       "tag": "0001_partner_program",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791424109030,
+      "tag": "0002_fix_partner_stats_recent_activity",
+      "breakpoints": true
     }
   ]
 }
