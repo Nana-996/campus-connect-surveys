@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { getOwnerSurveyResults } from "@/lib/survey-owner.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -182,6 +183,7 @@ function ReportBuilderPage() {
   const [showFindings, setShowFindings] = useState(true);
   const [showDemographics, setShowDemographics] = useState(true);
   const [showMethodology, setShowMethodology] = useState(true);
+  const [includeGraphs, setIncludeGraphs] = useState(true);
   const [sections, setSections] = useState<SectionConfig[]>([]);
 
   useEffect(() => {
@@ -288,7 +290,7 @@ function ReportBuilderPage() {
       const chartTypes: Record<string, "bar" | "column" | "donut" | "none"> = {};
       const commentary: Record<string, string> = {};
       includedSections.forEach((s) => {
-        chartTypes[s.qid] =
+        chartTypes[s.qid] = !includeGraphs ? "none" :
           s.chart === "pie" || s.chart === "donut" ? "donut" : s.chart === "column" ? "column" : s.chart === "table" ? "none" : "bar";
         if (s.comment.trim()) commentary[s.qid] = s.comment.trim();
       });
@@ -387,27 +389,38 @@ function ReportBuilderPage() {
         <ArrowLeft className="h-3 w-3" /> Back to analytics
       </Link>
 
-      <div className="flex flex-wrap items-end justify-between gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-4 pb-16 sm:pb-0">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground">Report studio</p>
-          <h1 className="mt-1 font-serif text-4xl leading-[0.95]">{survey.title}</h1>
+          <h1 className="mt-1 break-words font-serif text-3xl leading-[0.95] sm:text-4xl">{survey.title}</h1>
           <p className="mt-1 text-xs text-muted-foreground">
             {responses.length} response{responses.length === 1 ? "" : "s"} · {survey.questions.length} question{survey.questions.length === 1 ? "" : "s"}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="inline-flex items-center gap-2 rounded-full border border-foreground/15 px-3 py-1.5 text-xs font-semibold">
+            <Switch checked={includeGraphs} onCheckedChange={setIncludeGraphs} aria-label="Include graphs" />
+            Include graphs
+          </label>
           <Button variant="outline" className="rounded-full" onClick={exportCsvSummary}>
             <ListOrdered className="mr-1 h-4 w-4" /> Summary CSV
           </Button>
-          <Button onClick={exportPDF} disabled={exporting} className="rounded-full">
+          <Button onClick={exportPDF} disabled={exporting} className="hidden rounded-full sm:inline-flex">
             {exporting ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <FileDown className="mr-1 h-4 w-4" />}
             {exporting ? "Exporting…" : "Export PDF"}
           </Button>
         </div>
       </div>
 
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-foreground/10 bg-card/95 p-3 backdrop-blur sm:hidden">
+        <Button onClick={exportPDF} disabled={exporting} className="w-full rounded-full">
+          {exporting ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <FileDown className="mr-1 h-4 w-4" />}
+          {exporting ? "Exporting…" : `Download PDF${includeGraphs ? "" : " (tables)"}`}
+        </Button>
+      </div>
+
       <Tabs defaultValue="summary">
-        <TabsList>
+        <TabsList className="w-full justify-start overflow-x-auto sm:w-auto">
           <TabsTrigger value="summary"><BarChart3 className="mr-1 h-3 w-3" /> Summary</TabsTrigger>
           <TabsTrigger value="build"><PenLine className="mr-1 h-3 w-3" /> Build report</TabsTrigger>
           <TabsTrigger value="preview"><LayoutList className="mr-1 h-3 w-3" /> Document preview</TabsTrigger>
@@ -470,7 +483,7 @@ function ReportBuilderPage() {
                   index={i + 1}
                   question={q}
                   responses={responses}
-                  chart={cfg?.chart ?? defaultChart(q)}
+                  chart={includeGraphs ? (cfg?.chart ?? defaultChart(q)) : "table"}
                   palette={t.palette}
                   accent={t.accent}
                   onChartChange={(c) => updateSection(q.id, { chart: c })}
@@ -723,20 +736,20 @@ function SummaryQuestionCard({
   const texts = isText ? textAnswersFor(question, responses) : [];
 
   return (
-    <div className="rounded-3xl border border-foreground/15 bg-card p-5">
+    <div className="min-w-0 rounded-3xl border border-foreground/15 bg-card p-4 sm:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
             Question {index} · {labelForType(question.type)}
           </p>
-          <h3 className="mt-1 font-serif text-xl leading-snug">{question.text}</h3>
+          <h3 className="mt-1 break-words font-serif text-xl leading-snug">{question.text}</h3>
           <p className="mt-1 text-xs text-muted-foreground">
             {answered} response{answered === 1 ? "" : "s"}
             {avg !== null && ` · mean ${avg.toFixed(2)}/5`}
             {top && ` · top: ${top.label}`}
           </p>
         </div>
-        {!isText && <ChartPicker value={chart} onChange={onChartChange} />}
+        {!isText && chart !== "table" && <ChartPicker value={chart} onChange={onChartChange} />}
       </div>
 
       <div className="mt-4">
@@ -780,6 +793,8 @@ function ChartRenderer({
   kind: ChartKind; data: { label: string; count: number }[]; palette: string[]; accent: string; height: number;
 }) {
   const total = data.reduce((s, x) => s + x.count, 0) || 1;
+  const isMobile = useIsMobile();
+  const short = (v: string) => (isMobile && v.length > 14 ? `${v.slice(0, 13)}…` : v);
 
   if (kind === "table") return <DistributionTable data={data} accent={accent} />;
 
@@ -796,8 +811,8 @@ function ChartRenderer({
               nameKey="label"
               cx="50%"
               cy="50%"
-              innerRadius={kind === "donut" ? 55 : 0}
-              outerRadius={90}
+              innerRadius={kind === "donut" ? (isMobile ? 42 : 55) : 0}
+              outerRadius={isMobile ? 70 : 90}
               paddingAngle={2}
               isAnimationActive={false}
             >
@@ -805,10 +820,10 @@ function ChartRenderer({
             </Pie>
           </PieChart>
         ) : kind === "bar" ? (
-          <BarChart data={data} layout="vertical" margin={{ top: 8, right: 24, left: 8, bottom: 0 }}>
+          <BarChart data={data} layout="vertical" margin={{ top: 8, right: isMobile ? 8 : 24, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" horizontal={false} />
             <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12, fontFamily: "sans-serif" }} />
-            <YAxis type="category" dataKey="label" width={120} tick={{ fontSize: 12, fontFamily: "sans-serif" }} />
+            <YAxis type="category" dataKey="label" width={isMobile ? 90 : 140} tickFormatter={short} tick={{ fontSize: isMobile ? 10 : 12, fontFamily: "sans-serif" }} />
             <Tooltip />
             <Bar dataKey="count" radius={[0, 4, 4, 0]} isAnimationActive={false}>
               {data.map((_, i) => <Cell key={i} fill={palette[i % palette.length]} />)}
@@ -817,7 +832,7 @@ function ChartRenderer({
         ) : (
           <BarChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
-            <XAxis dataKey="label" tick={{ fontSize: 12, fontFamily: "sans-serif" }} />
+            <XAxis dataKey="label" tickFormatter={short} interval={0} tick={{ fontSize: isMobile ? 10 : 12, fontFamily: "sans-serif" }} />
             <YAxis allowDecimals={false} tick={{ fontSize: 12, fontFamily: "sans-serif" }} />
             <Tooltip />
             <Bar dataKey="count" fill={accent} radius={[4, 4, 0, 0]} isAnimationActive={false} />

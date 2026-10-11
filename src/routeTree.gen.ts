@@ -43,7 +43,6 @@ import { Route as AuthenticatedFeedRouteImport } from './routes/_authenticated/f
 import { Route as AuthenticatedManageRouteImport } from './routes/_authenticated/manage'
 import { Route as AuthenticatedMySurveysRouteImport } from './routes/_authenticated/my-surveys'
 import { Route as AuthenticatedPartnerRouteImport } from './routes/_authenticated/partner'
-import { Route as AuthenticatedPollsRouteImport } from './routes/_authenticated/polls'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedSchoolAdminRouteImport } from './routes/_authenticated/school-admin'
 import { Route as AuthenticatedSchoolTrackingRouteImport } from './routes/_authenticated/school-tracking'
@@ -248,11 +247,6 @@ const AuthenticatedPartnerRoute = AuthenticatedPartnerRouteImport.update({
   path: '/partner',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedPollsRoute = AuthenticatedPollsRouteImport.update({
-  id: '/polls',
-  path: '/polls',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -447,7 +441,6 @@ export interface FileRoutesByFullPath {
   '/manage': typeof AuthenticatedManageRouteWithChildren
   '/my-surveys': typeof AuthenticatedMySurveysRoute
   '/partner': typeof AuthenticatedPartnerRoute
-  '/polls': typeof AuthenticatedPollsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/school-admin': typeof AuthenticatedSchoolAdminRoute
   '/school-tracking': typeof AuthenticatedSchoolTrackingRoute
@@ -512,7 +505,6 @@ export interface FileRoutesByTo {
   '/manage': typeof AuthenticatedManageRouteWithChildren
   '/my-surveys': typeof AuthenticatedMySurveysRoute
   '/partner': typeof AuthenticatedPartnerRoute
-  '/polls': typeof AuthenticatedPollsRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/school-admin': typeof AuthenticatedSchoolAdminRoute
   '/school-tracking': typeof AuthenticatedSchoolTrackingRoute
@@ -579,7 +571,6 @@ export interface FileRoutesById {
   '/_authenticated/manage': typeof AuthenticatedManageRouteWithChildren
   '/_authenticated/my-surveys': typeof AuthenticatedMySurveysRoute
   '/_authenticated/partner': typeof AuthenticatedPartnerRoute
-  '/_authenticated/polls': typeof AuthenticatedPollsRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/school-admin': typeof AuthenticatedSchoolAdminRoute
   '/_authenticated/school-tracking': typeof AuthenticatedSchoolTrackingRoute
@@ -646,7 +637,6 @@ export interface FileRouteTypes {
     | '/manage'
     | '/my-surveys'
     | '/partner'
-    | '/polls'
     | '/profile'
     | '/school-admin'
     | '/school-tracking'
@@ -711,7 +701,6 @@ export interface FileRouteTypes {
     | '/manage'
     | '/my-surveys'
     | '/partner'
-    | '/polls'
     | '/profile'
     | '/school-admin'
     | '/school-tracking'
@@ -777,7 +766,6 @@ export interface FileRouteTypes {
     | '/_authenticated/manage'
     | '/_authenticated/my-surveys'
     | '/_authenticated/partner'
-    | '/_authenticated/polls'
     | '/_authenticated/profile'
     | '/_authenticated/school-admin'
     | '/_authenticated/school-tracking'
@@ -1097,13 +1085,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPartnerRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/polls': {
-      id: '/_authenticated/polls'
-      path: '/polls'
-      fullPath: '/polls'
-      preLoaderRoute: typeof AuthenticatedPollsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/profile': {
       id: '/_authenticated/profile'
       path: '/profile'
@@ -1333,7 +1314,6 @@ interface AuthenticatedRouteChildren {
   AuthenticatedManageRoute: typeof AuthenticatedManageRouteWithChildren
   AuthenticatedMySurveysRoute: typeof AuthenticatedMySurveysRoute
   AuthenticatedPartnerRoute: typeof AuthenticatedPartnerRoute
-  AuthenticatedPollsRoute: typeof AuthenticatedPollsRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedSchoolAdminRoute: typeof AuthenticatedSchoolAdminRoute
   AuthenticatedSchoolTrackingRoute: typeof AuthenticatedSchoolTrackingRoute
@@ -1354,7 +1334,6 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedManageRoute: AuthenticatedManageRouteWithChildren,
   AuthenticatedMySurveysRoute: AuthenticatedMySurveysRoute,
   AuthenticatedPartnerRoute: AuthenticatedPartnerRoute,
-  AuthenticatedPollsRoute: AuthenticatedPollsRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedSchoolAdminRoute: AuthenticatedSchoolAdminRoute,
   AuthenticatedSchoolTrackingRoute: AuthenticatedSchoolTrackingRoute,
