@@ -130,7 +130,6 @@ export function AppHeader() {
       </div>
       <nav className="mx-auto flex max-w-5xl items-center overflow-x-auto border-t border-foreground/10 bg-card px-1 py-1.5 lg:hidden">
         <NavItem to="/feed" icon={<Home className="h-5 w-5" />} label="Feed" />
-        <NavItem to="/polls" icon={<BarChart3 className="h-5 w-5" />} label="Polls" />
         <NavItem to="/create" icon={<PlusCircle className="h-5 w-5" />} label="Create" />
         <NavItem to="/workspace" icon={<Bot className="h-5 w-5" />} label="Workspace" />
         <NavItem to="/my-surveys" icon={<FolderOpen className="h-5 w-5" />} label="Mine" />
@@ -141,7 +140,6 @@ export function AppHeader() {
       </nav>
       <nav className="mx-auto hidden max-w-5xl items-center gap-1 border-t border-foreground/10 px-5 py-2 lg:flex">
         <DesktopLink to="/feed">Feed</DesktopLink>
-        <DesktopLink to="/polls">Polls</DesktopLink>
         <DesktopLink to="/create">Create survey</DesktopLink>
         <DesktopLink to="/my-surveys">My surveys</DesktopLink>
         {/* WebMCP Challenge addition */}

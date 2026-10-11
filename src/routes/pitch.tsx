@@ -293,7 +293,7 @@ const Slide3 = () => (
             "Country and age range",
             "No academic verification required",
           ],
-          summary: "Participate in public-audience surveys and lightweight campus polls — extending sample reach beyond a single university.",
+          summary: "Participate in public-audience surveys — extending sample reach beyond a single university.",
         },
       ].map((c, i) => (
         <motion.div
@@ -496,7 +496,6 @@ const Slide5 = () => (
     </div>
 
     <motion.p variants={fadeUp} custom={7} className="mt-6 text-xs uppercase tracking-[0.28em]" style={{ color: C.muted, fontFamily: SANS }}>
-      + Polls — a separate lightweight tab for quick campus opinions.
     </motion.p>
   </SlideShell>
 );
@@ -1081,7 +1080,7 @@ const Slide11 = () => {
   const roadmap = [
     { when: "Now · 2026", what: "Published platform serving students, researchers, organisations, and community respondents" },
     { when: "Next", what: "Grow university partnerships and research participation across Ghana" },
-    { when: "2027", what: "Pan-African network — lecturer evaluations, peer polls, institutional API" },
+    { when: "2027", what: "Pan-African network — lecturer evaluations, institutional API" },
     { when: "2028", what: "Open research platform — white-label for university research departments" },
   ];
   const ctas = [
