@@ -486,8 +486,31 @@ function executiveSummary(L: Layout, stats: SurveyStats, options: ReportOptions)
   });
 }
 
+/** A short, descriptive figure title for a question's graph. */
+export function figureTitle(qs: QuestionStats, figNo: number): string {
+  const raw = String(qs.question.text ?? "").trim().replace(/[?.:!]+$/, "");
+  const topic = raw.length > 70 ? `${raw.slice(0, 67).trimEnd()}…` : raw;
+  const n = qs.answered;
+  if (qs.question.type === "rating") {
+    const mean = qs.rating ? ` (mean ${qs.rating.mean.toFixed(2)} / 5)` : "";
+    return `Figure ${figNo}. Ratings for "${topic}" on a 1–5 scale${mean}, n = ${n}`;
+  }
+  return `Figure ${figNo}. How respondents answered "${topic}", n = ${n}`;
+}
+
+let FIGURE_COUNTER = 0;
+
 function questionSection(L: Layout, qs: QuestionStats, options: ReportOptions, isLast = false) {
-  L.space(90);
+  // Work out the graph first so the heading, figure title and graph are kept
+  // together on one page — a heading is never stranded away from its graph.
+  const isClosed = qs.question.type !== "text" && qs.answered > 0;
+  const pData = qs.options.map((o) => ({ label: o.label, count: o.count }));
+  const pChosen = options.chartTypes?.[qs.question.id];
+  const pAuto: ChartChoice = qs.question.type === "rating" ? "column" : pData.length <= 6 ? "donut" : "bar";
+  const pChart: ChartChoice = pChosen ?? pAuto;
+  const pHasGraph = isClosed && pChart !== "none" && !pData.every((d) => d.count === 0);
+  const pChartH = !pHasGraph ? 0 : pChart === "column" ? 132 : pChart === "donut" ? Math.max(110, pData.length * 13 + 10) + 14 : measureHorizontalBars(pData.slice(0, 12)) + 14;
+  L.space(60 + (pHasGraph ? pChartH + 50 : 30));
   L.gap(4);
 
   L.doc.setFont("helvetica", "bold");
@@ -578,6 +601,24 @@ function questionSection(L: Layout, qs: QuestionStats, options: ReportOptions, i
   const allZero = data.every((d) => d.count === 0);
 
   if (chart !== "none" && !allZero) {
+    // Each graph stands on its own as a numbered, titled figure inside a framed panel.
+    FIGURE_COUNTER += 1;
+    const title = figureTitle(qs, FIGURE_COUNTER);
+    L.doc.setFont("helvetica", "bold");
+    L.doc.setFontSize(9.5);
+    const tLines: string[] = L.doc.splitTextToSize(title, L.contentW - 20);
+    const panelH = tLines.length * 12 + 12 + pChartH + 18;
+    L.space(panelH);
+    const panelTop = L.y;
+    fill(L.doc, "#ffffff");
+    stroke(L.doc, RULE);
+    L.doc.setLineWidth(0.6);
+    L.doc.roundedRect(L.margin - 6, panelTop, L.contentW + 12, panelH, 6, 6, "FD");
+    ink(L.doc, INK);
+    L.doc.setFont("helvetica", "bold");
+    L.doc.setFontSize(9.5);
+    tLines.forEach((ln, i) => L.doc.text(ln, L.margin + 4, panelTop + 16 + i * 12));
+    L.y = panelTop + tLines.length * 12 + 16;
     if (chart === "column") {
       L.space(132);
       drawColumns(L.doc, { x: L.margin, y: L.y, w: L.contentW, h: 120, data });
@@ -598,8 +639,9 @@ function questionSection(L: Layout, qs: QuestionStats, options: ReportOptions, i
         L.text(`+ ${data.length - shown.length} further answers — see the table below.`, { size: 8, color: MUTED });
       }
     }
-    L.text(`n = ${qs.answered} answered`, { size: 7.5, color: MUTED });
-    L.gap(2);
+    L.y = Math.max(L.y, panelTop + panelH - 14);
+    L.text(`Source: CampusVerify survey responses · n = ${qs.answered} answered`, { size: 7.5, color: MUTED });
+    L.gap(8);
   }
 
   if (qs.question.type === "rating" && qs.rating) {
@@ -705,6 +747,7 @@ export async function buildResearchReport(args: {
       { size: 9.5, color: MUTED },
     );
   }
+  FIGURE_COUNTER = 0;
   questions.forEach((qs, i) => questionSection(L, qs, options, i === questions.length - 1));
 
   if (options.includeCrossTabs && options.mode === "full") {
