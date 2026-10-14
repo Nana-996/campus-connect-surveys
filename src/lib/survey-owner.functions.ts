@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { createHash } from "crypto";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { collectCheckedPages } from "@/lib/checked-pages";
 
 const surveyIdSchema = z.object({ surveyId: z.string().uuid() });
 
@@ -31,17 +32,24 @@ export const getOwnerSurveyResults = createServerFn({ method: "GET" })
       return { survey: null, responses: [], profiles: [], visualizations: [] };
     }
 
+    const snapshotAt = new Date().toISOString();
+    const { count, error: countError } = await supabaseAdmin.from("survey_responses")
+      .select("id", { count: "exact", head: true }).eq("survey_id", data.surveyId).lte("created_at", snapshotAt);
+    if (countError || count === null) throw new Error("Could not confirm the complete response count");
+    const rawResponses = await collectCheckedPages(count, async (from, to) => {
+      const { data: page, error } = await supabaseAdmin.from("survey_responses")
+        .select("id, survey_id, respondent_id, answers, created_at, duration_ms")
+        .eq("survey_id", data.surveyId).lte("created_at", snapshotAt)
+        .order("created_at", { ascending: false }).order("id", { ascending: false }).range(from, to);
+      if (error) throw new Error("Could not load all survey responses. Please retry before exporting.");
+      return page ?? [];
+    });
+
     const [
-      { data: rawResponses, error: responseError },
       { data: visualizations, error: vizError },
       { data: savedViews, error: savedViewsError },
       { data: shareTokens, error: shareTokensError },
     ] = await Promise.all([
-      supabaseAdmin
-        .from("survey_responses")
-        .select("id, survey_id, respondent_id, answers, created_at, duration_ms")
-        .eq("survey_id", data.surveyId)
-        .order("created_at", { ascending: false }),
       supabaseAdmin
         .from("survey_visualizations")
         .select("question_id, chart_type")
@@ -57,7 +65,7 @@ export const getOwnerSurveyResults = createServerFn({ method: "GET" })
         .eq("survey_id", data.surveyId)
         .order("created_at", { ascending: false }),
     ]);
-    if (responseError || vizError || savedViewsError || shareTokensError) throw new Error("Could not load survey responses");
+    if (vizError || savedViewsError || shareTokensError) throw new Error("Could not load survey responses");
 
     // Map real respondent_id -> opaque pseudonym before anything leaves the server.
     // This prevents survey creators from correlating a real user UUID with
@@ -71,20 +79,21 @@ export const getOwnerSurveyResults = createServerFn({ method: "GET" })
     const responses = (rawResponses ?? []).map((r) => ({
       id: r.id,
       survey_id: r.survey_id,
-      respondent_id: realToPseudo.get(r.respondent_id)!,
+      respondent_id: realToPseudo.get(r.respondent_id) ?? pseudonymize(data.surveyId, r.respondent_id),
       answers: r.answers,
       created_at: r.created_at,
       duration_ms: r.duration_ms,
     }));
 
     const respondentIds = Array.from(realToPseudo.keys());
-    const { data: rawProfiles, error: profileError } = respondentIds.length
-      ? await supabaseAdmin
-          .from("profiles")
-          .select("id, department, year, country, age_range, university_name")
-          .in("id", respondentIds)
-      : { data: [], error: null };
-    if (profileError) throw new Error("Could not load response demographics");
+    const rawProfiles: Array<{ id: string; department: string; year: string; country: string | null; age_range: string | null; university_name: string }> = [];
+    for (let i = 0; i < respondentIds.length; i += 200) {
+      const { data: page, error } = await supabaseAdmin.from("profiles")
+        .select("id, department, year, country, age_range, university_name")
+        .in("id", respondentIds.slice(i, i + 200));
+      if (error) throw new Error("Could not load response demographics");
+      rawProfiles.push(...(page ?? []));
+    }
 
     // Re-key profile rows by the same pseudonym so analyze/report UIs keep
     // working without changes.

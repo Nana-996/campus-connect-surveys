@@ -21,7 +21,7 @@ export function LeadsPanel() {
   const save = useServerFn(updateLead);
   const qc = useQueryClient();
   const { data = [], isPending, isError, refetch } = useQuery({ queryKey: ["admin", "leads"], queryFn: () => fetchLeads(), retry: 1 });
-  const [kind, setKind] = useState<"all" | "school" | "demo">("all");
+  const [kind, setKind] = useState<"all" | Lead["kind"]>("all");
   const [status, setStatus] = useState<"all" | Lead["status"]>("all");
   const [q, setQ] = useState("");
 
@@ -41,7 +41,7 @@ export function LeadsPanel() {
   }
 
   function exportCsv() {
-    const cols: (keyof Lead)[] = ["created_at", "kind", "status", "full_name", "email", "phone", "organization", "role_title", "country", "student_count", "message", "notes"];
+    const cols: (keyof Lead)[] = ["created_at", "kind", "status", "full_name", "email", "phone", "organization", "role_title", "country", "student_count", "sample_size", "contact_preference", "message", "notes"];
     const body = [cols.join(","), ...rows.map((r) => cols.map((c) => csvCell(r[c])).join(","))].join("\n");
     const url = URL.createObjectURL(new Blob(["\ufeff" + body], { type: "text/csv" }));
     const a = document.createElement("a"); a.href = url; a.download = `campusverify-leads-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
@@ -62,7 +62,7 @@ export function LeadsPanel() {
       <div className="flex flex-wrap items-center gap-2">
         <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, email, organisation…" className="max-w-xs" />
         <select className={sel} value={kind} onChange={(e) => setKind(e.target.value as any)}>
-          <option value="all">All forms</option><option value="school">School interest</option><option value="demo">Demo requests</option>
+          <option value="all">All forms</option><option value="school">School interest</option><option value="demo">Demo requests</option><option value="study">Study enquiries</option>
         </select>
         <select className={sel} value={status} onChange={(e) => setStatus(e.target.value as any)}>
           <option value="all">All statuses</option>{STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
@@ -85,7 +85,7 @@ function LeadRow({ lead: l, onPatch, sel }: { lead: Lead; onPatch: (id: string, 
         <div>
           <p className="font-serif text-lg leading-tight">{l.full_name} <span className="text-sm text-muted-foreground">· {l.organization ?? "—"}</span></p>
           <p className="text-xs text-muted-foreground">
-            <span className="font-semibold text-foreground">{l.kind === "school" ? "School interest" : "Demo request"}</span> · <a className="underline" href={`mailto:${l.email}`}>{l.email}</a>
+            <span className="font-semibold text-foreground">{l.kind === "study" ? "Study enquiry" : l.kind === "school" ? "School interest" : "Demo request"}</span> · <a className="underline" href={`mailto:${l.email}`}>{l.email}</a>
             {l.phone && ` · ${l.phone}`}{l.role_title && ` · ${l.role_title}`}{l.country && ` · ${l.country}`}{l.student_count && ` · ${l.student_count} students`} · {new Date(l.created_at).toLocaleDateString()}
           </p>
         </div>
@@ -94,6 +94,8 @@ function LeadRow({ lead: l, onPatch, sel }: { lead: Lead; onPatch: (id: string, 
         </select>
       </div>
       {l.message && <p className="mt-2 whitespace-pre-wrap text-sm">{l.message}</p>}
+      {l.sample_size && <p className="mt-2 text-sm">Responses needed: {l.sample_size}</p>}
+      {l.contact_preference && <p className="text-xs text-muted-foreground">Preferred contact: {l.contact_preference}</p>}
       <div className="mt-3 flex gap-2">
         <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Private notes" rows={2} maxLength={4000} />
         <Button size="sm" variant="outline" disabled={notes === (l.notes ?? "")} onClick={() => onPatch(l.id, { notes })}>Save</Button>

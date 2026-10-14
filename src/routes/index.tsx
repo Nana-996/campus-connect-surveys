@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth";
 import { SocialLinks } from "@/components/SocialLinks";
 import { Button } from "@/components/ui/button";
+import { useConversionTracking } from "@/hooks/useConversionTracking";
 import {
   Sheet,
   SheetContent,
@@ -62,6 +63,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
+  const track = useConversionTracking("homepage");
   const { user, loading } = useAuth();
   const isSignedIn = !loading && !!user;
 
@@ -200,7 +202,7 @@ function Landing() {
               </Link>
             ) : (
               <>
-                <Link to="/pricing">
+                <Link to="/pricing" onClick={() => track("buyer_cta_click")}>
                   <Button size="lg" className="h-12 rounded-full bg-primary px-7 text-base">
                     Get responses for your study <ArrowUpRight className="ml-1 h-4 w-4" />
                   </Button>

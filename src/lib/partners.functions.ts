@@ -27,6 +27,11 @@ export type Partner = {
   created_at: string;
 };
 
+export type PartnerPayout = {
+  id: string; milestone: number; target_paying: number; reward_note: string | null;
+  paid_at: string | null; legacy: boolean;
+};
+
 const requireOwner = createMiddleware({ type: "function" })
   .middleware([requireSupabaseAuth])
   .server(async ({ next, context }) => {
@@ -46,6 +51,15 @@ async function statsFor(id: string): Promise<PartnerStats> {
   return data as unknown as PartnerStats;
 }
 
+async function payoutsFor(id: string): Promise<PartnerPayout[]> {
+  const db = await admin();
+  const { data, error } = await db.from("partner_payouts")
+    .select("id,milestone,target_paying,reward_note,paid_at,legacy")
+    .eq("partner_id", id).order("milestone", { ascending: false });
+  if (error) throw new Error("Could not load payout history");
+  return data ?? [];
+}
+
 export const listPartners = createServerFn({ method: "GET" })
   .middleware([requireOwner])
   .handler(async () => {
@@ -53,7 +67,7 @@ export const listPartners = createServerFn({ method: "GET" })
     const { data, error } = await db.from("partners").select("*").order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
     const rows = (data ?? []) as Partner[];
-    return Promise.all(rows.map(async (p) => ({ ...p, stats: await statsFor(p.id) })));
+    return Promise.all(rows.map(async (p) => ({ ...p, stats: await statsFor(p.id), payouts: await payoutsFor(p.id) })));
   });
 
 const partnerInput = z.object({
@@ -82,16 +96,11 @@ export const savePartner = createServerFn({ method: "POST" })
 /** Records a manual payout and starts the next milestone cycle. */
 export const markPartnerPaid = createServerFn({ method: "POST" })
   .middleware([requireOwner])
-  .inputValidator((i: { id: string }) => z.object({ id: z.string().uuid() }).parse(i))
-  .handler(async ({ data }) => {
+  .inputValidator((i: { id: string; expectedPaid: number }) => z.object({ id: z.string().uuid(), expectedPaid: z.number().int().min(0) }).parse(i))
+  .handler(async ({ data, context }) => {
     const db = await admin();
-    const { data: p, error } = await db.from("partners").select("milestones_paid").eq("id", data.id).single();
+    const { error } = await db.rpc("record_partner_payout", { _partner_id: data.id, _expected_paid: data.expectedPaid, _actor: context.userId });
     if (error) throw new Error(error.message);
-    const { error: e2 } = await db
-      .from("partners")
-      .update({ milestones_paid: (p.milestones_paid ?? 0) + 1, last_paid_at: new Date().toISOString() })
-      .eq("id", data.id);
-    if (e2) throw new Error(e2.message);
     return { ok: true };
   });
 
@@ -107,5 +116,5 @@ export const getMyPartnerDashboard = createServerFn({ method: "GET" })
       .select("id,name,slug,target_paying,reward_note,clicks,milestones_paid,last_paid_at,is_active")
       .eq("partner_email", email);
     if (error) throw new Error(error.message);
-    return Promise.all((data ?? []).map(async (p) => ({ ...p, stats: await statsFor(p.id) })));
+    return Promise.all((data ?? []).map(async (p) => ({ ...p, stats: await statsFor(p.id), payouts: await payoutsFor(p.id) })));
   });

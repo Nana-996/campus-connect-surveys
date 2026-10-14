@@ -21,6 +21,8 @@ import {
   PieChart, Pie, Cell, Legend, AreaChart, Area,
 } from "recharts";
 import { analyzeSentiment, topWords, suggestInterpretation } from "@/lib/text-analysis";
+import { summaryTablesCsv, downloadCsv } from "@/lib/report/csv";
+import { computeSurveyStats } from "@/lib/report/stats";
 
 type Question = { id: string; type: "text" | "choice" | "rating"; text: string; options?: string[] };
 type Survey = {
@@ -328,23 +330,10 @@ function ReportBuilderPage() {
 
   const exportCsvSummary = () => {
     if (!survey) return;
-    const lines: string[] = ["question,type,option,count,percent"];
-    for (const q of survey.questions) {
-      if (q.type === "text") continue;
-      const data = aggregate(q, responses);
-      const total = data.reduce((a, b) => a + b.count, 0) || 1;
-      data.forEach((d) => {
-        const esc = (v: string) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
-        lines.push([esc(q.text), q.type, esc(d.label), String(d.count), ((d.count / total) * 100).toFixed(1)].join(","));
-      });
-    }
-    const blob = new Blob([lines.join("\n")], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${(survey.title || "survey").replace(/\s+/g, "_")}_summary.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const selectedSurvey = { ...survey, questions: survey.questions.filter((q) => sections.some((s) => s.qid === q.id && s.included)) };
+    const profileMap = Object.fromEntries(profiles.map((p) => [p.id, p]));
+    const stats = computeSurveyStats(selectedSurvey, responses, profileMap, responses.length);
+    downloadCsv(summaryTablesCsv({ survey: selectedSurvey, stats, rows: responses, profiles: profileMap, filtersLabel: null }), `${survey.title.replace(/[^a-z0-9_-]/gi, "_")}_summary.csv`);
   };
 
   if (loading) return <p className="text-sm text-muted-foreground">Loading report studio…</p>;

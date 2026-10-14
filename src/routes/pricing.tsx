@@ -6,6 +6,9 @@ import { useAuth } from "@/lib/auth";
 import { useSchoolOnboarded, STUDENT_PRICE_FACTOR } from "@/hooks/useSchoolOnboarded";
 import { Button } from "@/components/ui/button";
 import { Check, Coins, Sparkles, Target } from "lucide-react";
+import { useEffect } from "react";
+import { LeadForm } from "@/components/LeadForm";
+import { useConversionTracking } from "@/hooks/useConversionTracking";
 
 
 export const Route = createFileRoute("/pricing")({
@@ -17,6 +20,8 @@ export const Route = createFileRoute("/pricing")({
       { property: "og:title", content: "Pricing — Survey credits for research | CampusVerify" },
       { property: "og:description", content: "Compare CampusVerify credit bundles: students earn credits by answering surveys, researchers buy credits to publish theirs and reach verified respondents." },
       { property: "og:url", content: "https://campus-verify.live/pricing" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
     links: [{ rel: "canonical", href: "https://campus-verify.live/pricing" }],
   }),
@@ -30,6 +35,8 @@ const GENERAL_COSTS = [
 ];
 
 function PricingPage() {
+  const track = useConversionTracking("pricing");
+  useEffect(() => { track("pricing_view", true); }, [track]);
   const { profile } = useAuth();
   const forex = useUsdToGhs();
   const { onboarded, loading } = useSchoolOnboarded();
@@ -42,7 +49,8 @@ function PricingPage() {
     return <StudentFreeNotice />;
   }
 
-  const freeBundle = CREDIT_BUNDLES.find((b) => b.id === "free")!;
+  const freeBundle = CREDIT_BUNDLES.find((b) => b.id === "free");
+  if (!freeBundle) return null;
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-12">
@@ -115,7 +123,7 @@ function PricingPage() {
                   <li key={f} className="flex items-start gap-1.5"><Check className="mt-0.5 h-3 w-3 text-primary" /> {f}</li>
                 ))}
               </ul>
-              <Button asChild className="mt-5 w-full rounded-full">
+              <Button asChild className="mt-5 w-full rounded-full" onClick={() => track("buyer_cta_click")}>
                 <a href={profile ? "/buy-credits" : "/auth?as=general&next=%2Fbuy-credits"}>Buy credits</a>
               </Button>
             </div>
@@ -156,10 +164,16 @@ function PricingPage() {
             </li>
           ))}
         </ul>
-        <Button asChild className="mt-5 rounded-full">
+        <Button asChild className="mt-5 rounded-full" onClick={() => track("buyer_cta_click")}>
           <Link to="/create">Start a Research Boost</Link>
         </Button>
       </div>
+
+      <section className="mt-12" aria-labelledby="study-enquiry-title">
+        <h2 id="study-enquiry-title" className="font-serif text-3xl">Talk to us about your study</h2>
+        <p className="mt-2 mb-5 text-sm text-muted-foreground">Tell us who you need to reach. Contacting us is free and does not commit you to a purchase.</p>
+        <LeadForm kind="study" />
+      </section>
 
       <div className="mt-10 rounded-3xl border border-foreground/15 bg-card p-6 text-sm">
         <h3 className="font-serif text-xl">Billing &amp; refunds</h3>

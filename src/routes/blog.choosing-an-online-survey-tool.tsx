@@ -43,7 +43,7 @@ export const Route = createFileRoute("/blog/choosing-an-online-survey-tool")({
               name: "What is the best online survey tool for academic research?",
               acceptedAnswer: {
                 "@type": "Answer",
-                text: "The best tool depends on your respondents. For campus research, choose a platform that verifies respondents through academic email and lets you target by department and year — like CampusVerify. For general public polls, any major form tool works, but you must screen respondents yourself.",
+                text: "The best tool depends on your respondents. For campus research, choose a platform that verifies respondents through academic email and lets you target by department and year — like CampusVerify. For general public surveys, any major form tool works, but you must screen respondents yourself.",
               },
             },
             {
@@ -105,7 +105,7 @@ function GuidePage() {
 
         <h2>Which one is right for you?</h2>
         <ul>
-          <li><strong>Class poll or event feedback?</strong> A free form builder is enough.</li>
+          <li><strong>Class survey or event feedback?</strong> A free form builder is enough.</li>
           <li><strong>Academic research on students?</strong> You need campus verification and department targeting — that's exactly what CampusVerify is built for.</li>
           <li><strong>Market research on the general public?</strong> Use a platform with a verified public audience, or a panel provider if budget allows.</li>
           <li><strong>Thesis or dissertation survey?</strong> Prioritise verification and a paper trail of who was eligible — examiners ask.</li>

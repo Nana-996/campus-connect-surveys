@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { getMyPartnerDashboard } from "@/lib/partners.functions";
 import { PartnerProgress, StatGrid } from "@/components/PartnerProgress";
 import { siteUrl } from "@/lib/site";
+import { PartnerPayoutHistory } from "@/components/PartnerPayoutHistory";
 
 export const Route = createFileRoute("/_authenticated/partner")({
   component: PartnerPortal,
@@ -13,6 +14,10 @@ export const Route = createFileRoute("/_authenticated/partner")({
     meta: [
       { title: "Partner dashboard — CampusVerify" },
       { name: "description", content: "Track your CampusVerify partner referrals." },
+      { property: "og:title", content: "Partner dashboard — CampusVerify" },
+      { property: "og:description", content: "Your referral progress and manual payout history." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex,nofollow" },
     ],
   }),
@@ -57,6 +62,7 @@ function PartnerPortal() {
             <PartnerProgress stats={p.stats} target={p.target_paying} paid={p.milestones_paid} />
             <p className="text-xs text-muted-foreground">Milestones paid so far: {p.milestones_paid}</p>
             <StatGrid stats={p.stats} clicks={p.clicks} />
+            <PartnerPayoutHistory payouts={p.payouts} />
             <div>
               <h3 className="text-sm font-semibold">Recent activity</h3>
               <ul className="mt-2 space-y-1 text-sm">

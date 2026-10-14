@@ -29,6 +29,7 @@ import { InfoTip } from "@/components/InfoTip";
 import { AudienceBuilder, type AudienceValue, type CriterionKey } from "@/components/AudienceBuilder";
 import { VisibilityPicker } from "@/components/VisibilityPicker";
 import type { Visibility } from "@/lib/visibility";
+import { useConversionTracking } from "@/hooks/useConversionTracking";
 
 
 type Question = {
@@ -57,6 +58,8 @@ export const Route = createFileRoute("/_authenticated/create")({
       { property: "og:title", content: "Create a survey — CampusVerify" },
       { property: "og:description", content: "Design a targeted student survey, set your tier, and publish to verified university respondents in minutes." },
       { name: "robots", content: "noindex,nofollow" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
 });
@@ -80,6 +83,7 @@ const loadDraft = (): Partial<Draft> => {
 };
 
 function Create() {
+  const track = useConversionTracking("create");
   const { user, profile, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const search = Route.useSearch();
@@ -130,6 +134,9 @@ function Create() {
   const [mode, setMode] = useState<"credits" | "boost">("credits");
   const [boostTier, setBoostTier] = useState<BoostTierId>("standard");
   const isBoost = mode === "boost";
+  useEffect(() => {
+    if (!isBoost && !canAffordTotal) track("upgrade_prompt_view", true);
+  }, [isBoost, canAffordTotal, track]);
   const selectedBoost = getBoostTier(boostTier) ?? BOOST_TIERS[1];
 
   const startBoost = useServerFn(initializeResearchBoostCheckout);
@@ -759,14 +766,14 @@ function Create() {
         </div>
 
         {!isBoost && !canAffordTotal && (
-          <p className="text-center text-xs font-medium text-destructive">
+          <div className="space-y-3 text-center"><p className="text-xs font-medium text-destructive">
             Need {totalCost - spendable} more credit{(totalCost - spendable) === 1 ? "" : "s"} —{" "}
             {isGeneral ? (
               <a href="/buy-credits" className="underline">buy more credits</a>
             ) : (
               "answer surveys to earn them."
             )}
-          </p>
+          </p>{isGeneral && <div className="flex flex-wrap justify-center gap-2"><Button asChild variant="outline"><a href="/buy-credits" onClick={() => track("buyer_cta_click")}>Buy credits</a></Button><Button type="button" variant="outline" onClick={() => { track("buyer_cta_click"); setMode("boost"); }}>Choose Research Boost</Button></div>}</div>
         )}
         <Button type="submit" size="lg" disabled={submitting || (!isBoost && !canAffordTotal)}
           className="h-14 w-full rounded-full bg-primary text-base">

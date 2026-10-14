@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { listPartners, savePartner, markPartnerPaid, type Partner } from "@/lib/partners.functions";
 import { PartnerProgress, StatGrid, cycleProgress } from "@/components/PartnerProgress";
 import { siteUrl } from "@/lib/site";
+import { PartnerPayoutHistory } from "@/components/PartnerPayoutHistory";
 
 export const Route = createFileRoute("/_authenticated/admin-partners")({
   component: AdminPartners,
@@ -17,6 +18,10 @@ export const Route = createFileRoute("/_authenticated/admin-partners")({
     meta: [
       { title: "Partners — CampusVerify admin" },
       { name: "description", content: "Private partner referral tracking." },
+      { property: "og:title", content: "Partners — CampusVerify admin" },
+      { property: "og:description", content: "Private partner referral tracking and manual payouts." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex,nofollow" },
     ],
   }),
@@ -29,9 +34,10 @@ function AdminPartners() {
   const list = useServerFn(listPartners);
   const save = useServerFn(savePartner);
   const pay = useServerFn(markPartnerPaid);
-  const { data, isLoading, error } = useQuery({ queryKey: ["admin-partners"], queryFn: () => list() });
+  const { data, isLoading, error } = useQuery({ queryKey: ["admin-partners"], queryFn: () => list(), retry: false });
   const [form, setForm] = useState<typeof empty & { id?: string }>(empty);
   const [busy, setBusy] = useState(false);
+  const [payingId, setPayingId] = useState<string | null>(null);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,18 +57,24 @@ function AdminPartners() {
   const edit = (p: Partner) =>
     setForm({ id: p.id, name: p.name, slug: p.slug, partner_email: p.partner_email, contact: p.contact ?? "", target_paying: p.target_paying, reward_note: p.reward_note ?? "", is_active: p.is_active });
 
-  const markPaid = async (id: string) => {
+  const markPaid = async (id: string, expectedPaid: number) => {
     if (!confirm("Confirm you have paid this partner for the current milestone?")) return;
+    setPayingId(id);
     try {
-      await pay({ data: { id } });
+      await pay({ data: { id, expectedPaid } });
       toast.success("Payout recorded");
       qc.invalidateQueries({ queryKey: ["admin-partners"] });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed");
+    } finally {
+      setPayingId(null);
     }
   };
 
   const set = (k: keyof typeof empty) => (e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, [k]: e.target.value });
+
+  if (isLoading) return <p className="p-8 text-sm text-muted-foreground">Checking access…</p>;
+  if (error) return <div className="p-8"><h1 className="font-serif text-3xl">Private administration area.</h1><p className="mt-2 text-sm text-muted-foreground">{/forbidden|owner only/i.test(error.message) ? "Only the CampusVerify app owner can open this page." : "Could not verify access. Please try again."}</p><Button asChild className="mt-4"><Link to="/feed">Go to feed</Link></Button></div>;
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 px-4 py-8">
@@ -74,11 +86,11 @@ function AdminPartners() {
 
       <form onSubmit={submit} className="grid gap-3 rounded-2xl border bg-card p-5 sm:grid-cols-2">
         <h2 className="font-semibold sm:col-span-2">{form.id ? "Edit partner" : "Add partner"}</h2>
-        <div><Label>Name</Label><Input required value={form.name} onChange={set("name")} /></div>
-        <div><Label>Link name (campus-verify.live/p/…)</Label><Input required value={form.slug} onChange={set("slug")} placeholder="pulse" /></div>
+        <div><Label>Name</Label><Input required minLength={2} maxLength={100} value={form.name} onChange={set("name")} /></div>
+        <div><Label>Link name (campus-verify.live/p/…)</Label><Input required pattern="[a-z0-9-]{2,40}" maxLength={40} value={form.slug} onChange={set("slug")} placeholder="pulse" /></div>
         <div><Label>Partner's login email</Label><Input required type="email" value={form.partner_email} onChange={set("partner_email")} /></div>
         <div><Label>WhatsApp / phone (optional)</Label><Input value={form.contact} onChange={set("contact")} /></div>
-        <div><Label>Paying customers per milestone</Label><Input required type="number" min={1} value={form.target_paying} onChange={set("target_paying")} /></div>
+        <div><Label>Paying customers per milestone</Label><Input required type="number" min={1} max={100000} disabled={Boolean(form.id && data?.find((p) => p.id === form.id)?.milestones_paid)} value={form.target_paying} onChange={set("target_paying")} /></div>
         <div><Label>Agreed reward</Label><Input value={form.reward_note} onChange={set("reward_note")} placeholder="GHS 500 per milestone" /></div>
         <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} /> Active</label>
         <div className="flex gap-2 sm:col-span-2">
@@ -103,12 +115,13 @@ function AdminPartners() {
                 </div>
                 <div className="flex gap-2">
                   <Button size="sm" variant="outline" onClick={() => edit(p)}>Edit</Button>
-                  <Button size="sm" disabled={!due} onClick={() => markPaid(p.id)}>Mark milestone paid</Button>
+                  <Button size="sm" disabled={!due || payingId !== null} onClick={() => markPaid(p.id, p.milestones_paid)}>Mark milestone paid</Button>
                 </div>
               </div>
               <PartnerProgress stats={p.stats} target={p.target_paying} paid={p.milestones_paid} />
               <p className="text-xs text-muted-foreground">Milestones paid: {p.milestones_paid}{p.last_paid_at ? ` · last ${new Date(p.last_paid_at).toLocaleDateString()}` : ""}</p>
               <StatGrid stats={p.stats} clicks={p.clicks} />
+              <PartnerPayoutHistory payouts={p.payouts} />
             </section>
           );
         })}
