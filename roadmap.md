@@ -1,5 +1,14 @@
 # Roadmap
 
+## Audit fixes — 2026-10-14
+- [ ] Unify safe CSV summary generation and regression tests.
+- [ ] Load every survey response in checked batches and batch demographics.
+- [ ] Hide partner administration until server-authorized.
+- [ ] Record atomic, historical manual milestone payouts.
+- [ ] Add study enquiries and wire conversion measurement and owner reporting.
+- [ ] Retire remaining callable Poll features and remove public mentions.
+- [ ] Verify affected flows, mobile layouts, and tests.
+
 - [x] Replace student-only positioning on the homepage and shared metadata.
 - [x] Update broad public and shared copy to represent all user types.
 - [x] Verify the updated public experience on mobile and desktop.
