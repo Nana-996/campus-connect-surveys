@@ -29,6 +29,13 @@
       "when": 1791719138579,
       "tag": "0003_deprecate_polls",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791992094988,
+      "tag": "0004_audit_payout_history_conversion_and_poll_retirement",
+      "breakpoints": true
     }
   ]
 }

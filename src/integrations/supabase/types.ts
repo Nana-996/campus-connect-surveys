@@ -437,6 +437,50 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_payouts: {
+        Row: {
+          id: string
+          legacy: boolean
+          milestone: number
+          paid_at: string | null
+          partner_id: string
+          paying_at_payout: number | null
+          recorded_by: string | null
+          reward_note: string | null
+          target_paying: number
+        }
+        Insert: {
+          id?: string
+          legacy?: boolean
+          milestone: number
+          paid_at?: string | null
+          partner_id: string
+          paying_at_payout?: number | null
+          recorded_by?: string | null
+          reward_note?: string | null
+          target_paying: number
+        }
+        Update: {
+          id?: string
+          legacy?: boolean
+          milestone?: number
+          paid_at?: string | null
+          partner_id?: string
+          paying_at_payout?: number | null
+          recorded_by?: string | null
+          reward_note?: string | null
+          target_paying?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_payouts_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_referrals: {
         Row: {
           created_at: string
@@ -1964,6 +2008,7 @@ export type Database = {
       claim_partner_referral: { Args: { _slug: string }; Returns: string }
       claim_referral: { Args: { _code: string }; Returns: Json }
       claim_school_admin: { Args: never; Returns: number }
+      conversion_summary: { Args: never; Returns: Json }
       credit_paystack_purchase: {
         Args: { _raw: Json; _reference: string }
         Returns: undefined
@@ -2215,6 +2260,10 @@ export type Database = {
       new_referral_code: { Args: never; Returns: string }
       partner_stats: { Args: { _partner_id: string }; Returns: Json }
       record_partner_click: { Args: { _slug: string }; Returns: boolean }
+      record_partner_payout: {
+        Args: { _actor: string; _expected_paid: number; _partner_id: string }
+        Returns: undefined
+      }
       redeem_promo_code: { Args: { _code: string }; Returns: Json }
       refund_purchased_credits: {
         Args: {
