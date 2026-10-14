@@ -331,6 +331,7 @@ function ReportBuilderPage() {
   const exportCsvSummary = () => {
     if (!survey) return;
     const selectedSurvey = { ...survey, questions: survey.questions.filter((q) => sections.some((s) => s.qid === q.id && s.included)) };
+    const profileMap = Object.fromEntries(profiles.map((p) => [p.id, p]));
     const stats = computeSurveyStats(selectedSurvey, responses, profileMap, responses.length);
     downloadCsv(summaryTablesCsv({ survey: selectedSurvey, stats, rows: responses, profiles: profileMap, filtersLabel: null }), `${survey.title.replace(/[^a-z0-9_-]/gi, "_")}_summary.csv`);
   };

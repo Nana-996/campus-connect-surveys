@@ -13,14 +13,17 @@ interface Props {
   country?: string;
   studentCount?: string;
   message?: string;
+  sampleSize?: string;
+  contactPreference?: string;
 }
 
 const Email = (p: Props) => {
-  const label = p.kind === "school" ? "School interest" : "Demo request";
+  const label = p.kind === "study" ? "Study enquiry" : p.kind === "school" ? "School interest" : "Demo request";
   const rows: [string, string | undefined][] = [
     ["Name", p.fullName], ["Email", p.email], ["Phone", p.phone],
     ["Organisation", p.organization], ["Role", p.roleTitle], ["Country", p.country],
     ["Students", p.studentCount], ["Message", p.message],
+    ["Responses needed", p.sampleSize], ["Preferred contact", p.contactPreference],
   ];
   return (
     <Html lang="en">
@@ -45,7 +48,7 @@ const Email = (p: Props) => {
 export const template = {
   component: Email,
   subject: (d: Record<string, unknown>) =>
-    `New ${d?.["kind"] === "school" ? "school interest" : "demo request"}: ${(d?.["fullName"] as string) ?? ""}`.trim(),
+    `New ${d?.["kind"] === "study" ? "study enquiry" : d?.["kind"] === "school" ? "school interest" : "demo request"}: ${(d?.["fullName"] as string) ?? ""}`.trim(),
   displayName: "New lead alert",
   previewData: { kind: "school", fullName: "Kofi Mensah", email: "kofi@ug.edu.gh", organization: "University of Ghana", studentCount: "5,000+", message: "We'd like to onboard." },
 } satisfies TemplateEntry;

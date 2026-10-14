@@ -2,20 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { isAppOwnerClaims } from "@/lib/app-owner";
-
-const opt = (n: number) => z.string().trim().max(n).optional().transform((v) => (v ? v : null));
-
-const leadSchema = z.object({
-  kind: z.enum(["school", "demo"]),
-  full_name: z.string().trim().min(1).max(120),
-  email: z.string().trim().email().max(255),
-  phone: opt(40),
-  organization: opt(160),
-  role_title: opt(120),
-  country: opt(80),
-  student_count: opt(40),
-  message: opt(2000),
-});
+import { leadSchema } from "@/lib/lead-schema";
 
 export const submitLead = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => leadSchema.parse(d))
@@ -39,7 +26,7 @@ export const submitLead = createServerFn({ method: "POST" })
           templateData: {
             kind: data.kind, fullName: data.full_name, email: data.email, phone: data.phone,
             organization: data.organization, roleTitle: data.role_title, country: data.country,
-            studentCount: data.student_count, message: data.message,
+            studentCount: data.student_count, message: data.message, sampleSize: data.sample_size, contactPreference: data.contact_preference,
           },
         }).catch((e) => console.error("[leads:email]", e));
       }
@@ -54,10 +41,11 @@ function assertAdmin(claims: Record<string, unknown>) {
 }
 
 export type Lead = {
-  id: string; kind: "school" | "demo"; full_name: string; email: string; phone: string | null;
+  id: string; kind: "school" | "demo" | "study"; full_name: string; email: string; phone: string | null;
   organization: string | null; role_title: string | null; country: string | null;
   student_count: string | null; message: string | null; status: "new" | "contacted" | "won" | "lost";
   notes: string | null; created_at: string;
+  sample_size: string | null; contact_preference: string | null;
 };
 
 export const listLeads = createServerFn({ method: "GET" })
