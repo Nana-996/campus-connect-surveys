@@ -74,7 +74,7 @@ export function responsesWideCsv({ survey, stats, rows, profiles }: PackageArgs)
       r.created_at,
       r.duration_ms ? Math.round(r.duration_ms / 1000) : "",
       ...DEMO_COLUMNS.map(([key]) => (p?.[key] as string | null | undefined) ?? ""),
-      ...survey.questions.map((q) => answerOf(r, q.id)),
+      ...stats.questions.map((q) => answerOf(r, q.question.id)),
     ];
   });
   return toCsv([header, ...body]);
