@@ -19,6 +19,7 @@ import {
 import { BroadcastPanel } from "@/components/BroadcastPanel";
 import { PromoCodesPanel } from "@/components/PromoCodesPanel";
 import { LeadsPanel } from "@/components/LeadsPanel";
+import { ConversionSummary } from "@/components/ConversionSummary";
 import { PLATFORM_META, PlatformIcon } from "@/components/SocialLinks";
 
 import {
@@ -66,6 +67,10 @@ export const Route = createFileRoute("/_authenticated/admin")({
     meta: [
       { title: "Admin Console — CampusVerify" },
       { name: "description", content: "Manage schools, people, surveys and moderation across CampusVerify." },
+      { property: "og:title", content: "Admin Console — CampusVerify" },
+      { property: "og:description", content: "Private CampusVerify management and customer conversion measurements." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -101,6 +106,7 @@ function Admin() {
 
   return (
     <div className="space-y-6">
+      {section === "overview" && <ConversionSummary />}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">App owner</p>

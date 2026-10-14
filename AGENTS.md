@@ -10,3 +10,7 @@
 - Public entity data is canonicalized in root Organization/WebSite JSON-LD and `/facts` SoftwareApplication schema; `llms.txt` points machine readers to evidence pages so product claims stay consistent.
 
 - Official contact and sending addresses are independent of the authenticated owner identity; contact updates must never change access control.
+- Survey-owner results use snapshot-bounded, count-checked response batches and bounded profile queries so exports never silently accept capped data.
+- All spreadsheet exports use the shared formula-neutralizing CSV serializer so alternate export entry points retain the same protection.
+- Partner payouts use a service-only locked database transaction and immutable milestone ledger; expected progress prevents duplicate confirmations and paid targets cannot be edited.
+- Conversion payment and enquiry events originate from database transitions; public interaction tracking cannot report payments or identify callers, and aggregate reporting stays owner-gated.
