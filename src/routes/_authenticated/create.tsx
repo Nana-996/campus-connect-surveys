@@ -134,9 +134,7 @@ function Create() {
   const [mode, setMode] = useState<"credits" | "boost">("credits");
   const [boostTier, setBoostTier] = useState<BoostTierId>("standard");
   const isBoost = mode === "boost";
-  useEffect(() => {
-    if (!isBoost && !canAffordTotal) track("upgrade_prompt_view", true);
-  }, [isBoost, canAffordTotal, track]);
+
   const selectedBoost = getBoostTier(boostTier) ?? BOOST_TIERS[1];
 
   const startBoost = useServerFn(initializeResearchBoostCheckout);
