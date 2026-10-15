@@ -256,6 +256,10 @@ function Create() {
   const totalCost = baseTierCost;
   const spendable = (profile?.earned_credits ?? 0) + (profile?.paid_credits ?? 0);
   const canAffordTotal = spendable >= totalCost;
+  useEffect(() => {
+    if (!isBoost && !canAffordTotal) track("upgrade_prompt_view", true);
+  }, [isBoost, canAffordTotal, track]);
+
 
 
   const submit = async (e: React.FormEvent) => {
