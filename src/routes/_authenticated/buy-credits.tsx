@@ -4,10 +4,10 @@ import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { CREDIT_BUNDLES, PAID_BUNDLES } from "@/lib/credit-bundles";
+import { CREDIT_BUNDLES, PAID_BUNDLES, getBundleByBundleId } from "@/lib/credit-bundles";
 import { useUsdToGhs } from "@/hooks/useForex";
 import { initializePaystackCheckout, verifyPaystackCheckout } from "@/utils/paystack.functions";
-import { Coins, Sparkles, Check } from "lucide-react";
+import { Coins, Sparkles, Check, RotateCcw, AlertCircle } from "lucide-react";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { PromoRedeem } from "@/components/PromoRedeem";
 import { TopupRequest } from "@/components/TopupRequest";
@@ -15,6 +15,14 @@ import { useSchoolOnboarded, STUDENT_PRICE_FACTOR } from "@/hooks/useSchoolOnboa
 
 export const Route = createFileRoute("/_authenticated/buy-credits")({
   component: BuyCredits,
+  head: () => ({ meta: [
+    { title: "Buy survey credits | CampusVerify" },
+    { name: "description", content: "Top up research publishing credits, starting with the Mini pack in Ghana Cedis." },
+    { property: "og:title", content: "Buy survey credits | CampusVerify" },
+    { property: "og:description", content: "Choose your publishing credit pack and pay securely through Paystack." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
 });
 
 function BuyCredits() {
@@ -30,31 +38,38 @@ function BuyCredits() {
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [promo, setPromo] = useState<{ code: string; pct: number } | null>(null);
 
-  // On return from Paystack, verify the transaction and credit the account.
+  const [payment, setPayment] = useState<{ status: "failed" | "pending"; message: string; reference: string; bundleId?: string } | null>(null);
+  const [checking, setChecking] = useState(false);
+
+  const checkPayment = async (reference: string) => {
+    setChecking(true);
+    try {
+      const result = await verifyCheckout({ data: { reference } });
+      if (result.status === "success") {
+        setPayment(null);
+        sessionStorage.removeItem("cv:credit-checkout-ref");
+        toast.success(`Payment received — ${result.credits} credits added.`);
+        await refreshProfile();
+      } else {
+        setPayment({ ...result, reference });
+      }
+    } catch {
+      setPayment({ status: "pending", reference, message: "We could not check your payment yet. Check again before paying again. If you were debited, contact founder@campus-verify.live." });
+    } finally {
+      setChecking(false);
+    }
+  };
+
+  // Keep unconfirmed references across refreshes so buyers can check before retrying.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const ref = params.get("paystack_ref") || params.get("reference") || params.get("trxref");
+    const ref = params.get("paystack_ref") || params.get("reference") || params.get("trxref") || sessionStorage.getItem("cv:credit-checkout-ref");
     if (!ref) return;
-    void (async () => {
-      try {
-        const result = await verifyCheckout({ data: { reference: ref } });
-        if (result.status === "success") {
-          toast.success(`Payment received — ${result.credits} credits added.`);
-          await refreshProfile();
-        } else {
-          toast.error("Payment could not be confirmed. If you were charged, contact support.");
-        }
-      } catch (e) {
-        toast.error(e instanceof Error ? e.message : "Verification failed");
-      } finally {
-        // Clean the URL so a refresh doesn't re-verify.
-        const url = new URL(window.location.href);
-        url.searchParams.delete("paystack_ref");
-        url.searchParams.delete("reference");
-        url.searchParams.delete("trxref");
-        window.history.replaceState({}, "", url.toString());
-      }
-    })();
+    sessionStorage.setItem("cv:credit-checkout-ref", ref);
+    void checkPayment(ref);
+    const url = new URL(window.location.href);
+    ["paystack_ref", "reference", "trxref"].forEach((key) => url.searchParams.delete(key));
+    window.history.replaceState({}, "", url.toString());
   }, [verifyCheckout, refreshProfile]);
 
   if (!profile) return null;
@@ -80,16 +95,17 @@ function BuyCredits() {
     );
   }
 
-  const handleBuy = async (bundleId: string, usdAmount: number) => {
-    if (usdAmount <= 0) return;
+  const handleBuy = async (bundleId: string) => {
+    if (!getBundleByBundleId(bundleId) || bundleId === "free") return;
     setLoadingId(bundleId);
     try {
-      const { authorizationUrl } = await initCheckout({
+      const { authorizationUrl, reference } = await initCheckout({
         data: { bundleId, originUrl: window.location.origin, promoCode: promo?.code },
       });
+      sessionStorage.setItem("cv:credit-checkout-ref", reference);
       window.location.href = authorizationUrl;
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not start checkout");
+      setPayment({ status: "failed", reference: "", bundleId, message: "Checkout could not be opened. Please try again shortly. If this continues, contact founder@campus-verify.live." });
       setLoadingId(null);
     }
   };
@@ -117,9 +133,21 @@ function BuyCredits() {
         </p>
 
         <p className="mt-6 max-w-2xl text-sm text-muted-foreground">
-          Prices are shown in USD and charged in Ghana Cedis at the live exchange rate.
+          Mini has a fixed Ghana Cedi price. Other packs are shown in USD and charged in Ghana Cedis at the live exchange rate.
           {forex.usingFallback && " Rate may be slightly outdated."}
         </p>
+
+        {payment && (
+          <section role="alert" className="mt-6 border border-destructive/30 bg-card p-4 rounded-lg">
+            <h2 className="flex items-center gap-2 font-semibold"><AlertCircle className="h-4 w-4 text-destructive" />{payment.status === "pending" ? "Awaiting payment confirmation" : "Payment not completed"}</h2>
+            <p className="mt-2 text-sm text-muted-foreground">{payment.message}</p>
+            <div className="mt-3 flex flex-wrap gap-3">
+              {payment.status === "failed" && payment.bundleId && <Button disabled={loadingId !== null || checking} onClick={() => { if (payment.bundleId) void handleBuy(payment.bundleId); }}><RotateCcw className="h-4 w-4" />Try again</Button>}
+              {payment.reference && <Button variant="outline" disabled={checking} onClick={() => void checkPayment(payment.reference)}>{checking ? "Checking…" : "Check payment status"}</Button>}
+              <Button variant="ghost" asChild><a href="mailto:founder@campus-verify.live">Contact support</a></Button>
+            </div>
+          </section>
+        )}
 
         {isStudent && (
           <div className="mt-6 max-w-2xl rounded-2xl border-2 border-primary/40 bg-primary/5 p-4 text-sm">
@@ -163,7 +191,7 @@ function BuyCredits() {
           </div>
 
           {PAID_BUNDLES.map((b) => {
-            const ghs = forex.toGhs(b.usdAmount * factor);
+            const ghs = b.ghsAmount !== undefined ? b.ghsAmount * factor : forex.toGhs(b.usdAmount * factor);
             return (
               <div
                 key={b.id}
@@ -183,14 +211,14 @@ function BuyCredits() {
 
                 <div className="mt-5">
                   <p className="font-serif text-2xl">
-                    {isStudent && <span className="mr-2 text-base text-muted-foreground line-through">${b.usdAmount.toFixed(2)}</span>}
-                    ${(b.usdAmount * factor).toFixed(2)}
+                    {isStudent && <span className="mr-2 text-base text-muted-foreground line-through">{b.ghsAmount !== undefined ? `GHS ${b.ghsAmount.toFixed(2)}` : `$${b.usdAmount.toFixed(2)}`}</span>}
+                    {b.ghsAmount !== undefined ? `GHS ${ghs.toFixed(2)}` : `$${(b.usdAmount * factor).toFixed(2)}`}
                   </p>
                   <p className="text-[11px] text-muted-foreground">
-                    ≈ GHS {ghs}
-                    {forex.loading && " …"}
+                    {b.ghsAmount !== undefined ? "Fixed price · no currency conversion" : `≈ GHS ${ghs}`}
+                    {b.ghsAmount === undefined && forex.loading && " …"}
                   </p>
-                  <p className="mt-0.5 text-[10px] text-muted-foreground/80">Price includes exchange rate adjustment</p>
+                  {b.ghsAmount === undefined && <p className="mt-0.5 text-[10px] text-muted-foreground/80">Price includes exchange rate adjustment</p>}
                 </div>
 
                 <ul className="mt-4 space-y-1.5 text-xs text-muted-foreground">
@@ -201,8 +229,8 @@ function BuyCredits() {
 
                 <Button
                   className="mt-6 w-full rounded-full"
-                  disabled={loadingId !== null || forex.loading}
-                  onClick={() => handleBuy(b.id, b.usdAmount)}
+                  disabled={loadingId !== null || (b.ghsAmount === undefined && forex.loading) || checking || payment?.status === "pending"}
+                  onClick={() => handleBuy(b.id)}
                 >
                   {loadingId === b.id ? "Opening…" : `Buy ${b.label}`}
                 </Button>
