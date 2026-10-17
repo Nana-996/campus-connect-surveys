@@ -58,7 +58,7 @@ function PricingPage() {
       <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Pricing</p>
       <h1 className="mt-1 font-serif text-5xl leading-[0.95]">Simple <em className="text-primary">credit</em> bundles.</h1>
       <p className="mt-4 max-w-2xl text-sm text-muted-foreground">
-        Answering surveys is always free. General / Researcher accounts (lecturers, NGOs, companies and independent researchers) buy credit bundles to publish surveys. Students publish with credits earned by answering. Prices are shown in USD and charged in Ghana Cedis at the live exchange rate.
+        Answering surveys is always free. General / Researcher accounts (lecturers, NGOs, companies and independent researchers) buy credit bundles to publish surveys. Students publish with credits earned by answering. Mini has a fixed Ghana Cedi price. Other packs are shown in USD and charged in Ghana Cedis at the live exchange rate.
         {forex.usingFallback && " Rate may be slightly outdated."}
       </p>
 
@@ -93,7 +93,7 @@ function PricingPage() {
         </div>
 
         {PAID_BUNDLES.map((b) => {
-          const ghs = forex.toGhs(b.usdAmount * factor);
+          const ghs = b.ghsAmount !== undefined ? b.ghsAmount * factor : forex.toGhs(b.usdAmount * factor);
           return (
             <div
               key={b.id}
@@ -112,11 +112,11 @@ function PricingPage() {
               <p className="mt-1 text-xs uppercase tracking-wider text-muted-foreground">credits</p>
               <div className="mt-5">
                 <p className="font-serif text-2xl">
-                  {isStudent && <span className="mr-2 text-base text-muted-foreground line-through">${b.usdAmount.toFixed(2)}</span>}
-                  ${(b.usdAmount * factor).toFixed(2)}
+                  {isStudent && <span className="mr-2 text-base text-muted-foreground line-through">{b.ghsAmount !== undefined ? `GHS ${b.ghsAmount.toFixed(2)}` : `$${b.usdAmount.toFixed(2)}`}</span>}
+                  {b.ghsAmount !== undefined ? `GHS ${ghs.toFixed(2)}` : `$${(b.usdAmount * factor).toFixed(2)}`}
                 </p>
-                <p className="text-[11px] text-muted-foreground">≈ GHS {ghs}{forex.loading && " …"}</p>
-                <p className="mt-0.5 text-[10px] text-muted-foreground/80">Price includes exchange rate adjustment</p>
+                <p className="text-[11px] text-muted-foreground">{b.ghsAmount !== undefined ? "Fixed price · no currency conversion" : `≈ GHS ${ghs}`}{b.ghsAmount === undefined && forex.loading && " …"}</p>
+                {b.ghsAmount === undefined && <p className="mt-0.5 text-[10px] text-muted-foreground/80">Price includes exchange rate adjustment</p>}
               </div>
               <ul className="mt-4 space-y-1.5 text-xs text-muted-foreground">
                 {b.features?.map((f) => (
