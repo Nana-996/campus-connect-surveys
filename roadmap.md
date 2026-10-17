@@ -1,5 +1,10 @@
 # Roadmap
 
+## Checkout improvements — 2026-10-17
+- [ ] Add a fixed-GHS mini credit pack without changing existing bundles.
+- [ ] Add safe payment failure guidance, status checks, and retry actions.
+- [ ] Test pricing, payment statuses, and the checkout journey.
+
 ## Audit fixes — 2026-10-14
 - [ ] Unify safe CSV summary generation and regression tests.
 - [ ] Load every survey response in checked batches and batch demographics.

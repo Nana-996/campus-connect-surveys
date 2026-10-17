@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { getBundleByBundleId } from "@/lib/credit-bundles";
+import { bundleAmountGhs, getBundleByBundleId } from "@/lib/credit-bundles";
+import { paymentFeedback } from "@/lib/payment-feedback";
 import { safeOrigin } from "@/lib/safe-origin";
 
 export const getPaystackTestMode = createServerFn({ method: "GET" }).handler(async () => {
@@ -10,7 +11,7 @@ export const getPaystackTestMode = createServerFn({ method: "GET" }).handler(asy
 
 /**
  * Initialize a Paystack transaction for a credit bundle purchase.
- * Uses the live USD→GHS rate + 5% buffer sent from the client (must be a positive number).
+ * Uses server-owned fixed-GHS pricing or the live USD→GHS rate + 5% buffer.
  * Records a pending row in paystack_purchases, returns an authorization_url to redirect to.
  */
 export const initializePaystackCheckout = createServerFn({ method: "POST" })
@@ -23,7 +24,7 @@ export const initializePaystackCheckout = createServerFn({ method: "POST" })
   })
   .handler(async ({ data, context }) => {
     const bundle = getBundleByBundleId(data.bundleId);
-    if (!bundle || bundle.usdAmount <= 0) throw new Error("Unknown bundle");
+    if (!bundle || (bundle.usdAmount <= 0 && (bundle.ghsAmount ?? 0) <= 0)) throw new Error("Unknown bundle");
 
     const { supabase, userId, claims } = context;
 
@@ -48,15 +49,13 @@ export const initializePaystackCheckout = createServerFn({ method: "POST" })
     if (!email) throw new Error("No email on session");
 
     let serverRate = 0;
-    try {
+    if (bundle.ghsAmount === undefined) try {
       const r = await fetch("https://api.exchangerate-api.com/v4/latest/USD");
       if (r.ok) serverRate = Number((await r.json())?.rates?.GHS) || 0;
     } catch { /* fall through */ }
     // The charged amount is always derived on the server (live rate + 5% buffer, matching
     // the displayed price). The client-supplied amount is never used for billing.
-    const rateOk = serverRate > 5 && serverRate < 100;
-    if (!rateOk) throw new Error("Pricing is temporarily unavailable — please try again shortly.");
-    const serverAmountGhs = Math.round(usdPrice * serverRate * 1.05 * 100) / 100;
+    const serverAmountGhs = bundleAmountGhs(bundle, priceFactor, serverRate);
 
     const reference = `cv_${userId.slice(0, 8)}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -118,19 +117,24 @@ export const verifyPaystackCheckout = createServerFn({ method: "POST" })
     if (!purchase) throw new Error("Purchase not found");
     if (purchase.user_id !== userId) throw new Error("Not your purchase");
     if (purchase.status === "success") {
-      return { status: "success" as const, credits: purchase.credits };
+      return { status: "success" as const, credits: purchase.credits, bundleId: purchase.bundle_id };
     }
 
     const { verifyTransaction } = await import("@/lib/paystack.server");
     const verified = await verifyTransaction(data.reference);
 
     if (verified.status !== "success") {
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      await supabaseAdmin
-        .from("paystack_purchases")
-        .update({ status: "failed", raw: verified as unknown as never })
-        .eq("reference", data.reference);
-      return { status: "failed" as const };
+      const feedback = paymentFeedback(verified.status, verified.gateway_response);
+      // Pending payments must remain pending; a webhook may confirm them later.
+      if (feedback.status === "failed") {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        await supabaseAdmin
+          .from("paystack_purchases")
+          .update({ status: "failed", raw: verified as unknown as never })
+          .eq("reference", data.reference)
+          .neq("status", "success");
+      }
+      return { ...feedback, bundleId: purchase.bundle_id };
     }
 
     // Sanity check amount matches what we recorded.
@@ -145,5 +149,5 @@ export const verifyPaystackCheckout = createServerFn({ method: "POST" })
     });
     if (creditErr) throw new Error(creditErr.message);
 
-    return { status: "success" as const, credits: purchase.credits };
+    return { status: "success" as const, credits: purchase.credits, bundleId: purchase.bundle_id };
   });

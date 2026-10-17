@@ -73,6 +73,7 @@ export async function verifyTransaction(reference: string) {
     reference: string;
     amount: number; // pesewas
     currency: string;
+    gateway_response?: string | null;
     metadata?: Record<string, unknown>;
     customer?: { email?: string };
   };
