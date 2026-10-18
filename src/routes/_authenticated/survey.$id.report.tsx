@@ -1,3 +1,4 @@
+import { answerMatches, answerText, selectionsOf, validMultiAnswer, type SurveyAnswers } from "@/lib/survey-answers";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -24,7 +25,7 @@ import { analyzeSentiment, topWords, suggestInterpretation } from "@/lib/text-an
 import { summaryTablesCsv, downloadCsv } from "@/lib/report/csv";
 import { computeSurveyStats } from "@/lib/report/stats";
 
-type Question = { id: string; type: "text" | "choice" | "rating"; text: string; options?: string[] };
+type Question = { id: string; type: "text" | "choice" | "multi_choice" | "rating"; text: string; options?: string[] };
 type Survey = {
   id: string; creator_id: string; title: string; description: string;
   questions: Question[]; response_count: number; response_goal?: number; created_at: string;
@@ -32,7 +33,7 @@ type Survey = {
 };
 type ResponseRow = {
   id: string; respondent_id: string;
-  answers: Record<string, string>; created_at: string; duration_ms?: number | null;
+  answers: SurveyAnswers; created_at: string; duration_ms?: number | null;
 };
 type ProfileRow = {
   id: string; department: string | null; year: string | null;
@@ -78,16 +79,16 @@ function aggregate(q: Question, rows: ResponseRow[]) {
   const labels = q.type === "rating" ? ["1", "2", "3", "4", "5"] : (q.options ?? []);
   return labels.map((label) => ({
     label,
-    count: rows.filter((r) => String(r.answers?.[q.id] ?? "") === label).length,
+    count: rows.filter((r) => answerMatches(r.answers?.[q.id], label)).length,
   }));
 }
 
 function textAnswersFor(q: Question, rows: ResponseRow[]): string[] {
-  return rows.map((r) => String(r.answers?.[q.id] ?? "").trim()).filter((t) => t.length > 0);
+  return rows.map((r) => answerText(r.answers?.[q.id])).filter((t) => t.length > 0);
 }
 
 function answeredCount(q: Question, rows: ResponseRow[]) {
-  return rows.filter((r) => String(r.answers?.[q.id] ?? "").trim() !== "").length;
+  return rows.filter((r) => answerText(r.answers?.[q.id]) !== "").length;
 }
 
 function ratingAverage(q: Question, rows: ResponseRow[]) {
@@ -97,6 +98,7 @@ function ratingAverage(q: Question, rows: ResponseRow[]) {
 }
 
 function defaultChart(q: Question): ChartKind {
+  if (q.type === "multi_choice") return "bar";
   if (q.type === "rating") return "column";
   if (q.type === "choice") return (q.options?.length ?? 0) <= 6 ? "donut" : "bar";
   return "bar";
@@ -134,7 +136,7 @@ function responsesOverTime(rows: ResponseRow[]) {
 function autoSummary(s: Survey, rs: ResponseRow[]) {
   const n = rs.length;
   const qCount = s.questions.length;
-  const closed = s.questions.filter((q) => q.type === "choice" || q.type === "rating").length;
+  const closed = s.questions.filter((q) => q.type === "choice" || q.type === "multi_choice" || q.type === "rating").length;
   return [
     `This report presents the findings of "${s.title}", conducted on CampusVerify with verified campus respondents.`,
     `A total of ${n} response${n === 1 ? "" : "s"} were collected across ${qCount} question${qCount === 1 ? "" : "s"} (${closed} closed-ended, ${qCount - closed} open-ended).`,
@@ -729,11 +731,12 @@ function SummaryQuestionCard({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-            Question {index} · {labelForType(question.type)}
+            Question {index} · {question.type === "multi_choice" ? "Multiple selection" : labelForType(question.type)}
           </p>
           <h3 className="mt-1 break-words font-serif text-xl leading-snug">{question.text}</h3>
           <p className="mt-1 text-xs text-muted-foreground">
             {answered} response{answered === 1 ? "" : "s"}
+            {question.type === "multi_choice" && " · percentages count respondents; totals may exceed 100%"}
             {avg !== null && ` · mean ${avg.toFixed(2)}/5`}
             {top && ` · top: ${top.label}`}
           </p>
@@ -1016,10 +1019,11 @@ function QuestionReportPage({
   const avg = question.type === "rating" ? ratingAverage(question, responses) : null;
 
   return (
-    <Page theme={theme} page={page} kicker={`Question ${index} · ${labelForType(question.type)}`}>
+    <Page theme={theme} page={page} kicker={`Question ${index} · ${question.type === "multi_choice" ? "Multiple selection" : labelForType(question.type)}`}>
       <PageHeading theme={theme}>Q{index}. {question.text}</PageHeading>
       <div style={{ fontSize: 11.5, color: "#666", fontFamily: "sans-serif" }}>
-        {answered} response{answered === 1 ? "" : "s"}{avg !== null && ` · mean ${avg.toFixed(2)} / 5`}
+        {answered} response{answered === 1 ? "" : "s"}{question.type === "multi_choice" && " · percentages count respondents; totals may exceed 100%"}
+            {avg !== null && ` · mean ${avg.toFixed(2)} / 5`}
       </div>
 
       <div style={{ marginTop: 22 }}>

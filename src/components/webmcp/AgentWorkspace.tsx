@@ -270,7 +270,7 @@ export function AgentWorkspace() {
                           })
                         }
                       />
-                      {q.type === "choice" && q.options?.length ? (
+                      {(q.type === "choice" || q.type === "multi_choice") && q.options?.length ? (
                         <p className="mt-2 text-xs text-muted-foreground">Options: {q.options.join(" · ")}</p>
                       ) : null}
                     </li>

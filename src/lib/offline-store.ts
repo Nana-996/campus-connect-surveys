@@ -1,3 +1,4 @@
+import type { SurveyAnswers } from "@/lib/survey-answers";
 // IndexedDB-backed offline store:
 //   - cached survey questions (so they re-open offline)
 //   - cached feed snapshot per user
@@ -37,7 +38,7 @@ export type QueuedResponse = {
   id: string; // local uuid
   survey_id: string;
   respondent_id: string;
-  answers: Record<string, string>;
+  answers: SurveyAnswers;
   duration_ms: number;
   queued_at: number;
   attempts: number;

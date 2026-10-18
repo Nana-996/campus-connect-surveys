@@ -3,7 +3,7 @@
 
 import { z } from "zod";
 
-export const QUESTION_TYPES = ["text", "choice", "rating"] as const;
+export const QUESTION_TYPES = ["text", "choice", "multi_choice", "rating"] as const;
 export type QuestionType = (typeof QUESTION_TYPES)[number];
 
 export const questionSchema = z.object({

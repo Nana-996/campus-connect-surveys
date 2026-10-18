@@ -506,7 +506,7 @@ function questionSection(L: Layout, qs: QuestionStats, options: ReportOptions, i
   const isClosed = qs.question.type !== "text" && qs.answered > 0;
   const pData = qs.options.map((o) => ({ label: o.label, count: o.count }));
   const pChosen = options.chartTypes?.[qs.question.id];
-  const pAuto: ChartChoice = qs.question.type === "rating" ? "column" : pData.length <= 6 ? "donut" : "bar";
+  const pAuto: ChartChoice = qs.question.type === "multi_choice" ? "bar" : qs.question.type === "rating" ? "column" : pData.length <= 6 ? "donut" : "bar";
   const pChart: ChartChoice = pChosen ?? pAuto;
   const pHasGraph = isClosed && pChart !== "none" && !pData.every((d) => d.count === 0);
   const pChartH = !pHasGraph ? 0 : pChart === "column" ? 132 : pChart === "donut" ? Math.max(110, pData.length * 13 + 10) + 14 : measureHorizontalBars(pData.slice(0, 12)) + 14;
@@ -523,11 +523,12 @@ function questionSection(L: Layout, qs: QuestionStats, options: ReportOptions, i
     L.y += 15;
   });
 
-  const typeLabel = qs.question.type === "text" ? "Open text" : qs.question.type === "rating" ? "Rating (1–5)" : "Single choice";
+  const typeLabel = qs.question.type === "text" ? "Open text" : qs.question.type === "rating" ? "Rating (1–5)" : qs.question.type === "multi_choice" ? "Multiple selection" : "Single choice";
   L.text(
     `${typeLabel} · ${qs.question.required ? "Required" : "Optional"} · variable ${qs.variable} · ${qs.answered} answered, ${qs.skipped} skipped (${qs.responseRate}% response rate)`,
     { size: 8, color: MUTED },
   );
+  if (qs.question.type === "multi_choice") L.text("Multiple selections allowed. Percentages are of respondents who answered and may total more than 100%.", { size: 8, color: MUTED });
   L.gap(4);
 
   if (qs.answered === 0) {
@@ -596,7 +597,7 @@ function questionSection(L: Layout, qs: QuestionStats, options: ReportOptions, i
   // can never be cut in half by a page break.
   const data = qs.options.map((o) => ({ label: o.label, count: o.count }));
   const chosen = options.chartTypes?.[qs.question.id];
-  const auto: ChartChoice = qs.question.type === "rating" ? "column" : data.length <= 6 ? "donut" : "bar";
+  const auto: ChartChoice = qs.question.type === "multi_choice" ? "bar" : qs.question.type === "rating" ? "column" : data.length <= 6 ? "donut" : "bar";
   const chart: ChartChoice = chosen && chosen !== "none" ? chosen : chosen === "none" ? "none" : auto;
   const allZero = data.every((d) => d.count === 0);
 

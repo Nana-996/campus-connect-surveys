@@ -34,7 +34,7 @@ import { useConversionTracking } from "@/hooks/useConversionTracking";
 
 type Question = {
   id: string;
-  type: "text" | "choice" | "rating";
+  type: "text" | "choice" | "multi_choice" | "rating";
   text: string;
   options?: string[];
   required?: boolean;
@@ -240,7 +240,7 @@ function Create() {
   const addQ = (type: Question["type"]) =>
     setQuestions((q) => [...q, {
       id: crypto.randomUUID(), type, text: "", required: true,
-      options: type === "choice" ? ["", ""] : undefined,
+      options: (type === "choice" || type === "multi_choice") ? ["", ""] : undefined,
     }]);
   const removeQ = (id: string) => setQuestions((q) => q.filter((x) => x.id !== id));
   const updateQ = (id: string, patch: Partial<Question>) =>
@@ -275,6 +275,9 @@ function Create() {
     if (questions.length === 0 || questions.some((q) => !q.text.trim())) {
       toast.error("Each question needs text."); return;
     }
+    if (questions.some((q) => (q.type === "choice" || q.type === "multi_choice") && ((q.options?.length ?? 0) < 2 || q.options?.some((o) => !o.trim()) || new Set(q.options?.map((o) => o.trim())).size !== q.options?.length))) {
+      toast.error("Each selection question needs at least two different, non-empty options."); return;
+    }
     setSubmitting(true);
     try {
       const expiresIso = expiresAt ? new Date(expiresAt).toISOString() : null;
@@ -285,7 +288,7 @@ function Create() {
           university_domain: profile.university_domain,
           title: title.trim(),
           description: description.trim(),
-          questions: questions as any,
+          questions: questions.map((q) => ({ ...q, options: q.options?.map((o) => o.trim()) })) as any,
           tier: (isBoost ? "research_boost" : tier) as any,
           target_department: isBoost
             ? (audience.department.trim() || null)
@@ -676,11 +679,12 @@ function Create() {
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-semibold text-primary">Q{i + 1}</span>
                     <Select value={q.type} onValueChange={(v: any) =>
-                      updateQ(q.id, { type: v, options: v === "choice" ? ["", ""] : undefined })}>
+                      updateQ(q.id, { type: v, options: (v === "choice" || v === "multi_choice") ? (q.options ?? ["", ""]) : undefined })}>
                       <SelectTrigger className="h-8 w-40 text-xs"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="text">Short answer</SelectItem>
-                        <SelectItem value="choice">Multiple choice</SelectItem>
+                        <SelectItem value="choice">Single selection</SelectItem>
+                        <SelectItem value="multi_choice">Multiple selection</SelectItem>
                         <SelectItem value="rating">Rating (1-5)</SelectItem>
                       </SelectContent>
                     </Select>
@@ -717,7 +721,7 @@ function Create() {
                       ))}
                     </div>
                   )}
-                  {q.type === "choice" && (
+                  {(q.type === "choice" || q.type === "multi_choice") && (
                     <div className="space-y-2 pl-2">
                       {q.options?.map((opt, oi) => (
                         <div key={oi} className="flex gap-2">
@@ -760,8 +764,9 @@ function Create() {
             <Plus className="mr-1 h-4 w-4" /> Short answer
           </Button>
           <Button type="button" variant="outline" className="rounded-full border-foreground/30" onClick={() => addQ("choice")}>
-            <Plus className="mr-1 h-4 w-4" /> Multiple choice
+            <Plus className="mr-1 h-4 w-4" /> Single selection
           </Button>
+          <Button type="button" variant="outline" className="rounded-full border-foreground/30" onClick={() => addQ("multi_choice")}><Plus className="mr-1 h-4 w-4" /> Multiple selection</Button>
           <Button type="button" variant="outline" className="rounded-full border-foreground/30" onClick={() => addQ("rating")}>
             <Plus className="mr-1 h-4 w-4" /> Rating
           </Button>
