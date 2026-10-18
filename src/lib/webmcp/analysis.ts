@@ -1,3 +1,4 @@
+import { selectionsOf } from "@/lib/survey-answers";
 // WebMCP Challenge — added after competition start.
 // Not part of pre-existing CampusVerify functionality.
 //
@@ -38,7 +39,7 @@ function answerValue(answers: Record<string, unknown>, qid: string): unknown {
 
 /** Aggregate distribution for one question over a set of responses. */
 export function aggregateQuestion(question: OwnerQuestion, rows: OwnerResponse[]) {
-  const values = rows.map((r) => answerValue(r.answers, question.id)).filter((v) => v !== undefined && v !== null && v !== "");
+  const values = rows.map((r) => answerValue(r.answers, question.id)).filter((v) => v !== undefined && v !== null && v !== "" && (!Array.isArray(v) || v.length > 0));
   const n = values.length;
 
   if (question.type === "rating") {
@@ -56,11 +57,13 @@ export function aggregateQuestion(question: OwnerQuestion, rows: OwnerResponse[]
     };
   }
 
-  if (question.type === "choice") {
+  if ((question.type === "choice" || question.type === "multi_choice")) {
     const counts = new Map<string, number>();
     for (const v of values) {
-      const key = sanitizeText(String(v), 120);
-      counts.set(key, (counts.get(key) ?? 0) + 1);
+      for (const selection of selectionsOf(v)) {
+        const key = sanitizeText(selection, 120);
+        counts.set(key, (counts.get(key) ?? 0) + 1);
+      }
     }
     const distribution = Array.from(counts.entries())
       .sort((a, b) => b[1] - a[1])
@@ -104,7 +107,7 @@ export function subgroupCompare(input: {
     buckets.set(value, list);
   }
 
-  const selected = input.questionIds?.length ? questions.filter((q) => input.questionIds!.includes(q.id)) : questions;
+  const selected = input.questionIds?.length ? questions.filter((q) => input.questionIds?.includes(q.id)) : questions;
 
   const groups = Array.from(buckets.entries())
     .sort((a, b) => b[1].length - a[1].length)

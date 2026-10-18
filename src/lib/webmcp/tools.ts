@@ -59,7 +59,7 @@ function toDraftQuestions(list: Array<z.infer<typeof questionSchema>>): DraftQue
     ...q,
     id: q.id ?? newDraftId(),
     text: sanitizeText(q.text, 300),
-    options: q.type === "choice" ? (q.options ?? []).map((o) => sanitizeText(o, 120)) : undefined,
+    options: (q.type === "choice" || q.type === "multi_choice") ? (q.options ?? []).map((o) => sanitizeText(o, 120)) : undefined,
   }));
 }
 
@@ -365,7 +365,7 @@ export function buildTools(deps: ToolDeps): WebMcpTool[] {
             items: {
               type: "object",
               properties: {
-                type: { enum: ["text", "choice", "rating"] },
+                type: { enum: ["text", "choice", "multi_choice", "rating"] },
                 text: { type: "string" },
                 options: { type: "array", items: { type: "string" } },
                 required: { type: "boolean" },
@@ -470,7 +470,7 @@ export function buildTools(deps: ToolDeps): WebMcpTool[] {
               type: "object",
               properties: {
                 id: { type: "string" },
-                type: { enum: ["text", "choice", "rating"] },
+                type: { enum: ["text", "choice", "multi_choice", "rating"] },
                 text: { type: "string" },
                 options: { type: "array", items: { type: "string" } },
                 required: { type: "boolean" },

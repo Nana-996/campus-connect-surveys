@@ -1,3 +1,4 @@
+import { answerText, selectionsOf, answerMatches, type SurveyAnswers } from "@/lib/survey-answers";
 // Single source of truth for survey analytics used by the Analysis page,
 // the Report Studio and every export (PDF + data package).
 // Pure functions, no DOM, no server access.
@@ -17,7 +18,7 @@ export type QuestionLike = {
 export type ResponseLike = {
   id: string;
   respondent_id: string;
-  answers: Record<string, string> | null;
+  answers: SurveyAnswers | null;
   created_at: string;
   duration_ms?: number | null;
 };
@@ -115,7 +116,7 @@ export type SurveyStats = {
 
 const pct = (part: number, whole: number) => (whole > 0 ? Math.round((part / whole) * 1000) / 10 : 0);
 
-export const answerOf = (r: ResponseLike, qid: string) => String(r.answers?.[qid] ?? "").trim();
+export const answerOf = (r: ResponseLike, qid: string) => answerText(r.answers?.[qid]);
 
 export function optionLabels(q: QuestionLike): string[] {
   if (q.type === "rating") return ["1", "2", "3", "4", "5"];
@@ -147,7 +148,7 @@ export function computeQuestionStats(q: QuestionLike, index: number, rows: Respo
 
   const labels = optionLabels(q);
   const options: OptionStat[] = labels.map((label) => {
-    const count = given.filter((r) => answerOf(r, q.id) === label).length;
+    const count = given.filter((r) => answerMatches(r.answers?.[q.id], label)).length;
     return { label, count, pctAnswered: pct(count, answered), pctAll: pct(count, n) };
   });
 
@@ -156,8 +157,9 @@ export function computeQuestionStats(q: QuestionLike, index: number, rows: Respo
     const known = new Set(labels);
     const extras = new Map<string, number>();
     given.forEach((r) => {
-      const a = answerOf(r, q.id);
-      if (!known.has(a)) extras.set(a, (extras.get(a) ?? 0) + 1);
+      for (const a of selectionsOf(r.answers?.[q.id])) {
+        if (!known.has(a)) extras.set(a, (extras.get(a) ?? 0) + 1);
+      }
     });
     extras.forEach((count, label) =>
       options.push({ label, count, pctAnswered: pct(count, answered), pctAll: pct(count, n) }),
@@ -294,7 +296,7 @@ export function computeCrossTab(rowQ: QuestionLike, colQ: QuestionLike, rows: Re
   const rowLabels = optionLabels(rowQ);
   const colLabels = optionLabels(colQ);
   const cells = rowLabels.map((rl) =>
-    colLabels.map((cl) => rows.filter((r) => answerOf(r, rowQ.id) === rl && answerOf(r, colQ.id) === cl).length),
+    colLabels.map((cl) => rows.filter((r) => answerMatches(r.answers?.[rowQ.id], rl) && answerMatches(r.answers?.[colQ.id], cl)).length),
   );
   const rowTotals = cells.map((r) => r.reduce((a, b) => a + b, 0));
   const colTotals = colLabels.map((_, ci) => cells.reduce((sum, r) => sum + r[ci], 0));
@@ -326,7 +328,7 @@ export function keyFindings(stats: SurveyStats, limit = 6): string[] {
     if (q.answered === 0) continue;
     if (q.rating) {
       out.push(`Q${q.index} "${q.question.text}" averaged ${q.rating.mean.toFixed(2)} out of 5 (SD ${q.rating.sd.toFixed(2)}, n = ${q.rating.n}).`);
-    } else if (q.question.type === "choice") {
+    } else if ((q.question.type === "choice" || q.question.type === "multi_choice")) {
       const top = [...q.options].sort((a, b) => b.count - a.count)[0];
       if (top && top.count > 0) {
         out.push(`Q${q.index} "${q.question.text}" — the most selected answer was "${top.label}" (${top.count} of ${q.answered}, ${top.pctAnswered}%).`);

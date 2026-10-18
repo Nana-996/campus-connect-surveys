@@ -8,6 +8,7 @@ import { ArrowLeft, CheckCircle2, Circle, Download, Layers, MessageSquare } from
 import { getSurveyTracking, getSurveyResponsesForManager, getSurveyQuestionsForManager, getSurveyTrackingScope } from "@/lib/manager.functions";
 import { FilterBar } from "@/components/FilterBar";
 import { neutralizeFormula } from "@/lib/csv-safe";
+import { answerText, type SurveyAnswers } from "@/lib/survey-answers";
 
 export const Route = createFileRoute("/_authenticated/manage/$surveyId")({
   component: ManageSurveyPage,
@@ -240,7 +241,7 @@ function ManageSurveyPage() {
                           r.department ?? "",
                           r.year ?? "",
                           r.created_at,
-                          ...questions.map((q) => r.answers?.[q.id] ?? ""),
+                          ...questions.map((q) => answerText(r.answers?.[q.id])),
                         ]
                           .map((v) => {
                             const s = neutralizeFormula(v).replace(/"/g, '""');
@@ -294,7 +295,7 @@ function ResponsesList({
     created_at: string;
     quality_score: number | null;
     duration_ms: number | null;
-    answers: Record<string, string>;
+    answers: SurveyAnswers;
     is_identified: boolean;
     respondent_label: string;
     full_name: string | null;
@@ -331,7 +332,7 @@ function ResponsesList({
             {questions.map((q) => (
               <div key={q.id}>
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{q.text}</p>
-                <p className="mt-0.5 whitespace-pre-wrap text-sm">{r.answers?.[q.id] || <span className="text-muted-foreground">—</span>}</p>
+                <p className="mt-0.5 whitespace-pre-wrap text-sm">{answerText(r.answers?.[q.id]) || <span className="text-muted-foreground">—</span>}</p>
               </div>
             ))}
           </div>

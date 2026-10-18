@@ -1,3 +1,4 @@
+import { answerMatches, answerText, selectionsOf, validMultiAnswer, type SurveyAnswers } from "@/lib/survey-answers";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useRef } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -50,7 +51,7 @@ const CHART_TYPES: { value: ChartType; label: string }[] = [
 ];
 const PALETTE = ["var(--primary)", "var(--highlight)", "var(--accent)", "#7c9a6b", "#c98a4b", "#4a6b52", "#b8c47a"];
 
-type Question = { id: string; type: "text" | "choice" | "rating"; text: string; options?: string[]; required?: boolean };
+type Question = { id: string; type: "text" | "choice" | "multi_choice" | "rating"; text: string; options?: string[]; required?: boolean };
 type Survey = {
   id: string;
   creator_id: string;
@@ -93,6 +94,7 @@ export const Route = createFileRoute("/survey/$id")({
         { property: "og:description", content: desc },
         { property: "og:url", content: url },
         { property: "og:type", content: "article" },
+        { name: "twitter:card", content: "summary" },
       ],
       links: [{ rel: "canonical", href: url }],
     };
@@ -113,7 +115,7 @@ function SurveyPage() {
   const draftKey = `cv:answers:${id}`;
   const pendingKey = `cv:pending-submit:${id}`;
 
-  const [answers, setAnswers] = useState<Record<string, string>>(() => {
+  const [answers, setAnswers] = useState<SurveyAnswers>(() => {
     if (typeof window === "undefined") return {};
     try { return JSON.parse(localStorage.getItem(draftKey) || "{}"); } catch { return {}; }
   });
@@ -154,7 +156,7 @@ function SurveyPage() {
     reason: string;
     newBalance: number;
     submittedAt?: string;
-    answers?: Record<string, string>;
+    answers?: SurveyAnswers;
   }>(null);
 
   const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/survey/${id}` : `/survey/${id}`;
@@ -284,6 +286,9 @@ function SurveyPage() {
     if (new Date(survey.expires_at) <= new Date()) { toast.error("This survey has closed."); return false; }
     if (survey.response_count >= survey.response_goal) { toast.error("This survey has reached its response goal."); return false; }
     for (const q of survey.questions) {
+      if (q.type === "multi_choice" && !validMultiAnswer(answers[q.id], q.options ?? [], q.required ?? true)) {
+        toast.error("Please select valid options for all required questions."); return false;
+      }
       const isRequired = q.required ?? true;
       if (isRequired && (!answers[q.id] || answers[q.id].toString().trim() === "")) {
         toast.error("Please answer all required questions."); return false;
@@ -408,7 +413,7 @@ function SurveyPage() {
     const rows = responses.map((r) => [
       r.respondent_id,
       r.created_at,
-      ...survey.questions.map((q) => neutralizeFormula(r.answers?.[q.id] ?? "").replace(/"/g, '""')),
+      ...survey.questions.map((q) => neutralizeFormula(answerText(r.answers?.[q.id])).replace(/"/g, '""')),
     ]);
     const csv = [header, ...rows].map((row) => row.map((c) => `"${c}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
@@ -446,11 +451,11 @@ function SurveyPage() {
     survey.questions.forEach((q, qi) => {
       y += 6;
       line(`Q${qi + 1}. ${q.text}`, 12, true);
-      if (q.type === "choice" || q.type === "rating") {
+      if (q.type === "choice" || q.type === "multi_choice" || q.type === "rating") {
         const counts = chartData(q);
         counts.forEach((c) => line(`  • ${c.label}: ${c.count}`, 10));
       } else {
-        responses.forEach((r, ri) => line(`  ${ri + 1}. ${String(r.answers?.[q.id] ?? "—")}`, 10));
+        responses.forEach((r, ri) => line(`  ${ri + 1}. ${(answerText(r.answers?.[q.id]) || "—")}`, 10));
       }
     });
     doc.save(`${survey.title.replace(/\s+/g, "_")}.pdf`);
@@ -461,7 +466,7 @@ function SurveyPage() {
     const labels = q.type === "rating" ? ["1", "2", "3", "4", "5"] : (q.options ?? []);
     return labels.map((label) => ({
       label,
-      count: responses.filter((r) => String(r.answers?.[q.id] ?? "") === label).length,
+      count: responses.filter((r) => answerMatches(r.answers?.[q.id], label)).length,
     }));
   };
 
@@ -668,7 +673,7 @@ function SurveyPage() {
 
                 <div className="mt-4 grid gap-4 sm:grid-cols-2">
                   {survey.questions.map((q, qi) => {
-                    const isChartable = q.type === "choice" || q.type === "rating";
+                    const isChartable = q.type === "choice" || q.type === "multi_choice" || q.type === "rating";
                     if (!isChartable) return null;
                     const type = chartTypes[q.id] ?? "bar";
                     const avg = avgRating(q);
@@ -710,7 +715,7 @@ function SurveyPage() {
                         {survey.questions.map((q) => (
                           <div key={q.id}>
                             <p className="text-xs font-semibold text-muted-foreground">{q.text}</p>
-                            <p className="text-sm">{String(r.answers?.[q.id] ?? "—")}</p>
+                            <p className="text-sm">{(answerText(r.answers?.[q.id]) || "—")}</p>
                           </div>
                         ))}
                       </div>
@@ -751,7 +756,7 @@ function SurveyPage() {
                 </Label>
                 <div className="mt-2">
                   {q.type === "text" && (
-                    <Textarea value={answers[q.id] ?? ""} onChange={(e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value }))} />
+                    <Textarea value={answerText(answers[q.id])} onChange={(e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value }))} />
                   )}
                   {q.type === "choice" && (
                     <div className="space-y-1.5">
@@ -765,6 +770,20 @@ function SurveyPage() {
                             onChange={(e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value }))}
                             className="accent-primary"
                           />
+                          {opt}
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                  {q.type === "multi_choice" && (
+                    <div className="space-y-1.5">
+                      {q.options?.map((opt, oi) => (
+                        <label key={oi} className="flex cursor-pointer items-center gap-2 rounded-md border p-2 text-sm hover:bg-secondary">
+                          <input type="checkbox" checked={answerMatches(answers[q.id], opt)} className="accent-primary"
+                            onChange={(e) => {
+                              const checked = e.target.checked;
+                              setAnswers((a) => ({ ...a, [q.id]: checked ? [...selectionsOf(a[q.id]), opt] : selectionsOf(a[q.id]).filter((v) => v !== opt) }));
+                            }} />
                           {opt}
                         </label>
                       ))}
@@ -848,7 +867,7 @@ function SubmissionResult({
   survey,
   onClose,
 }: {
-  result: { delta: number; reason: string; newBalance: number; submittedAt?: string; answers?: Record<string, string> };
+  result: { delta: number; reason: string; newBalance: number; submittedAt?: string; answers?: SurveyAnswers };
   survey: Survey | null;
   onClose: () => void;
 }) {

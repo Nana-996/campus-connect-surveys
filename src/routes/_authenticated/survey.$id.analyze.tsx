@@ -1,3 +1,4 @@
+import { answerMatches, answerText, selectionsOf, validMultiAnswer, type SurveyAnswers } from "@/lib/survey-answers";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
@@ -126,7 +127,7 @@ function QuestionChart({ data, type, height = 224 }: { data: { label: string; co
 const PALETTE = ["#4a6b52", "#7c9a6b", "#c98a4b", "#b8c47a", "#8e7a5a", "#6b8e9e", "#a47b4c"];
 const SUPPRESS_THRESHOLD = 5;
 
-type Question = { id: string; type: "text" | "choice" | "rating"; text: string; options?: string[] };
+type Question = { id: string; type: "text" | "choice" | "multi_choice" | "rating"; text: string; options?: string[] };
 type Survey = {
   id: string; creator_id: string; title: string; description: string;
   questions: Question[]; response_count: number; response_goal: number;
@@ -135,7 +136,7 @@ type Survey = {
 };
 type Response = {
   id: string; survey_id: string; respondent_id: string;
-  answers: Record<string, string>; created_at: string; duration_ms: number;
+  answers: SurveyAnswers; created_at: string; duration_ms: number;
 };
 type Profile = {
   id: string; full_name: string; department: string; year: string;
@@ -149,6 +150,14 @@ const EMPTY_FILTERS: Filters = { department: "", year: "", country: "", age_rang
 
 export const Route = createFileRoute("/_authenticated/survey/$id/analyze")({
   component: AnalyzePage,
+  head: () => ({ meta: [
+    { title: "Survey analysis — CampusVerify" },
+    { name: "description", content: "Analyse survey responses, compare groups, and export research results with CampusVerify." },
+    { property: "og:title", content: "Survey analysis — CampusVerify" },
+    { property: "og:description", content: "Analyse survey responses, compare groups, and export research results with CampusVerify." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
 });
 
 function AnalyzePage() {
@@ -332,7 +341,7 @@ function AnalyzePage() {
       const p = profileMap[r.respondent_id];
       return [
         r.created_at, p?.department ?? "", p?.year ?? "", p?.country ?? "", p?.age_range ?? "",
-        ...survey.questions.map((q) => neutralizeFormula(r.answers?.[q.id] ?? "").replace(/"/g, '""')),
+        ...survey.questions.map((q) => neutralizeFormula(answerText(r.answers?.[q.id])).replace(/"/g, '""')),
       ];
     });
     const csv = [header, ...rows].map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");
@@ -385,7 +394,7 @@ function AnalyzePage() {
     line(`n = ${n}${activeFilterChips.length ? ` · filters: ${activeFilterChips.map((c) => `${c.k}=${c.v}`).join(", ")}` : ""}`, 10);
     y += 6;
 
-    if (q.type === "choice" || q.type === "rating") {
+    if (q.type === "choice" || q.type === "multi_choice" || q.type === "rating") {
       const node = document.getElementById(`q-card-${q.id}`);
       if (node) {
         const cap = await captureNodeToPng(node);
@@ -407,7 +416,7 @@ function AnalyzePage() {
       });
     } else {
       const answers = filtered
-        .map((r) => String(r.answers?.[q.id] ?? "").trim())
+        .map((r) => answerText(r.answers?.[q.id]))
         .filter((t) => t.length > 0);
       line(`${answers.length} of ${n} answered · responses shown anonymously`, 10, true);
       y += 4;
@@ -423,7 +432,7 @@ function AnalyzePage() {
 
   const exportQuestionCSV = (q: Question, qi: number) => {
     let csv = "";
-    if (q.type === "choice" || q.type === "rating") {
+    if (q.type === "choice" || q.type === "multi_choice" || q.type === "rating") {
       const data = aggregateQuestion(q, filtered);
       const total = data.reduce((s, x) => s + x.count, 0) || 1;
       csv = ["option,count,percent"]
@@ -431,7 +440,7 @@ function AnalyzePage() {
         .join("\n");
     } else {
       const answers = filtered
-        .map((r, i) => ({ idx: i + 1, text: String(r.answers?.[q.id] ?? "").trim(), at: r.created_at }))
+        .map((r, i) => ({ idx: i + 1, text: answerText(r.answers?.[q.id]), at: r.created_at }))
         .filter((a) => a.text.length > 0);
       csv = ["anonymous_id,submitted_at,answer"]
         .concat(answers.map((a) => `${a.idx},${a.at},"${neutralizeFormula(a.text).replace(/"/g, '""')}"`))
@@ -635,7 +644,7 @@ function aggregateQuestion(q: Question, rows: Response[]) {
   const labels = q.type === "rating" ? ["1", "2", "3", "4", "5"] : (q.options ?? []);
   return labels.map((label) => ({
     label,
-    count: rows.filter((r) => String(r.answers?.[q.id] ?? "") === label).length,
+    count: rows.filter((r) => answerMatches(r.answers?.[q.id], label)).length,
   }));
 }
 
@@ -675,7 +684,7 @@ function OverviewView({ survey, filtered, hiddenQs }: { survey: Survey; filtered
     durSum += r.duration_ms ?? 0;
     survey.questions.forEach((q) => {
       slots += 1;
-      if (String(r.answers?.[q.id] ?? "").trim()) answered += 1;
+      if (answerText(r.answers?.[q.id])) answered += 1;
     });
   });
   const completion = slots ? Math.round((answered / slots) * 100) : 0;
@@ -688,7 +697,7 @@ function OverviewView({ survey, filtered, hiddenQs }: { survey: Survey; filtered
   });
   const timeline = Object.entries(buckets).sort(([a],[b])=>a.localeCompare(b)).map(([date, count]) => ({ date: date.slice(5), count }));
 
-  const top3 = survey.questions.filter((q) => (q.type === "choice" || q.type === "rating") && !hiddenQs.has(q.id)).slice(0, 3);
+  const top3 = survey.questions.filter((q) => (q.type === "choice" || q.type === "multi_choice" || q.type === "rating") && !hiddenQs.has(q.id)).slice(0, 3);
 
   const [timelineType, setTimelineType] = useState<ChartType>("area");
   const [topTypes, setTopTypes] = useState<Record<string, ChartType>>({});
@@ -1008,7 +1017,7 @@ function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs, onExportPDF, o
         const hidden = hiddenQs.has(q.id);
         if (q.type === "text") {
           const answers = filtered
-            .map((r) => ({ id: r.id, text: String(r.answers?.[q.id] ?? "").trim(), at: r.created_at }))
+            .map((r) => ({ id: r.id, text: answerText(r.answers?.[q.id]), at: r.created_at }))
             .filter((a) => a.text.length > 0);
           return (
             <div key={q.id} id={`q-card-${q.id}`} className={`rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper ${hidden ? "opacity-50" : ""}`}>
@@ -1027,7 +1036,7 @@ function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs, onExportPDF, o
           );
         }
         const data = aggregateQuestion(q, filtered);
-        const total = data.reduce((s, x) => s + x.count, 0) || 1;
+        const total = q.type === "multi_choice" ? filtered.filter((r) => answerText(r.answers?.[q.id])).length : data.reduce((s, x) => s + x.count, 0) || 1;
         const t = types[q.id] ?? "hbar";
         return (
           <div key={q.id} id={`q-card-${q.id}`} className={`rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper ${hidden ? "opacity-50" : ""}`}>
@@ -1091,7 +1100,7 @@ function Header({ q, qi, hidden, toggle, n, rightExtra }: { q: Question; qi: num
 }
 
 function CompareView({ survey, filtered, profileMap }: { survey: Survey; filtered: Response[]; profileMap: Record<string, Profile> }) {
-  const choiceQs = survey.questions.filter((q) => q.type === "choice" || q.type === "rating");
+  const choiceQs = survey.questions.filter((q) => q.type === "choice" || q.type === "multi_choice" || q.type === "rating");
   const [qid, setQid] = useState(choiceQs[0]?.id ?? "");
   const [dim, setDim] = useState<keyof Profile>("department");
   const [mode, setMode] = useState<"grouped" | "stacked" | "line">("grouped");
@@ -1105,7 +1114,7 @@ function CompareView({ survey, filtered, profileMap }: { survey: Survey; filtere
     const row: any = { label };
     groups.forEach((g) => {
       const rows = filtered.filter((r) => (profileMap[r.respondent_id]?.[dim] as string) === g);
-      const c = rows.filter((r) => String(r.answers?.[q.id] ?? "") === label).length;
+      const c = rows.filter((r) => answerMatches(r.answers?.[q.id], label)).length;
       row[g] = rows.length < SUPPRESS_THRESHOLD ? 0 : c;
     });
     return row;
@@ -1178,7 +1187,7 @@ function CompareView({ survey, filtered, profileMap }: { survey: Survey; filtere
 }
 
 function CrossTabView({ survey, filtered }: { survey: Survey; filtered: Response[] }) {
-  const cs = survey.questions.filter((q) => q.type === "choice" || q.type === "rating");
+  const cs = survey.questions.filter((q) => q.type === "choice" || q.type === "multi_choice" || q.type === "rating");
   const [a, setA] = useState(cs[0]?.id ?? "");
   const [b, setB] = useState(cs[1]?.id ?? cs[0]?.id ?? "");
   if (cs.length < 2) return <div className="rounded-3xl border border-foreground/15 bg-card p-6 text-sm text-muted-foreground shadow-paper">Need at least two choice/rating questions.</div>;
@@ -1208,13 +1217,13 @@ function CrossTabView({ survey, filtered }: { survey: Survey; filtered: Response
           </thead>
           <tbody>
             {la.map((ra) => {
-              const rowRows = filtered.filter((r) => String(r.answers?.[qa.id]) === ra);
+              const rowRows = filtered.filter((r) => answerMatches(r.answers?.[qa.id], ra));
               const total = rowRows.length;
               return (
                 <tr key={ra} className="border-b border-foreground/5">
                   <td className="p-2 font-semibold">{ra}</td>
                   {lb.map((cb) => {
-                    const c = rowRows.filter((r) => String(r.answers?.[qb.id]) === cb).length;
+                    const c = rowRows.filter((r) => answerMatches(r.answers?.[qb.id], cb)).length;
                     const safe = safeCount(c);
                     const pct = total ? ((c / total) * 100).toFixed(0) : "0";
                     return <td key={cb} className="p-2 text-right font-mono">{safe == null ? "—" : `${safe} (${pct}%)`}</td>;
@@ -1254,7 +1263,7 @@ function RawDataView({ survey, filtered, profileMap }: { survey: Survey; filtere
                   <td className="p-2 text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</td>
                   <td className="p-2">{p?.department ?? "—"}</td>
                   <td className="p-2">{p?.year ?? "—"}</td>
-                  {survey.questions.map((q) => <td key={q.id} className="p-2">{String(r.answers?.[q.id] ?? "—").slice(0, 80)}</td>)}
+                  {survey.questions.map((q) => <td key={q.id} className="p-2">{(answerText(r.answers?.[q.id]) || "—").slice(0, 80)}</td>)}
                 </tr>
               );
             })}

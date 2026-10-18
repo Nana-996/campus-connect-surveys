@@ -42,7 +42,7 @@ export async function publishDraftAsUser(
         id: q.id,
         type: q.type,
         text: q.text.trim(),
-        ...(q.type === "choice" ? { options: q.options ?? [] } : {}),
+        ...((q.type === "choice" || q.type === "multi_choice") ? { options: q.options ?? [] } : {}),
         required: q.required !== false,
       })) as never,
       tier: draft.tier as never,

@@ -2332,6 +2332,10 @@ export type Database = {
         Args: { _department: string; _index_number: string }
         Returns: undefined
       }
+      valid_multi_choice_answer: {
+        Args: { _answer: Json; _options: Json; _required: boolean }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "user" | "manager" | "faculty"

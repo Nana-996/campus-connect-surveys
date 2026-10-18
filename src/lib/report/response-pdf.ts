@@ -1,3 +1,4 @@
+import { answerText, type SurveyAnswers } from "@/lib/survey-answers";
 // Branded single-response PDF: a respondent's own copy of what they submitted.
 // Client-side only, reuses jsPDF (already a dependency) and the report palette.
 
@@ -7,14 +8,14 @@ import { SITE_URL } from "@/lib/site";
 export type ResponsePdfQuestion = {
   id: string;
   text: string;
-  type: "text" | "choice" | "rating";
+  type: "text" | "choice" | "multi_choice" | "rating";
 };
 
 export async function downloadMyResponsePdf(args: {
   surveyTitle: string;
   surveyDescription?: string | null;
   questions: ResponsePdfQuestion[];
-  answers: Record<string, string>;
+  answers: SurveyAnswers;
   submittedAt: string;
   respondentName?: string | null;
 }) {
@@ -99,7 +100,7 @@ export async function downloadMyResponsePdf(args: {
         ? "— no answer —"
         : q.type === "rating"
           ? `${String(raw)} / 5`
-          : String(raw);
+          : answerText(raw);
     text(value, { size: 10, color: raw ? INK : MUTED, indent: 14 });
     y += 8;
   });
