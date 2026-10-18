@@ -766,7 +766,7 @@ function SummaryQuestionCard({
         ) : total === 0 ? (
           <p className="text-sm italic text-muted-foreground">No answers yet.</p>
         ) : (
-          <ChartRenderer kind={chart} data={data} palette={palette} accent={accent} height={260} />
+          <ChartRenderer kind={chart} data={data} palette={palette} accent={accent} height={260} respondentTotal={question.type === "multi_choice" ? answered : undefined} />
         )}
       </div>
     </div>
@@ -780,15 +780,15 @@ function labelForType(t: Question["type"]) {
 /* ============================ charts ============================ */
 
 function ChartRenderer({
-  kind, data, palette, accent, height,
+  kind, data, palette, accent, height, respondentTotal,
 }: {
-  kind: ChartKind; data: { label: string; count: number }[]; palette: string[]; accent: string; height: number;
+  kind: ChartKind; data: { label: string; count: number }[]; palette: string[]; accent: string; height: number; respondentTotal?: number;
 }) {
-  const total = data.reduce((s, x) => s + x.count, 0) || 1;
+  const total = respondentTotal ?? data.reduce((s, x) => s + x.count, 0) || 1;
   const isMobile = useIsMobile();
   const short = (v: string) => (isMobile && v.length > 14 ? `${v.slice(0, 13)}…` : v);
 
-  if (kind === "table") return <DistributionTable data={data} accent={accent} />;
+  if (kind === "table") return <DistributionTable data={data} accent={accent} respondentTotal={respondentTotal} />;
 
   return (
     <div style={{ width: "100%", height }}>
@@ -835,8 +835,8 @@ function ChartRenderer({
   );
 }
 
-function DistributionTable({ data, accent }: { data: { label: string; count: number }[]; accent: string }) {
-  const total = data.reduce((s, x) => s + x.count, 0) || 1;
+function DistributionTable({ data, accent, respondentTotal }: { data: { label: string; count: number }[]; accent: string; respondentTotal?: number }) {
+  const total = respondentTotal ?? data.reduce((s, x) => s + x.count, 0) || 1;
   return (
     <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "sans-serif", fontSize: 13 }}>
       <thead>
@@ -1031,10 +1031,10 @@ function QuestionReportPage({
           <TextAnalysisBlock question={question} responses={responses} theme={theme} />
         ) : (
           <>
-            <ChartRenderer kind={chart} data={aggregate(question, responses)} palette={theme.palette} accent={theme.accent} height={270} />
+            <ChartRenderer kind={chart} data={aggregate(question, responses)} palette={theme.palette} accent={theme.accent} height={270} respondentTotal={question.type === "multi_choice" ? answered : undefined} />
             {chart !== "table" && (
               <div style={{ marginTop: 18 }}>
-                <DistributionTable data={aggregate(question, responses)} accent={theme.accent} />
+                <DistributionTable data={aggregate(question, responses)} accent={theme.accent} respondentTotal={question.type === "multi_choice" ? answered : undefined} />
               </div>
             )}
           </>
