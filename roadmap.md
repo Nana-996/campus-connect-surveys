@@ -1,5 +1,10 @@
 # Roadmap
 
+## Multiple-selection survey questions — 2026-10-18
+- [ ] Add multiple-selection creation and respondent controls, preserving single-choice questions.
+- [ ] Support selection arrays in validation, results, reports, exports, and workspace.
+- [ ] Test multiple selection, persistence, and reporting.
+
 ## Checkout improvements — 2026-10-17
 - [x] Add a fixed-GHS mini credit pack without changing existing bundles.
 - [x] Add safe payment failure guidance, status checks, and retry actions.
