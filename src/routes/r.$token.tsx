@@ -6,7 +6,7 @@ import {
 } from "recharts";
 
 type SharedQ =
-  | { id: string; type: "choice" | "rating"; text: string; counts: { label: string; count: number }[] }
+  | { id: string; type: "choice" | "multi_choice" | "rating"; text: string; counts: { label: string; count: number }[] }
   | { id: string; type: "text"; text: string; answered: number };
 
 type Shared = {
@@ -24,6 +24,10 @@ export const Route = createFileRoute("/r/$token")({
     meta: [
       { title: "Shared survey dashboard · CampusVerify" },
       { name: "description", content: "Read-only live dashboard of an aggregated survey on CampusVerify." },
+      { property: "og:title", content: "Shared survey dashboard · CampusVerify" },
+      { property: "og:description", content: "Read-only live dashboard of aggregated survey results on CampusVerify." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex,nofollow" },
     ],
   }),

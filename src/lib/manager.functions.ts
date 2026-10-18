@@ -1,3 +1,4 @@
+import type { SurveyAnswers } from "@/lib/survey-answers";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -134,7 +135,7 @@ export const getSurveyResponsesForManager = createServerFn({ method: "POST" })
       created_at: string;
       duration_ms: number | null;
       quality_score: number | null;
-      answers: Record<string, string>;
+      answers: SurveyAnswers;
       is_identified: boolean;
       respondent_label: string;
       full_name: string | null;
