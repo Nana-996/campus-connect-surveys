@@ -150,6 +150,14 @@ const EMPTY_FILTERS: Filters = { department: "", year: "", country: "", age_rang
 
 export const Route = createFileRoute("/_authenticated/survey/$id/analyze")({
   component: AnalyzePage,
+  head: () => ({ meta: [
+    { title: "Survey analysis — CampusVerify" },
+    { name: "description", content: "Analyse survey responses, compare groups, and export research results with CampusVerify." },
+    { property: "og:title", content: "Survey analysis — CampusVerify" },
+    { property: "og:description", content: "Analyse survey responses, compare groups, and export research results with CampusVerify." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
 });
 
 function AnalyzePage() {
@@ -1028,7 +1036,7 @@ function QuestionsView({ survey, filtered, hiddenQs, setHiddenQs, onExportPDF, o
           );
         }
         const data = aggregateQuestion(q, filtered);
-        const total = data.reduce((s, x) => s + x.count, 0) || 1;
+        const total = q.type === "multi_choice" ? filtered.filter((r) => answerText(r.answers?.[q.id])).length : data.reduce((s, x) => s + x.count, 0) || 1;
         const t = types[q.id] ?? "hbar";
         return (
           <div key={q.id} id={`q-card-${q.id}`} className={`rounded-3xl border border-foreground/15 bg-card p-5 shadow-paper ${hidden ? "opacity-50" : ""}`}>
