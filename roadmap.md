@@ -1,5 +1,10 @@
 # Roadmap
 
+## Shared survey access — 2026-10-19
+- [ ] Replace misleading signed-out not-found states with signup/login, preserving restricted survey privacy.
+- [ ] Preserve survey destinations through signup, confirmation, and login; distinguish connection failures.
+- [ ] Test public and restricted links, account buttons, and retry states.
+
 ## Multiple-selection survey questions — 2026-10-18
 - [ ] Add multiple-selection creation and respondent controls, preserving single-choice questions.
 - [ ] Support selection arrays in validation, results, reports, exports, and workspace.

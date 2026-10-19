@@ -1,7 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { createClient } from "@supabase/supabase-js";
 
 const inputSchema = z.object({ id: z.string().uuid() });
@@ -15,18 +14,25 @@ export const getSurveyPublic = createServerFn({ method: "GET" })
     const url = process.env.SUPABASE_URL;
     const key = process.env.SUPABASE_PUBLISHABLE_KEY;
     if (!url || !key) {
-      return { survey: null as null, ownerName: null as string | null };
+      throw new Error("Survey preview temporarily unavailable.");
     }
     const client = createClient(url, key, {
       auth: { persistSession: false, autoRefreshToken: false },
+      global: { fetch: (input, init) => {
+        const headers = new Headers(init?.headers);
+        if (key.startsWith("sb_") && headers.get("Authorization") === `Bearer ${key}`) headers.delete("Authorization");
+        headers.set("apikey", key);
+        return fetch(input, { ...init, headers });
+      } },
     });
     const { data: result, error } = await client.rpc("get_survey_share_card", {
       _survey_id: data.id,
     });
-    if (error || !result) {
+    if (error) {
       console.error("[getSurveyPublic] rpc error", error);
-      return { survey: null, ownerName: null };
+      throw new Error("Survey preview temporarily unavailable.");
     }
+    if (!result) return { survey: null, ownerName: null };
     const s = result as Record<string, any>;
     const questions = s.is_evaluation
       ? sanitizeEvaluationQuestions(s.questions ?? [])
@@ -130,6 +136,7 @@ export const getSurveyForRespondent = createServerFn({ method: "GET" })
       (s as any).questions = sanitizeEvaluationQuestions((s as any).questions);
     }
 
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: prof } = await supabaseAdmin
       .from("profiles")
       .select("full_name, university_name")
