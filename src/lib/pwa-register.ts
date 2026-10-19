@@ -40,7 +40,25 @@ export async function registerPwa(): Promise<void> {
   }
   if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
   try {
-    await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+    // A new service worker normally waits until every tab closes before it
+    // takes over, which can strand users on a stale app build for days.
+    // Activate updates immediately and reload once the new worker takes control.
+    let reloaded = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (reloaded) return;
+      reloaded = true;
+      window.location.reload();
+    });
+    const reg = await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+    const activate = (worker: ServiceWorker | null) => {
+      if (worker && worker.state === "installed") worker.postMessage({ type: "SKIP_WAITING" });
+    };
+    activate(reg.waiting);
+    reg.addEventListener("updatefound", () => {
+      const worker = reg.installing;
+      if (!worker) return;
+      worker.addEventListener("statechange", () => activate(worker));
+    });
   } catch (err) {
     console.warn("[pwa] register failed", err);
   }
