@@ -10,7 +10,6 @@ import {
 import { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/lib/auth";
-import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { registerPwa } from "@/lib/pwa-register";
 import { installAutoSync } from "@/lib/offline-sync";
 import { captureReferralFromUrl } from "@/lib/referral";
@@ -165,7 +164,6 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <Outlet />
-        <OfflineIndicator />
         <Toaster />
         <SpeedInsights />
       </AuthProvider>
