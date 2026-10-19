@@ -111,6 +111,8 @@ function SurveyPage() {
   const [survey, setSurvey] = useState<Survey | null>(null);
   const [ownerName, setOwnerName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [alreadyAnswered, setAlreadyAnswered] = useState(false);
   const draftKey = `cv:answers:${id}`;
   const pendingKey = `cv:pending-submit:${id}`;
@@ -183,18 +185,25 @@ function SurveyPage() {
   // and fill out questions without a connection.
   useEffect(() => {
     let active = true;
+    setLoading(true);
+    setLoadError(false);
+    setSurvey(null);
+    setOwnerName(null);
     (async () => {
       const useCache = async () => {
         try {
           const cached = await getCachedSurvey(id);
-          if (cached && active) {
+          if (cached && active && user && cached.creator_id === user.id) {
             setSurvey(cached as unknown as Survey);
             setOwnerName(null);
+            return true;
           }
         } catch {}
+        return false;
       };
       if (typeof navigator !== "undefined" && navigator.onLine === false) {
-        await useCache();
+        const cached = await useCache();
+        if (active) setLoadError(!cached);
         if (active) setLoading(false);
         return;
       }
@@ -203,7 +212,7 @@ function SurveyPage() {
           ? await fetchAuthed({ data: { id } })
           : await fetchPublic({ data: { id } });
         if (!active) return;
-        if (!res.survey) { await useCache(); setLoading(false); return; }
+        if (!res.survey) { setLoading(false); return; }
         const surveyData = { ...(res.survey as any), questions: (res.survey as any).questions ?? [] };
         setSurvey(surveyData as Survey);
         setOwnerName(res.ownerName);
@@ -224,14 +233,15 @@ function SurveyPage() {
         }
       } catch (e) {
         console.warn("Survey load failed, trying offline cache", e);
-        await useCache();
+        const cached = await useCache();
+        if (active) setLoadError(!cached);
       } finally {
         if (active) setLoading(false);
       }
     })();
     return () => { active = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, user?.id]);
+  }, [id, user?.id, loadAttempt]);
 
   // Unauthenticated visitors can read and answer the questions; we only ask
   // them to sign up at submit time (or resume a pending submit after signup).
@@ -569,7 +579,24 @@ function SurveyPage() {
 
   const content = (() => {
     if (loading) return <p className="text-sm text-muted-foreground">Loading...</p>;
-    if (!survey) return <p className="text-sm text-muted-foreground">Survey not found.</p>;
+    if (!survey) return (
+      <section className="mx-auto max-w-lg py-10">
+        <Lock className="h-8 w-8 text-primary" />
+        <h1 className="mt-4 font-serif text-3xl">{loadError ? "We couldn’t load this survey" : user ? "Survey unavailable to this account" : "Log in or sign up to open this survey"}</h1>
+        <p className="mt-3 text-sm text-muted-foreground">
+          {loadError ? "Check your internet connection and try again. This does not mean the survey is missing."
+            : user ? "This link may be closed or invalid, or your account may not meet the survey’s requirements. For invite-only surveys, use the email address that was invited."
+            : "Some surveys require a verified academic email or an email invitation. Log in or create the right account to check access. If the link is no longer active, ask the sender for a current link."}
+        </p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          {loadError ? <Button onClick={() => setLoadAttempt((attempt) => attempt + 1)}>Try again</Button> : null}
+          {!user ? <>
+            <Button asChild><Link to="/signup" search={{ next: `/survey/${id}` }}>Create an account</Link></Button>
+            <Button asChild variant="outline"><Link to="/auth" search={{ next: `/survey/${id}` }}>Log in</Link></Button>
+          </> : <Button asChild variant="outline"><Link to="/feed">Go to feed</Link></Button>}
+        </div>
+      </section>
+    );
     if (result) return <SubmissionResult result={result} survey={survey} onClose={() => navigate({ to: "/feed" })} />;
     return (
       <div>

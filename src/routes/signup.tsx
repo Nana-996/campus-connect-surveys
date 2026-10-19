@@ -18,7 +18,9 @@ import { ResendVerification } from "@/components/ResendVerification";
 import { AGE_RANGES, COUNTRIES, YEAR_OPTIONS, DEPARTMENT_SUGGESTIONS } from "@/lib/interests";
 import { getSchoolPartnership } from "@/lib/school-partnership.functions";
 
-const signupSearchSchema = z.object({ school: z.string().trim().max(100).regex(/^[a-z0-9-]+$/).optional() });
+import { authDestination } from "@/lib/auth-destination";
+
+const signupSearchSchema = z.object({ school: z.string().trim().max(100).regex(/^[a-z0-9-]+$/).optional(), next: z.string().optional() });
 
 export const Route = createFileRoute("/signup")({
   validateSearch: signupSearchSchema,
@@ -31,6 +33,8 @@ export const Route = createFileRoute("/signup")({
       { name: "description", content: "Sign up for CampusVerify as a verified student or general user. Get free credits and start running or answering surveys today." },
       { property: "og:title", content: "Create account — CampusVerify" },
       { property: "og:description", content: "Join CampusVerify — pick a Student or General account, claim free credits, and start running real surveys." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { property: "og:url", content: "https://campus-verify.live/signup" },
     ],
     links: [{ rel: "canonical", href: "https://campus-verify.live/signup" }],
@@ -50,6 +54,7 @@ const GRAD_YEARS = Array.from({ length: 7 }, (_, i) => String(new Date().getFull
 function SignupPage() {
   const navigate = useNavigate();
   const search = Route.useSearch();
+  const nextPath = authDestination(search.next);
   const partnerSchool = Route.useLoaderData();
   const { user, loading } = useAuth();
 
@@ -168,7 +173,7 @@ function SignupPage() {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/feed`,
+          emailRedirectTo: `${window.location.origin}${nextPath ?? "/feed"}`,
           data: {
             full_name: fullName,
             user_type: userType,
@@ -202,7 +207,7 @@ function SignupPage() {
       if (data.session) {
         // Session returned (email confirmation disabled) — go straight in.
         toast.success("Account created. Welcome to CampusVerify.");
-        navigate({ to: "/feed" });
+        navigate({ to: nextPath ?? "/feed" });
         return;
       }
       // Email confirmation is on: the account is not usable until the link
@@ -273,7 +278,7 @@ function SignupPage() {
               <ResendVerification defaultEmail={email} />
               <p className="text-xs text-muted-foreground">
                 Already confirmed?{" "}
-                <Link to="/auth" className="font-semibold underline">Log in</Link>
+                <Link to="/auth" search={{ next: nextPath ?? undefined }} className="font-semibold underline">Log in</Link>
               </p>
             </div>
           )}
@@ -529,7 +534,7 @@ function SignupPage() {
           </form>
           <p className="mt-4 text-center text-xs text-muted-foreground">
             Already have an account?{" "}
-            <Link to="/auth" className="font-semibold text-foreground underline">Log in</Link>
+            <Link to="/auth" search={{ next: nextPath ?? undefined }} className="font-semibold text-foreground underline">Log in</Link>
           </p>
         </div>
       </div>

@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ArrowUpRight, LogIn, GraduationCap, Globe2 } from "lucide-react";
 import { ResendVerification } from "@/components/ResendVerification";
+import { authDestination } from "@/lib/auth-destination";
 
 import { lovable } from "@/integrations/lovable/index";
 
@@ -20,7 +21,7 @@ const searchSchema = z.object({
 });
 
 // Only same-origin relative paths may be used as a post-login destination.
-const safeNext = (next?: string) => (next && /^\/(?!\/)/.test(next) ? next : null);
+const safeNext = authDestination;
 
 export const Route = createFileRoute("/auth")({
   validateSearch: searchSchema,
@@ -31,6 +32,8 @@ export const Route = createFileRoute("/auth")({
       { name: "description", content: "Log in to your CampusVerify student or General/Researcher account to access surveys, credits, and responses." },
       { property: "og:title", content: "Log in — CampusVerify" },
       { property: "og:description", content: "Sign in to CampusVerify to access surveys, credits, and responses for your account type." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { property: "og:url", content: "https://campus-verify.live/auth" },
     ],
     links: [{ rel: "canonical", href: "https://campus-verify.live/auth" }],
@@ -56,9 +59,9 @@ function AuthPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      if (nextPath) window.location.replace(nextPath);
+      if (nextPath) navigate({ to: nextPath, replace: true });
       else navigate({ to: "/feed" });
-    } else if (!loading && search.mode === "signup") navigate({ to: "/signup", replace: true });
+    } else if (!loading && search.mode === "signup") navigate({ to: "/signup", search: { next: nextPath ?? undefined }, replace: true });
   }, [user, loading, search.mode, nextPath, navigate]);
 
   const submit = async (e: React.FormEvent) => {
@@ -91,7 +94,7 @@ function AuthPage() {
         return;
       }
 
-      if (nextPath) window.location.replace(nextPath);
+      if (nextPath) navigate({ to: nextPath, replace: true });
       else navigate({ to: "/feed" });
     } catch (err: any) {
       const raw = err.message ?? "Something went wrong";
@@ -281,7 +284,7 @@ function AuthPage() {
 
           <p className="mt-6 text-center text-xs text-muted-foreground">
             New here?{" "}
-            <Link to="/signup" className="font-semibold text-foreground underline">Create an account</Link>
+            <Link to="/signup" search={{ next: nextPath ?? undefined }} className="font-semibold text-foreground underline">Create an account</Link>
           </p>
           <p className="mt-2 text-center text-xs text-muted-foreground">
             Forgot your password?{" "}
