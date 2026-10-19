@@ -18,6 +18,8 @@ import { ResendVerification } from "@/components/ResendVerification";
 import { AGE_RANGES, COUNTRIES, YEAR_OPTIONS, DEPARTMENT_SUGGESTIONS } from "@/lib/interests";
 import { getSchoolPartnership } from "@/lib/school-partnership.functions";
 
+import { authDestination } from "@/lib/auth-destination";
+
 const signupSearchSchema = z.object({ school: z.string().trim().max(100).regex(/^[a-z0-9-]+$/).optional(), next: z.string().optional() });
 
 export const Route = createFileRoute("/signup")({
