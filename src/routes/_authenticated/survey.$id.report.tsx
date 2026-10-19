@@ -784,7 +784,7 @@ function ChartRenderer({
 }: {
   kind: ChartKind; data: { label: string; count: number }[]; palette: string[]; accent: string; height: number; respondentTotal?: number;
 }) {
-  const total = respondentTotal ?? data.reduce((s, x) => s + x.count, 0) || 1;
+  const total = (respondentTotal ?? data.reduce((s, x) => s + x.count, 0)) || 1;
   const isMobile = useIsMobile();
   const short = (v: string) => (isMobile && v.length > 14 ? `${v.slice(0, 13)}…` : v);
 
@@ -836,7 +836,7 @@ function ChartRenderer({
 }
 
 function DistributionTable({ data, accent, respondentTotal }: { data: { label: string; count: number }[]; accent: string; respondentTotal?: number }) {
-  const total = respondentTotal ?? data.reduce((s, x) => s + x.count, 0) || 1;
+  const total = (respondentTotal ?? data.reduce((s, x) => s + x.count, 0)) || 1;
   return (
     <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "sans-serif", fontSize: 13 }}>
       <thead>
