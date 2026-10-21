@@ -209,9 +209,12 @@ function SurveyPage() {
         return;
       }
       try {
-        const res = user
+        let res: any = user
           ? await fetchAuthed({ data: { id } })
           : await fetchPublic({ data: { id } });
+        // Signed-in but outside the survey's audience: still show the shared
+        // link's questions so the submit step can explain eligibility.
+        if (user && !res.survey) res = await fetchPublic({ data: { id } });
         if (!active) return;
         if (!res.survey) { setLoading(false); return; }
         const surveyData = { ...(res.survey as any), questions: (res.survey as any).questions ?? [] };
