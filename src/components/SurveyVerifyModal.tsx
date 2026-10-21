@@ -13,6 +13,7 @@ const schema = z.object({
   email: z.string().trim().email("Enter a valid email").max(255),
   password: z.string().min(8, "Use at least 8 characters").max(72),
 });
+const ACADEMIC_RE = /(^|\.)edu$|\.edu\.[a-z]{2,6}$|\.ac\.[a-z]{2,6}$|\.uni\.[a-z]{2,6}$/i;
 
 type Props = {
   open: boolean;
@@ -69,12 +70,18 @@ export function SurveyVerifyModal({ open, onClose, onVerified, surveyTitle }: Pr
         // Send the verification email back to this exact survey URL so the
         // respondent lands on the questions immediately after confirming.
         const returnTo = typeof window !== "undefined" ? window.location.href : undefined;
+        // Academic emails become student accounts so campus studies can
+        // count them; the school is resolved from the email domain.
+        const domain = parsed.data.email.split("@")[1]?.toLowerCase() ?? "";
+        const isAcademic = ACADEMIC_RE.test(domain);
         const { data, error: signUpError } = await supabase.auth.signUp({
           email: parsed.data.email,
           password: parsed.data.password,
           options: {
             emailRedirectTo: returnTo,
-            data: { user_type: "general", full_name: "" },
+            data: isAcademic
+              ? { user_type: "student", full_name: "", university_name: domain }
+              : { user_type: "general", full_name: "" },
           },
         });
         if (signUpError) throw signUpError;
