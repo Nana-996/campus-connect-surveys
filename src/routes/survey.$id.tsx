@@ -114,6 +114,7 @@ function SurveyPage() {
   const [loadError, setLoadError] = useState(false);
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [alreadyAnswered, setAlreadyAnswered] = useState(false);
+  const [notEligible, setNotEligible] = useState(false);
   const draftKey = `cv:answers:${id}`;
   const pendingKey = `cv:pending-submit:${id}`;
 
@@ -208,9 +209,12 @@ function SurveyPage() {
         return;
       }
       try {
-        const res = user
+        let res: any = user
           ? await fetchAuthed({ data: { id } })
           : await fetchPublic({ data: { id } });
+        // Signed-in but outside the survey's audience: still show the shared
+        // link's questions so the submit step can explain eligibility.
+        if (user && !res.survey) res = await fetchPublic({ data: { id } });
         if (!active) return;
         if (!res.survey) { setLoading(false); return; }
         const surveyData = { ...(res.survey as any), questions: (res.survey as any).questions ?? [] };
@@ -349,7 +353,19 @@ function SurveyPage() {
         answers: answers as any,
         duration_ms: duration,
       });
-      if (error) throw error;
+      if (error) {
+        // Row-level rule rejected it: this account isn't in the survey's
+        // required audience (e.g. a campus-specific study). Keep the account,
+        // discard the answers, and explain kindly.
+        const code = (error as any).code;
+        const m = String(error.message ?? "").toLowerCase();
+        if (code === "42501" || m.includes("row-level security") || m.includes("permission")) {
+          try { localStorage.removeItem(draftKey); } catch {}
+          setNotEligible(true);
+          return;
+        }
+        throw error;
+      }
       try { localStorage.removeItem(draftKey); } catch {}
 
       // Look up what the response trigger awarded so we can show a clear breakdown
@@ -759,14 +775,27 @@ function SurveyPage() {
             <p className="font-serif text-3xl text-primary">Already answered.</p>
             <p className="mt-1 text-sm text-muted-foreground">Thanks for adding your voice — head back to the feed for more.</p>
           </div>
+        ) : notEligible ? (
+          <div className="mt-6 rounded-3xl border border-dashed border-foreground/30 bg-card p-8 text-center shadow-paper">
+            <p className="font-serif text-3xl">Your account is ready</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              This study is limited to a specific campus or group, and your account isn't part of it, so your answers weren't added to it.
+              You can still answer and create other surveys on CampusVerify.
+            </p>
+            <Button asChild className="mt-5 h-11 rounded-full px-6"><Link to="/feed">Find surveys for you</Link></Button>
+          </div>
         ) : (
           <form onSubmit={submit} className="mt-6 space-y-3">
             {!user && (
               <div className="flex items-start gap-3 rounded-3xl border border-dashed border-foreground/25 bg-card p-4 shadow-paper">
                 <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                 <p className="text-sm text-muted-foreground">
-                  Answer the questions now — you'll only be asked to create a free account when you submit,
-                  so your response counts and you earn a credit.
+                  Answer the questions now — you'll only be asked to create a free account when you submit.
+                  {(survey as any).visibility === "campus"
+                    ? " This study is for one campus: sign up with that institution's email so your response counts."
+                    : (survey as any).visibility === "students"
+                      ? " This study is for students: sign up with your academic email so your response counts."
+                      : ""}
                 </p>
               </div>
             )}

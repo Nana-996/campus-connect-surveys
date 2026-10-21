@@ -51,6 +51,7 @@ export const getSurveyPublic = createServerFn({ method: "GET" })
         target_department: s.target_department,
         target_year: s.target_year,
         is_active: s.is_active,
+        visibility: s.visibility ?? "everyone",
       },
       ownerName: s.owner_name || null,
     };
