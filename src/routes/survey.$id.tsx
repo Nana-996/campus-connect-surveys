@@ -114,6 +114,7 @@ function SurveyPage() {
   const [loadError, setLoadError] = useState(false);
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [alreadyAnswered, setAlreadyAnswered] = useState(false);
+  const [notEligible, setNotEligible] = useState(false);
   const draftKey = `cv:answers:${id}`;
   const pendingKey = `cv:pending-submit:${id}`;
 
@@ -349,7 +350,19 @@ function SurveyPage() {
         answers: answers as any,
         duration_ms: duration,
       });
-      if (error) throw error;
+      if (error) {
+        // Row-level rule rejected it: this account isn't in the survey's
+        // required audience (e.g. a campus-specific study). Keep the account,
+        // discard the answers, and explain kindly.
+        const code = (error as any).code;
+        const m = String(error.message ?? "").toLowerCase();
+        if (code === "42501" || m.includes("row-level security") || m.includes("permission")) {
+          try { localStorage.removeItem(draftKey); } catch {}
+          setNotEligible(true);
+          return;
+        }
+        throw error;
+      }
       try { localStorage.removeItem(draftKey); } catch {}
 
       // Look up what the response trigger awarded so we can show a clear breakdown
