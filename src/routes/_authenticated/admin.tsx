@@ -20,6 +20,7 @@ import { BroadcastPanel } from "@/components/BroadcastPanel";
 import { PromoCodesPanel } from "@/components/PromoCodesPanel";
 import { LeadsPanel } from "@/components/LeadsPanel";
 import { ConversionSummary } from "@/components/ConversionSummary";
+import { OwnerOverview, OwnerPayments } from "@/components/OwnerOverview";
 import { PLATFORM_META, PlatformIcon } from "@/components/SocialLinks";
 
 import {
@@ -145,7 +146,8 @@ function Admin() {
           { value: "domains", label: "Blocked", icon: Ban },
           { value: "links", label: "Links", icon: Link2 },
           { value: "broadcast", label: "Broadcast", icon: Megaphone },
-          { value: "promos", label: "Promo codes", icon: Ticket },
+          { value: "payments", label: "Payments", icon: Ticket },
+          { value: "promos", label: "Discount codes", icon: Ticket },
           { value: "leads", label: "Leads", icon: Inbox },
         ]}
       />
@@ -166,6 +168,7 @@ function Admin() {
         {section === "links" && <SocialLinksPanel />}
         {section === "broadcast" && <BroadcastPanel />}
         {section === "promos" && <PromoCodesPanel />}
+        {section === "payments" && <OwnerPayments />}
         {section === "leads" && <LeadsPanel />}
 
       </div>
@@ -191,7 +194,7 @@ function useAdminSurveys() {
 function OverviewPanel({ metrics, onGo }: { metrics: any; onGo: (s: string) => void }) {
   const tasks = [
     { go: "schools", icon: Building2, title: "Onboard a school", desc: "Add a university, its email domain, and send faculty invites." },
-    { go: "users", icon: Users, title: "Help a student", desc: "Find someone stuck at sign-up and fix their university, role or credits." },
+    { go: "users", icon: Users, title: "Help a user", desc: "Find anyone stuck at sign-up and fix their school, role or credits." },
     { go: "evaluations", icon: GraduationCap, title: "Manage lecturers", desc: "Lecturer directory and evaluation forms." },
     { go: "flags", icon: Flag, title: "Review flags", desc: `${metrics?.openFlags ?? 0} open reports waiting for a decision.` },
     { go: "surveys", icon: FileText, title: "Moderate surveys", desc: "Pause or remove surveys, or send a progress invitation on an owner's behalf." },
@@ -199,6 +202,8 @@ function OverviewPanel({ metrics, onGo }: { metrics: any; onGo: (s: string) => v
   ];
   return (
     <div className="space-y-6">
+      <OwnerOverview onGo={onGo} />
+      <h2 className="font-serif text-2xl">Quick tasks</h2>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {tasks.map((t) => (
           <button

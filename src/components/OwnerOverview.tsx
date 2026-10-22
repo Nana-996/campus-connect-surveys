@@ -11,8 +11,6 @@ const fmt = (iso: string) =>
 export function OwnerOverview({ onGo }: { onGo: (s: string) => void }) {
   const fetchOverview = useServerFn(getOwnerOverview);
   const { data, isLoading, error } = useQuery({ queryKey: ["admin", "owner-overview"], queryFn: () => fetchOverview() });
-  const [payFilter, setPayFilter] = useState<"all" | "paid" | "unpaid">("all");
-
   if (isLoading) return <p className="text-sm text-muted-foreground">Loading today's summary…</p>;
   if (error || !data) return <p className="text-sm text-destructive">Couldn't load today's summary.</p>;
 
@@ -30,8 +28,6 @@ export function OwnerOverview({ onGo }: { onGo: (s: string) => void }) {
     { n: a.stuckPayments, text: "payments still pending after an hour (checkout abandoned or failed)", go: "payments", icon: CreditCard },
     { n: a.flaggedUsers, text: "flagged accounts", go: "users", icon: AlertTriangle },
   ].filter((x) => x.n > 0);
-
-  const pays = data.payments.filter((p) => payFilter === "all" || (payFilter === "paid" ? p.paid : !p.paid));
 
   return (
     <div className="space-y-6">
