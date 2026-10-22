@@ -24,6 +24,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { SurveyVerifyModal } from "@/components/SurveyVerifyModal";
+import { SurveyEligibilityModal } from "@/components/SurveyEligibilityModal";
 import { AppHeader } from "@/components/AppHeader";
 import { ReferralInvite } from "@/components/ReferralInvite";
 import { DonateNudge } from "@/components/DonateNudge";
@@ -152,6 +153,9 @@ function SurveyPage() {
   const [responses, setResponses] = useState<any[] | null>(null);
   const [chartTypes, setChartTypes] = useState<Record<string, ChartType>>({});
   const [verifyOpen, setVerifyOpen] = useState(false);
+  const [eligibilityOpen, setEligibilityOpen] = useState(false);
+  const [readyToSubmit, setReadyToSubmit] = useState(false);
+  const [verificationEmail, setVerificationEmail] = useState("");
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [result, setResult] = useState<null | {
@@ -315,22 +319,16 @@ function SurveyPage() {
     e.preventDefault();
     if (!survey) return;
     if (!validateAnswers()) return;
-    if (!user) {
-      // Answers stay in the local draft; we submit them right after signup.
-      try { localStorage.setItem(pendingKey, "1"); } catch {}
-      setVerifyOpen(true);
-      return;
-    }
-    const duration = Date.now() - startedAt;
+    setReadyToSubmit(true);
+    setEligibilityOpen(true);
+  };
+
+  const doSubmit = async (duration: number) => {
+    if (!survey || !user || !validateAnswers()) return;
     if (duration < 15000) {
       toast.error(`Take your time — at least 15 seconds for quality credit (${Math.floor(duration/1000)}s so far).`);
       return;
     }
-    await doSubmit(duration);
-  };
-
-  const doSubmit = async (duration: number) => {
-    if (!survey || !user) return;
     setSubmitting(true);
     const isOffline = typeof navigator !== "undefined" && navigator.onLine === false;
 
@@ -360,7 +358,7 @@ function SurveyPage() {
         const code = (error as any).code;
         const m = String(error.message ?? "").toLowerCase();
         if (code === "42501" || m.includes("row-level security") || m.includes("permission")) {
-          try { localStorage.removeItem(draftKey); } catch {}
+          setEligibilityOpen(false);
           setNotEligible(true);
           return;
         }
@@ -386,6 +384,7 @@ function SurveyPage() {
       const reason = ledger?.reason ?? "response";
       const newBalance = prof?.earned_credits ?? 0;
       setResult({ delta, reason, newBalance, submittedAt: new Date().toISOString(), answers: { ...answers } });
+      setEligibilityOpen(false);
       if (delta > 0) {
         toast.success(`+${delta} credit${delta === 1 ? "" : "s"} earned!`);
       }
@@ -415,8 +414,7 @@ function SurveyPage() {
     }
   };
 
-  // Someone answered before signing up: submit their saved answers as soon as
-  // their account exists (works even after an email-confirmation round trip).
+  // After verification, show the final match and require explicit submission.
   const resumed = useRef(false);
   useEffect(() => {
     if (!user || !survey || alreadyAnswered || isOwner || resumed.current) return;
@@ -428,7 +426,8 @@ function SurveyPage() {
     try { localStorage.removeItem(pendingKey); } catch {}
     void (async () => {
       if (!validateAnswers()) return;
-      await doSubmit(Math.max(Date.now() - startedAt, 15000));
+      setReadyToSubmit(true);
+      setEligibilityOpen(true);
     })();
   }, [user?.id, survey?.id, alreadyAnswered, isOwner]);
 
