@@ -138,16 +138,16 @@ function AuthPage() {
         </div>
       </div>
 
-      <div className="flex items-center justify-center px-6 py-10">
-        <div className="w-full max-w-md">
-          <Link to="/" className="mb-8 inline-flex items-center gap-2 font-serif text-3xl text-primary lg:hidden">
-            <img src="/logo-mark.png" alt="CampusVerify" width={36} height={36} className="h-9 w-9" />
-            CampusVerify
-          </Link>
+      <div className="flex flex-col items-center justify-start px-4 py-8 sm:justify-center sm:px-6 sm:py-12">
+        <Link to="/" className="mb-6 inline-flex items-center gap-2 font-serif text-3xl text-primary lg:hidden">
+          <img src="/logo-mark.png" alt="CampusVerify" width={36} height={36} className="h-9 w-9" />
+          CampusVerify
+        </Link>
+        <div className="w-full max-w-md rounded-3xl border border-foreground/10 bg-card p-6 shadow-paper sm:p-8">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-highlight px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-highlight-foreground">
             <LogIn className="h-3 w-3" /> log in
           </span>
-          <h1 className="mt-4 font-serif text-5xl leading-[0.95]">Hello again.</h1>
+          <h1 className="mt-4 font-serif text-4xl leading-[0.95] sm:text-5xl">Hello again.</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Choose your account type, then log in.
           </p>

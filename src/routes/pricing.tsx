@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Check, Coins, Sparkles, Target } from "lucide-react";
 import { useEffect } from "react";
 import { LeadForm } from "@/components/LeadForm";
+import { PromoRedeem } from "@/components/PromoRedeem";
 import { useConversionTracking } from "@/hooks/useConversionTracking";
 
 
@@ -73,6 +74,16 @@ function PricingPage() {
           <Button asChild className="mt-3 rounded-full" size="sm"><Link to="/buy-credits">Buy credits</Link></Button>
         </div>
       )}
+
+      <div className="mt-6 max-w-2xl">
+        {profile ? (
+          <PromoRedeem />
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Have a promo code? <a href="/auth?next=%2Fpricing" className="font-semibold text-foreground underline">Log in</a> to redeem it.
+          </p>
+        )}
+      </div>
 
       <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {/* Free */}

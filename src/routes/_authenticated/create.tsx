@@ -1,5 +1,4 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { PromoRedeem } from "@/components/PromoRedeem";
 import { useServerFn } from "@tanstack/react-start";
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -379,7 +378,6 @@ function Create() {
           <span className="text-muted-foreground">earn more by answering surveys</span>
         )}
       </p>
-      <div className="mt-4 max-w-2xl"><PromoRedeem /></div>
 
 
 
