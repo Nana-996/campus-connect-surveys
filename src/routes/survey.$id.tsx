@@ -333,6 +333,14 @@ function SurveyPage() {
     const isOffline = typeof navigator !== "undefined" && navigator.onLine === false;
 
     try {
+      if (!isOffline) {
+        const { data: match, error: matchError } = await supabase.rpc("check_survey_eligibility", { _survey_id: survey.id });
+        if (matchError) throw new Error("We couldn’t verify your match. Please try again.");
+        if (!match || typeof match !== "object" || Array.isArray(match) || match.status !== "eligible") {
+          setEligibilityOpen(true);
+          return;
+        }
+      }
       if (isOffline) {
         await enqueueResponse({
           survey_id: survey.id,
@@ -798,6 +806,9 @@ function SurveyPage() {
                 </p>
               </div>
             )}
+            <Button type="button" variant="outline" className="gap-2" onClick={() => { setReadyToSubmit(false); setEligibilityOpen(true); }}>
+              <ShieldCheck className="h-4 w-4" /> Check if I match this study
+            </Button>
             {survey.questions.map((q, i) => {
 
               const isRequired = q.required ?? true;
@@ -865,17 +876,33 @@ function SurveyPage() {
               );
             })}
             <Button type="submit" size="lg" className="h-14 w-full rounded-full bg-primary text-base" disabled={submitting}>
-              {submitting ? "Submitting…" : user ? "Submit & earn 1 credit →" : "Submit answers & create account →"}
+              {submitting ? "Submitting…" : "Review eligibility & submit →"}
 
             </Button>
           </form>
         )}
 
+        <SurveyEligibilityModal
+          open={eligibilityOpen}
+          onOpenChange={setEligibilityOpen}
+          surveyId={id}
+          userId={user?.id}
+          readyToSubmit={readyToSubmit}
+          submitting={submitting}
+          onSubmit={() => void doSubmit(Date.now() - startedAt)}
+          onVerify={(email) => {
+            setVerificationEmail(email);
+            try { localStorage.setItem(pendingKey, "1"); } catch {}
+            setEligibilityOpen(false);
+            setVerifyOpen(true);
+          }}
+        />
         <SurveyVerifyModal
           open={verifyOpen}
           onClose={() => setVerifyOpen(false)}
           onVerified={() => setVerifyOpen(false)}
           surveyTitle={survey?.title}
+          defaultEmail={verificationEmail}
         />
 
         <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
