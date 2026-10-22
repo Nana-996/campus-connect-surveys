@@ -748,8 +748,8 @@ function GuideDeck() {
 
   return (
     <div ref={containerRef} className="relative h-screen w-screen overflow-hidden" style={{ background: C.greenDeep, fontFamily: SANS }}>
-      <header className="relative z-20 flex h-20 items-center justify-center bg-primary px-6 text-primary-foreground">
-        <h1 className="text-center font-serif text-xl sm:text-2xl">CampusVerify onboarding guide</h1>
+      <header className="relative z-20 flex h-20 items-center justify-center bg-primary pl-6 pr-24 text-primary-foreground sm:px-6">
+        <h1 className="text-center font-serif text-lg sm:text-2xl">CampusVerify onboarding guide</h1>
       </header>
       <AnimatePresence mode="wait" custom={direction}>
         <motion.div
