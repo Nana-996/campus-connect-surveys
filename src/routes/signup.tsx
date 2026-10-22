@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { ArrowUpRight, BadgeCheck, GraduationCap, Globe2 } from "lucide-react";
 
 import { InterestTagInput, type InterestEntry } from "@/components/InterestTagInput";
+import { UniversityCombobox } from "@/components/UniversityCombobox";
 import { ResendVerification } from "@/components/ResendVerification";
 import { AGE_RANGES, COUNTRIES, YEAR_OPTIONS, DEPARTMENT_SUGGESTIONS } from "@/lib/interests";
 import { getSchoolPartnership } from "@/lib/school-partnership.functions";
