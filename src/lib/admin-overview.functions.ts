@@ -38,7 +38,7 @@ export const getOwnerOverview = createServerFn({ method: "GET" })
       return { today: t, weekAvg: Math.round((w / 7) * 10) / 10 };
     };
 
-    const [signups, surveys, responses, payments, openFlags, newLeads, stuckPayments, flaggedUsers, invalidStudents, payRows, recentUsers, recentSurveys] =
+    const [signups, surveys, responses, payments, openFlags, newLeads, stuckPayments, flaggedUsers, payRows, recentUsers, recentSurveys] =
       await Promise.all([
         pair("profiles"),
         pair("surveys"),
@@ -48,7 +48,6 @@ export const getOwnerOverview = createServerFn({ method: "GET" })
         count("leads", (q) => q.eq("status", "new")),
         count("paystack_purchases", (q) => q.eq("status", "pending").lt("created_at", hourAgo)),
         count("profiles", (q) => q.eq("is_flagged", true)),
-        count("profiles", (q) => q.eq("user_type", "invalid")),
         db.from("paystack_purchases").select("id, reference, user_id, bundle_id, credits, amount_ghs_kobo, status, credited_at, created_at").order("created_at", { ascending: false }).limit(50),
         db.from("profiles").select("id, full_name, user_type, university_name, created_at").order("created_at", { ascending: false }).limit(10),
         db.from("surveys").select("id, title, creator_id, created_at").order("created_at", { ascending: false }).limit(10),
@@ -85,7 +84,7 @@ export const getOwnerOverview = createServerFn({ method: "GET" })
 
     return {
       glance: { signups, surveys, responses, payments },
-      attention: { openFlags, newLeads, stuckPayments, flaggedUsers, invalidStudents },
+      attention: { openFlags, newLeads, stuckPayments, flaggedUsers },
       payments: paymentsList,
       activity,
     };
