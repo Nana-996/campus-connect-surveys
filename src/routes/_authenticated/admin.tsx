@@ -147,7 +147,7 @@ function Admin() {
           { value: "links", label: "Links", icon: Link2 },
           { value: "broadcast", label: "Broadcast", icon: Megaphone },
           { value: "payments", label: "Payments", icon: Ticket },
-          { value: "promos", label: "Discount codes", icon: Ticket },
+          { value: "promos", label: "Promo codes", icon: Ticket },
           { value: "leads", label: "Leads", icon: Inbox },
         ]}
       />
