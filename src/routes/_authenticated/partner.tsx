@@ -1,11 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import { getMyPartnerDashboard } from "@/lib/partners.functions";
 import { PartnerProgress, StatGrid } from "@/components/PartnerProgress";
 import { siteUrl } from "@/lib/site";
+import { ActivityList, FunnelInsights, ShareKit } from "@/components/PartnerExtras";
 import { PartnerPayoutHistory } from "@/components/PartnerPayoutHistory";
 
 export const Route = createFileRoute("/_authenticated/partner")({
@@ -44,37 +43,35 @@ function PartnerPortal() {
       <h1 className="font-serif text-4xl">Partner <em className="text-primary">dashboard.</em></h1>
       {data.map((p) => {
         const link = siteUrl(`/p/${p.slug}`);
-        const msg = `I use CampusVerify to get verified responses for research studies. Join here: ${link}`;
-        const copy = async (t: string) => {
-          try { await navigator.clipboard.writeText(t); toast.success("Copied"); } catch { toast.error("Copy failed"); }
-        };
         return (
-          <section key={p.id} className="space-y-4 rounded-2xl border bg-card p-5">
-            <div>
-              <h2 className="text-xl font-semibold">{p.name}</h2>
-              {p.reward_note && <p className="text-sm text-muted-foreground">Agreed reward: {p.reward_note}</p>}
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <code className="break-all rounded bg-muted px-2 py-1 text-sm">{link}</code>
-              <Button size="sm" variant="outline" onClick={() => copy(link)}>Copy link</Button>
-              <Button size="sm" onClick={() => copy(msg)}>Copy message</Button>
+          <section key={p.id} className="space-y-5 rounded-2xl border bg-card p-5">
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div>
+                <h2 className="text-xl font-semibold">{p.name}</h2>
+                {p.reward_note && <p className="text-sm text-muted-foreground">Agreed reward: {p.reward_note} for every {p.target_paying} paying customers</p>}
+              </div>
+              {!p.is_active && <span className="rounded-full bg-muted px-2 py-0.5 text-xs">Paused</span>}
             </div>
             <PartnerProgress stats={p.stats} target={p.target_paying} paid={p.milestones_paid} />
-            <p className="text-xs text-muted-foreground">Milestones paid so far: {p.milestones_paid}</p>
+            <p className="text-xs text-muted-foreground">Milestones paid so far: {p.milestones_paid}{p.last_paid_at ? ` · last payout ${new Date(p.last_paid_at).toLocaleDateString()}` : ""}</p>
             <StatGrid stats={p.stats} clicks={p.clicks} />
-            <PartnerPayoutHistory payouts={p.payouts} />
+            <FunnelInsights stats={p.stats} clicks={p.clicks} target={p.target_paying} paid={p.milestones_paid} />
+            <ShareKit link={link} />
             <div>
-              <h3 className="text-sm font-semibold">Recent activity</h3>
-              <ul className="mt-2 space-y-1 text-sm">
-                {p.stats.activity.length === 0 && <li className="text-muted-foreground">No activity yet — share your link.</li>}
-                {p.stats.activity.map((a, i) => (
-                  <li key={i} className="flex justify-between border-b py-1">
-                    <span>{a.kind}</span>
-                    <span className="text-muted-foreground">{new Date(a.at).toLocaleDateString()}</span>
-                  </li>
-                ))}
-              </ul>
+              <h3 className="mb-1 text-sm font-semibold">Recent activity</h3>
+              <ActivityList activity={p.stats.activity} />
+              <p className="mt-1 text-xs text-muted-foreground">For privacy you see activity, not names or contact details.</p>
             </div>
+            <PartnerPayoutHistory payouts={p.payouts} />
+            <details className="rounded-lg bg-muted/50 p-3 text-sm">
+              <summary className="cursor-pointer font-medium">How counting works</summary>
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-muted-foreground">
+                <li>A sign-up counts when someone creates an account after opening your link.</li>
+                <li>A paying customer counts once, the first time they buy anything — repeat purchases add to revenue only.</li>
+                <li>When you reach the milestone, CampusVerify pays you manually and the next milestone starts.</li>
+                <li>Questions? Email founder@campus-verify.live.</li>
+              </ul>
+            </details>
           </section>
         );
       })}
