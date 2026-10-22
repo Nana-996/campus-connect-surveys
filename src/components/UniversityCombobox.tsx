@@ -31,7 +31,14 @@ export function UniversityCombobox({ id, value, onChange, readOnly, placeholder,
   // Debounced directory search. Clears the pick when the user edits the text.
   useEffect(() => {
     if (readOnly) return;
-    if (picked && value !== picked.name) setPicked(null);
+    if (picked && value !== picked.name) {
+      setPicked(null);
+    } else if (picked) {
+      // Value still matches the pick — don't re-search and re-open the list.
+      setHits([]);
+      setOpen(false);
+      return;
+    }
     const q = value.trim();
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (q.length < 2) {
