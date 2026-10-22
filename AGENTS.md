@@ -24,3 +24,4 @@
 - Conversion payment and enquiry events originate from database transitions; public interaction tracking cannot report payments or identify callers, and aggregate reporting stays owner-gated.
 - Credit bundles declare fixed-GHS or converted-USD prices in the shared catalog; checkout computes amounts server-side so display changes cannot control billing.
 - Payment feedback uses allowlisted provider-state mappings and preserves pending references for rechecks; only terminal failures offer retry to reduce duplicate payments.
+- University identity is 3-layer: curated `public.universities` directory (searched via `search_universities` RPC in the signup combobox), email domain as the final authority (`canonical_university_name` checks the directory first, then partner schools, then crowd names excluding auto-generated "<part> University" junk), and free text only as fallback. Never trust typed school names over the email domain.

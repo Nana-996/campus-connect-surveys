@@ -1681,6 +1681,30 @@ export type Database = {
           },
         ]
       }
+      universities: {
+        Row: {
+          country: string
+          created_at: string
+          domain: string
+          id: string
+          name: string
+        }
+        Insert: {
+          country: string
+          created_at?: string
+          domain: string
+          id?: string
+          name: string
+        }
+        Update: {
+          country?: string
+          created_at?: string
+          domain?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       university_slot_purchases: {
         Row: {
           created_at: string
@@ -2322,6 +2346,14 @@ export type Database = {
       school_survey_is_linked: {
         Args: { _school_domain: string; _survey_id: string }
         Returns: boolean
+      }
+      search_universities: {
+        Args: { q: string }
+        Returns: {
+          country: string
+          domain: string
+          name: string
+        }[]
       }
       submit_survey_review: {
         Args: { _approve: boolean; _comment?: string; _token: string }

@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { ArrowUpRight, BadgeCheck, GraduationCap, Globe2 } from "lucide-react";
 
 import { InterestTagInput, type InterestEntry } from "@/components/InterestTagInput";
+import { UniversityCombobox } from "@/components/UniversityCombobox";
 import { ResendVerification } from "@/components/ResendVerification";
 import { AGE_RANGES, COUNTRIES, YEAR_OPTIONS, DEPARTMENT_SUGGESTIONS } from "@/lib/interests";
 import { getSchoolPartnership } from "@/lib/school-partnership.functions";
@@ -371,14 +372,12 @@ function SignupPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label htmlFor="uni" className="text-xs font-semibold uppercase tracking-wider">University <span className="text-destructive">*</span></Label>
-                  <Input
+                  <UniversityCombobox
                     id="uni"
-                    required
                     value={universityName}
-                    onChange={(e) => { setUniversityName(e.target.value); setFormError(null); }}
+                    onChange={(name) => { setUniversityName(name); setFormError(null); }}
                     readOnly={Boolean(partnerSchool)}
-                    placeholder="e.g. University of Ghana"
-                    maxLength={120}
+                    placeholder="Start typing… e.g. University of Ghana"
                     className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card read-only:bg-secondary"
                   />
                 </div>

@@ -57,6 +57,13 @@
       "when": 1792645503337,
       "tag": "0007_survey_eligibility_preflight",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792704422373,
+      "tag": "0008_universities_directory",
+      "breakpoints": true
     }
   ]
 }
