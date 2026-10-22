@@ -65,7 +65,7 @@ export function OwnerOverview({ onGo }: { onGo: (s: string) => void }) {
       <section className="grid gap-3 sm:grid-cols-2">
         <button type="button" onClick={() => onGo("promos")} className="flex items-center gap-3 rounded-2xl border border-primary/40 bg-primary/5 p-4 text-left">
           <Ticket className="h-5 w-5 text-primary" />
-          <span><span className="block font-medium">Discount &amp; promo codes</span><span className="text-xs text-muted-foreground">Create codes for bonus credits or a % off purchases.</span></span>
+          <span><span className="block font-medium">Promo codes</span><span className="text-xs text-muted-foreground">Create codes for bonus credits or a % off purchases.</span></span>
         </button>
         <Link to="/admin-partners" className="flex items-center gap-3 rounded-2xl border border-primary/40 bg-primary/5 p-4">
           <Handshake className="h-5 w-5 text-primary" />
