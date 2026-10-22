@@ -33,7 +33,7 @@ export function SurveyEligibilityModal({ open, onOpenChange, surveyId, userId, r
     try {
       const { data, error: queryError } = await supabase.rpc("check_survey_eligibility", {
         _survey_id: surveyId,
-        _email: candidateEmail ?? null,
+        _email: candidateEmail,
       });
       if (queryError) throw queryError;
       const parsed = z.object({ status: z.enum(["eligible", "mismatch", "needs_verification", "unavailable"]), reasons: z.array(z.string()) }).parse(data);

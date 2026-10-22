@@ -361,8 +361,8 @@ function SurveyPage() {
       });
       if (error) {
         // Row-level rule rejected it: this account isn't in the survey's
-        // required audience (e.g. a campus-specific study). Keep the account,
-        // discard the answers, and explain kindly.
+        // required audience (e.g. a campus-specific study). Keep the account
+        // and local answers, and explain kindly.
         const code = (error as any).code;
         const m = String(error.message ?? "").toLowerCase();
         if (code === "42501" || m.includes("row-level security") || m.includes("permission")) {
