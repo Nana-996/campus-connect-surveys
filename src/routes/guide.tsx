@@ -654,14 +654,14 @@ const SlideFAQ = () => {
 const SlideStart = () => (
   <SlideShell bg="cream" align="center">
     <Kicker dark>You're ready.</Kicker>
-    <motion.h1
+    <motion.h2
       variants={fadeUp}
       custom={1}
       className="mt-8 max-w-[1100px] text-[80px] leading-[0.98] tracking-tight"
       style={{ fontFamily: SERIF, color: C.green }}
     >
       Now go <em style={{ color: C.limeDeep }}>get the data</em> your research deserves.
-    </motion.h1>
+    </motion.h2>
     <motion.p variants={fadeUp} custom={2} className="mt-8 max-w-2xl text-xl" style={{ color: C.mutedDark, fontFamily: SANS }}>
       Sign up · verify · answer five surveys · publish your first study. That's the whole journey.
     </motion.p>
