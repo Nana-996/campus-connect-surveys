@@ -1,5 +1,7 @@
 # Architecture rules
 
+- Survey eligibility preflight mirrors mandatory response policies in a read-only RPC; anonymous email matches are provisional, verified matches require explicit submission, and response RLS remains authoritative.
+
 - Shared-survey student signup validates graduation metadata before calling auth so account provisioning requirements are met without bypassing verification.
 
 - Shared survey links keep public previews constrained; absent previews offer authentication without revealing restricted survey data, and auth destinations use the shared local-path validator.

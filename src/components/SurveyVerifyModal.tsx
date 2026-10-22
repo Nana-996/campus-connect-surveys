@@ -20,9 +20,10 @@ type Props = {
   onClose: () => void;
   onVerified?: () => void;
   surveyTitle?: string;
+  defaultEmail?: string;
 };
 
-export function SurveyVerifyModal({ open, onClose, onVerified, surveyTitle }: Props) {
+export function SurveyVerifyModal({ open, onClose, onVerified, surveyTitle, defaultEmail }: Props) {
   const { signIn } = useAuth();
   const [mode, setMode] = useState<"signup" | "login">("signup");
   const [email, setEmail] = useState("");
@@ -31,6 +32,10 @@ export function SurveyVerifyModal({ open, onClose, onVerified, surveyTitle }: Pr
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [signupSent, setSignupSent] = useState(false);
+
+  useEffect(() => {
+    if (open && defaultEmail) setEmail(defaultEmail);
+  }, [open, defaultEmail]);
 
   // Lock body scroll while open
   useEffect(() => {

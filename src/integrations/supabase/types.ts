@@ -2005,6 +2005,10 @@ export type Database = {
         Args: { _domain: string; _typed: string }
         Returns: string
       }
+      check_survey_eligibility: {
+        Args: { _email?: string; _survey_id: string }
+        Returns: Json
+      }
       claim_partner_referral: { Args: { _slug: string }; Returns: string }
       claim_referral: { Args: { _code: string }; Returns: Json }
       claim_school_admin: { Args: never; Returns: number }
