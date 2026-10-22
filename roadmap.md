@@ -1,5 +1,10 @@
 # Roadmap
 
+## Before-submit survey eligibility — 2026-10-22
+- [ ] Add a privacy-safe audience preflight using existing required eligibility rules.
+- [ ] Show visitors a provisional match and verified users a final check before explicit submission.
+- [ ] Verify matching, mismatching, optional-interest and confirmation-return flows.
+
 ## SEO findings — 2026-10-22
 - [x] Align homepage search and social metadata; remove competing root copy.
 - [x] Keep a visible, stable guide heading and complete its page metadata.
