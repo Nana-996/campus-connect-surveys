@@ -1,5 +1,10 @@
 # Roadmap
 
+## SEO findings — 2026-10-22
+- [x] Align homepage search and social metadata; remove competing root copy.
+- [x] Keep a visible, stable guide heading and complete its page metadata.
+- [x] Verify emitted metadata and guide navigation; update the three SEO findings (awaiting rescan and publication).
+
 ## Shared survey access — 2026-10-19
 - [x] Replace misleading signed-out not-found states with signup/login, preserving restricted survey privacy.
 - [x] Preserve survey destinations through signup, confirmation, and login; distinguish connection failures.

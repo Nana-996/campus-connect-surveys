@@ -33,9 +33,11 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "CampusVerify — Verified survey platform for academic research" },
-      { name: "description", content: "The survey platform for academic research: create surveys, reach verified student respondents and research participants, and earn credits by answering community research." },
-      { property: "og:title", content: "CampusVerify — Verified research and surveys" },
-      { property: "og:description", content: "A credit-powered survey platform for students, professional researchers, organisations, and community respondents." },
+      { name: "description", content: "Create academic research surveys, reach verified respondents, and participate in research. CampusVerify connects researchers, institutions, and communities." },
+      { property: "og:title", content: "CampusVerify — Verified survey platform for academic research" },
+      { property: "og:description", content: "Create academic research surveys, reach verified respondents, and participate in research. CampusVerify connects researchers, institutions, and communities." },
+      { name: "twitter:title", content: "CampusVerify — Verified survey platform for academic research" },
+      { name: "twitter:description", content: "Create academic research surveys, reach verified respondents, and participate in research. CampusVerify connects researchers, institutions, and communities." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:image", content: "https://campus-verify.live/logo-mark.png" },

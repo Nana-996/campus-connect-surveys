@@ -41,6 +41,10 @@ export const Route = createFileRoute("/guide")({
     meta: [
       { title: "CampusVerify — User Onboarding Guide" },
       { name: "description", content: "A step-by-step onboarding guide for students, lecturers, and faculty supervisors using CampusVerify." },
+      { property: "og:title", content: "CampusVerify — User Onboarding Guide" },
+      { property: "og:description", content: "A step-by-step onboarding guide for students, lecturers, and faculty supervisors using CampusVerify." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
       { property: "og:url", content: "https://campus-verify.live/guide" },
     ],
@@ -182,14 +186,14 @@ const SlideWelcome = () => (
   <SlideShell bg="green" align="center">
     <div className="absolute left-12 top-10"><Wordmark /></div>
     <Kicker>User onboarding · 2026</Kicker>
-    <motion.h1
+    <motion.h2
       variants={fadeUp}
       custom={1}
       className="mt-10 max-w-[1100px] text-[88px] leading-[0.98] tracking-tight"
       style={{ fontFamily: SERIF, color: C.cream }}
     >
       Welcome to <span style={{ color: C.lime, fontStyle: "italic" }}>CampusVerify</span>.
-    </motion.h1>
+    </motion.h2>
     <motion.p variants={fadeUp} custom={2} className="mt-8 max-w-2xl text-2xl" style={{ color: C.muted, fontFamily: SANS, fontWeight: 300 }}>
       A short guide to onboarding, earning credits, publishing surveys, and getting real responses from relevant people.
     </motion.p>
@@ -650,14 +654,14 @@ const SlideFAQ = () => {
 const SlideStart = () => (
   <SlideShell bg="cream" align="center">
     <Kicker dark>You're ready.</Kicker>
-    <motion.h1
+    <motion.h2
       variants={fadeUp}
       custom={1}
       className="mt-8 max-w-[1100px] text-[80px] leading-[0.98] tracking-tight"
       style={{ fontFamily: SERIF, color: C.green }}
     >
       Now go <em style={{ color: C.limeDeep }}>get the data</em> your research deserves.
-    </motion.h1>
+    </motion.h2>
     <motion.p variants={fadeUp} custom={2} className="mt-8 max-w-2xl text-xl" style={{ color: C.mutedDark, fontFamily: SANS }}>
       Sign up · verify · answer five surveys · publish your first study. That's the whole journey.
     </motion.p>
@@ -744,6 +748,9 @@ function GuideDeck() {
 
   return (
     <div ref={containerRef} className="relative h-screen w-screen overflow-hidden" style={{ background: C.greenDeep, fontFamily: SANS }}>
+      <header className="relative z-20 flex h-20 items-center justify-center bg-primary pl-6 pr-24 text-primary-foreground sm:px-6">
+        <h1 className="text-center font-serif text-lg sm:text-2xl">CampusVerify onboarding guide</h1>
+      </header>
       <AnimatePresence mode="wait" custom={direction}>
         <motion.div
           key={SLIDES[index].id}
@@ -752,7 +759,7 @@ function GuideDeck() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -16 }}
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-          className="absolute inset-0"
+          className="absolute inset-x-0 bottom-0 top-20"
         >
           <motion.div initial="hidden" animate="show" variants={fadeIn} className="h-full w-full">
             <Current />
