@@ -8,12 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/PasswordInput";
 import { toast } from "sonner";
+import { isAcademicEmail, sharedSurveySignupMetadata } from "@/lib/shared-survey-signup";
 
 const schema = z.object({
   email: z.string().trim().email("Enter a valid email").max(255),
   password: z.string().min(8, "Use at least 8 characters").max(72),
 });
-const ACADEMIC_RE = /(^|\.)edu$|\.edu\.[a-z]{2,6}$|\.ac\.[a-z]{2,6}$|\.uni\.[a-z]{2,6}$/i;
 
 type Props = {
   open: boolean;
@@ -27,6 +27,7 @@ export function SurveyVerifyModal({ open, onClose, onVerified, surveyTitle }: Pr
   const [mode, setMode] = useState<"signup" | "login">("signup");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [graduationMonth, setGraduationMonth] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [signupSent, setSignupSent] = useState(false);
@@ -72,16 +73,13 @@ export function SurveyVerifyModal({ open, onClose, onVerified, surveyTitle }: Pr
         const returnTo = typeof window !== "undefined" ? window.location.href : undefined;
         // Academic emails become student accounts so campus studies can
         // count them; the school is resolved from the email domain.
-        const domain = parsed.data.email.split("@")[1]?.toLowerCase() ?? "";
-        const isAcademic = ACADEMIC_RE.test(domain);
+        const metadata = sharedSurveySignupMetadata(parsed.data.email, graduationMonth);
         const { data, error: signUpError } = await supabase.auth.signUp({
           email: parsed.data.email,
           password: parsed.data.password,
           options: {
             emailRedirectTo: returnTo,
-            data: isAcademic
-              ? { user_type: "student", full_name: "", university_name: domain }
-              : { user_type: "general", full_name: "" },
+            data: metadata,
           },
         });
         if (signUpError) throw signUpError;
@@ -99,7 +97,7 @@ export function SurveyVerifyModal({ open, onClose, onVerified, surveyTitle }: Pr
       onVerified?.();
       onClose();
     } catch (err: any) {
-      const msg = err?.message ?? "Verification failed. Try again.";
+      const msg = err instanceof z.ZodError ? err.issues[0]?.message ?? "Check your details" : err?.message ?? "Verification failed. Try again.";
       setError(msg);
       toast.error(msg);
     } finally {
@@ -117,7 +115,7 @@ export function SurveyVerifyModal({ open, onClose, onVerified, surveyTitle }: Pr
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-md overflow-hidden rounded-t-3xl border border-foreground/10 bg-background shadow-2xl sm:rounded-3xl"
+        className="relative max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-t-3xl border border-foreground/10 bg-background shadow-2xl sm:rounded-3xl"
       >
         {/* Header band */}
         <div className="relative bg-primary px-6 py-7 text-primary-foreground">
@@ -212,6 +210,21 @@ export function SurveyVerifyModal({ open, onClose, onVerified, surveyTitle }: Pr
               required
             />
           </div>
+
+          {mode === "signup" && isAcademicEmail(email) && (
+            <div className="space-y-1.5">
+              <Label htmlFor="verify-graduation" className="text-xs font-bold uppercase tracking-wider">
+                Expected graduation month and year
+              </Label>
+              <Input
+                id="verify-graduation"
+                type="month"
+                value={graduationMonth}
+                onChange={(e) => { setGraduationMonth(e.target.value); setError(null); }}
+                required
+              />
+            </div>
+          )}
 
           {error && (
             <p className="rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
