@@ -424,6 +424,9 @@ function SurveyPage() {
 
   // After verification, show the final match and require explicit submission.
   const resumed = useRef(false);
+  // Answers were completed before signup/verification, so the 15s speed
+  // check (based on this page load's startedAt) must not block the submit.
+  const skipSpeedCheck = useRef(false);
   useEffect(() => {
     if (!user || !survey || alreadyAnswered || isOwner || resumed.current) return;
     if (typeof window === "undefined") return;
@@ -431,6 +434,7 @@ function SurveyPage() {
     if (!survey.questions?.length) return;
     if (!Object.keys(answersRef.current).length) return;
     resumed.current = true;
+    skipSpeedCheck.current = true;
     try { localStorage.removeItem(pendingKey); } catch {}
     void (async () => {
       if (!validateAnswers()) return;
@@ -889,7 +893,7 @@ function SurveyPage() {
           userId={user?.id}
           readyToSubmit={readyToSubmit}
           submitting={submitting}
-          onSubmit={() => void doSubmit(Date.now() - startedAt)}
+          onSubmit={() => void doSubmit(skipSpeedCheck.current ? Math.max(Date.now() - startedAt, 15000) : Date.now() - startedAt)}
           onVerify={(email) => {
             setVerificationEmail(email);
             try { localStorage.setItem(pendingKey, "1"); } catch {}
