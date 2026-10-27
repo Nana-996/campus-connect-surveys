@@ -893,7 +893,7 @@ function SurveyPage() {
           userId={user?.id}
           readyToSubmit={readyToSubmit}
           submitting={submitting}
-          onSubmit={() => void doSubmit(Date.now() - startedAt)}
+          onSubmit={() => void doSubmit(skipSpeedCheck.current ? Math.max(Date.now() - startedAt, 15000) : Date.now() - startedAt)}
           onVerify={(email) => {
             setVerificationEmail(email);
             try { localStorage.setItem(pendingKey, "1"); } catch {}
