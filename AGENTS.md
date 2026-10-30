@@ -22,6 +22,7 @@
 - All spreadsheet exports use the shared formula-neutralizing CSV serializer so alternate export entry points retain the same protection.
 - Partner payouts use a service-only locked database transaction and immutable milestone ledger; expected progress prevents duplicate confirmations and paid targets cannot be edited.
 - Conversion payment and enquiry events originate from database transitions; public interaction tracking cannot report payments or identify callers, and aggregate reporting stays owner-gated.
+- Survey completion uses deduplicated anonymous per-survey attempt tokens preserved through verification; only a successful response insert trigger records submission, including offline sync, and owner-gated aggregate reads use start-date cohorts.
 - Credit bundles declare fixed-GHS or converted-USD prices in the shared catalog; checkout computes amounts server-side so display changes cannot control billing.
 - Payment feedback uses allowlisted provider-state mappings and preserves pending references for rechecks; only terminal failures offer retry to reduce duplicate payments.
 - University identity is 3-layer: curated `public.universities` directory (searched via `search_universities` RPC in the signup combobox), email domain as the final authority (`canonical_university_name` checks the directory first, then partner schools, then crowd names excluding auto-generated "<part> University" junk), and free text only as fallback. Never trust typed school names over the email domain.
