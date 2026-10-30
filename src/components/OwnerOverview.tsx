@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Link } from "@tanstack/react-router";
 import { AlertTriangle, CreditCard, FileText, Flag, Handshake, Inbox, Ticket, UserPlus, Users } from "lucide-react";
 import { getOwnerOverview } from "@/lib/admin-overview.functions";
+import { SurveyCompletionPanel } from "@/components/SurveyCompletionPanel";
 
 const fmt = (iso: string) =>
   new Date(iso).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
@@ -43,6 +44,8 @@ export function OwnerOverview({ onGo }: { onGo: (s: string) => void }) {
           ))}
         </div>
       </section>
+
+      <SurveyCompletionPanel />
 
       <section className="rounded-2xl border border-foreground/15 bg-card p-4">
         <h2 className="font-serif text-2xl">Needs attention</h2>

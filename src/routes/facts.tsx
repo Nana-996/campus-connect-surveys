@@ -40,6 +40,16 @@ const facts = [
     text: "Answering an eligible survey earns one research credit. Credits are spent to publish surveys. Sign-up credits do not expire: 10 for students, 50 for partner-school students, and 5 for General/Researcher accounts.",
   },
   {
+    icon: BookOpenCheck,
+    title: "Shared-link participation",
+    text: "Visitors can answer open, non-private shared surveys before signing up. Email confirmation and mandatory audience checks happen before explicit submission. Optional interests do not exclude otherwise eligible responses.",
+  },
+  {
+    icon: Globe2,
+    title: "Questions and reports",
+    text: "Surveys support text, single-choice, multiple-selection and rating questions. Researchers can analyse responses, export spreadsheets, and create PDF reports with individually titled vector charts—not screenshots.",
+  },
+  {
     icon: Building2,
     title: "School partnerships",
     text: "Partner schools can use permanent co-branded joining links, school administration tools, and privacy-limited response tracking. Academic email domains—not a joining URL—determine student eligibility and partner benefits.",
@@ -71,6 +81,14 @@ const faq = [
     question: "Who operates CampusVerify?",
     answer:
       "CampusVerify is operated by Vibe Tribe Organisation in Ghana. Its official website is campus-verify.live and its main contact email is founder@campus-verify.live.",
+  },
+  {
+    question: "Can someone outside a university answer a shared survey?",
+    answer: "Yes. People using personal or work email addresses can answer open shared surveys before signup, then confirm a General/Researcher account and submit if they meet the study’s mandatory audience criteria. School details and graduation dates are not required for these accounts.",
+  },
+  {
+    question: "Are research credits cash, or are response targets guaranteed?",
+    answer: "No. Credits are used inside CampusVerify to publish research surveys; they are not cash payments to respondents. Paid Research Boost response targets depend on eligible participation and are not guaranteed. See Pricing and the Refund Policy for current terms.",
   },
 ];
 
@@ -121,6 +139,8 @@ export const Route = createFileRoute("/facts")({
             "Private invite-only surveys",
             "Research credit exchange",
             "Survey analytics, data export, and report building",
+            "Answer-first shared surveys with email verification before submission",
+            "Multiple-selection questions and vector-chart PDF reports",
             "School partnership and privacy-limited response tracking tools",
           ],
           offers: { "@type": "Offer", price: "0", priceCurrency: "GHS", description: "Accounts include permanent sign-up research credits." },
@@ -169,7 +189,7 @@ function FactsPage() {
             A concise, citable description of the platform, who it serves, and how its research tools work. These facts apply to the official website at campus-verify.live.
           </p>
           <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Last reviewed 2 October 2026
+            Last reviewed 30 October 2026
           </p>
         </section>
 

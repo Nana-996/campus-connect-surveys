@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const BASE_URL = "https://campus-verify.live";
 
@@ -20,10 +19,7 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/facts", changefreq: "monthly", priority: "0.8" },
           { path: "/guide", changefreq: "monthly", priority: "0.7" },
           { path: "/pricing", changefreq: "monthly", priority: "0.8" },
-          { path: "/auth", changefreq: "monthly", priority: "0.5" },
-          { path: "/signup", changefreq: "monthly", priority: "0.5" },
-          { path: "/forgot-password", changefreq: "monthly", priority: "0.3" },
-          { path: "/reset-password", changefreq: "monthly", priority: "0.3" },
+          { path: "/schools", changefreq: "monthly", priority: "0.7" },
           { path: "/privacy", changefreq: "monthly", priority: "0.4" },
           { path: "/privacy-audit", changefreq: "monthly", priority: "0.5" },
           { path: "/terms", changefreq: "monthly", priority: "0.4" },
@@ -35,25 +31,9 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/blog/paid-surveys-for-students", changefreq: "monthly", priority: "0.8" },
         ];
 
-        // Fetch published surveys for dynamic /survey/$id entries.
-        // Only surveys explicitly opened to the general public are indexed;
-        // campus-scoped surveys must not leak their IDs to crawlers.
-        const { data: surveys } = await supabaseAdmin
-          .from("surveys")
-          .select("id, created_at")
-          .eq("is_active", true)
-          .eq("allow_general_respondents", true);
-
-        if (surveys) {
-            for (const s of surveys) {
-            entries.push({
-              path: `/survey/${s.id}`,
-              changefreq: "weekly",
-              priority: "0.7",
-              lastmod: s.created_at ? new Date(s.created_at).toISOString().slice(0, 10) : undefined,
-            });
-          }
-        }
+        // Shared studies are respondent links, not public directory listings.
+        // Discover product/reference pages without enumerating survey IDs through
+        // privileged access (including invite-only and audience-limited studies).
 
         const urls = entries.map((e) =>
           [

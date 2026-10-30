@@ -11,6 +11,8 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { safeErrorMessage } from "@/lib/safe-error";
 import { ShareMessageEditor } from "@/components/ShareMessageEditor";
+import { useSurveyFunnel } from "@/hooks/useSurveyFunnel";
+import { hasSurveyAnswer } from "@/lib/survey-funnel";
 
 import { Download, ArrowLeft, Users, FileText, BarChart3, TrendingUp, Activity, Hash, Lock, ShieldCheck, Check, Trash2 } from "lucide-react";
 import {
@@ -85,7 +87,7 @@ export const Route = createFileRoute("/survey/$id")({
     const rawDesc = s?.description?.trim();
     const desc = rawDesc
       ? (rawDesc.length > 155 ? `${rawDesc.slice(0, 152)}…` : rawDesc)
-      : "Answer a verified CampusVerify survey to earn credits. Log in or create a free account to participate.";
+      : "Answer this CampusVerify research survey before signing up. Confirm your email and required audience eligibility before submitting.";
     const url = `https://campus-verify.live/survey/${params.id}`;
     return {
       meta: [
@@ -104,6 +106,7 @@ export const Route = createFileRoute("/survey/$id")({
 
 function SurveyPage() {
   const { id } = Route.useParams();
+  const { track: trackFunnel, getToken: getFunnelToken } = useSurveyFunnel(id);
   const { user, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const fetchPublic = useServerFn(getSurveyPublic);
@@ -183,6 +186,14 @@ function SurveyPage() {
   };
 
   const isOwner = !!(survey && user && survey.creator_id === user.id);
+
+  useEffect(() => {
+    if (!survey || isOwner || alreadyAnswered || result || !hasSurveyAnswer(answers)) return;
+    void trackFunnel("started");
+  }, [survey, isOwner, alreadyAnswered, result, answers, trackFunnel]);
+  useEffect(() => {
+    if (verifyOpen && !user && survey && !isOwner) void trackFunnel("signup");
+  }, [verifyOpen, user, survey, isOwner, trackFunnel]);
 
   // Load survey: authenticated users get full questions via RLS-scoped fetch;
   // anonymous viewers only see metadata (no questions) for the verify card.
@@ -347,17 +358,21 @@ function SurveyPage() {
           respondent_id: user.id,
           answers,
           duration_ms: duration,
+          funnel_token: getFunnelToken(),
         });
         try { localStorage.removeItem(draftKey); } catch {}
         setResult({ delta: 0, reason: "queued_offline", newBalance: 0 });
         toast.success("Saved offline — we'll sync it when you're back online.");
         return;
       }
+      // Ensure the attempt exists before the authoritative insert marks it submitted.
+      await trackFunnel("started");
       const { error } = await supabase.from("survey_responses").insert({
         survey_id: survey.id,
         respondent_id: user.id,
         answers: answers as any,
         duration_ms: duration,
+        funnel_token: getFunnelToken(),
       });
       if (error) {
         // Row-level rule rejected it: this account isn't in the survey's
@@ -409,6 +424,7 @@ function SurveyPage() {
             respondent_id: user.id,
             answers,
             duration_ms: duration,
+            funnel_token: getFunnelToken(),
           });
           try { localStorage.removeItem(draftKey); } catch {}
           setResult({ delta: 0, reason: "queued_offline", newBalance: 0 });

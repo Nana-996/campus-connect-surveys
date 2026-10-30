@@ -7,6 +7,7 @@ Official facts: https://campus-verify.live/facts
 Operator: Vibe Tribe Organisation, Ghana
 Contact: founder@campus-verify.live
 Language: English
+Product facts reviewed: 30 October 2026
 
 ## Canonical product facts
 
@@ -17,6 +18,9 @@ Language: English
 - Answering an eligible survey earns 1 research credit. Credits are spent to publish surveys.
 - Sign-up credits do not expire: 10 for students, 50 for students at partner schools, and 5 for General/Researcher accounts.
 - CampusVerify includes survey creation, audience controls, response collection, analytics, data export, and report building.
+- Open, non-private shared surveys can be answered before signup. Responses count only after email confirmation, mandatory audience eligibility, and explicit submission. Personal and work email users can create General/Researcher accounts without school details or graduation dates. Optional interests do not disqualify an otherwise eligible response.
+- Questions support text, single-choice, multiple-selection and ratings. PDF reports use individually titled vector charts, not screenshots; spreadsheet exports are available.
+- Research credits are platform credits, not cash paid to participants. Research Boost response targets depend on eligible participation and are not guaranteed; consult Pricing and the Refund Policy.
 - Partner schools can use co-branded joining pages and school administration tools. Academic email domains—not joining URLs—determine student eligibility and partner benefits.
 - School-assisted response tracking is privacy-limited to eligible students' index numbers, departments, and response state. It does not expose names, emails, answers, or submission times.
 - CampusVerify requires authenticated accounts and applies response-quality safeguards. It does not claim to prove how every person prepared an answer, guarantee every result, or detect every possible use of automation.

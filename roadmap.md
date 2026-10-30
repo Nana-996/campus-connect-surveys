@@ -1,5 +1,11 @@
 # Roadmap
 
+## Visibility and survey completion — 2026-10-30
+- [ ] Improve existing public facts and discovery signals using verified product capabilities.
+- [ ] Track unique survey starts, signup steps and authoritative submissions without respondent identities.
+- [ ] Add owner-only completion reporting with date ranges and clear denominators.
+- [ ] Verify funnel rules, public pages and signed-in dashboard; note publication requirements.
+
 ## Before-submit survey eligibility — 2026-10-22
 - [x] Add a privacy-safe audience preflight using existing required eligibility rules.
 - [x] Show visitors a provisional match and verified users a final check before explicit submission.

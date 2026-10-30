@@ -32,12 +32,12 @@ export const Route = createFileRoute("/")({
   component: Landing,
   head: () => ({
     meta: [
-      { title: "CampusVerify — Verified survey platform for academic research" },
-      { name: "description", content: "Create academic research surveys, reach verified respondents, and participate in research. CampusVerify connects researchers, institutions, and communities." },
-      { property: "og:title", content: "CampusVerify — Verified survey platform for academic research" },
-      { property: "og:description", content: "Create academic research surveys, reach verified respondents, and participate in research. CampusVerify connects researchers, institutions, and communities." },
-      { name: "twitter:title", content: "CampusVerify — Verified survey platform for academic research" },
-      { name: "twitter:description", content: "Create academic research surveys, reach verified respondents, and participate in research. CampusVerify connects researchers, institutions, and communities." },
+      { title: "CampusVerify — Research surveys, respondents & results" },
+      { name: "description", content: "Create online research surveys, find relevant respondents, and export results. CampusVerify serves academic researchers, organisations and community participants." },
+      { property: "og:title", content: "CampusVerify — Research surveys, respondents & results" },
+      { property: "og:description", content: "Create online research surveys, find relevant respondents, and export results. CampusVerify serves academic researchers, organisations and community participants." },
+      { name: "twitter:title", content: "CampusVerify — Research surveys, respondents & results" },
+      { name: "twitter:description", content: "Create online research surveys, find relevant respondents, and export results. CampusVerify serves academic researchers, organisations and community participants." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:image", content: "https://campus-verify.live/logo-mark.png" },
@@ -53,7 +53,7 @@ export const Route = createFileRoute("/")({
           "@type": "FAQPage",
           mainEntity: [
             { "@type": "Question", name: "Who can sign up?", acceptedAnswer: { "@type": "Answer", text: "Anyone with a valid academic email (.edu, .edu.xx, .ac.xx, .uni.xx) can create a student account. Non-students can sign up as general accounts and reach the wider public audience." } },
-            { "@type": "Question", name: "How do credits work?", acceptedAnswer: { "@type": "Answer", text: "You spend credits to publish a survey and earn 1 credit for each quality response you submit. CampusVerify is free to use — every credit you spend comes from answering other people's surveys." } },
+            { "@type": "Question", name: "How do credits work?", acceptedAnswer: { "@type": "Answer", text: "You spend credits to publish a survey and earn 1 credit for each quality response you submit. Accounts receive permanent signup credits; paid credit bundles are also available. Credits are not cash." } },
             { "@type": "Question", name: "Can I target specific departments?", acceptedAnswer: { "@type": "Answer", text: "Yes — pick the Targeted tier or higher to filter by department, year, country, age range, and interests." } },
             { "@type": "Question", name: "Is my data private?", acceptedAnswer: { "@type": "Answer", text: "Survey creators see responses, not respondent identities beyond what your questions ask. See the Privacy Policy for the full picture." } },
             { "@type": "Question", name: "What if I forgot my password?", acceptedAnswer: { "@type": "Answer", text: "Use the Forgot password link on the login screen. We'll email a secure reset link." } },
@@ -190,10 +190,10 @@ function Landing() {
             <BookOpen className="h-3 w-3" /> For every kind of researcher
           </span>
           <h1 className="mt-6 max-w-3xl font-serif text-5xl leading-[0.95] tracking-tight sm:text-7xl">
-            This is where researchers and respondents <em className="text-primary">help each other</em> turn questions into insight.
+            CampusVerify<br /><em className="text-primary">Research surveys & respondents.</em>
           </h1>
           <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-            Publish a survey, answer a few in return, and watch real responses roll in from relevant respondents.
+            Create online surveys, reach relevant participants, and analyse and export your results—for academic, professional, organisational, and community research.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             {isSignedIn ? (
@@ -218,7 +218,7 @@ function Landing() {
             )}
           </div>
           <p className="mt-4 max-w-xl text-xs text-muted-foreground">
-            Researchers: Research Boost delivers 50 targeted responses from GHS 10, up to 500 for GHS 50, aimed at the audience you choose.
+            Research Boost starts at GHS 10 for a target of 50 responses, with options up to 500 for GHS 50. Targets depend on eligible participation and are not guaranteed.
           </p>
         </section>
 
@@ -371,7 +371,7 @@ function Landing() {
               Anyone with a valid academic email can create a student account. Non-students can join as general accounts.
             </Faq>
             <Faq q="How do credits work?">
-              You spend credits to publish and earn 1 credit for each quality response you give.
+              Spend credits to publish and earn 1 credit for each quality response. Accounts receive permanent signup credits; paid bundles are also available. Credits are not cash.
             </Faq>
             <Faq q="Can I target a specific audience?">
               Yes — target academic groups by department and year, or wider audiences by country, age range, and interests.

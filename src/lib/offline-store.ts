@@ -40,6 +40,7 @@ export type QueuedResponse = {
   respondent_id: string;
   answers: SurveyAnswers;
   duration_ms: number;
+  funnel_token?: string;
   queued_at: number;
   attempts: number;
 };

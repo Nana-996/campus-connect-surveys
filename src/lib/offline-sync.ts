@@ -29,6 +29,7 @@ export async function syncQueuedResponses(): Promise<{ synced: number; remaining
           respondent_id: item.respondent_id,
           answers: item.answers as any,
           duration_ms: item.duration_ms,
+          funnel_token: item.funnel_token,
         });
         if (error) {
           // If it's a duplicate (already submitted) — drop it.
