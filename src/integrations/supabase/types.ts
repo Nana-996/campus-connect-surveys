@@ -1288,6 +1288,38 @@ export type Database = {
           },
         ]
       }
+      survey_funnel_visits: {
+        Row: {
+          signup_at: string | null
+          started_at: string
+          submitted_at: string | null
+          survey_id: string
+          token_hash: string
+        }
+        Insert: {
+          signup_at?: string | null
+          started_at?: string
+          submitted_at?: string | null
+          survey_id: string
+          token_hash: string
+        }
+        Update: {
+          signup_at?: string | null
+          started_at?: string
+          submitted_at?: string | null
+          survey_id?: string
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_funnel_visits_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       survey_invites: {
         Row: {
           created_at: string
@@ -1389,6 +1421,7 @@ export type Database = {
           answers: Json
           created_at: string
           duration_ms: number
+          funnel_token: string | null
           id: string
           quality_score: number
           respondent_id: string
@@ -1398,6 +1431,7 @@ export type Database = {
           answers?: Json
           created_at?: string
           duration_ms?: number
+          funnel_token?: string | null
           id?: string
           quality_score?: number
           respondent_id: string
@@ -1407,6 +1441,7 @@ export type Database = {
           answers?: Json
           created_at?: string
           duration_ms?: number
+          funnel_token?: string | null
           id?: string
           quality_score?: number
           respondent_id?: string
@@ -2292,6 +2327,10 @@ export type Database = {
         Args: { _actor: string; _expected_paid: number; _partner_id: string }
         Returns: undefined
       }
+      record_survey_funnel: {
+        Args: { _stage: string; _survey_id: string; _token: string }
+        Returns: undefined
+      }
       redeem_promo_code: { Args: { _code: string }; Returns: Json }
       refund_purchased_credits: {
         Args: {
@@ -2359,6 +2398,7 @@ export type Database = {
         Args: { _approve: boolean; _comment?: string; _token: string }
         Returns: Json
       }
+      survey_funnel_summary: { Args: { _days?: number }; Returns: Json }
       target_text_matches: {
         Args: { _actual: string; _target: string }
         Returns: boolean
