@@ -5,13 +5,15 @@ import { surveyAttemptToken } from "@/lib/survey-funnel";
 
 export function useSurveyFunnel(surveyId: string) {
   const record = useServerFn(recordSurveyFunnel);
-  const tokenRef = useRef<string | null>(null);
+  const tokenRef = useRef<{ surveyId: string; token: string } | null>(null);
   const requests = useRef(new Map<string, Promise<void>>());
   const getToken = useCallback(() => {
-    if (tokenRef.current) return tokenRef.current;
-    try { tokenRef.current = surveyAttemptToken(localStorage, surveyId, () => crypto.randomUUID()); }
-    catch { tokenRef.current = crypto.randomUUID(); }
-    return tokenRef.current;
+    if (tokenRef.current?.surveyId === surveyId) return tokenRef.current.token;
+    let token: string;
+    try { token = surveyAttemptToken(localStorage, surveyId, () => crypto.randomUUID()); }
+    catch { token = crypto.randomUUID(); }
+    tokenRef.current = { surveyId, token };
+    return token;
   }, [surveyId]);
   const track = useCallback((stage: "started" | "signup") => {
     const token = getToken();
