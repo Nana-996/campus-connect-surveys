@@ -78,6 +78,13 @@
       "when": 1793482203214,
       "tag": "0010_survey_readable_slugs",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1793482218622,
+      "tag": "0011_survey_slug_trigger_definer",
+      "breakpoints": true
     }
   ]
 }
