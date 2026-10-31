@@ -1633,6 +1633,7 @@ export type Database = {
           respondent_bonus: number
           response_count: number
           response_goal: number
+          slug: string | null
           target_age_range: string | null
           target_country: string | null
           target_department: string | null
@@ -1664,6 +1665,7 @@ export type Database = {
           respondent_bonus?: number
           response_count?: number
           response_goal?: number
+          slug?: string | null
           target_age_range?: string | null
           target_country?: string | null
           target_department?: string | null
@@ -1695,6 +1697,7 @@ export type Database = {
           respondent_bonus?: number
           response_count?: number
           response_goal?: number
+          slug?: string | null
           target_age_range?: string | null
           target_country?: string | null
           target_department?: string | null
@@ -2292,6 +2295,10 @@ export type Database = {
           title: string
         }[]
       }
+      make_survey_slug: {
+        Args: { _id: string; _title: string }
+        Returns: string
+      }
       mark_donation_paid: {
         Args: { _raw: Json; _reference: string }
         Returns: {
@@ -2354,6 +2361,13 @@ export type Database = {
       reserve_promo_discount: {
         Args: { _code: string; _reference: string; _user: string }
         Returns: number
+      }
+      resolve_survey_link: {
+        Args: { _key: string }
+        Returns: {
+          id: string
+          slug: string
+        }[]
       }
       school_admin_decide_topup: {
         Args: { _approve: boolean; _id: string; _note?: string }

@@ -71,6 +71,13 @@
       "when": 1793398740962,
       "tag": "0009_survey_completion_funnel",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793482203214,
+      "tag": "0010_survey_readable_slugs",
+      "breakpoints": true
     }
   ]
 }
