@@ -33,6 +33,7 @@ type Survey = {
   created_at: string;
   questions: any[];
   visibility: Visibility;
+  slug?: string | null;
 };
 
 export const Route = createFileRoute("/_authenticated/my-surveys")({
@@ -194,7 +195,7 @@ function MySurveys() {
                   title={s.title}
                   description={s.description}
                   questionCount={s.questions?.length ?? 0}
-                  url={shareUrl(s.id)}
+                  url={shareUrl(s.slug ?? s.id)}
                 />
               )}
             </div>

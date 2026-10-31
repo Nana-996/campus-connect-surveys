@@ -149,3 +149,28 @@ export const getSurveyForRespondent = createServerFn({ method: "GET" })
       ownerName: prof?.full_name || prof?.university_name || null,
     };
   });
+
+// Resolves a survey link key (readable slug or legacy UUID) to its id and slug.
+export const resolveSurveyLink = createServerFn({ method: "GET" })
+  .inputValidator((data) => z.object({ key: z.string().min(1).max(200) }).parse(data))
+  .handler(async ({ data }) => {
+    const url = process.env.SUPABASE_URL;
+    const key = process.env.SUPABASE_PUBLISHABLE_KEY;
+    if (!url || !key) return { id: null as string | null, slug: null as string | null };
+    const client = createClient(url, key, {
+      auth: { persistSession: false, autoRefreshToken: false },
+      global: { fetch: (input, init) => {
+        const headers = new Headers(init?.headers);
+        if (key.startsWith("sb_") && headers.get("Authorization") === `Bearer ${key}`) headers.delete("Authorization");
+        headers.set("apikey", key);
+        return fetch(input, { ...init, headers });
+      } },
+    });
+    const { data: rows, error } = await client.rpc("resolve_survey_link", { _key: data.key });
+    if (error) {
+      console.error("[resolveSurveyLink] rpc error", error);
+      return { id: null, slug: null };
+    }
+    const row = Array.isArray(rows) ? rows[0] : rows;
+    return { id: (row?.id as string) ?? null, slug: (row?.slug as string) ?? null };
+  });
