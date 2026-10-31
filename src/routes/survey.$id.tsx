@@ -30,7 +30,7 @@ import { SurveyEligibilityModal } from "@/components/SurveyEligibilityModal";
 import { AppHeader } from "@/components/AppHeader";
 import { ReferralInvite } from "@/components/ReferralInvite";
 import { DonateNudge } from "@/components/DonateNudge";
-import { getSurveyPublic, getSurveyForRespondent } from "@/lib/survey-public.functions";
+import { getSurveyPublic, getSurveyForRespondent, resolveSurveyLink } from "@/lib/survey-public.functions";
 import { getOwnerSurveyResults } from "@/lib/survey-owner.functions";
 import { cacheSurvey, getCachedSurvey, enqueueResponse } from "@/lib/offline-store";
 import { syncQueuedResponses } from "@/lib/offline-sync";
@@ -69,14 +69,23 @@ type Survey = {
   allow_response_download?: boolean;
 };
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const NIL_UUID = "00000000-0000-0000-0000-000000000000";
+
 export const Route = createFileRoute("/survey/$id")({
   component: SurveyPage,
   loader: async ({ params }) => {
+    let surveyId = UUID_RE.test(params.id) ? params.id.toLowerCase() : NIL_UUID;
+    let slug: string | null = null;
     try {
-      const res = await getSurveyPublic({ data: { id: params.id } });
-      return { surveyMeta: res?.survey ?? null };
+      const link = await resolveSurveyLink({ data: { key: params.id } });
+      if (link.id) { surveyId = link.id; slug = link.slug; }
+    } catch {}
+    try {
+      const res = await getSurveyPublic({ data: { id: surveyId } });
+      return { surveyId, slug, surveyMeta: res?.survey ?? null };
     } catch {
-      return { surveyMeta: null };
+      return { surveyId, slug, surveyMeta: null };
     }
   },
   head: ({ params, loaderData }) => {
@@ -88,7 +97,7 @@ export const Route = createFileRoute("/survey/$id")({
     const desc = rawDesc
       ? (rawDesc.length > 155 ? `${rawDesc.slice(0, 152)}…` : rawDesc)
       : "Answer this CampusVerify research survey before signing up. Confirm your email and required audience eligibility before submitting.";
-    const url = `https://campus-verify.live/survey/${params.id}`;
+    const url = `https://campus-verify.live/survey/${loaderData?.slug ?? params.id}`;
     return {
       meta: [
         { title },
@@ -105,7 +114,7 @@ export const Route = createFileRoute("/survey/$id")({
 });
 
 function SurveyPage() {
-  const { id } = Route.useParams();
+  const { surveyId: id, slug } = Route.useLoaderData();
   const { track: trackFunnel, getToken: getFunnelToken } = useSurveyFunnel(id);
   const { user, refreshProfile } = useAuth();
   const navigate = useNavigate();
@@ -169,7 +178,8 @@ function SurveyPage() {
     answers?: SurveyAnswers;
   }>(null);
 
-  const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/survey/${id}` : `/survey/${id}`;
+  const linkKey = slug ?? id;
+  const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/survey/${linkKey}` : `/survey/${linkKey}`;
 
   const handleDelete = async () => {
     if (!survey) return;
@@ -634,8 +644,8 @@ function SurveyPage() {
         <div className="mt-6 flex flex-wrap gap-3">
           {loadError ? <Button onClick={() => setLoadAttempt((attempt) => attempt + 1)}>Try again</Button> : null}
           {!user ? <>
-            <Button asChild><Link to="/signup" search={{ next: `/survey/${id}` }}>Create an account</Link></Button>
-            <Button asChild variant="outline"><Link to="/auth" search={{ next: `/survey/${id}` }}>Log in</Link></Button>
+            <Button asChild><Link to="/signup" search={{ next: `/survey/${linkKey}` }}>Create an account</Link></Button>
+            <Button asChild variant="outline"><Link to="/auth" search={{ next: `/survey/${linkKey}` }}>Log in</Link></Button>
           </> : <Button asChild variant="outline"><Link to="/feed">Go to feed</Link></Button>}
         </div>
       </section>
