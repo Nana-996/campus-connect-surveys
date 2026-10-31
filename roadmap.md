@@ -1,10 +1,10 @@
 # Roadmap
 
 ## Visibility and survey completion — 2026-10-30
-- [ ] Improve existing public facts and discovery signals using verified product capabilities.
-- [ ] Track unique survey starts, signup steps and authoritative submissions without respondent identities.
-- [ ] Add owner-only completion reporting with date ranges and clear denominators.
-- [ ] Verify funnel rules, public pages and signed-in dashboard; note publication requirements.
+- [x] Improve existing public facts, homepage positioning, AI reference facts and sitemap discovery; align Boost targets with actual delivery conditions.
+- [x] Track deduplicated browser survey starts, signup steps and authoritative submissions without identities in the funnel store.
+- [x] Add owner-only completion reporting with 7/30/90-day and all-time start-date cohorts and per-survey rates.
+- [x] Verify 20 tests, first-answer tracking, signup arrival, reload persistence, real saved test response and owner dashboard readback; remove test survey and reverse test credit. Preview build passes. Publication remains required; actual new-account email delivery and offline sync were not exercised.
 
 ## Before-submit survey eligibility — 2026-10-22
 - [x] Add a privacy-safe audience preflight using existing required eligibility rules.
