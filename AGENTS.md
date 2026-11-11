@@ -1,5 +1,7 @@
 # Architecture rules
 
+- University targeting controls use an account-type presentation helper and a bounded, collapsible picker; student creation screens omit this control without changing response eligibility policies.
+
 - Survey eligibility preflight mirrors mandatory response policies in a read-only RPC; anonymous email matches are provisional, verified matches require explicit submission, and response RLS remains authoritative.
 
 - Shared-survey student signup validates graduation metadata before calling auth so account provisioning requirements are met without bypassing verification.

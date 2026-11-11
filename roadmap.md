@@ -1,5 +1,10 @@
 # Roadmap
 
+## Survey creation university controls — 2026-11-11
+- [x] Collapse university selection for General/Researcher accounts and omit it for student accounts.
+- [x] Bound the option list and keep its contents within the page flow.
+- [x] Verify 2 visibility tests, real signed-in student desktop/mobile creation, and simulated General presentation including expand/search/collapse; preview build passes. No survey or payment created.
+
 ## Visibility and survey completion — 2026-10-30
 - [x] Improve existing public facts, homepage positioning, AI reference facts and sitemap discovery; align Boost targets with actual delivery conditions.
 - [x] Track deduplicated browser survey starts, signup steps and authoritative submissions without identities in the funnel store.

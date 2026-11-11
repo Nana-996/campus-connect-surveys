@@ -9,10 +9,12 @@ import { InterestTagInput, type InterestEntry } from "@/components/InterestTagIn
 import {
   AGE_RANGES, COUNTRIES, DEPARTMENT_SUGGESTIONS, YEAR_OPTIONS,
 } from "@/lib/interests";
-import { Loader2, Lock, Sparkle, Users, AlertTriangle, CheckCircle2, GraduationCap, Plus, Search, X } from "lucide-react";
+import { Loader2, Lock, Sparkle, Users, AlertTriangle, CheckCircle2, GraduationCap, Plus, Search, X, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EXPANSION_PRICE_GHS, EXPANSION_SLOTS } from "@/lib/university-slots";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { canShowUniversityTargeting } from "@/lib/audience-controls";
 
 export type CriterionKey = "department" | "year" | "country" | "age_range" | "interests" | "universities";
 
@@ -94,7 +96,7 @@ function Field({
         : String(value[criterion] ?? "").trim() !== "";
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:flex sm:justify-between">
         <Label className="text-xs">{label}</Label>
         <RequiredToggle
           active={value.required.includes(criterion)}
@@ -148,11 +150,10 @@ function UniversityPicker({
   };
 
   return (
-    <div className="rounded-2xl border border-foreground/15 bg-background/40 p-3">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="inline-flex items-center gap-1.5 text-xs font-semibold">
-          <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
-          {selected.length} of {limit} universities picked
+    <div className="min-w-0 space-y-2">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:flex sm:justify-between">
+        <p className="min-w-0 text-xs font-semibold">
+          {selected.length} of {limit} selected
         </p>
         {onBuySlots && (
           <Button type="button" size="sm" variant={atCap ? "default" : "ghost"} onClick={onBuySlots} disabled={buying}>
@@ -167,9 +168,9 @@ function UniversityPicker({
           {selected.map((d) => (
             <Badge key={d} variant="secondary" className="gap-1">
               {nameOf(d)}
-              <button type="button" onClick={() => toggleUni(d)} aria-label={`Remove ${nameOf(d)}`}>
+              <Button size="icon" variant="ghost" className="h-5 w-5 shrink-0" type="button" onClick={() => toggleUni(d)} aria-label={`Remove ${nameOf(d)}`}>
                 <X className="h-3 w-3" />
-              </button>
+              </Button>
             </Badge>
           ))}
         </div>
@@ -181,11 +182,12 @@ function UniversityPicker({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search universities…"
+          aria-label="Search universities"
           className="pl-8"
         />
       </div>
 
-      <div className="mt-2 max-h-44 overflow-y-auto rounded-xl border border-foreground/10">
+      <div className="relative h-44 overflow-y-auto overscroll-contain rounded-lg border border-foreground/10" role="group" aria-label="University search results">
         {loading ? (
           <p className="p-3 text-[11px] text-muted-foreground">Loading universities…</p>
         ) : filtered.length === 0 ? (
@@ -194,18 +196,20 @@ function UniversityPicker({
           filtered.map((o) => {
             const on = selected.includes(o.domain);
             return (
-              <button
+              <Button
                 key={o.domain}
                 type="button"
+                variant="ghost"
+                aria-pressed={on}
                 onClick={() => toggleUni(o.domain)}
                 disabled={!on && atCap}
-                className={`flex w-full items-center justify-between gap-2 border-b border-foreground/5 px-3 py-2 text-left text-xs last:border-0 transition ${
+                className={`grid h-9 w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-none border-b border-foreground/5 px-3 text-left text-xs last:border-0 transition ${
                   on ? "bg-primary/10 font-semibold" : "hover:bg-secondary/60 disabled:opacity-40"
                 }`}
               >
-                <span className="truncate">{o.name}</span>
+                <span className="min-w-0 truncate">{o.name}</span>
                 <span className="shrink-0 text-[10px] text-muted-foreground">{o.members} members</span>
-              </button>
+              </Button>
             );
           })
         )}
@@ -226,6 +230,7 @@ export function AudienceBuilder({
 }: Props) {
   const [reach, setReach] = useState<Reach | null>(null);
   const [loading, setLoading] = useState(false);
+  const [universitiesOpen, setUniversitiesOpen] = useState(false);
 
   const set = (patch: Partial<AudienceValue>) => onChange({ ...value, ...patch });
 
@@ -355,6 +360,20 @@ export function AudienceBuilder({
         </div>
       )}
 
+      {canShowUniversityTargeting(isGeneral) && <Collapsible open={universitiesOpen} onOpenChange={setUniversitiesOpen}>
+        <CollapsibleTrigger asChild>
+          <Button type="button" variant="outline" className="grid h-auto min-h-10 w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-3 py-2 text-left">
+            <span className="flex min-w-0 items-center gap-2">
+              <GraduationCap className="h-4 w-4 shrink-0" />
+              <span className="min-w-0 truncate">Universities</span>
+            </span>
+            <span className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
+              {value.universities.length ? `${value.universities.length} selected` : "Any"}
+              <ChevronDown className={`h-4 w-4 transition-transform ${universitiesOpen ? "rotate-180" : ""}`} />
+            </span>
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="pt-3">
       <Field
         label="Universities"
         criterion="universities"
@@ -370,6 +389,8 @@ export function AudienceBuilder({
           buying={buyingSlots}
         />
       </Field>
+        </CollapsibleContent>
+      </Collapsible>}
 
 
 
