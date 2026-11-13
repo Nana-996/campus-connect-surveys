@@ -9,6 +9,7 @@ import { cacheFeed, getCachedFeed } from "@/lib/offline-store";
 import { VisibilityBadge } from "@/components/VisibilityBadge";
 import { DonateNudge } from "@/components/DonateNudge";
 import { WelcomeTour } from "@/components/WelcomeTour";
+import { SurveyAlertsToggle } from "@/components/SurveyAlertsToggle";
 
 type Survey = {
   id: string;
@@ -250,6 +251,7 @@ function Feed() {
               ? <>Open to <span className="font-semibold text-foreground">everyone</span>{profile?.country ? <> · {profile.country}</> : null}</>
               : <>Verified students at <span className="font-semibold text-foreground">{profile?.university_name ?? "your campus"}</span></>}
           </p>
+          <div className="mt-3"><SurveyAlertsToggle /></div>
         </div>
         <Link to="/create" className="hidden sm:inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-wider text-primary-foreground shadow-paper hover:opacity-90">
           New survey <ArrowUpRight className="h-3.5 w-3.5" />

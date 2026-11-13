@@ -51,6 +51,7 @@ export default defineConfig({
       ],
     },
     workbox: {
+      importScripts: ["/push-handler.js"],
       navigateFallback: "/",
       navigateFallbackDenylist: [/^\/api\//, /^\/~oauth/, /^\/_server/, /^\/lovable\//, /^\/mcp/, /^\/\.mcp/, /^\/\.well-known\//, /^\/\.lovable\//],
       globPatterns: ["**/*.{js,css,html,svg,png,ico,woff2}"],

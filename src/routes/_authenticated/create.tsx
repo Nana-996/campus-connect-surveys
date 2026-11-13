@@ -29,6 +29,7 @@ import { AudienceBuilder, type AudienceValue, type CriterionKey } from "@/compon
 import { VisibilityPicker } from "@/components/VisibilityPicker";
 import type { Visibility } from "@/lib/visibility";
 import { useConversionTracking } from "@/hooks/useConversionTracking";
+import { notifySurveyPublished } from "@/lib/push.functions";
 
 
 type Question = {
@@ -325,6 +326,7 @@ function Create() {
       if (error) throw error;
 
       publishedRef.current = true;
+      void notifySurveyPublished({ data: { surveyId: data.id } }).catch(() => {});
       try { localStorage.removeItem(DRAFT_KEY); } catch {}
 
       if (isBoost) {

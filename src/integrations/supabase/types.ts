@@ -877,6 +877,33 @@ export type Database = {
           },
         ]
       }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       referrals: {
         Row: {
           created_at: string
@@ -1628,6 +1655,7 @@ export type Database = {
           lecturer_id: string | null
           min_response_seconds: number
           paid_cost: number
+          push_notified_at: string | null
           questions: Json
           required_criteria: string[]
           respondent_bonus: number
@@ -1660,6 +1688,7 @@ export type Database = {
           lecturer_id?: string | null
           min_response_seconds?: number
           paid_cost?: number
+          push_notified_at?: string | null
           questions?: Json
           required_criteria?: string[]
           respondent_bonus?: number
@@ -1692,6 +1721,7 @@ export type Database = {
           lecturer_id?: string | null
           min_response_seconds?: number
           paid_cost?: number
+          push_notified_at?: string | null
           questions?: Json
           required_criteria?: string[]
           respondent_bonus?: number
