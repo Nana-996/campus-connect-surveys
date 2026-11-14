@@ -7,7 +7,13 @@ export function matchesSurveyAudience(
 ): boolean {
   if (person.id === survey.creator_id) return false;
   if (survey.visibility === "private") return false;
-  if (survey.visibility === "campus" && person.university_domain !== survey.university_domain) return false;
+  if (survey.visibility === "campus") {
+    // Explicit campus picks replace the creator's campus, just as in survey RLS.
+    const campusMatches = survey.target_universities.length > 0
+      ? survey.target_universities.includes((person.university_domain ?? "").toLowerCase())
+      : person.university_domain === survey.university_domain;
+    if (!campusMatches) return false;
+  }
   if (survey.visibility === "students" && person.user_type !== "student") return false;
   if (survey.target_universities.length > 0 && person.user_type === "student" &&
       !survey.target_universities.includes(person.university_domain ?? "")) return false;
