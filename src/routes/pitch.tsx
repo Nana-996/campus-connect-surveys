@@ -1,10 +1,9 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
 import { verifySuperAdminAccess } from "@/lib/admin.functions";
-import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft,
   ArrowRight,
@@ -43,17 +42,6 @@ import {
 
 export const Route = createFileRoute("/pitch")({
   ssr: false,
-  beforeLoad: async () => {
-    const { data } = await supabase.auth.getSession();
-    if (!data.session) {
-      throw redirect({ to: "/auth", search: { next: "/pitch" } });
-    }
-    try {
-      await verifySuperAdminAccess();
-    } catch {
-      throw redirect({ to: "/feed" });
-    }
-  },
   component: PitchDeck,
   head: () => ({
     meta: [
@@ -1180,7 +1168,7 @@ const SLIDES = [
 
 function PitchDeck() {
   const verifyAccess = useServerFn(verifySuperAdminAccess);
-  const { isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["pitch", "super-admin-access"],
     queryFn: () => verifyAccess(),
     retry: false,
@@ -1224,7 +1212,7 @@ function PitchDeck() {
   if (isLoading) {
     return <div className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-foreground">Checking access…</div>;
   }
-  if (error) {
+  if (error || !data?.authorized) {
     return <div className="flex min-h-screen items-center justify-center bg-background px-6 text-center"><div><ShieldCheck className="mx-auto h-8 w-8 text-primary" /><h1 className="mt-3 font-serif text-3xl text-foreground">Private presentation</h1><p className="mt-2 text-sm text-muted-foreground">Sign in with the super-admin account to view this page.</p></div></div>;
   }
 

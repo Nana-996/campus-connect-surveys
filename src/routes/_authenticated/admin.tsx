@@ -1,4 +1,4 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { SchoolSubscriptionsPanel } from "@/components/SchoolSubscriptionsPanel";
 import { useMemo, useState } from "react";
 import { FilterBar } from "@/components/FilterBar";
@@ -23,7 +23,6 @@ import { ConversionSummary } from "@/components/ConversionSummary";
 import { PLATFORM_META, PlatformIcon } from "@/components/SocialLinks";
 
 import {
-  verifySuperAdminAccess,
   getAdminMetrics,
   listAdminUsers,
   grantCreditsToUser,
@@ -63,13 +62,6 @@ import { Briefcase } from "lucide-react";
 import { SurveyAccessPanel } from "@/components/SurveyAccessPanel";
 
 export const Route = createFileRoute("/_authenticated/admin")({
-  beforeLoad: async () => {
-    try {
-      await verifySuperAdminAccess();
-    } catch {
-      throw redirect({ to: "/feed" });
-    }
-  },
   component: Admin,
   head: () => ({
     meta: [

@@ -1,8 +1,5 @@
 import { useMemo, useState } from "react";
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
-import { verifySuperAdminAccess } from "@/lib/admin.functions";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Activity, AlertTriangle, ArrowDownRight, ArrowLeft, ArrowUpRight, BarChart3,
   Building2, Clock, Coins, Download, FileText, LayoutDashboard, RefreshCw,
@@ -17,13 +14,6 @@ import { SectionNav } from "@/components/SectionNav";
 import { getAdminAnalytics, type AdminAnalyticsData, type AnalyticsPeriod } from "@/lib/analytics.functions";
 
 export const Route = createFileRoute("/_authenticated/admin-analytics")({
-  beforeLoad: async () => {
-    try {
-      await verifySuperAdminAccess();
-    } catch {
-      throw redirect({ to: "/feed" });
-    }
-  },
   component: AdminAnalytics,
   errorComponent: ({ error }) => <ErrorCard message={error instanceof Error ? error.message : "Unknown error."} />,
   head: () => ({

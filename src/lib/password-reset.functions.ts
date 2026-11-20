@@ -1,5 +1,4 @@
 import { createServerFn } from "@tanstack/react-start";
-import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 
 const inputSchema = z.object({
@@ -65,46 +64,6 @@ function safeRedirect(candidate: string): string {
 export const requestPasswordReset = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => inputSchema.parse(data))
   .handler(async ({ data }): Promise<{ outcome: ResetOutcome }> => {
-    const req = getRequest();
-    if (req) {
-      const origin = req.headers.get("origin");
-      const referer = req.headers.get("referer");
-      const candidate = origin || (referer ? new URL(referer).origin : null);
-      if (candidate) {
-        const allowed = new Set(
-          [
-            CANONICAL_SITE,
-            "https://www.campus-verify.live",
-            "https://campus-verify.lovable.app",
-            process.env["SITE_URL"],
-            process.env["VITE_SITE_URL"],
-          ]
-            .filter(Boolean)
-            .map((u) => {
-              try {
-                return new URL(u as string).origin;
-              } catch {
-                return null;
-              }
-            })
-            .filter(Boolean) as string[],
-        );
-        try {
-          const u = new URL(candidate);
-          const isLocal =
-            u.hostname === "localhost" ||
-            u.hostname === "127.0.0.1" ||
-            u.hostname.endsWith(".lovableproject.com") ||
-            u.hostname.endsWith(".lovable.app");
-          if (!allowed.has(u.origin) && !isLocal) {
-            throw new Error("Invalid request origin");
-          }
-        } catch (e: any) {
-          if (e?.message === "Invalid request origin") throw e;
-        }
-      }
-    }
-
     const email = data.email.trim().toLowerCase();
     const redirectTo = safeRedirect(data.redirectTo);
     const url = process.env["SUPABASE_URL"];

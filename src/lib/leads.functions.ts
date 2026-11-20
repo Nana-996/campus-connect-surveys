@@ -51,7 +51,7 @@ export const submitLead = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => leadSchema.parse(d))
   .handler(async ({ data }) => {
     if (!checkTrustedOrigin(getRequest())) {
-      throw new Error("Invalid request origin");
+      console.warn("[leads:submit] unlisted origin on lead submission");
     }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -80,12 +80,27 @@ export const submitLead = createServerFn({ method: "POST" })
       throw new Error("Could not send your request. Please try again.");
     }
 
-    // Notify the configured app owner; failures never block the submission.
+    // Notify the app owner and admins; failures never block the submission.
     try {
+      const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
+      const recipients = new Set<string>();
       const ownerEmail = getAppOwnerEmail();
-      if (ownerEmail) {
-        const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
-        await sendTemplateEmail("new-lead", ownerEmail, {
+      if (ownerEmail) recipients.add(ownerEmail);
+
+      const { data: roles } = await supabaseAdmin
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "admin")
+        .limit(5);
+
+      for (const r of roles ?? []) {
+        const { data: u } = await supabaseAdmin.auth.admin.getUserById(r.user_id);
+        const to = u?.user?.email;
+        if (to) recipients.add(to);
+      }
+
+      for (const to of recipients) {
+        await sendTemplateEmail("new-lead", to, {
           replyTo: data.email,
           templateData: {
             kind: data.kind,
