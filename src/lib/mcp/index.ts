@@ -5,8 +5,11 @@ import getSurvey from "./tools/get-survey";
 import listSurveyResponses from "./tools/list-survey-responses";
 import listAvailableSurveys from "./tools/list-available-surveys";
 
-// Issuer must be the direct Supabase host; the project ref is inlined at build time.
-const projectRef = import.meta.env['VITE_SUPABASE_PROJECT_ID'] ?? "project-ref-unset";
+// Issuer must be the direct Supabase host; the project ref is inlined at build time or read from env.
+const projectRef =
+  (typeof process !== "undefined" && process.env?.["SUPABASE_PROJECT_ID"]) ||
+  import.meta.env["VITE_SUPABASE_PROJECT_ID"] ||
+  "project-ref-unset";
 
 export default defineMcp({
   name: "campus-connect-surveys",

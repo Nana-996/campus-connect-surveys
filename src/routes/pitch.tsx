@@ -1,9 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
 import { verifySuperAdminAccess } from "@/lib/admin.functions";
+import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft,
   ArrowRight,
@@ -41,6 +42,18 @@ import {
 } from "lucide-react";
 
 export const Route = createFileRoute("/pitch")({
+  ssr: false,
+  beforeLoad: async () => {
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) {
+      throw redirect({ to: "/auth", search: { next: "/pitch" } });
+    }
+    try {
+      await verifySuperAdminAccess();
+    } catch {
+      throw redirect({ to: "/feed" });
+    }
+  },
   component: PitchDeck,
   head: () => ({
     meta: [

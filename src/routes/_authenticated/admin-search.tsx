@@ -1,10 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { verifySuperAdminAccess } from "@/lib/admin.functions";
 import {
   Search, RefreshCw, ArrowLeft, MousePointerClick, Eye, Percent, Crosshair,
   Globe, FileText, AlertTriangle, CheckCircle2,
@@ -17,6 +18,13 @@ import {
 } from "@/lib/search-console.functions";
 
 export const Route = createFileRoute("/_authenticated/admin-search")({
+  beforeLoad: async () => {
+    try {
+      await verifySuperAdminAccess();
+    } catch {
+      throw redirect({ to: "/feed" });
+    }
+  },
   component: AdminSearchPage,
   head: () => ({
     meta: [

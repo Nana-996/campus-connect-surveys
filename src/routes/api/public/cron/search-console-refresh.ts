@@ -5,6 +5,7 @@ import { runScheduledRefresh } from "@/lib/search-console.functions";
 export const Route = createFileRoute("/api/public/cron/search-console-refresh")({
   server: {
     handlers: {
+      GET: async () => new Response("Method Not Allowed", { status: 405 }),
       POST: async ({ request }) => {
         const secret = process.env.CRON_SECRET;
         const provided = request.headers.get("x-cron-secret") ?? "";

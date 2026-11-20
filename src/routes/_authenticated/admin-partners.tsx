@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -7,12 +7,20 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { verifySuperAdminAccess } from "@/lib/admin.functions";
 import { listPartners, savePartner, markPartnerPaid, type Partner } from "@/lib/partners.functions";
 import { PartnerProgress, StatGrid, cycleProgress } from "@/components/PartnerProgress";
 import { siteUrl } from "@/lib/site";
 import { PartnerPayoutHistory } from "@/components/PartnerPayoutHistory";
 
 export const Route = createFileRoute("/_authenticated/admin-partners")({
+  beforeLoad: async () => {
+    try {
+      await verifySuperAdminAccess();
+    } catch {
+      throw redirect({ to: "/feed" });
+    }
+  },
   component: AdminPartners,
   head: () => ({
     meta: [

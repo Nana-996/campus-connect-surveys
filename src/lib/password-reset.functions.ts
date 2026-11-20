@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 
 const inputSchema = z.object({
@@ -64,33 +65,79 @@ function safeRedirect(candidate: string): string {
 export const requestPasswordReset = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => inputSchema.parse(data))
   .handler(async ({ data }): Promise<{ outcome: ResetOutcome }> => {
+    const req = getRequest();
+    if (req) {
+      const origin = req.headers.get("origin");
+      const referer = req.headers.get("referer");
+      const candidate = origin || (referer ? new URL(referer).origin : null);
+      if (candidate) {
+        const allowed = new Set(
+          [
+            CANONICAL_SITE,
+            "https://www.campus-verify.live",
+            "https://campus-verify.lovable.app",
+            process.env["SITE_URL"],
+            process.env["VITE_SITE_URL"],
+          ]
+            .filter(Boolean)
+            .map((u) => {
+              try {
+                return new URL(u as string).origin;
+              } catch {
+                return null;
+              }
+            })
+            .filter(Boolean) as string[],
+        );
+        try {
+          const u = new URL(candidate);
+          const isLocal =
+            u.hostname === "localhost" ||
+            u.hostname === "127.0.0.1" ||
+            u.hostname.endsWith(".lovableproject.com") ||
+            u.hostname.endsWith(".lovable.app");
+          if (!allowed.has(u.origin) && !isLocal) {
+            throw new Error("Invalid request origin");
+          }
+        } catch (e: any) {
+          if (e?.message === "Invalid request origin") throw e;
+        }
+      }
+    }
+
     const email = data.email.trim().toLowerCase();
     const redirectTo = safeRedirect(data.redirectTo);
-    const url = process.env["SUPABASE_URL"]!;
-    const anonKey = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
+    const url = process.env["SUPABASE_URL"];
+    const anonKey = process.env["SUPABASE_PUBLISHABLE_KEY"];
+    const serviceRoleKey = process.env["SUPABASE_SERVICE_ROLE_KEY"];
 
+    if (!url || !anonKey) {
+      return { outcome: "unknown" };
+    }
 
     // Look up the account by email (admin API supports a filter query).
     let confirmed: boolean | null = null;
-    try {
-      const res = await fetch(
-        `${url}/auth/v1/admin/users?page=1&per_page=50&filter=${encodeURIComponent(email)}`,
-        {
-          headers: {
-            apikey: process.env["SUPABASE_SERVICE_ROLE_KEY"]!,
-            Authorization: `Bearer ${process.env["SUPABASE_SERVICE_ROLE_KEY"]!}`,
+    if (serviceRoleKey) {
+      try {
+        const res = await fetch(
+          `${url}/auth/v1/admin/users?page=1&per_page=50&filter=${encodeURIComponent(email)}`,
+          {
+            headers: {
+              apikey: serviceRoleKey,
+              Authorization: `Bearer ${serviceRoleKey}`,
+            },
           },
-        },
-      );
-      if (res.ok) {
-        const body = (await res.json()) as { users?: Array<Record<string, any>> };
-        const match = (body.users ?? []).find(
-          (u) => String(u["email"] ?? "").toLowerCase() === email,
         );
-        if (match) confirmed = Boolean(match["email_confirmed_at"] ?? match["confirmed_at"]);
+        if (res.ok) {
+          const body = (await res.json()) as { users?: Array<Record<string, any>> };
+          const match = (body.users ?? []).find(
+            (u) => String(u["email"] ?? "").toLowerCase() === email,
+          );
+          if (match) confirmed = Boolean(match["email_confirmed_at"] ?? match["confirmed_at"]);
+        }
+      } catch {
+        confirmed = null;
       }
-    } catch {
-      confirmed = null;
     }
 
     const post = async (path: string, redirect: string, body: unknown) =>

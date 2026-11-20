@@ -9,6 +9,7 @@ import { createHmac, timingSafeEqual } from "crypto";
 export const Route = createFileRoute("/api/public/paystack/webhook")({
   server: {
     handlers: {
+      GET: async () => new Response("Method Not Allowed", { status: 405 }),
       POST: async ({ request }) => {
         const secret = process.env.PAYSTACK_SECRET_KEY;
         if (!secret) return new Response("Not configured", { status: 500 });

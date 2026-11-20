@@ -34,7 +34,7 @@ export const getSurveyPublic = createServerFn({ method: "GET" })
     return {
       survey: {
         id: s.id,
-        creator_id: s.creator_id,
+        creator_id: "",
         title: s.title,
         description: s.description,
         questions,
