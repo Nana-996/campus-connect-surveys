@@ -15,7 +15,7 @@ bun run dev            # http://localhost:8080
 ## Build
 
 ```bash
-bun run build          # produces a Vercel-ready build by default
+bun run build          # produces a production build for the configured Nitro host
 bun run preview        # preview the production build locally
 ```
 
@@ -29,16 +29,12 @@ NITRO_PRESET=cloudflare-module bun run build # Cloudflare Workers
 
 See [Nitro presets](https://nitro.build/deploy) for the full list.
 
-## Deploying to Vercel
+## Hosting
 
-1. Push the repo to GitHub / GitLab / Bitbucket.
-2. Import the project on Vercel — **Framework Preset: Other** (already configured in `vercel.json`).
-3. Add the environment variables from `.env.example` in **Project Settings → Environment Variables**:
-   - `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_PROJECT_ID`
-   - `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_PROJECT_ID`
-   - `SUPABASE_SERVICE_ROLE_KEY` (server-only)
-   - `VITE_SITE_URL` (your deployed origin, e.g. `https://campusverify.app`)
-4. Deploy. The build emits `.vercel/output/` (Vercel Build Output API v3) and routes are served by the Nitro Vercel adapter.
+This repository does not depend on any hosted-platform integration. Pushes to GitHub are
+validated by GitHub Actions. Choose a Nitro-compatible Node or edge host for
+production deployment. GitHub Pages is not sufficient by itself because this
+app uses server-side routes and Supabase server functions.
 
 ## Database
 

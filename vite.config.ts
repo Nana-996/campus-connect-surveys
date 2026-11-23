@@ -6,8 +6,6 @@ import { VitePWA } from "vite-plugin-pwa";
 
 const __dirname_ = path.dirname(fileURLToPath(import.meta.url));
 
-const isVercelBuild = process.env.VERCEL === "1" || process.env.VERCEL === "true";
-
 export default defineConfig({
   // React Email pulls htmlparser2 -> entities; pin every import to the hoisted
   // v4.5.0 copy (v5+ removed ./lib/decode.js and breaks SSR).
@@ -20,17 +18,14 @@ export default defineConfig({
       },
     },
   },
-  nitro: isVercelBuild
-    ? { preset: "vercel" }
-    : {
-        preset: process.env.NITRO_PRESET || "cloudflare-module",
-        output: { dir: "dist", serverDir: "dist/server", publicDir: "dist/client" },
-        cloudflare: { nodeCompat: true, deployConfig: true },
-      },
+  nitro: {
+    preset: process.env.NITRO_PRESET || "cloudflare-module",
+    output: { dir: "dist", serverDir: "dist/server", publicDir: "dist/client" },
+    cloudflare: { nodeCompat: true, deployConfig: true },
+  },
   plugins: [
     // @lovable.dev/mcp-js currently mixes Windows and forward-slash path
-    // separators internally. Keep this optional integration off for Windows
-    // builds; it remains enabled on Linux deployments (including Vercel).
+    // separators internally. Keep this optional integration off for Windows builds.
     ...(process.platform === "win32" ? [] : [mcpPlugin()]),
     VitePWA({
       registerType: "autoUpdate",

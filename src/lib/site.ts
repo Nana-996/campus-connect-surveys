@@ -1,4 +1,4 @@
-// Canonical site URL. Configure via VITE_SITE_URL on your host (Vercel, etc.).
+// Canonical site URL. Configure via VITE_SITE_URL on your deployed host.
 // Falls back to the current production domain so SEO metadata stays valid
 // even when the env var is missing.
 const FALLBACK = "https://campus-verify.live";
