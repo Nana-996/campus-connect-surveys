@@ -22,11 +22,20 @@ type Survey = {
   target_interests?: string[] | null;
   target_universities?: string[] | null;
   response_count: number;
-  questions: any[];
+  questions: unknown[];
   created_at: string;
   tier?: string | null;
   boosted_until?: string | null;
   visibility?: string | null;
+};
+
+type CampusDirectoryClient = {
+  from: (table: "campus_directory") => {
+    select: (columns: "department, year") => Promise<{
+      data: { department: string; year: string }[] | null;
+      error: unknown;
+    }>;
+  };
 };
 
 export const Route = createFileRoute("/_authenticated/feed")({
@@ -34,9 +43,17 @@ export const Route = createFileRoute("/_authenticated/feed")({
   head: () => ({
     meta: [
       { title: "Your survey feed — CampusVerify" },
-      { name: "description", content: "Browse open surveys matched to your campus, year, and interests. Answer to earn credits on CampusVerify." },
+      {
+        name: "description",
+        content:
+          "Browse open surveys matched to your campus, year, and interests. Answer to earn credits on CampusVerify.",
+      },
       { property: "og:title", content: "Your survey feed — CampusVerify" },
-      { property: "og:description", content: "Browse open surveys matched to your campus, year, and interests. Answer to earn credits on CampusVerify." },
+      {
+        property: "og:description",
+        content:
+          "Browse open surveys matched to your campus, year, and interests. Answer to earn credits on CampusVerify.",
+      },
       { name: "robots", content: "noindex,nofollow" },
     ],
   }),
@@ -66,6 +83,7 @@ function Feed() {
   const [ageFilter, setAgeFilter] = useState<string>("all");
   const [interestFilter, setInterestFilter] = useState<string>("all");
   const [scope, setScope] = useState<"all" | "mine">("all");
+  const [tourReplayToken, setTourReplayToken] = useState(0);
   const [campusDepts, setCampusDepts] = useState<string[]>([]);
   const [campusYears, setCampusYears] = useState<string[]>([]);
 
@@ -82,7 +100,9 @@ function Feed() {
           setFromCache(true);
           setLoading(false);
         }
-      } catch {}
+      } catch {
+        // The cached feed is optional; network loading continues below.
+      }
 
       if (typeof navigator !== "undefined" && navigator.onLine === false) {
         if (active) setLoading(false);
@@ -91,10 +111,25 @@ function Feed() {
 
       try {
         const peersPromise = isGeneral
-          ? Promise.resolve({ data: [], error: null } as any)
-          : supabase.from("campus_directory" as any).select("department, year");
-        const [{ data, error }, { data: resps, error: respsError }, { data: peers, error: peersError }] = await Promise.all([
-          supabase.from("surveys").select("*").eq("is_active", true).gt("expires_at", new Date().toISOString()).neq("creator_id", user.id).order("created_at", { ascending: false }),
+          ? Promise.resolve({
+              data: [] as { department: string; year: string }[],
+              error: null,
+            })
+          : (supabase as unknown as CampusDirectoryClient)
+              .from("campus_directory")
+              .select("department, year");
+        const [
+          { data, error },
+          { data: resps, error: respsError },
+          { data: peers, error: peersError },
+        ] = await Promise.all([
+          supabase
+            .from("surveys")
+            .select("*")
+            .eq("is_active", true)
+            .gt("expires_at", new Date().toISOString())
+            .neq("creator_id", user.id)
+            .order("created_at", { ascending: false }),
           supabase.from("survey_responses").select("survey_id").eq("respondent_id", user.id),
           peersPromise,
         ]);
@@ -102,17 +137,23 @@ function Feed() {
         if (error) console.warn("Survey feed request failed.", error);
         if (respsError) console.warn("Answered-surveys request failed.", respsError);
         if (peersError) console.warn("Campus filters request failed.", peersError);
-        const rows = ((data as unknown as (Survey & { response_goal: number })[]) ?? []).filter((s) => s.response_count < (s.response_goal ?? Infinity));
+        const rows = ((data as unknown as (Survey & { response_goal: number })[]) ?? []).filter(
+          (s) => s.response_count < (s.response_goal ?? Infinity),
+        );
         rows.sort((a, b) => {
           const aB = a.boosted_until && new Date(a.boosted_until) > new Date() ? 1 : 0;
           const bB = b.boosted_until && new Date(b.boosted_until) > new Date() ? 1 : 0;
           return bB - aB;
         });
         setSurveys(rows);
-        const answeredIds = (resps ?? []).map((r: any) => r.survey_id);
+        const answeredIds = (resps ?? []).map((r) => r.survey_id);
         setAnswered(new Set(answeredIds));
-        setCampusDepts(Array.from(new Set((peers ?? []).map((p: any) => p.department).filter(Boolean))) as string[]);
-        setCampusYears(Array.from(new Set((peers ?? []).map((p: any) => p.year).filter(Boolean))) as string[]);
+        setCampusDepts(
+          Array.from(new Set((peers ?? []).map((p) => p.department).filter(Boolean))) as string[],
+        );
+        setCampusYears(
+          Array.from(new Set((peers ?? []).map((p) => p.year).filter(Boolean))) as string[],
+        );
         setFromCache(false);
         // Persist for offline browsing (cap to 50 to keep storage light).
         void cacheFeed({ user_id: user.id, surveys: rows.slice(0, 50), answered: answeredIds });
@@ -120,24 +161,26 @@ function Feed() {
         if (active) setLoading(false);
       }
     })();
-    return () => { active = false; };
-  }, [user?.id, profile?.department, profile?.year, isGeneral]);
+    return () => {
+      active = false;
+    };
+  }, [user, profile?.department, profile?.year, isGeneral]);
 
   // Student cohort options
-  const departments = Array.from(new Set([
-    ...campusDepts,
-    ...surveys.map((s) => s.target_department).filter(Boolean) as string[],
-  ])).sort();
-  const years = Array.from(new Set([
-    ...campusYears,
-    ...surveys.map((s) => s.target_year).filter(Boolean) as string[],
-  ])).sort();
+  const departments = Array.from(
+    new Set([
+      ...campusDepts,
+      ...(surveys.map((s) => s.target_department).filter(Boolean) as string[]),
+    ]),
+  ).sort();
+  const years = Array.from(
+    new Set([...campusYears, ...(surveys.map((s) => s.target_year).filter(Boolean) as string[])]),
+  ).sort();
 
   // General audience options
-  const countries = Array.from(new Set([
-    ...COUNTRIES,
-    ...surveys.map((s) => s.target_country).filter(Boolean) as string[],
-  ]));
+  const countries = Array.from(
+    new Set([...COUNTRIES, ...(surveys.map((s) => s.target_country).filter(Boolean) as string[])]),
+  );
 
   const matchesDept = (s: Survey, dept: string) =>
     dept === "all" || !s.target_department || s.target_department === dept;
@@ -148,7 +191,10 @@ function Feed() {
   const matchesAge = (s: Survey, a: string) =>
     a === "all" || !s.target_age_range || s.target_age_range === a;
   const matchesInterest = (s: Survey, i: string) =>
-    i === "all" || !s.target_interests || s.target_interests.length === 0 || s.target_interests.includes(i);
+    i === "all" ||
+    !s.target_interests ||
+    s.target_interests.length === 0 ||
+    s.target_interests.includes(i);
 
   // Relevance scoring — surveys that line up with your profile rank higher.
   // Targeting is no longer an all-or-nothing gate, so the feed sorts by fit.
@@ -156,7 +202,7 @@ function Feed() {
     !!a && !!b && a.trim().toLowerCase() === b.trim().toLowerCase();
 
   const scoreOf = (s: Survey) => {
-    const myInterests = ((profile as any)?.interests ?? []) as string[];
+    const myInterests = profile?.interests ?? [];
     let score = 0;
     let targeted = 0;
     let hit = 0;
@@ -165,15 +211,24 @@ function Feed() {
     const dim = (target: unknown, matched: boolean, weight: number, label: string) => {
       if (!target) return;
       targeted += 1;
-      if (matched) { hit += 1; score += weight; reasons.push(label); }
+      if (matched) {
+        hit += 1;
+        score += weight;
+        reasons.push(label);
+      }
     };
 
-    dim(s.target_department, eq(s.target_department, profile?.department), 3, s.target_department ?? "");
+    dim(
+      s.target_department,
+      eq(s.target_department, profile?.department),
+      3,
+      s.target_department ?? "",
+    );
     dim(s.target_year, eq(s.target_year, profile?.year), 3, s.target_year ?? "");
-    dim(s.target_country, eq(s.target_country, (profile as any)?.country), 2, s.target_country ?? "");
+    dim(s.target_country, eq(s.target_country, profile?.country), 2, s.target_country ?? "");
     dim(
       s.target_age_range,
-      eq(s.target_age_range, (profile as any)?.age_range),
+      eq(s.target_age_range, profile?.age_range),
       2,
       s.target_age_range ? ageLabel(s.target_age_range) : "",
     );
@@ -186,13 +241,7 @@ function Feed() {
     );
     const unis = s.target_universities ?? [];
     const myDomain = (profile?.university_domain ?? "").trim().toLowerCase();
-    dim(
-      unis.length > 0 ? "y" : null,
-      !!myDomain && unis.includes(myDomain),
-      3,
-      "Your university",
-    );
-
+    dim(unis.length > 0 ? "y" : null, !!myDomain && unis.includes(myDomain), 3, "Your university");
 
     const perfect = targeted > 0 && hit === targeted;
     return { score, targeted, hit, perfect, reasons: reasons.filter(Boolean) };
@@ -229,51 +278,95 @@ function Feed() {
 
     .map(({ s, m }) => ({ ...s, __match: m }));
 
-
-  const generalCohortLabel = [profile?.country, profile?.age_range ? ageLabel(profile.age_range) : null].filter(Boolean).join(" / ");
+  const generalCohortLabel = [
+    profile?.country,
+    profile?.age_range ? ageLabel(profile.age_range) : null,
+  ]
+    .filter(Boolean)
+    .join(" / ");
   const studentCohortLabel = [profile?.department, profile?.year].filter(Boolean).join(" / ");
   const cohortLabel = isGeneral ? generalCohortLabel : studentCohortLabel;
   const anyFilterActive = isGeneral
-    ? (countryFilter !== "all" || ageFilter !== "all" || interestFilter !== "all" || scope === "mine")
-    : (deptFilter !== "all" || yearFilter !== "all" || scope === "mine");
+    ? countryFilter !== "all" || ageFilter !== "all" || interestFilter !== "all" || scope === "mine"
+    : deptFilter !== "all" || yearFilter !== "all" || scope === "mine";
 
   return (
     <div>
       <div className="mb-8 flex items-end justify-between gap-4">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">{isGeneral ? "Today's surveys" : "Today on campus"}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+            {isGeneral ? "Today's surveys" : "Today on campus"}
+          </p>
           <h1 className="mt-1 font-serif text-5xl leading-[0.95] sm:text-6xl">
             The <em className="text-primary">feed.</em>
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            {isGeneral
-              ? <>Open to <span className="font-semibold text-foreground">everyone</span>{profile?.country ? <> · {profile.country}</> : null}</>
-              : <>Verified students at <span className="font-semibold text-foreground">{profile?.university_name ?? "your campus"}</span></>}
+            {isGeneral ? (
+              <>
+                Open to <span className="font-semibold text-foreground">everyone</span>
+                {profile?.country ? <> · {profile.country}</> : null}
+              </>
+            ) : (
+              <>
+                Verified students at{" "}
+                <span className="font-semibold text-foreground">
+                  {profile?.university_name ?? "your campus"}
+                </span>
+              </>
+            )}
           </p>
         </div>
-        <Link to="/create" className="hidden sm:inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-wider text-primary-foreground shadow-paper hover:opacity-90">
-          New survey <ArrowUpRight className="h-3.5 w-3.5" />
-        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setTourReplayToken((current) => current + 1)}
+            className="inline-flex items-center gap-1.5 rounded-full border border-foreground/20 bg-card px-3 py-2 text-xs font-semibold uppercase tracking-wider shadow-paper transition hover:border-primary/40"
+            aria-label="Replay dashboard tour"
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Replay tour</span>
+          </button>
+          <Link
+            to="/create"
+            className="hidden sm:inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-wider text-primary-foreground shadow-paper hover:opacity-90"
+          >
+            New survey <ArrowUpRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
       </div>
 
       <div className="mb-6 grid gap-3 sm:grid-cols-2">
         <div className="rounded-2xl border border-foreground/15 bg-card p-4 shadow-paper">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Here to answer?</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            Here to answer?
+          </p>
           <p className="mt-1 text-sm">
             {isGeneral
               ? "Pick a survey below to support real research and earn credits."
               : "Answer surveys from your campus below to earn credits."}
           </p>
         </div>
-        <Link to="/my-surveys" className="rounded-2xl border border-foreground/15 bg-card p-4 shadow-paper transition hover:border-foreground/40">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Running research?</p>
+        <Link
+          to="/my-surveys"
+          className="rounded-2xl border border-foreground/15 bg-card p-4 shadow-paper transition hover:border-foreground/40"
+        >
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            Running research?
+          </p>
           <p className="mt-1 flex items-center gap-1 text-sm font-semibold text-primary">
-            {isGeneral ? "Go to your research and responses" : "Go to your surveys and responses"} <ArrowUpRight className="h-3.5 w-3.5" />
+            {isGeneral ? "Go to your research and responses" : "Go to your surveys and responses"}{" "}
+            <ArrowUpRight className="h-3.5 w-3.5" />
           </p>
         </Link>
       </div>
-      {user && <WelcomeTour userId={user.id} isGeneral={isGeneral} credits={profile ? (profile.earned_credits ?? 0) + (profile.paid_credits ?? 0) : null} />}
-
+      {user && (
+        <WelcomeTour
+          userId={user.id}
+          isGeneral={isGeneral}
+          credits={profile ? (profile.earned_credits ?? 0) + (profile.paid_credits ?? 0) : null}
+          replayToken={tourReplayToken}
+        />
+      )}
 
       {fromCache && (
         <div className="mb-4 flex items-center gap-2 rounded-2xl border border-foreground/20 bg-card px-3 py-2 text-xs text-muted-foreground shadow-paper">
@@ -282,14 +375,14 @@ function Feed() {
         </div>
       )}
 
-
       <div className="mb-6 flex flex-wrap items-center gap-2 text-xs">
         <Filter className="h-3.5 w-3.5 text-muted-foreground" />
         <button
           onClick={() => setScope(scope === "mine" ? "all" : "mine")}
           className={`rounded-full border px-3 py-1 font-semibold uppercase tracking-wider transition ${scope === "mine" ? "border-primary bg-primary text-primary-foreground" : "border-foreground/20 bg-card hover:bg-accent"}`}
         >
-          {isGeneral ? "Best for me" : "Best for me"}{cohortLabel ? ` · ${cohortLabel}` : ""}
+          {isGeneral ? "Best for me" : "Best for me"}
+          {cohortLabel ? ` · ${cohortLabel}` : ""}
         </button>
 
         {isGeneral ? (
@@ -301,7 +394,11 @@ function Feed() {
               className="rounded-full border border-foreground/20 bg-card px-3 py-1 font-semibold uppercase tracking-wider"
             >
               <option value="all">All countries</option>
-              {countries.map((c) => <option key={c} value={c}>{c}</option>)}
+              {countries.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
             </select>
             <select
               aria-label="Filter by age"
@@ -310,7 +407,11 @@ function Feed() {
               className="rounded-full border border-foreground/20 bg-card px-3 py-1 font-semibold uppercase tracking-wider"
             >
               <option value="all">All ages</option>
-              {AGE_RANGES.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}
+              {AGE_RANGES.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.label}
+                </option>
+              ))}
             </select>
             <select
               aria-label="Filter by interest"
@@ -319,7 +420,11 @@ function Feed() {
               className="rounded-full border border-foreground/20 bg-card px-3 py-1 font-semibold uppercase tracking-wider"
             >
               <option value="all">All interests</option>
-              {INTEREST_TAGS.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
+              {INTEREST_TAGS.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.label}
+                </option>
+              ))}
             </select>
           </>
         ) : (
@@ -331,7 +436,11 @@ function Feed() {
               className="rounded-full border border-foreground/20 bg-card px-3 py-1 font-semibold uppercase tracking-wider"
             >
               <option value="all">All departments</option>
-              {departments.map((d) => <option key={d} value={d}>{d}</option>)}
+              {departments.map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
             </select>
             <select
               aria-label="Filter by year"
@@ -340,7 +449,11 @@ function Feed() {
               className="rounded-full border border-foreground/20 bg-card px-3 py-1 font-semibold uppercase tracking-wider"
             >
               <option value="all">All years</option>
-              {years.map((y) => <option key={y} value={y}>{y}</option>)}
+              {years.map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
             </select>
           </>
         )}
@@ -348,8 +461,11 @@ function Feed() {
         {anyFilterActive && (
           <button
             onClick={() => {
-              setDeptFilter("all"); setYearFilter("all");
-              setCountryFilter("all"); setAgeFilter("all"); setInterestFilter("all");
+              setDeptFilter("all");
+              setYearFilter("all");
+              setCountryFilter("all");
+              setAgeFilter("all");
+              setInterestFilter("all");
               setScope("all");
             }}
             className="text-muted-foreground underline hover:text-foreground"
@@ -370,9 +486,7 @@ function Feed() {
             <div className="rounded-3xl border border-dashed border-foreground/30 bg-card p-10 text-center shadow-paper">
               <Sparkles className="mx-auto h-8 w-8 text-primary" />
               <p className="mt-3 font-serif text-3xl">
-                {filteredOut
-                  ? "Nothing matches those filters."
-                  : "No open surveys right now."}
+                {filteredOut ? "Nothing matches those filters." : "No open surveys right now."}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
                 {filteredOut
@@ -385,8 +499,11 @@ function Feed() {
                 {filteredOut && (
                   <button
                     onClick={() => {
-                      setDeptFilter("all"); setYearFilter("all");
-                      setCountryFilter("all"); setAgeFilter("all"); setInterestFilter("all");
+                      setDeptFilter("all");
+                      setYearFilter("all");
+                      setCountryFilter("all");
+                      setAgeFilter("all");
+                      setInterestFilter("all");
                       setScope("all");
                     }}
                     className="inline-flex items-center gap-1 rounded-full border border-foreground/30 bg-background px-5 py-2 text-sm font-semibold"
@@ -394,7 +511,10 @@ function Feed() {
                     Clear filters
                   </button>
                 )}
-                <Link to="/create" className="inline-flex items-center gap-1 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground">
+                <Link
+                  to="/create"
+                  className="inline-flex items-center gap-1 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground"
+                >
                   {filteredOut ? "New survey" : "Start one"} <ArrowUpRight className="h-4 w-4" />
                 </Link>
               </div>
@@ -405,85 +525,101 @@ function Feed() {
         <>
           <h2 className="sr-only">Open surveys</h2>
           <div className="grid auto-rows-[minmax(180px,auto)] grid-cols-2 gap-3 sm:grid-cols-6 sm:gap-4">
-          {visible.map((s, i) => {
-            const tone = TONES[i % TONES.length];
-            // Bento sizing pattern
-            const span =
-              i % 7 === 0 ? "col-span-2 sm:col-span-4 sm:row-span-2"
-              : i % 5 === 0 ? "col-span-2 sm:col-span-3"
-              : i % 3 === 0 ? "col-span-2 sm:col-span-3"
-              : "col-span-2 sm:col-span-2";
-            const isLarge = i % 7 === 0;
-            const isDone = answered.has(s.id);
-            const isBoosted = s.boosted_until && new Date(s.boosted_until) > new Date();
-            const isPro = s.tier === "pro";
-            return (
-              <Link
-                key={s.id}
-                to="/survey/$id"
-                params={{ id: s.id }}
-                className={`group relative flex flex-col justify-between overflow-hidden rounded-3xl border p-5 shadow-paper transition hover:-translate-y-0.5 hover:shadow-lg ${tone} ${span} ${isBoosted ? "border-highlight ring-2 ring-highlight/40" : "border-foreground/15"}`}
-              >
-                <div>
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-70">
-                        №{String(i + 1).padStart(2, "0")}
-                      </span>
-                      {isBoosted && (
-                        <span className="rounded-full bg-highlight px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-highlight-foreground">
-                          {s.tier === "research_boost" ? "◎ Research" : isPro ? "★ Pro" : "↑ Boosted"}
+            {visible.map((s, i) => {
+              const tone = TONES[i % TONES.length];
+              // Bento sizing pattern
+              const span =
+                i % 7 === 0
+                  ? "col-span-2 sm:col-span-4 sm:row-span-2"
+                  : i % 5 === 0
+                    ? "col-span-2 sm:col-span-3"
+                    : i % 3 === 0
+                      ? "col-span-2 sm:col-span-3"
+                      : "col-span-2 sm:col-span-2";
+              const isLarge = i % 7 === 0;
+              const isDone = answered.has(s.id);
+              const isBoosted = s.boosted_until && new Date(s.boosted_until) > new Date();
+              const isPro = s.tier === "pro";
+              return (
+                <Link
+                  key={s.id}
+                  to="/survey/$id"
+                  params={{ id: s.id }}
+                  className={`group relative flex flex-col justify-between overflow-hidden rounded-3xl border p-5 shadow-paper transition hover:-translate-y-0.5 hover:shadow-lg ${tone} ${span} ${isBoosted ? "border-highlight ring-2 ring-highlight/40" : "border-foreground/15"}`}
+                >
+                  <div>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-70">
+                          №{String(i + 1).padStart(2, "0")}
+                        </span>
+                        {isBoosted && (
+                          <span className="rounded-full bg-highlight px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-highlight-foreground">
+                            {s.tier === "research_boost"
+                              ? "◎ Research"
+                              : isPro
+                                ? "★ Pro"
+                                : "↑ Boosted"}
+                          </span>
+                        )}
+
+                        {s.__match.targeted > 0 && s.__match.hit > 0 && (
+                          <span
+                            className="rounded-full bg-background/40 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider"
+                            title={s.__match.reasons.join(" · ")}
+                          >
+                            {s.__match.perfect
+                              ? "Perfect match"
+                              : `Match ${s.__match.hit}/${s.__match.targeted}`}
+                          </span>
+                        )}
+                      </div>
+                      {isDone && (
+                        <span className="rounded-full bg-background/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+                          ✓ Done
                         </span>
                       )}
-
-                      {s.__match.targeted > 0 && s.__match.hit > 0 && (
-                        <span
-                          className="rounded-full bg-background/40 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider"
-                          title={s.__match.reasons.join(" · ")}
-                        >
-                          {s.__match.perfect ? "Perfect match" : `Match ${s.__match.hit}/${s.__match.targeted}`}
-                        </span>
-                      )}
-
                     </div>
-                    {isDone && (
-                      <span className="rounded-full bg-background/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
-                        ✓ Done
-                      </span>
+                    <h3
+                      className={`mt-3 font-serif leading-[1] ${isLarge ? "text-4xl sm:text-6xl" : "text-2xl sm:text-3xl"}`}
+                    >
+                      {s.title}
+                    </h3>
+                    {s.description && isLarge && (
+                      <p className="mt-3 line-clamp-3 max-w-md text-sm opacity-80">
+                        {s.description}
+                      </p>
                     )}
                   </div>
-                  <h3 className={`mt-3 font-serif leading-[1] ${isLarge ? "text-4xl sm:text-6xl" : "text-2xl sm:text-3xl"}`}>
-                    {s.title}
-                  </h3>
-                  {s.description && isLarge && (
-                    <p className="mt-3 line-clamp-3 max-w-md text-sm opacity-80">{s.description}</p>
-                  )}
-                </div>
-                <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-medium uppercase tracking-wider opacity-80">
-                  <VisibilityBadge visibility={s.visibility} />
-                  <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" />{s.response_count}</span>
-                  <span>·</span>
-                  <span>{s.questions?.length ?? 0} Qs</span>
-                  {(() => {
-                    const bits = [
-                      s.target_department,
-                      s.target_year,
-                      s.target_country,
-                      s.target_age_range ? ageLabel(s.target_age_range) : null,
-                      ...(s.target_interests ?? []).map((id) => tagLabel(id)),
-                    ].filter(Boolean) as string[];
-                    return bits.length > 0 ? (
-                      <span className="inline-flex items-center gap-1">
-                        <Filter className="h-3 w-3" />
-                        {bits.slice(0, 3).join(" · ")}{bits.length > 3 ? ` +${bits.length - 3}` : ""}
-                      </span>
-                    ) : null;
-                  })()}
-                </div>
-                <ArrowUpRight className="absolute right-4 top-4 h-4 w-4 opacity-0 transition group-hover:opacity-70" />
-              </Link>
-            );
-          })}
+                  <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-medium uppercase tracking-wider opacity-80">
+                    <VisibilityBadge visibility={s.visibility} />
+                    <span className="inline-flex items-center gap-1">
+                      <Users className="h-3 w-3" />
+                      {s.response_count}
+                    </span>
+                    <span>·</span>
+                    <span>{s.questions?.length ?? 0} Qs</span>
+                    {(() => {
+                      const bits = [
+                        s.target_department,
+                        s.target_year,
+                        s.target_country,
+                        s.target_age_range ? ageLabel(s.target_age_range) : null,
+                        ...(s.target_interests ?? []).map((id) => tagLabel(id)),
+                      ].filter(Boolean) as string[];
+                      return bits.length > 0 ? (
+                        <span className="inline-flex items-center gap-1">
+                          <Filter className="h-3 w-3" />
+                          {bits.slice(0, 3).join(" · ")}
+                          {bits.length > 3 ? ` +${bits.length - 3}` : ""}
+                        </span>
+                      ) : null;
+                    })()}
+                  </div>
+                  <ArrowUpRight className="absolute right-4 top-4 h-4 w-4 opacity-0 transition group-hover:opacity-70" />
+                </Link>
+              );
+            })}
           </div>
           <DonateNudge className="mt-8" />
         </>

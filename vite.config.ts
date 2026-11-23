@@ -14,8 +14,8 @@ export default defineConfig({
   vite: {
     resolve: {
       alias: {
-      "entities/lib/decode.js": path.resolve(__dirname_, "node_modules/entities/lib/decode.js"),
-      "entities/lib/encode.js": path.resolve(__dirname_, "node_modules/entities/lib/encode.js"),
+        "entities/lib/decode.js": path.resolve(__dirname_, "node_modules/entities/lib/decode.js"),
+        "entities/lib/encode.js": path.resolve(__dirname_, "node_modules/entities/lib/encode.js"),
         entities: path.resolve(__dirname_, "node_modules/entities"),
       },
     },
@@ -28,58 +28,80 @@ export default defineConfig({
         cloudflare: { nodeCompat: true, deployConfig: true },
       },
   plugins: [
-    mcpPlugin(),
+    // @lovable.dev/mcp-js currently mixes Windows and forward-slash path
+    // separators internally. Keep this optional integration off for Windows
+    // builds; it remains enabled on Linux deployments (including Vercel).
+    ...(process.platform === "win32" ? [] : [mcpPlugin()]),
     VitePWA({
-    registerType: "autoUpdate",
-    injectRegister: null, // we register from src/lib/pwa-register.ts under guards
-    devOptions: { enabled: false },
-    filename: "sw.js",
-    includeAssets: ["favicon.ico", "icons/icon-192.png", "icons/icon-512.png"],
-    manifest: {
-      name: "CampusVerify — Verified student research",
-      short_name: "CampusVerify",
-      description:
-        "Verified student surveys. Cache surveys and answer offline — they sync when you reconnect.",
-      theme_color: "#1f4d33",
-      background_color: "#f7f3e8",
-      display: "standalone",
-      start_url: "/",
-      scope: "/",
-      icons: [
-        { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any maskable" },
-        { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
-      ],
-    },
-    workbox: {
-      navigateFallback: "/",
-      navigateFallbackDenylist: [/^\/api\//, /^\/~oauth/, /^\/_server/, /^\/lovable\//, /^\/mcp/, /^\/\.mcp/, /^\/\.well-known\//, /^\/\.lovable\//],
-      globPatterns: ["**/*.{js,css,html,svg,png,ico,woff2}"],
-      runtimeCaching: [
-        {
-          urlPattern: ({ request }) => request.mode === "navigate",
-          handler: "NetworkFirst",
-          options: {
-            cacheName: "cv-pages",
-            networkTimeoutSeconds: 4,
-            expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 * 7 },
+      registerType: "autoUpdate",
+      injectRegister: null, // we register from src/lib/pwa-register.ts under guards
+      devOptions: { enabled: false },
+      filename: "sw.js",
+      includeAssets: ["favicon.ico", "icons/icon-192.png", "icons/icon-512.png"],
+      manifest: {
+        name: "CampusVerify — Verified student research",
+        short_name: "CampusVerify",
+        description:
+          "Verified student surveys. Cache surveys and answer offline — they sync when you reconnect.",
+        theme_color: "#1f4d33",
+        background_color: "#f7f3e8",
+        display: "standalone",
+        start_url: "/",
+        scope: "/",
+        icons: [
+          {
+            src: "/icons/icon-192.png",
+            sizes: "192x192",
+            type: "image/png",
+            purpose: "any maskable",
           },
-        },
-        {
-          urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-          handler: "StaleWhileRevalidate",
-          options: { cacheName: "google-fonts-css" },
-        },
-        {
-          urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-          handler: "CacheFirst",
-          options: {
-            cacheName: "google-fonts-files",
-            expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 },
-            cacheableResponse: { statuses: [0, 200] },
+          {
+            src: "/icons/icon-512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "any maskable",
           },
-        },
-      ],
-    },
+        ],
+      },
+      workbox: {
+        navigateFallback: "/",
+        navigateFallbackDenylist: [
+          /^\/api\//,
+          /^\/~oauth/,
+          /^\/_server/,
+          /^\/lovable\//,
+          /^\/mcp/,
+          /^\/\.mcp/,
+          /^\/\.well-known\//,
+          /^\/\.lovable\//,
+        ],
+        globPatterns: ["**/*.{js,css,html,svg,png,ico,woff2}"],
+        runtimeCaching: [
+          {
+            urlPattern: ({ request }) => request.mode === "navigate",
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "cv-pages",
+              networkTimeoutSeconds: 4,
+              expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 * 7 },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: "StaleWhileRevalidate",
+            options: { cacheName: "google-fonts-css" },
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "google-fonts-files",
+              expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+        ],
+      },
     }),
   ],
 });
