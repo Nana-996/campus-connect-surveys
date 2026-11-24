@@ -225,17 +225,14 @@ function Profile() {
               </div>
               <div>
                 <Label htmlFor="profile-dept" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Department</Label>
-                <Input
-                  id="profile-dept"
-                  list="profile-dept-suggestions"
-                  value={department}
-                  onChange={(e) => setDepartment(e.target.value)}
-                  placeholder="e.g. Pharmacy"
-                  className="mt-1"
-                />
-                <datalist id="profile-dept-suggestions">
-                  {DEPARTMENT_SUGGESTIONS.map((d) => <option key={d} value={d} />)}
-                </datalist>
+                <Select value={department} onValueChange={setDepartment}>
+                  <SelectTrigger id="profile-dept" className="mt-1 rounded-xl bg-card pr-3"><SelectValue placeholder="Choose department" /></SelectTrigger>
+                  <SelectContent className="max-h-60 rounded-xl">
+                    {DEPARTMENT_SUGGESTIONS.map((departmentName) => (
+                      <SelectItem key={departmentName} value={departmentName}>{departmentName}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label htmlFor="profile-year" className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Year</Label>

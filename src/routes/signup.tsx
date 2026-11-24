@@ -529,11 +529,11 @@ function SignupPage() {
                   >
                     <SelectTrigger
                       id="dept"
-                      className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card"
+                      className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card pr-3"
                     >
                       <SelectValue placeholder="Choose department" />
                     </SelectTrigger>
-                    <SelectContent className="max-h-60">
+                    <SelectContent className="max-h-60 rounded-xl">
                       {DEPARTMENT_SUGGESTIONS.map((departmentName) => (
                         <SelectItem key={departmentName} value={departmentName}>
                           {departmentName}
