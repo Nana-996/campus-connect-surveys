@@ -6,6 +6,25 @@ import { createClient } from "@supabase/supabase-js";
 
 const inputSchema = z.object({ id: z.string().uuid() });
 
+// Resolves a readable survey slug (or legacy UUID) to the survey id. Public.
+export const resolveSurveyLink = createServerFn({ method: "GET" })
+  .inputValidator((data) => z.object({ key: z.string().min(1).max(200) }).parse(data))
+  .handler(async ({ data }) => {
+    const url = process.env.SUPABASE_URL;
+    const key = process.env.SUPABASE_PUBLISHABLE_KEY;
+    if (!url || !key) return { id: null as string | null };
+    const client = createClient(url, key, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data: rows, error } = await client.rpc("resolve_survey_link", { _key: data.key });
+    if (error) {
+      console.error("[resolveSurveyLink] rpc error", error);
+      return { id: null as string | null };
+    }
+    const row = Array.isArray(rows) ? rows[0] : null;
+    return { id: (row?.id as string | undefined) ?? null };
+  });
+
 // Public share-card metadata (no auth). Returns only safe-to-expose fields.
 // Uses a public-safe database RPC rather than supabaseAdmin to avoid
 // service-role enumeration risk.

@@ -1,5 +1,5 @@
 import { answerMatches, answerText, selectionsOf, validMultiAnswer, type SurveyAnswers } from "@/lib/survey-answers";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
 import { useEffect, useState, useRef } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,7 +27,7 @@ import { SurveyVerifyModal } from "@/components/SurveyVerifyModal";
 import { AppHeader } from "@/components/AppHeader";
 import { ReferralInvite } from "@/components/ReferralInvite";
 import { DonateNudge } from "@/components/DonateNudge";
-import { getSurveyPublic, getSurveyForRespondent } from "@/lib/survey-public.functions";
+import { getSurveyPublic, getSurveyForRespondent, resolveSurveyLink } from "@/lib/survey-public.functions";
 import { getOwnerSurveyResults } from "@/lib/survey-owner.functions";
 import { cacheSurvey, getCachedSurvey, enqueueResponse } from "@/lib/offline-store";
 import { syncQueuedResponses } from "@/lib/offline-sync";
@@ -69,6 +69,16 @@ type Survey = {
 export const Route = createFileRoute("/survey/$id")({
   component: SurveyPage,
   loader: async ({ params }) => {
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!UUID_RE.test(params.id)) {
+      let resolved: string | null = null;
+      try {
+        resolved = (await resolveSurveyLink({ data: { key: params.id } })).id;
+      } catch {}
+      if (resolved && resolved !== params.id) {
+        throw redirect({ to: "/survey/$id", params: { id: resolved }, search: true, replace: true });
+      }
+    }
     try {
       const res = await getSurveyPublic({ data: { id: params.id } });
       return { surveyMeta: res?.survey ?? null };
