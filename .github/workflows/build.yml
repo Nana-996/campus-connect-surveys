@@ -16,10 +16,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
 
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      # bun.lock is the lockfile Lovable keeps in sync on every dependency change.
       - name: Install
-        run: npm ci
+        run: bun install --frozen-lockfile
 
       - name: Type check
         run: npx tsc --noEmit

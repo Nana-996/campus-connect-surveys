@@ -18,3 +18,4 @@
 - Conversion payment and enquiry events originate from database transitions; public interaction tracking cannot report payments or identify callers, and aggregate reporting stays owner-gated.
 - Credit bundles declare fixed-GHS or converted-USD prices in the shared catalog; checkout computes amounts server-side so display changes cannot control billing.
 - Payment feedback uses allowlisted provider-state mappings and preserves pending references for rechecks; only terminal failures offer retry to reduce duplicate payments.
+- CI installs with `bun install --frozen-lockfile` because bun.lock is the lockfile kept in sync with dependency changes; package-lock.json may lag.
