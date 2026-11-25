@@ -877,6 +877,33 @@ export type Database = {
           },
         ]
       }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       referrals: {
         Row: {
           created_at: string
@@ -1288,6 +1315,38 @@ export type Database = {
           },
         ]
       }
+      survey_funnel_visits: {
+        Row: {
+          signup_at: string | null
+          started_at: string
+          submitted_at: string | null
+          survey_id: string
+          token_hash: string
+        }
+        Insert: {
+          signup_at?: string | null
+          started_at?: string
+          submitted_at?: string | null
+          survey_id: string
+          token_hash: string
+        }
+        Update: {
+          signup_at?: string | null
+          started_at?: string
+          submitted_at?: string | null
+          survey_id?: string
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_funnel_visits_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       survey_invites: {
         Row: {
           created_at: string
@@ -1389,6 +1448,7 @@ export type Database = {
           answers: Json
           created_at: string
           duration_ms: number
+          funnel_token: string | null
           id: string
           quality_score: number
           respondent_id: string
@@ -1398,6 +1458,7 @@ export type Database = {
           answers?: Json
           created_at?: string
           duration_ms?: number
+          funnel_token?: string | null
           id?: string
           quality_score?: number
           respondent_id: string
@@ -1407,6 +1468,7 @@ export type Database = {
           answers?: Json
           created_at?: string
           duration_ms?: number
+          funnel_token?: string | null
           id?: string
           quality_score?: number
           respondent_id?: string
@@ -1593,11 +1655,13 @@ export type Database = {
           lecturer_id: string | null
           min_response_seconds: number
           paid_cost: number
+          push_notified_at: string | null
           questions: Json
           required_criteria: string[]
           respondent_bonus: number
           response_count: number
           response_goal: number
+          slug: string | null
           target_age_range: string | null
           target_country: string | null
           target_department: string | null
@@ -1624,11 +1688,13 @@ export type Database = {
           lecturer_id?: string | null
           min_response_seconds?: number
           paid_cost?: number
+          push_notified_at?: string | null
           questions?: Json
           required_criteria?: string[]
           respondent_bonus?: number
           response_count?: number
           response_goal?: number
+          slug?: string | null
           target_age_range?: string | null
           target_country?: string | null
           target_department?: string | null
@@ -1655,11 +1721,13 @@ export type Database = {
           lecturer_id?: string | null
           min_response_seconds?: number
           paid_cost?: number
+          push_notified_at?: string | null
           questions?: Json
           required_criteria?: string[]
           respondent_bonus?: number
           response_count?: number
           response_goal?: number
+          slug?: string | null
           target_age_range?: string | null
           target_country?: string | null
           target_department?: string | null
@@ -1680,6 +1748,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      universities: {
+        Row: {
+          country: string
+          created_at: string
+          domain: string
+          id: string
+          name: string
+        }
+        Insert: {
+          country: string
+          created_at?: string
+          domain: string
+          id?: string
+          name: string
+        }
+        Update: {
+          country?: string
+          created_at?: string
+          domain?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
       }
       university_slot_purchases: {
         Row: {
@@ -2005,6 +2097,10 @@ export type Database = {
         Args: { _domain: string; _typed: string }
         Returns: string
       }
+      check_survey_eligibility: {
+        Args: { _email?: string; _survey_id: string }
+        Returns: Json
+      }
       claim_partner_referral: { Args: { _slug: string }; Returns: string }
       claim_referral: { Args: { _code: string }; Returns: Json }
       claim_school_admin: { Args: never; Returns: number }
@@ -2229,6 +2325,10 @@ export type Database = {
           title: string
         }[]
       }
+      make_survey_slug: {
+        Args: { _id: string; _title: string }
+        Returns: string
+      }
       mark_donation_paid: {
         Args: { _raw: Json; _reference: string }
         Returns: {
@@ -2264,6 +2364,10 @@ export type Database = {
         Args: { _actor: string; _expected_paid: number; _partner_id: string }
         Returns: undefined
       }
+      record_survey_funnel: {
+        Args: { _stage: string; _survey_id: string; _token: string }
+        Returns: undefined
+      }
       redeem_promo_code: { Args: { _code: string }; Returns: Json }
       refund_purchased_credits: {
         Args: {
@@ -2287,6 +2391,13 @@ export type Database = {
       reserve_promo_discount: {
         Args: { _code: string; _reference: string; _user: string }
         Returns: number
+      }
+      resolve_survey_link: {
+        Args: { _key: string }
+        Returns: {
+          id: string
+          slug: string
+        }[]
       }
       school_admin_decide_topup: {
         Args: { _approve: boolean; _id: string; _note?: string }
@@ -2319,10 +2430,19 @@ export type Database = {
         Args: { _school_domain: string; _survey_id: string }
         Returns: boolean
       }
+      search_universities: {
+        Args: { q: string }
+        Returns: {
+          country: string
+          domain: string
+          name: string
+        }[]
+      }
       submit_survey_review: {
         Args: { _approve: boolean; _comment?: string; _token: string }
         Returns: Json
       }
+      survey_funnel_summary: { Args: { _days?: number }; Returns: Json }
       target_text_matches: {
         Args: { _actual: string; _target: string }
         Returns: boolean
