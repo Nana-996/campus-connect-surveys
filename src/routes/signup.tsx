@@ -1,6 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -21,22 +20,16 @@ import { InterestTagInput, type InterestEntry } from "@/components/InterestTagIn
 import { ResendVerification } from "@/components/ResendVerification";
 import { AGE_RANGES, COUNTRIES, YEAR_OPTIONS, DEPARTMENT_SUGGESTIONS } from "@/lib/interests";
 import { getSchoolPartnership } from "@/lib/school-partnership.functions";
-
-const signupSearchSchema = z.object({
-  school: z
-    .string()
-    .trim()
-    .max(100)
-    .regex(/^[a-z0-9-]+$/)
-    .optional(),
-});
+import { loadOptionalSignupSchool, signupSearchSchema } from "@/lib/signup-link";
 
 export const Route = createFileRoute("/signup")({
   validateSearch: signupSearchSchema,
   loaderDeps: ({ search }) => ({ school: search.school }),
   loader: ({ deps }) =>
-    deps.school ? getSchoolPartnership({ data: { slug: deps.school } }) : null,
+    loadOptionalSignupSchool(deps.school, (slug) => getSchoolPartnership({ data: { slug } })),
   component: SignupPage,
+  errorComponent: () => <SignupRecovery />,
+  notFoundComponent: () => <SignupRecovery />,
   head: () => ({
     meta: [
       { title: "Create account — CampusVerify" },
@@ -52,10 +45,25 @@ export const Route = createFileRoute("/signup")({
           "Join CampusVerify — pick a Student or General account, claim free credits, and start running real surveys.",
       },
       { property: "og:url", content: "https://campus-verify.live/signup" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [{ rel: "canonical", href: "https://campus-verify.live/signup" }],
   }),
 });
+
+function SignupRecovery() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background px-6">
+      <div className="max-w-md text-center">
+        <h1 className="font-serif text-3xl">Let's get you signed up.</h1>
+        <p className="mt-3 text-sm text-muted-foreground">We couldn't open this sign-up link. Your account hasn't been changed.</p>
+        <Button asChild className="mt-6"><a href="/signup">Open sign-up</a></Button>
+        <p className="mt-4 text-sm"><Link to="/auth" className="underline">Already registered? Log in</Link></p>
+      </div>
+    </div>
+  );
+}
 
 const ACADEMIC_RE = /(^|\.)edu$|\.edu\.[a-z]{2,6}$|\.ac\.[a-z]{2,6}$|\.uni\.[a-z]{2,6}$/i;
 

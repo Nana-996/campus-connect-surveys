@@ -19,3 +19,4 @@
 - Credit bundles declare fixed-GHS or converted-USD prices in the shared catalog; checkout computes amounts server-side so display changes cannot control billing.
 - Payment feedback uses allowlisted provider-state mappings and preserves pending references for rechecks; only terminal failures offer retry to reduce duplicate payments.
 - CI installs with `bun install --frozen-lockfile` because bun.lock is the lockfile kept in sync with dependency changes; package-lock.json may lag.
+- Signup school hints are validated and loaded through a fail-soft helper so malformed links or optional partnership lookup failures cannot block registration; verified email domains remain authoritative.
