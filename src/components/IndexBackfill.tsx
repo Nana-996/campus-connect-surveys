@@ -19,7 +19,8 @@ export function IndexBackfill({ currentDepartment }: { currentDepartment: string
         <div className="flex-1">
           <p className="text-sm font-semibold">Add your index / student number</p>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Your faculty managers use this to confirm whether you've responded to surveys. Answer content stays private.
+            Your student ID — it confirms you're a real student at your school and matches you to
+            studies on your campus. Other respondents never see it.
           </p>
           <form
             className="mt-3 flex flex-wrap items-end gap-2"
