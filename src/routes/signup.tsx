@@ -588,8 +588,8 @@ function SignupPage() {
                   className="mt-1.5 h-11 rounded-xl border-foreground/25 bg-card font-mono"
                 />
                 <p className="mt-1 text-[11px] text-muted-foreground">
-                  Used by your faculty managers to track survey completion. Visible only to admins
-                  and managers at your university.
+                  Used so your faculty managers can see which surveys you've completed. Only admins
+                  and managers at your university can view this.
                 </p>
               </div>
             )}
