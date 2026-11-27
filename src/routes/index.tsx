@@ -215,9 +215,6 @@ function Landing() {
               </>
             )}
           </div>
-          <p className="mt-4 max-w-xl text-xs text-muted-foreground">
-            Researchers: Research Boost delivers 50 targeted responses from GHS 10, up to 500 for GHS 50, aimed at the audience you choose.
-          </p>
         </section>
 
         {/* How it works — three simple steps */}
