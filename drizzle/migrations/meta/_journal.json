@@ -57,6 +57,13 @@
       "when": 1795742146585,
       "tag": "0007_security_fix_review_topup_credit_watchlist_promo_manager",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1795744066225,
+      "tag": "0008_restrict_survey_tracking_scope_metadata",
+      "breakpoints": true
     }
   ]
 }

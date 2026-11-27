@@ -486,6 +486,12 @@ export const sendBroadcastEmail = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => broadcastSend.parse(d ?? {}))
   .handler(async ({ data, context }) => {
     const { buildBroadcastAudience, sendBroadcastEmails } = await import("@/lib/broadcast.server");
+    if (data.testEmail) {
+      const own = String((context.claims as Record<string, unknown>)?.["email"] ?? "").toLowerCase();
+      if (!own || data.testEmail.toLowerCase() !== own) {
+        throw new Error("Test emails can only be sent to your own address");
+      }
+    }
     const audience = data.testEmail
       ? { recipients: [] }
       : await buildBroadcastAudience(context.supabase, data);
