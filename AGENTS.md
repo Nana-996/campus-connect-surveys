@@ -20,3 +20,4 @@
 - Payment feedback uses allowlisted provider-state mappings and preserves pending references for rechecks; only terminal failures offer retry to reduce duplicate payments.
 - CI installs with `bun install --frozen-lockfile` because bun.lock is the lockfile kept in sync with dependency changes; package-lock.json may lag.
 - Signup school hints are validated and loaded through a fail-soft helper so malformed links or optional partnership lookup failures cannot block registration; verified email domains remain authoritative.
+- `.env` stays committed (it holds only the public backend URL and publishable key); untracking it makes published builds crash with missing backend settings.
