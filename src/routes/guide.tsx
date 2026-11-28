@@ -20,6 +20,10 @@ export const Route = createFileRoute("/guide")({
         content: "A practical step-by-step guide for using CampusVerify.",
       },
       { name: "robots", content: "noindex" },
+      { property: "og:title", content: "CampusVerify — User Onboarding Guide" },
+      { property: "og:description", content: "A practical step-by-step guide for using CampusVerify." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       {
         property: "og:url",
         content: "https://campus-verify.live/guide",
@@ -79,9 +83,9 @@ function GuidePage() {
     <main className="min-h-screen bg-[#f5f0e8] text-[#1a3a2a]">
       <div className="mx-auto max-w-6xl px-4 pb-12 pt-5 sm:px-6 sm:pb-16 sm:pt-8">
         <header className="flex items-center justify-between gap-3">
-          <Link to="/feed" className="inline-flex items-center gap-2 text-sm font-bold">
-            <span className="h-2 w-2 rounded-full bg-[#b8e04a]" />
-            Campus<span className="text-[#5f7b43]">Verify</span>
+          <Link to="/feed" className="inline-flex min-w-0 items-center gap-2">
+            <img src="/logo-mark.png" alt="" width={32} height={32} className="h-8 w-8 shrink-0 object-contain" />
+            <span className="font-serif text-xl leading-none text-primary sm:text-2xl">CampusVerify</span>
           </Link>
           <Link
             to="/feed"
